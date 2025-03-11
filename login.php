@@ -1,21 +1,28 @@
 <?php 
 require_once('header.php');
 session_start();
+include_once("class/Utils.php");
+$bs = new Bootstrap();
 
-$redirects = [
-    'Teacher_login' => 'teacher/index.php',
-    'Director_login' => 'director/index.php',
-    'Officer_login' => 'groupleader/index.php',
-    'Admin_login' => 'admin/index.php',
-    'Student_login' => 'student/index.php'
-];
+function redirectUser() {
+    $roles = [
+        'Teacher_login' => 'teacher/index.php',
+        'Director_login' => 'director/index.php',
+        'Group_leader_login' => 'groupleader/index.php',
+        'Officer_login' => 'officer/index.php',
+        'Admin_login' => 'admin/index.php',
+        'Student_login' => 'student/index.php'
+    ];
 
-foreach ($redirects as $key => $url) {
-    if (isset($_SESSION[$key])) {
-        header("location: $url");
-        exit();
+    foreach ($roles as $sessionKey => $redirectPath) {
+        if (isset($_SESSION[$sessionKey])) {
+            header("Location: $redirectPath");
+            exit(); // Prevent further execution
+        }
     }
 }
+
+redirectUser();
 ?>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -145,7 +152,7 @@ foreach ($redirects as $key => $url) {
                                     <select class="form-control text-center" name="txt_role">
                                         <option value="Teacher" selected="selected">ครู</option>
                                         <option value="Officer">เจ้าหน้าที่</option>
-                                        <option value="Director">ผู้บริหาร</option>
+                                        <!-- <option value="Director">ผู้บริหาร</option> -->
                                         <option value="Admin">Admin</option>
                                     </select>
                                 </div>

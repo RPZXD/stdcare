@@ -48,6 +48,15 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
     <!-- DataTables Buttons CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
     <style>
     body {
@@ -130,11 +139,11 @@
     }
 
     .slider .icon-light {
-        color: #fbc02d; /* สีสำหรับแสง */
+        color: #fbc02d;
     }
 
     .slider .icon-dark {
-        color: #2196F3; /* สีสำหรับมืด */
+        color: #2196F3;
     }
 
     input:checked + .slider {
@@ -175,9 +184,8 @@
         transition: opacity 0.5s;
     }
 
-    .preloader .animation__shake {
-        animation: shake 1.5s;
-        animation-iteration-count: infinite;
+    .preloader .animate-shake {
+        animation: shake 1.5s infinite;
     }
 
     @keyframes shake {
