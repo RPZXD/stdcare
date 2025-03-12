@@ -4,6 +4,7 @@ session_start();
 
 include_once("../config/Database.php");
 include_once("../class/UserLogin.php");
+include_once("../class/Student.php");
 include_once("../class/Utils.php");
 
 // Initialize database connection
@@ -12,6 +13,7 @@ $db = $connectDB->getConnection();
 
 // Initialize UserLogin class
 $user = new UserLogin($db);
+$student = new Student($db);
 
 // Fetch terms and pee
 $term = $user->getTerm();
@@ -35,7 +37,12 @@ $teacher_name = $userData['Teach_name'];
 $class = $userData['Teach_class'];
 $room = $userData['Teach_room'];
 
-
+$currentDate = Utils::convertToThaiDatePlusNum(date("Y-m-d"));
+$currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
+// $count = $student->getStudyStatusCountClassRoom2($class, $room, Utils::convertToThaiDatePlusNum(date("Y-m-d")));
+$countStdCome = $student->getStatusCountClassRoom($class, $room, [1, 3, 6] , $currentDate);
+$countStdAbsent = $student->getStatusCountClassRoom($class, $room, [2, 4, 5] , $currentDate);
+$countAll = $student->getCountClassRoom($class, $room);
 
 require_once('header.php');
 
@@ -60,88 +67,80 @@ require_once('header.php');
     </div>
     <!-- /.content-header -->
 
-    <section class="content">
+<section class="content">
 
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-12">
-                    <div class="callout callout-success text-center">
-                        <h4 class="text-green-600">ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name'] . ' ' . $setting->getPageTitle(); ?></h4>
+                <div class="w-full">
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center">
+                            <h4 class="text-lg font-semibold">ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name']. ' ' . $setting->getPageTitle()?></h4>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <h3 class="text-dark">ยอดนักเรียนที่มาเรียน/ไม่มาเรียนของ มัธยมศึกษาปีที่ <?=$class?>/<?=$room?> </h3>
-                <div class="row">
+                <div class="row justify-content-center">
+                <h3 class="text-lg font-semibold text-gray-900 mt-6">ยอดนักเรียนมาเรียน/ไม่มาเรียน</h3>
 
-                    <div class="col-lg-4 col-sm-12 col-md-12">
-                        <!-- small box -->
-                        <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>55</h3>
-
-                            <p>จำนวนนักเรียนทั้งห้อง</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-person-add"></i>
-                        </div>
-                        
-                        </div>
-                    </div>
-                    <!-- ./col -->
-                    <div class="col-lg-4 col-sm-12 col-md-12">
-                        <!-- small box -->
-                        <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>22</h3>
-
-                            <p>มาเรียน</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-person-add"></i>
-                        </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-sm-12 col-md-12">
-                        <!-- small box -->
-                        <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>11</h3>
-
-                            <p>ไม่มาเรียน</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-person-add"></i>
-                        </div>
-                        </div>
-                    </div>
-                    <!-- ./col -->
+                </div>
                     
-                    <!-- ./col -->
-                    
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                    <div class="flex flex-wrap mt-4">
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                        <!-- small box -->
+                        <div class="bg-blue-500 text-white p-4 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                            <h3 class="text-3xl font-bold"><?=$countAll?></h3>
+                            <i class="ion ion-person-add text-4xl"></i>
+                            </div>
+                            <p class="mt-2">จำนวนนักเรียนทั้งห้อง</p>
+                        </div>
+                        </div>
+                        <!-- ./col -->
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                        <!-- small box -->
+                        <div class="bg-green-500 text-white p-4 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                            <h3 class="text-3xl font-bold"><?=$countStdCome?></h3>
+                            <i class="ion ion-person-add text-4xl"></i>
+                            </div>
+                            <p class="mt-2">มาเรียน</p>
+                        </div>
+                        </div>
+
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                        <!-- small box -->
+                        <div class="bg-red-500 text-white p-4 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                            <h3 class="text-3xl font-bold"><?=$countStdAbsent?></h3>
+                            <i class="ion ion-person-add text-4xl"></i>
+                            </div>
+                            <p class="mt-2">ไม่มาเรียน</p>
+                        </div>
+                        </div>
                     </div>
-                    <h4>สรุปการมาเรียนของนักเรียนประจำวันที่ <?=Utils::convertToThaiDatePlus(date("Y-m-d"));?> </h4>
-                    <div class="row">
-                        <div class="col-lg-4 col-sm-12 col-md-12">
-                        <div class="card card-primary">
-                            <div class="card-header">
-                                <h3 class="card-title"><?="ม.".$class."/".$room?></h3>
-                                <div class="card-tools">
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-8">
+
+                        <div class="w-full md:w-1/1 px-2 mb-4">
+                            <div class="card card-success">
+                                <div class="card-header">
+                                    <h3 class="card-title">สรุปการมาเรียนของนักเรียนประจำวันที่ <?=$currentDate2?></h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <canvas id="donutChart1" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                            </div>
                         </div>
                     </div>
-        </div>
-    </section>
+
+                </div>
+
+            </div><!-- /.container-fluid -->
+
+</section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
@@ -161,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [],
             datasets: [{
                 data: [],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                backgroundColor: ['#4BC0C0', '#FF6384', '#36A2EB', '#FFCE56', '#9966FF', '#FF9F40']
             }]
         },
         options: {
@@ -172,59 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     callbacks: {
                         label: function(tooltipItem) {
                             let value = tooltipItem.raw || 0;
-                            return `${value} ชั่วโมง`; // เพิ่มหน่วย ชั่วโมง
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    const ctx2 = document.getElementById('donutChart2').getContext('2d');
-    const donutChart2 = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            let value = tooltipItem.raw || 0;
-                            return `${value} รางวัล`; // เพิ่มหน่วย รางวัล
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    const ctx3 = document.getElementById('donutChart3').getContext('2d');
-    const donutChart3 = new Chart(ctx3, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            let value = tooltipItem.raw || 0;
-                            return `${value} วัน`; // เพิ่มหน่วย รางวัล
+                            return `${value} คน`; // เพิ่มหน่วย คน
                         }
                     }
                 }
@@ -233,36 +180,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function fetchData() {
-        const term = document.getElementById('term').value;
-        const year = document.getElementById('year').value;
-
-        fetch(`api/fetch_chart_training.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
+        fetch(`api/fetch_chart_studentcome.php?class=<?=$class?>&room=<?=$room?>&date=<?=$currentDate?>`)
             .then(response => response.json())
             .then(data => {
-                donutChart.data.labels = data.map(item => item.topic);
-                donutChart.data.datasets[0].data = data.map(item => parseFloat(item.total_hours)); // แปลงเป็นตัวเลข
+                donutChart.data.labels = data.map(item => item.status_name);
+                donutChart.data.datasets[0].data = data.map(item => parseFloat(item.count_total)); // แปลงเป็นตัวเลข
                 donutChart.update();
             });
-
-        fetch(`api/fetch_chart_award.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
-            .then(response => response.json())
-            .then(data => {
-                donutChart2.data.labels = data.map(item => item.level_name);
-                donutChart2.data.datasets[0].data = data.map(item => item.total_awards); // Adjust based on your data structure
-                donutChart2.update();
-            });
-
-        fetch(`api/fetch_chart_leave.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
-            .then(response => response.json())
-            .then(data => {
-                donutChart3.data.labels = data.map(item => item.status_name);
-                donutChart3.data.datasets[0].data = data.map(item => item.total_days); // Adjust based on your data structure
-                donutChart3.update();
-            });
     }
-
-    document.getElementById('term').addEventListener('change', fetchData);
-    document.getElementById('year').addEventListener('change', fetchData);
 
     fetchData(); // Initial fetch
 });
