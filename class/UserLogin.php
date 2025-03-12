@@ -2,7 +2,8 @@
 
 class UserLogin {
     private $conn;
-    private $table_name = "teacher";
+    private $table_teacher = "teacher";
+    private $table_student = "student";
     public $user;
     public $password;
 
@@ -19,7 +20,7 @@ class UserLogin {
     }
 
     public function userNotExists() {
-        $query = "SELECT Teach_id FROM {$this->table_name} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT Teach_id FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -28,7 +29,7 @@ class UserLogin {
     }
 
     public function verifyPassword() {
-        $query = "SELECT Teach_id, Teach_password FROM {$this->table_name} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT Teach_id, Teach_password FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -51,13 +52,26 @@ class UserLogin {
     }
 
     public function getUserRole() {
-        $query = "SELECT role_general FROM {$this->table_name} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT role_general FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($result) {
             return $result['role_general'];
+        }
+        return null;
+    }
+    
+
+    public function getUserRoleStudent() {
+        $query = "SELECT role FROM {$this->table_student} WHERE Stu_id = :user LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user", $this->user);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            return $result['role'];
         }
         return null;
     }
@@ -79,7 +93,7 @@ class UserLogin {
     
 
     public function userData($userid) {
-        $query = "SELECT * FROM {$this->table_name} WHERE Teach_id = :id";
+        $query = "SELECT * FROM {$this->table_teacher} WHERE Teach_id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $userid);
         $stmt->execute();
@@ -105,7 +119,7 @@ class UserLogin {
     }
 
     public function getAllMajors() {
-        $query = "SELECT DISTINCT Teach_major FROM {$this->table_name}";
+        $query = "SELECT DISTINCT Teach_major FROM {$this->table_teacher}";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

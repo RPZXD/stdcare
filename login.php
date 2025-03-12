@@ -74,7 +74,7 @@ redirectUser();
                     $username = filter_input(INPUT_POST, 'txt_username_email', FILTER_SANITIZE_STRING);
                     $password = filter_input(INPUT_POST, 'txt_password', FILTER_SANITIZE_STRING);
 
-                    $allowed_roles = ['Admin', 'Teacher', 'Officer'];
+                    $allowed_roles = ['Admin', 'Teacher', 'Officer', 'Student'];
                     $role = filter_input(INPUT_POST, 'txt_role', FILTER_SANITIZE_STRING);
                     
                     if (!in_array($role, $allowed_roles)) {
@@ -93,9 +93,14 @@ redirectUser();
                         $sw2->renderAlert();
                     } else {
                         if ($user->verifyPassword()) {
-                            $userRole = $user->getUserRole();
+                            if ($role = 'Student') {
+                                $userRole = $user->getUserRoleStudent();
+                            } else {
+                                $userRole = $user->getUserRole();
+                            }
                             $allowedUserRoles = [
                                 'Teacher' => ['T', 'ADM', 'VP', 'OF', 'DIR'],
+                                'Student' => ['STD'],
                                 'Officer' => ['ADM', 'OF'],
                                 'Admin' => ['ADM']
                             ];
@@ -151,6 +156,7 @@ redirectUser();
                                 <div class="col-sm-12">
                                     <select class="form-control text-center" name="txt_role">
                                         <option value="Teacher" selected="selected">ครู</option>
+                                        <option value="Student">นักเรียน</option>
                                         <option value="Officer">เจ้าหน้าที่</option>
                                         <!-- <option value="Director">ผู้บริหาร</option> -->
                                         <option value="Admin">Admin</option>
