@@ -93,11 +93,12 @@ redirectUser();
                         $sw2->renderAlert();
                     } else {
                         if ($user->verifyPassword()) {
-                            if ($role = 'Student') {
-                                $userRole = $user->getUserRoleStudent();
-                            } else {
-                                $userRole = $user->getUserRole();
-                            }
+                            // if ($role = 'Student') {
+                            //     $userRole = $user->getUserRoleStudent();
+                            // } else {
+                            //     $userRole = $user->getUserRole();
+                            // }
+                            $userRole = $user->getUserRole();
                             $allowedUserRoles = [
                                 'Teacher' => ['T', 'ADM', 'VP', 'OF', 'DIR'],
                                 'Student' => ['STD'],

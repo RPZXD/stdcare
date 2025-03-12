@@ -1,8 +1,45 @@
 <?php 
+session_start();
+
+
+include_once("../config/Database.php");
+include_once("../class/UserLogin.php");
+include_once("../class/Utils.php");
+
+// Initialize database connection
+$connectDB = new Database_User();
+$db = $connectDB->getConnection();
+
+// Initialize UserLogin class
+$user = new UserLogin($db);
+
+// Fetch terms and pee
+$term = $user->getTerm();
+$pee = $user->getPee();
+
+if (isset($_SESSION['Teacher_login'])) {
+    $userid = $_SESSION['Teacher_login'];
+    $userData = $user->userData($userid);
+} else {
+    $sw2 = new SweetAlert2(
+        'คุณยังไม่ได้เข้าสู่ระบบ',
+        'error',
+        '../login.php' // Redirect URL
+    );
+    $sw2->renderAlert();
+    exit;
+}
+
+$teacher_id = $userData['Teach_id'];
+$teacher_name = $userData['Teach_name'];
+$class = $userData['Teach_class'];
+$room = $userData['Teach_room'];
+
+
 
 require_once('header.php');
-require_once('config/Setting.php');
-require_once('class/Utils.php');
+
+
 ?>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
@@ -17,253 +54,218 @@ require_once('class/Utils.php');
         <div class="row mb-2">
           <div class="col-sm-6">
             <h1 class="m-0"></h1>
-          </div>
-        </div>
-      </div>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
     </div>
     <!-- /.content-header -->
 
     <section class="content">
 
-      <div class="container-fluid">
-        <h3 class="text-dark">ยอดนักเรียนแต่ละระดับชั้น</h3>
-      <div class="row">
-
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-green-400 text-white">
-              <div class="inner">
-                <h3>1365</h3>
-
-                <p>นักเรียนมัธยมศึกษาตอนต้น</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-              
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-blue-400 text-white">
-              <div class="inner">
-                <h3>781<sup style="font-size: 20px"></sup></h3>
-
-                <p>นักเรียนมัธยมศึกษาตอนปลาย</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-yellow-400 text-white">
-              <div class="inner">
-                <h3>2146<sup style="font-size: 20px"></sup></h3>
-
-                <p>นักเรียนทั้งหมด</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-            </div>
-          </div>
-          <!-- ./col -->
-          
-          <!-- ./col -->
-          
-        </div>
-        <h4>สรุปการมาเรียนของนักเรียนประจำวันที่ <?=Utils::convertToThaiDatePlus(date("Y-m-d"));?> </h4>
-        <div class="row">
-            <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">ม.1</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="callout callout-success text-center">
+                        <h4 class="text-green-600">ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name'] . ' ' . $setting->getPageTitle(); ?></h4>
                     </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="donutChart1" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
             </div>
-        </div>
-                <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">ม.2</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="donutChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-        </div>
-                <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">ม.3</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="donutChart3" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-        </div>
-                <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">ม.4</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="donutChart4" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-        </div>
-                <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">ม.5</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="donutChart5" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-        </div>
-                <div class="col-lg-4 col-sm-12 col-md-12">
-            <div class="card card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">ม.6</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="donutChart6" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-        </div>
-        </div>
+            <h3 class="text-dark">ยอดนักเรียนที่มาเรียน/ไม่มาเรียนของ มัธยมศึกษาปีที่ <?=$class?>/<?=$room?> </h3>
+                <div class="row">
 
+                    <div class="col-lg-4 col-sm-12 col-md-12">
+                        <!-- small box -->
+                        <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>55</h3>
 
-        
-        <!-- /.row -->
+                            <p>จำนวนนักเรียนทั้งห้อง</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-4 col-sm-12 col-md-12">
+                        <!-- small box -->
+                        <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>22</h3>
 
-      </div><!-- /.container-fluid -->
+                            <p>มาเรียน</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-sm-12 col-md-12">
+                        <!-- small box -->
+                        <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>11</h3>
+
+                            <p>ไม่มาเรียน</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    
+                    <!-- ./col -->
+                    
+                    </div>
+                    <h4>สรุปการมาเรียนของนักเรียนประจำวันที่ <?=Utils::convertToThaiDatePlus(date("Y-m-d"));?> </h4>
+                    <div class="row">
+                        <div class="col-lg-4 col-sm-12 col-md-12">
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title"><?="ม.".$class."/".$room?></h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="donutChart1" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+        </div>
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-    <?php require_once('footer.php');?>
+    <?php require_once('../footer.php'); ?>
 </div>
 <!-- ./wrapper -->
 
+<?php require_once('script.php'); ?>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-$.widget.bridge('uibutton', $.ui.button)
-  // Make an AJAX request to fetch data from fet_comestu.php
-// Function to fetch data and create donut chart for class values from 1 to 6
-// Function to fetch data and create donut chart for class values from 1 to 6
-// Loop through classes 1 to 6
-// Loop through classes 1 to 6
-for (var i = 1; i <= 6; i++) {
-    // Create a closure to capture the value of 'i'
-    (function(classNumber) {
-        // Make AJAX call for each class
-        $.ajax({
-            url: 'api/fetch_comestu.php',
-            type: 'GET',
-            data: { class: classNumber }, // Change the class parameter for each iteration
-            dataType: 'json',
-            success: function(data) {
-                // Assuming 'data' is an array of objects containing the fetched data
-                // Process the fetched data to populate the donutData object
-                var donutData = {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: []
-                    }]
-                };
-
-                // Populate labels, data, and backgroundColor arrays in donutData
-                data.forEach(function(item) {
-                    donutData.labels.push(item.label); // Assuming 'label' is the key for label data
-                    donutData.datasets[0].data.push(item.value); // Assuming 'value' is the key for data value
-                    donutData.datasets[0].backgroundColor.push(item.color); // Assuming 'color' is the key for background color
-                });
-
-                // Call the function to create the Donut chart with the populated data
-                createDonutChart(donutData, 'donutChart' + classNumber); // Pass chart ID dynamically
-            },
-            error: function(xhr, status, error) {
-                // Handle errors here
-                console.error(xhr.responseText);
-            }
-        });
-    })(i); // Pass the value of 'i' to the closure
-}
-
-// Function to create the Donut chart
-function createDonutChart(data, chartId) {
-    var donutChartCanvas = $('#' + chartId).get(0).getContext('2d');
-    var donutOptions = {
-        maintainAspectRatio: false,
-        responsive: true,
-    };
-    // Create doughnut chart
-    new Chart(donutChartCanvas, {
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('donutChart').getContext('2d');
+    const donutChart = new Chart(ctx, {
         type: 'doughnut',
-        data: data,
-        options: donutOptions
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let value = tooltipItem.raw || 0;
+                            return `${value} ชั่วโมง`; // เพิ่มหน่วย ชั่วโมง
+                        }
+                    }
+                }
+            }
+        }
     });
-}
 
+    const ctx2 = document.getElementById('donutChart2').getContext('2d');
+    const donutChart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let value = tooltipItem.raw || 0;
+                            return `${value} รางวัล`; // เพิ่มหน่วย รางวัล
+                        }
+                    }
+                }
+            }
+        }
+    });
 
+    const ctx3 = document.getElementById('donutChart3').getContext('2d');
+    const donutChart3 = new Chart(ctx3, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let value = tooltipItem.raw || 0;
+                            return `${value} วัน`; // เพิ่มหน่วย รางวัล
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    function fetchData() {
+        const term = document.getElementById('term').value;
+        const year = document.getElementById('year').value;
+
+        fetch(`api/fetch_chart_training.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                donutChart.data.labels = data.map(item => item.topic);
+                donutChart.data.datasets[0].data = data.map(item => parseFloat(item.total_hours)); // แปลงเป็นตัวเลข
+                donutChart.update();
+            });
+
+        fetch(`api/fetch_chart_award.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                donutChart2.data.labels = data.map(item => item.level_name);
+                donutChart2.data.datasets[0].data = data.map(item => item.total_awards); // Adjust based on your data structure
+                donutChart2.update();
+            });
+
+        fetch(`api/fetch_chart_leave.php?tid=<?php echo $teacher_id; ?>&term=${term}&year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                donutChart3.data.labels = data.map(item => item.status_name);
+                donutChart3.data.datasets[0].data = data.map(item => item.total_days); // Adjust based on your data structure
+                donutChart3.update();
+            });
+    }
+
+    document.getElementById('term').addEventListener('change', fetchData);
+    document.getElementById('year').addEventListener('change', fetchData);
+
+    fetchData(); // Initial fetch
+});
 </script>
-<?php require_once('script.php');?>
 </body>
 </html>
