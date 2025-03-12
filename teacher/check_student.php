@@ -70,7 +70,7 @@ require_once('header.php');
 <section class="content">
     <div class="container-fluid">
 
-        <div class="row my-4 mx-3">
+        <div class="row my-3 mx-3">
             <div class="w-full">
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center">
                     <h4 class="text-lg font-semibold">การเช็คชื่อของนักเรียนชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?>
