@@ -70,7 +70,7 @@ require_once('header.php');
 <section class="content">
 
         <div class="container-fluid">
-            <div class="row">
+            <div class="row justify-content-center">
                 <div class="w-full">
                         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center">
                             <h4 class="text-lg font-semibold">ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name']. ' ' . $setting->getPageTitle()?></h4>
