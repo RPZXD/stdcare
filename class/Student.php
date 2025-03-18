@@ -106,6 +106,57 @@ class Student {
     
         return $count === 0 ? "0" : $count;
     }
+
+    public function getStudentInfoByRfid($rfid) {
+        $query = "SELECT `Stu_id`, `Stu_rfid`, `Stu_no`, `Stu_password`, `Stu_sex`, `Stu_pre`, `Stu_name`, `Stu_sur`, `Stu_major`, `Stu_room`, `Stu_nick`, `Stu_birth`, `Stu_religion`, `Stu_blood`, `Stu_addr`, `Stu_phone`, `Father_name`, `Father_occu`, `Father_income`, `Mother_name`, `Mother_occu`, `Mother_income`, `Par_name`, `Par_relate`, `Par_occu`, `Par_income`, `Par_addr`, `Par_phone`, `Risk_group`, `Stu_picture`, `Stu_status`, `vehicle` 
+                  FROM {$this->table_student} 
+                  WHERE Stu_rfid = :rfid";
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':rfid', $rfid);
+        $statement->execute();
+        return $statement->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getRealTimeStudentInfo($device = '') {
+        $query = "SELECT sa.id, sa.Stu_id, sa.Study_date, sa.Study_status, sa.Study_term, sa.Study_pee, sa.device, sa.create_at,
+                         s.Stu_rfid, s.Stu_no, s.Stu_password, s.Stu_sex, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, 
+                         s.Stu_nick, s.Stu_birth, s.Stu_religion, s.Stu_blood, s.Stu_addr, s.Stu_phone, s.Father_name, s.Father_occu, 
+                         s.Father_income, s.Mother_name, s.Mother_occu, s.Mother_income, s.Par_name, s.Par_relate, s.Par_occu, 
+                         s.Par_income, s.Par_addr, s.Par_phone, s.Risk_group, s.Stu_picture, s.Stu_status, s.vehicle
+                  FROM student_attendance AS sa
+                  INNER JOIN student AS s ON sa.Stu_id = s.Stu_id";
+        if ($device) {
+            $query .= " WHERE sa.device = :device";
+        }
+        $query .= " ORDER BY sa.create_at DESC LIMIT 1";
+        $statement = $this->conn->prepare($query);
+        if ($device) {
+            $statement->bindParam(':device', $device);
+        }
+        $statement->execute();
+        return $statement->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getDeviceNames() {
+        $query = "SELECT DISTINCT device FROM student_attendance";
+        $statement = $this->conn->prepare($query);
+        $statement->execute();
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTodayAttendanceRecords() {
+        $query = "SELECT sa.id, sa.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, sa.create_at
+                  FROM student_attendance AS sa
+                  INNER JOIN student AS s ON sa.Stu_id = s.Stu_id
+                  WHERE DATE(sa.create_at) = CURDATE()";
+        if ($device) {
+            $query .= " AND sa.device = :device";
+        }
+        $query .= " ORDER BY sa.create_at DESC";
+        $statement = $this->conn->prepare($query);
+        $statement->execute();
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
     
 }
 ?>
