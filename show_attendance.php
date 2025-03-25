@@ -50,38 +50,33 @@ require_once('header.php');
             <div class="row justify-content-center">
                 <div class="col-md-12">
                 <div class="flex flex-wrap mt-4">
-                    <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="w-full md:w-2/5 px-2 mb-4">
                     <!-- small box -->
-                        <div class="bg-red-500 text-white p-4 rounded-lg shadow callout">
-                            <div class="flex justify-between items-center">
-                                <img src="" alt="" id="StudentProfile" style="width:480px;height:600px;">
+                        <div class="bg-red-500 text-white p-4 rounded-lg shadow callout text-center">
+                            <div class="flex justify-center items-center">
+                                <img src="" alt="" id="StudentProfile" class="user-avatar rounded-lg shadow w-28 h-28 mx-auto" style="width:250px;height:300px;">
                             </div>
+                            <div class="flex justify-center items-center mt-3">
+                            <h3 class="text-lg text-left text-bold" id="StudentDetails"></h3>
+                        </div>
                         </div>
                     </div>
                     <!-- ./col -->
-                    <div class="w-full md:w-1/3 px-2 mb-4">
-                    <!-- small box -->
-                    <div class="bg-green-500 text-white p-4 rounded-lg shadow callout">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg" id="StudentDetails"></h3>
-                        </div>
-                    </div>
-                    </div>
 
-                    <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="w-full md:w-3/5 px-2 mb-4">
                     <!-- small box -->
-                    <div class="bg-blue-500 p-4 rounded-lg shadow">
-                        <div class="flex justify-between items-center callout">
+                    <div class="bg-blue-500 p-4 rounded-lg shadow text-center">
+                        <div class="flex justify-center items-center callout">
                             <div class="table-responsive mx-auto">
                                 
                                 <table id="recordTable" class="display table-bordered table-hover" style="width:100%">
                                 <thead class="thead-secondary bg-blue-500 text-white ">
                                     <tr >
-                                        <th  class=" text-center">#</th>
-                                        <th  class=" text-center">รหัสประจำตัวนักเรียน</th>
+                                        <th  style="width:5%" class=" text-center">#</th>
+                                        <th  style="width:20%" class=" text-center">รหัสประจำตัวนักเรียน</th>
                                         <th  class=" text-center">ชื่อ - สกุล</th>
-                                        <th  class=" text-center">ชั้น</th>
-                                        <th  class=" text-center">เวลา</th>
+                                        <th  style="width:10%" class=" text-center">ชั้น</th>
+                                        <th  style="width:30%" class=" text-center">เวลา</th>
                                         <!-- Add more table column headers as needed -->
                                     </tr>
                                 </thead>
@@ -123,9 +118,9 @@ require_once('header.php');
             document.getElementById('StudentDetails').innerHTML = `
                 ชื่อ: ${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}<br>
                 รหัสประจำตัว: ${data.Stu_id}<br>
-                ห้อง: ${data.Stu_major}/${data.Stu_room}<br>
+                ห้อง: ม.${data.Stu_major}/${data.Stu_room}<br>
                 สถานะ: ${data.Study_status} <br>
-                วันเวลา: ${data.create_at}
+                วันเวลา: ${new Date(data.create_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}
             `;
         } catch (error) {
             console.error('Error fetching student info:', error);
@@ -140,7 +135,7 @@ require_once('header.php');
 
     $(document).ready(function() {
         const table = $('#recordTable').DataTable({
-            "pageLength": 5,
+            "pageLength": 10,
             "order": [[4, "desc"]],
             "ajax": {
                 "url": "api/get_realtime_attendance_records.php",
@@ -163,10 +158,17 @@ require_once('header.php');
                 { 
                     "data": null,
                     "render": function (data, type, row) {
-                        return `${row.Stu_major}/${row.Stu_room}`;
+                        return `ม.${row.Stu_major}/${row.Stu_room}`;
                     }
                 },
-                { "data": "create_at" }
+                { 
+                    "data": "create_at",
+                    "render": function (data, type, row) {
+                        const date = new Date(data);
+                        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+                        return date.toLocaleDateString('th-TH', options);
+                    }
+                }
             ]
         });
 
