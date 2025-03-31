@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['image2']['tmp_name'], $image2Path);
     }
 
-    $database = new Database();
+    $database = new Database("phichaia_student");
     $db = $database->getConnection();
     $homeroom = new Homeroom($db);
 

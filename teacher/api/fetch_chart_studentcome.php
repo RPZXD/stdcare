@@ -2,7 +2,7 @@
 include_once("../../config/Database.php");
 include_once("../../class/Student.php");
 
-$database = new Database_User();
+$database = new Database("phichaia_student");
 $db = $database->getConnection();
 
 $student = new Student($db);

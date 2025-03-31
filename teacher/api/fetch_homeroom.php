@@ -3,7 +3,7 @@ require_once "../../config/Database.php";
 require_once "../../class/Homeroom.php";
 
 // Initialize database connection
-$connectDB = new Database_User();
+$connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize Homeroom class

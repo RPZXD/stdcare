@@ -101,12 +101,19 @@ class UserLogin {
         return $stmt->rowCount() > 0 ? $stmt->fetch(PDO::FETCH_ASSOC) : false;
     }
 
+
     public function logOut() {
         // Start session if not already started
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         unset($_SESSION['Teacher_login']);
+        unset($_SESSION['Admin_login']);
+        unset($_SESSION['Officer_login']);
+        unset($_SESSION['Director_login']);
+        unset($_SESSION['Group_leader_login']);
+        unset($_SESSION['Student_login']);
+        session_write_close(); // Ensure session data is saved and session is properly closed
         // session_destroy(); // Optional: Uncomment if you want to destroy the session completely
         include_once("Utils.php");
         $sw2 = new SweetAlert2(

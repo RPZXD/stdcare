@@ -19,6 +19,64 @@ class Behavior {
         $this->conn = $db;
     }
 
+    // Insert behavior data into the database
+    public function create() {
+        $query = "INSERT INTO " . $this->table . " 
+                  (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
+                  VALUES (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :term, :pee)";
+        
+        $stmt = $this->conn->prepare($query);
+
+        // Sanitize input data
+        $this->stu_id = htmlspecialchars(strip_tags($this->stu_id));
+        $this->behavior_date = htmlspecialchars(strip_tags($this->behavior_date));
+        $this->behavior_type = htmlspecialchars(strip_tags($this->behavior_type));
+        $this->behavior_name = htmlspecialchars(strip_tags($this->behavior_name));
+        $this->behavior_score = htmlspecialchars(strip_tags($this->behavior_score));
+        $this->teach_id = htmlspecialchars(strip_tags($this->teach_id));
+        $this->term = htmlspecialchars(strip_tags($this->term));
+        $this->pee = htmlspecialchars(strip_tags($this->pee));
+
+        // Bind data
+        $stmt->bindParam(':stu_id', $this->stu_id);
+        $stmt->bindParam(':behavior_date', $this->behavior_date);
+        $stmt->bindParam(':behavior_type', $this->behavior_type);
+        $stmt->bindParam(':behavior_name', $this->behavior_name);
+        $stmt->bindParam(':behavior_score', $this->behavior_score);
+        $stmt->bindParam(':teach_id', $this->teach_id);
+        $stmt->bindParam(':term', $this->term);
+        $stmt->bindParam(':pee', $this->pee);
+
+        if ($stmt->execute()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function update() {
+        $query = "UPDATE {$this->table} 
+                  SET stu_id = :stu_id, 
+                      behavior_date = :behavior_date, 
+                      behavior_type = :behavior_type, 
+                      behavior_name = :behavior_name, 
+                      behavior_score = :behavior_score 
+                  WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters
+        $stmt->bindParam(':stu_id', $this->stu_id);
+        $stmt->bindParam(':behavior_date', $this->behavior_date);
+        $stmt->bindParam(':behavior_type', $this->behavior_type);
+        $stmt->bindParam(':behavior_name', $this->behavior_name);
+        $stmt->bindParam(':behavior_score', $this->behavior_score);
+        $stmt->bindParam(':id', $this->id);
+
+        // Execute the query
+        return $stmt->execute();
+    }
+
     // Function to get behavior scores based on class and room
     public function getScoreBehaviorsClassTA($class, $room, $term, $pee)
     {
@@ -61,6 +119,53 @@ class Behavior {
             // Bind parameters
             $stmt->bindParam(':class', $class, PDO::PARAM_INT);
             $stmt->bindParam(':room', $room, PDO::PARAM_INT);
+            $stmt->bindParam(':term', $term, PDO::PARAM_INT);
+            $stmt->bindParam(':pee', $pee, PDO::PARAM_INT);
+
+            // Execute the query
+            $stmt->execute();
+
+            // Fetch results
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "data" => $result
+            ];
+        } catch (Exception $e) {
+            // Handle errors
+            return [
+                "success" => false,
+                "error" => $e->getMessage()
+            ];
+        }
+    }
+    public function getBehaviorTeacherID($id, $term, $pee)
+    {
+        try {
+            // SQL query
+            $query = "
+                SELECT 
+                    a.*, b.Stu_pre, b.Stu_name, b.Stu_sur, b.Stu_major, b.Stu_room 
+                FROM 
+                    behavior AS a
+                INNER JOIN 
+                    student AS b
+                ON 
+                    a.stu_id = b.Stu_id
+                WHERE 
+                    teach_id = :teacherid 
+                    AND behavior_term = :term 
+                    AND behavior_pee = :pee 
+                ORDER BY 
+                    a.behavior_date DESC
+            ";
+
+            // Prepare the statement
+            $stmt = $this->conn->prepare($query);
+
+            // Bind parameters
+            $stmt->bindParam(':teacherid', $id, PDO::PARAM_INT);
             $stmt->bindParam(':term', $term, PDO::PARAM_INT);
             $stmt->bindParam(':pee', $pee, PDO::PARAM_INT);
 
@@ -302,22 +407,11 @@ class Behavior {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function deleteBehavior() {
-        // SQL query to delete a record based on the ID
+    public function deleteBehavior($id) {
         $query = "DELETE FROM {$this->table} WHERE id = :id";
-
-        // Prepare the query
         $stmt = $this->conn->prepare($query);
-
-        // Bind the ID parameter
-        $stmt->bindParam(':id', $this->id);
-
-        // Execute the query
-        if ($stmt->execute()) {
-            return true;
-        }
-
-        return false;
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
     }
 
     public function deleteAllBehavior() {

@@ -8,7 +8,7 @@ include_once("../class/Student.php");
 include_once("../class/Utils.php");
 
 // Initialize database connection
-$connectDB = new Database_User();
+$connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize UserLogin class

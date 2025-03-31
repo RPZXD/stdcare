@@ -8,7 +8,7 @@ require_once "../class/Homeroom.php";
 require_once "../class/Utils.php";
 
 // Initialize database connection
-$connectDB = new Database_User();
+$connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize UserLogin class
@@ -80,18 +80,18 @@ require_once('header.php');
                         <h5 class="text-center text-lg">รายงานกิจกรรมโฮมรูม<br>ระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
                         <h5 class="text-center text-lg">ภาคเรียนที่ <?=$term?> ปีการศึกษา <?=$pee?></h5>
 
-                       
+
                     <div class="text-left">
 
-                    <button type="button" class="btn-lg btn-primary mb-4" data-toggle="modal" data-target="#addhomeModal">
-                            เพิ่มกิจกรรมโฮมรูม
-                        </button>
+                    <button type="button" id="addButton" class="btn bg-blue-500 text-white text-left mb-3 mt-2" data-toggle="modal" data-target="#addhomeModal">
+                    <i class="fas fa-plus"></i> เพิ่มกิจกรรมโฮมรูม <i class="fas fa-plus"></i></button>
+                    <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
                     </div>
                     <div class="row justify-content-center">
                         <div class="col-md-12 mt-3 mb-3 mx-auto">
                             <div class="table-responsive mx-auto">
                             <table id="example2" class="display table-bordered table-hover" style="width:100%">
-                            <thead class="thead-secondary bg-green-400 text-white">
+                            <thead class="thead-secondary bg-purple-400 text-white">
                                 <tr >
                                     <th  class=" text-center">#</th>
                                     <th  class=" text-center">วันที่</th>
@@ -123,12 +123,225 @@ require_once('header.php');
 </div>
 <!-- ./wrapper -->
 
-<!-- Modal for Editing Student Information -->
+<!-- Modal  -->
+
+    <div class="modal fade" tabindex="-1" id="addhomeModal">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-header">เพิ่มข้อมูลโฮมรูม</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form id="homeroomForm" enctype="multipart/form-data" class="p-2" novalidate>
+                            <div class="row mb-3 gx-3">
+                                <div class="col"><label for="type">ประเภทเรื่องในการโฮมรูม : <br><span class="text-danger">กรุณาเลือกประเภททุกครั้ง</span></label>
+                                </div>
+                                <div class="col">
+                                <select class="form-control form-control-lg text-center" id="type" name="type" required>
+                                <option selected> -- กรุณาเลือก --</option>
+                                <?php
+                                    $types = $homeroom->fetchHomeroomTypes();
+                                    foreach ($types as $row) {
+                                    echo '<option value="'.$row['th_id'].'">'.$row['th_name'].'</option>';
+                                    }
+                                    ?>
+                                </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="title">หัวข้อเรื่อง : <span class="text-danger">ควรเป็นหัวข้อเรื่องสั้นๆ ที่กระชับ หากมีรายละเอียดเพิ่มเติมกรุณากรอกในช่องรายละเอียดกิจกรรม</span></label>
+                                <input type="text" name="title" id="title" class="form-control form-control-lg" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detail">รายละเอียดกิจกรรม : </label>
+                                <textarea class="form-control form-control-lg " name="detail" id="detail" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="result">ผลที่คาดว่าจะได้รับจากการจัดกิจกรรม : </label>
+                                <textarea class="form-control form-control-lg " name="result" id="result" rows="3" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                    <label for="image1" >ภาพประกอบ 1 : </label>
+                                    <input type="file" class="form-control" name="image1" id="image1" accept="image/*">
+                                    <img id="image-preview1" src="#" alt="Preview1" style="display: none; max-width: 400px; margin-top: 10px;">
+                            </div>
+
+                            <div class="form-group">
+                                    <label for="image2" >ภาพประกอบ 2 : </label>
+                                    <input type="file" class="form-control" name="image2" id="image2" accept="image/*">
+                                    <img id="image-preview2" src="#" alt="Preview2" style="display: none; max-width: 400px; margin-top: 10px;">
+                            </div>
+
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">ปิดหน้าต่าง</button>
+                                <input type="hidden" name="class" value="<?=$class?>">
+                                <input type="hidden" name="room" value="<?=$room?>">
+                                <input type="hidden" name="term" value="<?=$term?>">
+                                <input type="hidden" name="pee" value="<?=$pee?>">
+                                <input type="submit" name="btn_submit" class="btn btn-primary" value="บันทึกข้อมูล">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="viewHomeModal">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">รายละเอียดโฮมรูม </h5>
+                    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col"><strong>โฮมรูมของวันที่:</strong></div>
+                        <div class="col" id="viewDate"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>ประเภทเรื่อง:</strong></div>
+                        <div class="col" id="viewType"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>หัวข้อเรื่อง:</strong></div>
+                        <div class="col" id="viewTitle"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>รายละเอียดกิจกรรม:</strong></div>
+                        <div class="col" id="viewDetail"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>ผลที่คาดว่าจะได้รับ:</strong></div>
+                        <div class="col" id="viewResult"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>ภาพประกอบ 1:</strong></div>
+                        <div class="col"><img id="viewImage1" src="#" alt="Image 1" style="max-width: 100%;"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col"><strong>ภาพประกอบ 2:</strong></div>
+                        <div class="col"><img id="viewImage2" src="#" alt="Image 2" style="max-width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิดหน้าต่าง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="editHomeModal">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">แก้ไขข้อมูลโฮมรูม</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editHomeroomForm" enctype="multipart/form-data" class="p-2" novalidate>
+                        <div class="row mb-3 gx-3">
+                            <div class="col"><label for="editType">ประเภทเรื่องในการโฮมรูม : <br><span class="text-danger">กรุณาเลือกประเภททุกครั้ง</span></label>
+                            </div>
+                            <div class="col">
+                                <select class="form-control form-control-lg text-center" id="editType" name="type" required>
+                                    <option selected> -- กรุณาเลือก --</option>
+                                    <?php
+                                    $types = $homeroom->fetchHomeroomTypes();
+                                    foreach ($types as $row) {
+                                        echo '<option value="'.$row['th_id'].'">'.$row['th_name'].'</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTitle">หัวข้อเรื่อง : <span class="text-danger">ควรเป็นหัวข้อเรื่องสั้นๆ ที่กระชับ หากมีรายละเอียดเพิ่มเติมกรุณากรอกในช่องรายละเอียดกิจกรรม</span></label>
+                            <input type="text" name="title" id="editTitle" class="form-control form-control-lg" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDetail">รายละเอียดกิจกรรม : </label>
+                            <textarea class="form-control form-control-lg " name="detail" id="editDetail" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editResult">ผลที่คาดว่าจะได้รับจากการจัดกิจกรรม : </label>
+                            <textarea class="form-control form-control-lg " name="result" id="editResult" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editImage1" >ภาพประกอบ 1 : </label>
+                            <input type="file" class="form-control" name="image1" id="editImage1" accept="image/*">
+                            <img id="editImagePreview1" src="#" alt="Preview1" style="display: none; max-width: 400px; margin-top: 10px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editImage2" >ภาพประกอบ 2 : </label>
+                            <input type="file" class="form-control" name="image2" id="editImage2" accept="image/*">
+                            <img id="editImagePreview2" src="#" alt="Preview2" style="display: none; max-width: 400px; margin-top: 10px;">
+                        </div>
+
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">ปิดหน้าต่าง</button>
+                            <input type="hidden" name="id" id="editHomeroomId">
+                            <input type="submit" name="btn_submit" class="btn btn-primary" value="บันทึกข้อมูล">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <?php require_once('script.php');?>
 
 <script>
     $(document).ready(function() {
+
+          // Function to handle printing
+        window.printPage = function() {
+            let elementsToHide = $('#addButton, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
+
+            // Hide the export to Excel button
+            $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
+
+            // Hide the elements you want to exclude from the print
+            elementsToHide.hide();
+            $('thead').css('display', 'table-header-group'); // Ensure header shows
+
+            // Hide the last column
+            $('table tr').each(function() {
+                $(this).find('td:last-child, th:last-child').hide();
+            });
+            
+
+            setTimeout(() => {
+                window.print();
+                elementsToHide.show();
+
+                // After printing, restore the last column
+                $('table tr').each(function() {
+                    $(this).find('td:last-child, th:last-child').show();
+                });
+                $('#record_table_wrapper .dt-buttons').show();
+            }, 100);
+        };
+
+
+
+        // Function to set up the print layout
+        function setupPrintLayout() {
+            // Set page properties for landscape A4 with 0.5 inch margins
+            var style = '@page { size: A4 portrait; margin: 0.5in; }';
+            var printStyle = document.createElement('style');
+            printStyle.appendChild(document.createTextNode(style));
+            document.head.appendChild(printStyle);
+        }
+
       
       function loadTable() {
         $.ajax({
@@ -167,9 +380,9 @@ require_once('header.php');
                         <td>${item.h_detail}</td>
                         <td>${item.h_result}</td>
                         <td>
-                            <button class="btn bg-blue-400 text-white my-1 btn-view" data-id="${item.h_id}">ดู</button>
-                            <button class="btn bg-yellow-400 text-white my-1 btn-edit" data-id="${item.h_id}">แก้ไข</button>
-                            <button class="btn bg-red-400 text-white my-1 btn-delete" data-id="${item.h_id}">ลบ</button>
+                            <button class="btn bg-blue-400 text-white my-1 btn-view" data-id="${item.h_id}"><i class="fas fa-search"></i></button>
+                            <button class="btn bg-yellow-400 text-white my-1 btn-edit" data-id="${item.h_id}"><i class="fas fa-pen"></i></button>
+                            <button class="btn bg-red-400 text-white my-1 btn-delete" data-id="${item.h_id}"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -304,6 +517,7 @@ require_once('header.php');
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
+                cancelButtonText: 'ยกเลิก',
                 confirmButtonText: 'ใช่, ลบเลย!'
             }).then((result) => {
                 if (result.isConfirmed) {

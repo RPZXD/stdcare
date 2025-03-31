@@ -2,7 +2,7 @@
 require_once "../../config/Database.php";
 
 
-$database = new Database_User();
+$database = new Database("phichaia_student");
 $db = $database->getConnection();
 
 function sendLineNotifyMessage($accessToken, $message) {

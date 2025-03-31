@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id = $_POST['id'];
 
-    $database = new Database_User();
+    $database = new Database("phichaia_student");
     $db = $database->getConnection();
     $homeroom = new Homeroom($db);
 

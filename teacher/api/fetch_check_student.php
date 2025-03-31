@@ -3,7 +3,7 @@ require_once "../../config/Database.php";
 require_once "../../class/Student.php";
 
 // Initialize database connection
-$connectDB = new Database_User();
+$connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize Student class

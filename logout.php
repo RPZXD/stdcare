@@ -10,9 +10,9 @@
         session_start();
     }
 
-    $connectDB = new Database_User();
-    $db = $connectDB->getConnection();
+    $studentDb = new Database("phichaia_student");
+    $studentConn = $studentDb->getConnection();
 
-    $user = new UserLogin($db);
+    $user = new UserLogin($studentConn);
     $user->logOut();
 ?>
