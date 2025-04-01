@@ -6,7 +6,6 @@
       <h3 class="mt-4 text-center"><?php echo $setting->getPageTitle(); ?></h3>
   </div>
 
-
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand bg-white">
     <!-- Left navbar links -->

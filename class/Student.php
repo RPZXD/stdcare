@@ -3,10 +3,243 @@
 class Student {
     private $conn;
     private $table_student = "student";
-    private $table_study = "study";
+    private $table_behavior = "behavior";
+
+   // คุณสมบัติของนักเรียน
+    public $Stu_id;
+    public $Stu_pre;
+    public $Stu_name;
+    public $Stu_sur;
+    public $Stu_no;
+    public $Stu_password;
+    public $Stu_sex;
+    public $Stu_major;
+    public $Stu_room;
+    public $Stu_nick;
+    public $Stu_birth;
+    public $Stu_religion;
+    public $Stu_blood;
+    public $Stu_addr;
+    public $Stu_phone;
+    public $OldStu_id;
+    public $StuId;
+    public $StuNo;
+    public $StuPass;
+    public $StuSex;
+    public $PreStu;
+    public $NameStu;
+    public $SurStu;
+    public $StuClass;
+    public $StuRoom;
+    public $NickName;
+    public $Birth;
+    public $Religion;
+    public $Blood;
+    public $Addr;
+    public $Phone;
+    public $Status;
 
     public function __construct($db) {
         $this->conn = $db;
+    }
+
+    // ฟังก์ชันสำหรับค้นหานักเรียน
+    public function searchStudents($keysearch) {
+        $query = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur 
+                  FROM " . $this->table_student . " 
+                  WHERE (Stu_name LIKE :keysearch 
+                  OR Stu_sur LIKE :keysearch 
+                  OR Stu_id LIKE :keysearch)
+                  AND Stu_status = 1
+                  LIMIT 10"; // จำกัดจำนวนผลลัพธ์เพื่อประสิทธิภาพ
+
+        // เตรียมคำสั่ง SQL
+        $stmt = $this->conn->prepare($query);
+        $searchTerm = "%{$keysearch}%";
+        $stmt->bindParam(':keysearch', $searchTerm);
+
+        // รันคำสั่ง SQL
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    public function create() {
+        // SQL query to insert a new record
+        $query = "INSERT INTO " . $this->table_student . " 
+                  SET 
+                      Stu_id = :StuId,
+                      Stu_no = :StuNo,
+                      Stu_password = :StuPass,
+                      Stu_sex = :StuSex,
+                      Stu_pre = :PreStu,
+                      Stu_name = :NameStu,
+                      Stu_sur = :SurStu,
+                      Stu_major = :StuClass,
+                      Stu_room = :StuRoom,
+                      Stu_nick = :NickName,
+                      Stu_birth = :Birth,
+                      Stu_religion = :Religion,
+                      Stu_blood = :Blood,
+                      Stu_addr = :Addr,
+                      Stu_phone = :Phone,
+                      Stu_status = 1";
+
+        // Prepare the query
+        $stmt = $this->conn->prepare($query);
+
+        // Bind values to the query
+        $stmt->bindParam(":StuId", $this->StuId);
+        $stmt->bindParam(":StuNo", $this->StuNo);
+        $stmt->bindParam(":StuPass", $this->StuPass);
+        $stmt->bindParam(":StuSex", $this->StuSex);
+        $stmt->bindParam(":PreStu", $this->PreStu);
+        $stmt->bindParam(":NameStu", $this->NameStu);
+        $stmt->bindParam(":SurStu", $this->SurStu);
+        $stmt->bindParam(":StuClass", $this->StuClass);
+        $stmt->bindParam(":StuRoom", $this->StuRoom);
+        $stmt->bindParam(":NickName", $this->NickName);
+        $stmt->bindParam(":Birth", $this->Birth);
+        $stmt->bindParam(":Religion", $this->Religion);
+        $stmt->bindParam(":Blood", $this->Blood);
+        $stmt->bindParam(":Addr", $this->Addr);
+        $stmt->bindParam(":Phone", $this->Phone);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public function fetchFilteredStudents($class = '', $room = '') {
+        // Base query with default filters
+        $query = "SELECT Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, 
+                     Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone, 
+                     Stu_status
+                  FROM {$this->table_student} 
+                  WHERE Stu_status = 1";
+        
+        // Add class filter if provided
+        if (!empty($class)) {
+            $query .= " AND Stu_major = :class";
+        }
+        
+        // Add room filter if provided
+        if (!empty($room)) {
+            $query .= " AND Stu_room = :room";
+        }
+        
+        // Add ordering
+        $query .= " ORDER BY Stu_no ASC";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind parameters if filters are provided
+        if (!empty($class)) {
+            $stmt->bindParam(':class', $class);
+        }
+        
+        if (!empty($room)) {
+            $stmt->bindParam(':room', $room);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStudentById($stu_id) {
+        try {
+            $query = "SELECT * 
+            FROM {$this->table_student} 
+            WHERE Stu_id = :stu_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":stu_id", $stu_id);
+            $stmt->execute();
+            
+            // Fetch all matching records
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Return results if found, otherwise return false
+            return $stmt->rowCount() > 0 ? $results : false;
+        } catch (PDOException $e) {
+            // Log error or handle accordingly
+            error_log("Database query error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    public function updateStudentInfo() {
+        $sql = "UPDATE {$this->table_student}
+                SET Stu_id = :stuId,
+                    Stu_no = :stuNo,
+                    Stu_password = :stuPass,
+                    Stu_sex = :stuSex,
+                    Stu_pre = :preStu,
+                    Stu_name = :nameStu,
+                    Stu_sur = :surStu,
+                    Stu_major = :stuClass,
+                    Stu_room = :stuRoom,
+                    Stu_nick = :nickName,
+                    Stu_birth = :birth,
+                    Stu_religion = :religion,
+                    Stu_blood = :blood,
+                    Stu_addr = :addr,
+                    Stu_phone = :phone,
+                    Par_phone = :parPhone,
+                    Stu_citizenid = :stuCitizenId,
+                    Father_name = :fatherName,
+                    Father_occu = :fatherOccu,
+                    Father_income = :fatherIncome,
+                    Mother_name = :motherName,
+                    Mother_occu = :motherOccu,
+                    Mother_income = :motherIncome,
+                    Par_name = :parName,
+                    Par_relate = :parRelate,
+                    Par_occu = :parOccu,
+                    Par_income = :parIncome,
+                    Par_addr = :parAddr,
+                    Stu_status = :status
+                WHERE Stu_id = :oldStuId";
+
+        $stmt = $this->conn->prepare($sql);
+
+        // Bind parameters
+        $stmt->bindParam(':stuId', $this->Stu_id);
+        $stmt->bindParam(':stuNo', $this->Stu_no);
+        $stmt->bindParam(':stuPass', $this->Stu_password);
+        $stmt->bindParam(':stuSex', $this->Stu_sex);
+        $stmt->bindParam(':preStu', $this->Stu_pre);
+        $stmt->bindParam(':nameStu', $this->Stu_name);
+        $stmt->bindParam(':surStu', $this->Stu_sur);
+        $stmt->bindParam(':stuClass', $this->Stu_major);
+        $stmt->bindParam(':stuRoom', $this->Stu_room);
+        $stmt->bindParam(':nickName', $this->Stu_nick);
+        $stmt->bindParam(':birth', $this->Stu_birth);
+        $stmt->bindParam(':religion', $this->Stu_religion);
+        $stmt->bindParam(':blood', $this->Stu_blood);
+        $stmt->bindParam(':addr', $this->Stu_addr);
+        $stmt->bindParam(':phone', $this->Stu_phone);
+        $stmt->bindParam(':parPhone', $this->Par_phone);
+        $stmt->bindParam(':stuCitizenId', $this->Stu_citizenid);
+        $stmt->bindParam(':fatherName', $this->Father_name);
+        $stmt->bindParam(':fatherOccu', $this->Father_occu);
+        $stmt->bindParam(':fatherIncome', $this->Father_income);
+        $stmt->bindParam(':motherName', $this->Mother_name);
+        $stmt->bindParam(':motherOccu', $this->Mother_occu);
+        $stmt->bindParam(':motherIncome', $this->Mother_income);
+        $stmt->bindParam(':parName', $this->Par_name);
+        $stmt->bindParam(':parRelate', $this->Par_relate);
+        $stmt->bindParam(':parOccu', $this->Par_occu);
+        $stmt->bindParam(':parIncome', $this->Par_income);
+        $stmt->bindParam(':parAddr', $this->Par_addr);
+        $stmt->bindParam(':status', $this->Stu_status);
+        $stmt->bindParam(':oldStuId', $this->OldStu_id);
+
+        return $stmt->execute();
     }
 
     public function getStudyStatusCount($class, $date) {
@@ -158,5 +391,8 @@ class Student {
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
     
+
+  
+
 }
 ?>

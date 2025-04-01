@@ -71,24 +71,42 @@ require_once('header.php');
     <!-- /.content-header -->
     <!-- Modal -->
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="col-md-12">
-            <div class="callout callout-success text-center">
+  <section class="content">
+        <div class="container-fluid">
+            <div class="col-md-12">
+                <div class="callout callout-success text-center">
                 <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
-                <h5 class="text-center text-lg">รายชื่อนักเรียนระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
-                <h5 class="text-center text-lg">ปีการศึกษา <?=$pee?></h5>
+                        <h5 class="text-center text-lg">ข้อมูลผู้ปกครอง</h5>
+                        <h5 class="text-center text-lg"><?=$term?> ปีการศึกษา <?=$pee?></h5>
 
-                <div class="row justify-content-center">
-                    <div id="showDataStudent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- การ์ดนักเรียนจะถูกแทรกที่นี่ -->
+
+                    <div class="row justify-content-center">
+                        <div class="col-md-12 mt-3 mb-3 mx-auto">
+                            <div class="table-responsive mx-auto">
+                            <table id="record_table" class="display table-bordered table-hover" style="width:100%">
+                            <thead class="thead-secondary bg-indigo-500 text-white">
+                                <tr>
+                                            <th  class="text-center">เลขที่</th>
+                                            <th  class="text-center">เลขประจำตัว</th>
+                                            <th  class="text-center">ชื่อ-นามสกุล</th>
+                                            <th  class="text-center">ชื่อผู้ปกครอง</th>
+                                            <th  class="text-center">เบอร์โทรผู้ปกครอง</th>
+                                            <th  class="text-center">จัดการ</th>
+                                    <!-- Add more table column headers as needed -->
+                                </tr>
+                            </thead>
+                            <tbody> 
+                            </tbody>
+                            </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
             </div>
+        </div><!-- /.container-fluid -->
         </div>
-    </div><!-- /.container-fluid -->
-</section>
-
+    </section>
 
   <!-- /.content -->
   </div>
@@ -139,13 +157,11 @@ require_once('header.php');
     </div>
   </div>
 </div>
-
-
 <?php require_once('script.php');?>
 
 <script>
 $(document).ready(function() {
-
+    loadTable(); // Load data on page load
 // Function to handle printing
 window.printPage = function() {
     let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
@@ -200,68 +216,101 @@ function convertToThaiDate(dateString) {
     return `${day} ${month} ${year}`;
 }
 
-async function loadStudentData() {
-    try {
-        var classValue = <?=$class?>;
-        var roomValue = <?=$room?>;
+async function loadTable() {
+        try {
+            var TeacherId = <?=$teacher_id?>;
 
-        const response = await $.ajax({
-            url: 'api/fetch_data_student.php',
-            method: 'GET',
-            dataType: 'json',
-            data: { class: classValue, room: roomValue }
-        });
-
-        if (!response.success) {
-            Swal.fire('🚨 ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
-            return;
-        }
-
-        const showDataStudent = $('#showDataStudent');
-        showDataStudent.empty(); // เคลียร์ข้อมูลเก่า
-
-        if (response.data.length === 0) {
-            showDataStudent.html('<p class="text-center text-xl font-semibold text-gray-600">ไม่พบข้อมูลนักเรียน</p>');
-        } else {
-            response.data.forEach((item, index) => {
-                const studentCard = `
-                    <div class="card my-4 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105">
-                        <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/${item.Stu_picture}" alt="Student Picture" style="height: 350px; object-fit: cover;">
-                        <div class="card-body space-y-3">
-                            <h5 class="card-title text-base font-bold text-gray-800">${item.Stu_pre}${item.Stu_name} ${item.Stu_sur} </h5><br>
-                            <p class="card-text text-gray-600 text-left">รหัสนักเรียน: <span class="font-semibold text-blue-600">${item.Stu_id}</span></p>
-                            <p class="card-text text-gray-600 text-left">เลขที่: ${item.Stu_no}</p>
-                            <p class="card-text text-gray-600 text-left">ชื่อเล่น: <span class="italic text-purple-500">${item.Stu_nick}</span></p>
-                            <p class="card-text text-gray-600 text-left">เบอร์โทร: ${item.Stu_phone}</p>
-                            <p class="card-text text-gray-600 text-left">เบอร์ผู้ปกครอง: ${item.Par_phone}</p>
-                            <div class="flex space-x-2">
-                                <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 btn-view" data-id="${item.Stu_id}">👀 ดู</button>
-                                <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 btn-edit" data-id="${item.Stu_id}">✏️ แก้ไข</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                showDataStudent.append(studentCard); // แทรกการ์ดลงใน div
+            const response = await $.ajax({
+                url: 'api/fetch_data_student.php',
+                method: 'GET',
+                dataType: 'json',
+                data: { 
+                    class: <?= $class ?>,
+                    room: <?= $room ?> 
+                }
             });
-        }
 
-    } catch (error) {
-        Swal.fire('🚨 ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
-        console.error(error);
+            if (!response.success) {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+                return;
+            }
+
+            const table = $('#record_table').DataTable({
+                destroy: true,
+                pageLength: 50,
+                lengthMenu: [10, 25, 50, 100],
+                order: [[0, 'asc']],
+                columnDefs: [
+                    { targets: 0, className: 'text-center' },
+                    { targets: 1, className: 'text-center' },
+                    { targets: 2, className: 'text-left text-semibold' },
+                    { targets: 3, className: 'text-left text-semibold' },
+                    { targets: 4, className: 'text-center' },
+                    { targets: 5, className: 'text-center' }, // จัดกลางสำหรับปุ่ม
+                ],
+                scrollX: true,
+                autoWidth: false,
+                info: true,
+                lengthChange: true,
+                ordering: true,
+                responsive: true,
+                paging: true,
+                searching: true
+            });
+
+            // Clear old data
+            table.clear();
+
+            if (response.data.length === 0) {
+                table.row.add([
+                    '<td colspan="6" class="text-center">ไม่พบข้อมูล</td>'
+                ]);
+            } else {
+                response.data.forEach((item, index) => {
+                    const thaiDate = convertToThaiDate(item.behavior_date);
+
+                    // ปุ่มแก้ไขและลบ
+                    const actionButtons = `
+                        <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 btn-view" data-id="${item.Stu_id}">👀 ดู</button>
+                        <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 btn-edit" data-id="${item.Stu_id}">✏️ แก้ไข</button>
+                    `;
+
+                    table.row.add([
+                        (index + 1),
+                        item.Stu_id,
+                        item.Stu_pre + item.Stu_name + ' ' + item.Stu_sur,
+                        item.Par_name,
+                        item.Par_phone,
+                        actionButtons
+                    ]);
+                });
+            }
+
+            // Re-draw table
+            table.draw();
+
+        } catch (error) {
+            Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
+            console.error(error);
+        }
     }
-}
 
 // Use event delegation to handle dynamically added elements
 $(document).on('click', '.btn-view', function() {
-    var stuId = $(this).data('id');
+    var stuId = $(this).data('id'); // ดึงค่า Stu_id จาก data-id
     // Fetch student details and show in modal
     $.ajax({
-        url: 'api/view_student.php',
+        url: 'api/view_student.php', // ไฟล์ PHP ที่ใช้ดึงข้อมูล
         method: 'GET',
-        data: { stu_id: stuId },
+        data: { stu_id: stuId }, // ส่งค่า Stu_id ไปยัง server
         success: function(response) {
+            // แสดงข้อมูลใน modal
             $('#studentModal .modal-body').html(response);
-            $('#studentModal').modal('show');
+            $('#studentModal').modal('show'); // เปิด modal
+        },
+        error: function(xhr, status, error) {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+            console.error(error);
         }
     });
 });
