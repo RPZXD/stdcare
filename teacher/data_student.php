@@ -205,7 +205,7 @@ async function loadStudentData() {
             response.data.forEach((item, index) => {
                 const studentCard = `
                     <div class="card my-4 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105">
-                        <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/${item.Stu_picture}" alt="Student Picture" style="height: 300px; object-fit: cover;">
+                        <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/${item.Stu_picture}" alt="Student Picture" style="height: 350px; object-fit: cover;">
                         <div class="card-body space-y-3">
                             <h5 class="card-title text-base font-bold text-gray-800">${item.Stu_pre}${item.Stu_name} ${item.Stu_sur} </h5><br>
                             <p class="card-text text-gray-600 text-left">รหัสนักเรียน: <span class="font-semibold text-blue-600">${item.Stu_id}</span></p>
@@ -214,8 +214,8 @@ async function loadStudentData() {
                             <p class="card-text text-gray-600 text-left">เบอร์โทร: ${item.Stu_phone}</p>
                             <p class="card-text text-gray-600 text-left">เบอร์ผู้ปกครอง: ${item.Par_phone}</p>
                             <div class="flex space-x-2">
-                                <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.Stu_id}">👀 ดูข้อมูล</button>
-                                <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" data-id="${item.Stu_id}">✏️ แก้ไขข้อมูล</button>
+                                <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.Stu_id}">👀 ดู</button>
+                                <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" data-id="${item.Stu_id}">✏️ แก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -252,10 +252,6 @@ $('#addBehaviorModal form').on('submit', function(event) {
 
     var formData = new FormData(this); // เก็บข้อมูลทั้งหมดจากฟอร์ม
 
-    // แสดงข้อมูลใน FormData
-    // for (var pair of formData.entries()) {
-    //     console.log(pair[0] + ': ' + pair[1]);
-    // }
 
     $.ajax({
         url: 'api/insert_behavior.php',
