@@ -3,6 +3,7 @@
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
     const navbar = document.querySelector('.main-header.navbar');
+    const links = document.querySelectorAll('a');
 
     // Load saved theme
     const savedTheme = localStorage.getItem('theme') || 'light-mode';
@@ -12,6 +13,12 @@
     navbar.classList.toggle('bg-gray-900', savedTheme === 'dark-mode');
     themeToggle.checked = savedTheme === 'dark-mode';
 
+    // Update link colors
+    links.forEach(link => {
+        link.classList.toggle('text-blue-500', savedTheme === 'light-mode');
+        link.classList.toggle('text-blue-300', savedTheme === 'dark-mode');
+    });
+
     // Add event listener for the switch
     themeToggle.addEventListener('change', function() {
       const isDarkMode = themeToggle.checked;
@@ -19,6 +26,13 @@
       body.classList.toggle('dark-mode', isDarkMode);
       navbar.classList.toggle('bg-white', !isDarkMode);
       navbar.classList.toggle('bg-gray-900', isDarkMode);
+
+      // Update link colors dynamically
+      links.forEach(link => {
+          link.classList.toggle('text-blue-500', !isDarkMode);
+          link.classList.toggle('text-blue-300', isDarkMode);
+      });
+
       localStorage.setItem('theme', isDarkMode ? 'dark-mode' : 'light-mode');
     });
   });

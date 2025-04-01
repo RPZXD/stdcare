@@ -72,7 +72,7 @@ require_once('header.php');
     <!-- /.content-header -->
     <!-- Modal -->
 
-  <section class="content">
+    <section class="content">
         <div class="container-fluid">
             <div class="col-md-12">
                 <div class="callout callout-success text-center">

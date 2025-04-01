@@ -232,6 +232,9 @@
             display: table-row-group;
         }
     }
+    .modal-xl {
+        max-width: 90%; /* กำหนดความกว้างเป็น 90% ของหน้าจอ */
+    }
 </style>
 
 </head>
