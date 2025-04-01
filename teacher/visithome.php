@@ -150,7 +150,12 @@ require_once('header.php');
                 <div id="editVisitContent">
                     <!-- Dynamic content will be loaded here -->
                 </div>
+                <div class="flex justify-end">
+                <button type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-400" data-dismiss="modal">ปิด</button>
+                <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveChanges">บันทึกการเปลี่ยนแปลง</button>
             </div>
+            </div>
+            
         </div>
     </div>
 </div>

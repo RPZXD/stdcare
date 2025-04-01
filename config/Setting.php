@@ -6,6 +6,7 @@ class Setting {
     private $pageTitleShort = "STDCARE";
     private $logoImage = "/dist/img/logo-phicha.png";
     private $imgProfile = "https://std.phichai.ac.th/teacher/uploads/phototeach/";
+    private $imgVisitHome = "https://std.phichai.ac.th/teacher/uploads/visithome/";
     private $imgProfileStudent = "https://student.phichai.ac.th/photo/";
     private $imgAwards = "https://person.phichai.ac.th/teacher/uploads/file_award/";
     // private $imgAwards = "uploads/file_award/";
@@ -31,6 +32,11 @@ class Setting {
     public function getImgProfile() {
         return $this->imgProfile;
     }
+
+    public function getImgVisitHome() {
+        return $this->getImgVisitHome;
+    }
+
     public function getImgProfileStudent() {
         return $this->getImgProfileStudent;
     }

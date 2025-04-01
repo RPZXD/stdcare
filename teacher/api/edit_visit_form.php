@@ -1,42 +1,42 @@
 <div class="flex flex-col items-center">
-    <div class="w-full max-w-4xl">
-        <div class="bg-red-100 border-l-4 border-red-500 p-4 rounded-lg text-center">
-            <h5 class="text-lg font-bold">..:: เพิ่มข้อมูลการเยี่ยมบ้านนักเรียน ::..</h5>
+    <div class="w-full">
+        <div class="bg-blue-100 border-l-4 border-blue-500 p-4 rounded-lg text-center">
+            <h5 class="text-xl font-bold">..:: แก้ไขข้อมูลการเยี่ยมบ้านนักเรียน ::..</h5>
             <hr class="my-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <h6 class="text-sm font-medium">
-                        <i class="fa fa-address-card"></i> เลขประจำตัวนักเรียน: <?= $data['Stu_id']; ?>
+                    <h6 class="text-base font-medium">
+                        🆔 เลขประจำตัวนักเรียน: <?= $data['Stu_id']; ?>
                     </h6>
                 </div>
                 <div>
-                    <h6 class="text-sm font-medium">
-                        <i class="fa fa-user"></i> ชื่อ-นามสกุล: <?= $data['Stu_pre'] . $data['Stu_name'] . " " . $data['Stu_sur']; ?>
+                    <h6 class="text-base font-medium">
+                        👤 ชื่อ-สกุล: <?= $data['Stu_pre'] . $data['Stu_name'] . " " . $data['Stu_sur']; ?>
                     </h6>
                 </div>
                 <div>
-                    <h6 class="text-sm font-medium">
-                        <i class="fa fa-address-card"></i> ชั้น: <?= $data['Stu_major'] . "/" . $data['Stu_room']; ?>
+                    <h6 class="text-base font-medium">
+                        🏫 ชั้น: <?= $data['Stu_major'] . "/" . $data['Stu_room']; ?>
                     </h6>
                 </div>
                 <div>
-                    <h6 class="text-sm font-medium">
-                        <i class="fa fa-home"></i> ที่อยู่: <?= $data['Stu_addr']; ?>
+                    <h6 class="text-base font-medium">
+                        🏠 ที่อยู่: <?= $data['Stu_addr']; ?>
                     </h6>
                 </div>
                 <div>
-                    <h6 class="text-sm font-medium">
-                        <i class="fa fa-phone"></i> เบอร์โทรศัพท์: <?= $data['Stu_phone']; ?>
+                    <h6 class="text-base font-medium">
+                        📞 เบอร์โทรศัพท์: <?= $data['Stu_phone']; ?>
                     </h6>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="w-full max-w-4xl mt-6">
+    <div class="w-full mt-6">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-6 rounded-lg">
             <form method="post" enctype="multipart/form-data">
-                <p class="text-sm font-medium mb-4">กรอกข้อมูลในแบบฟอร์มให้ตรงตามความเป็นจริง</p>
+                <p class="text-base font-medium mb-4">กรอกข้อมูลในแบบฟอร์มให้ตรงตามความเป็นจริง</p>
 
                 <?php
                 $questions = [
@@ -63,14 +63,14 @@
                 $i = 1;
                 foreach ($questions as $question => $options) {
                     echo '<div class="mb-4">';
-                    echo '<h5 class="text-sm font-bold mb-2">' . $question . '</h5>';
+                    echo '<h5 class="text-base font-bold mb-2">' . $question . '</h5>';
                     echo '<div class="flex flex-wrap gap-4">';
                     foreach ($options as $index => $option) {
                         $radioId = 'vh' . $i . '-' . $index;
                         $isChecked = isset($data['vh' . $i]) && $data['vh' . $i] == ($index + 1) ? 'checked' : ''; // Pre-fill the radio button
                         echo '<div class="flex items-center space-x-2">';
                         echo '<input type="radio" id="' . $radioId . '" name="vh' . $i . '" value="' . ($index + 1) . '" ' . $isChecked . ' required class="form-radio text-blue-500">';
-                        echo '<label for="' . $radioId . '" class="text-sm">' . $option . '</label>';
+                        echo '<label for="' . $radioId . '" class="text-base">' . $option . '</label>';
                         echo '</div>';
                     }
                     echo '</div>';
@@ -80,24 +80,38 @@
                 ?>
 
                 <div class="mb-4">
-                    <h5 class="text-sm font-bold mb-2">19. รูปถ่ายการเยี่ยมบ้านนักเรียน (ได้สูงสุด 5 รูปภาพ)</h5>
+                    <h5 class="text-base font-bold mb-2">19. รูปถ่ายการเยี่ยมบ้านนักเรียน (ได้สูงสุด 5 รูปภาพ)</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <?php
+
+                        $yearImg = $data['Pee'] - 543; // Convert to Buddhist year
+
                         $images = [
-                            ["id" => "image1", "label" => "รูปภาพที่ 1", "description" => "* ภาพตัวบ้านนักเรียน (ให้เห็นทั้งหลัง)"],
-                            ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => "* ภาพภายในบ้านนักเรียน"],
-                            ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง"],
-                            ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "=> ภาพเพิ่มเติม"],
-                            ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "=> ภาพเพิ่มเติม"],
+                            [
+                                "id" => "image1", 
+                                "label" => "รูปภาพที่ 1", 
+                                "description" => "* ภาพตัวบ้านนักเรียน (ให้เห็นทั้งหลัง)", 
+                                "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture1']
+                            ],
+                            ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => "* ภาพภายในบ้านนักเรียน", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture2']],
+                            ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture3']],
+                            ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "=> ภาพเพิ่มเติม", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture4']],
+                            ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "=> ภาพเพิ่มเติม", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture5']],
                         ];
 
                         foreach ($images as $image) {
-                            $imageValue = isset($data[$image['id']]) ? $data[$image['id']] : '';
+                            $imagePath = $image['picture'];
                             echo '
                             <div class="text-center">
-                                <label for="' . $image['id'] . '" class="block text-sm font-medium">' . $image['label'] . ': <span class="text-red-500">' . $image['description'] . '</span></label>
-                                <input type="file" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*">
-                                <p class="mt-2">' . ($imageValue ? '<img src="' . $imageValue . '" alt="Uploaded Image" class="w-24 h-24 object-cover rounded-lg">' : 'No image uploaded') . '</p>
+                                <label for="' . $image['id'] . '" class="block text-base font-medium">' . $image['label'] . ': <span class="text-red-500">' . $image['description'] . '</span></label>
+                                <input type="file" class="mt-2 block w-full text-base text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*">
+                                <p class="mt-2">';
+                            if ($imagePath) {
+                                echo '<img src="' . $imagePath . '" alt="Uploaded Image" class="w-[250] h-[100] object-cover rounded-lg">';
+                            } else {
+                                echo 'No image uploaded';
+                            }
+                            echo '</p>
                             </div>';
                         }
                         ?>
@@ -105,7 +119,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <h5 class="text-sm font-bold mb-2">20. ปัญหา/อุปสรรค และความต้องการความช่วยเหลือ</h5>
+                    <h5 class="text-base font-bold mb-2">20. ปัญหา/อุปสรรค และความต้องการความช่วยเหลือ</h5>
                     <textarea name="vh20" id="vh20" cols="30" rows="5" class="w-full p-2 border border-gray-300 rounded-lg"><?= isset($data['vh20']) ? htmlspecialchars($data['vh20']) : ''; ?></textarea>
                 </div>
 
@@ -113,7 +127,6 @@
                     <input type="hidden" name="stuId" value="<?= $data['Stu_id']; ?>">
                     <input type="hidden" name="term" value="<?= $data['Term']; ?>">
                     <input type="hidden" name="pee" value="<?= $data['Pee']; ?>">
-                    <button type="submit" name="btn_submit" class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">บันทึก</button>
                 </div>
             </form>
         </div>
