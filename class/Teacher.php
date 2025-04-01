@@ -154,30 +154,31 @@ class Teacher {
         }
     }
 
-    public function updateTeacher($update_id, $Teach_id, $Teach_password, $Teach_name, $Teach_major, $Teach_class, $Teach_room, $Teach_status, $role_ckteach) {
-        $sql = "UPDATE {$this->table_name} SET 
-                    Teach_id = :teachid,
-                    Teach_password = :Teach_password,
-                    Teach_name = :Teach_name,
-                    Teach_major = :Teach_major,
-                    Teach_class = :Teach_class,
-                    Teach_room = :Teach_room,
-                    Teach_status = :Teach_status,
-                    role_ckteach = :role_ckteach
-                WHERE Teach_id = :teacher_id";
+    public function updateTeacher($teach_id, $teach_name, $teach_sex, $teach_birth, $teach_addr, $teach_major, $teach_phone, $teach_class, $teach_room, $teach_photo) {
+        $query = "UPDATE {$this->table_name} 
+                  SET Teach_name = :teach_name, 
+                      Teach_sex = :teach_sex, 
+                      Teach_birth = :teach_birth, 
+                      Teach_addr = :teach_addr, 
+                      Teach_major = :teach_major, 
+                      Teach_phone = :teach_phone, 
+                      Teach_class = :teach_class, 
+                      Teach_room = :teach_room, 
+                      Teach_photo = :teach_photo 
+                  WHERE Teach_id = :teach_id";
     
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare($query);
     
-        // Bind parameters
-        $stmt->bindParam(':teachid', $Teach_id);
-        $stmt->bindParam(':Teach_password', $Teach_password);
-        $stmt->bindParam(':Teach_name', $Teach_name);
-        $stmt->bindParam(':Teach_major', $Teach_major);
-        $stmt->bindParam(':Teach_class', $Teach_class);
-        $stmt->bindParam(':Teach_room', $Teach_room);
-        $stmt->bindParam(':Teach_status', $Teach_status);
-        $stmt->bindParam(':role_ckteach', $role_ckteach);
-        $stmt->bindParam(':teacher_id', $update_id);
+        $stmt->bindParam(':teach_id', $teach_id);
+        $stmt->bindParam(':teach_name', $teach_name);
+        $stmt->bindParam(':teach_sex', $teach_sex);
+        $stmt->bindParam(':teach_birth', $teach_birth);
+        $stmt->bindParam(':teach_addr', $teach_addr);
+        $stmt->bindParam(':teach_major', $teach_major);
+        $stmt->bindParam(':teach_phone', $teach_phone);
+        $stmt->bindParam(':teach_class', $teach_class);
+        $stmt->bindParam(':teach_room', $teach_room);
+        $stmt->bindParam(':teach_photo', $teach_photo);
     
         return $stmt->execute();
     }

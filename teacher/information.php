@@ -115,49 +115,147 @@ require_once('header.php');
     <?php require_once('../footer.php'); ?>
 </div>
 <!-- ./wrapper -->
+<div class="modal fade" id="editTeacherModal" tabindex="-1" role="dialog" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTeacherModalLabel">✏️ แก้ไขข้อมูลครู</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editTeacherForm" enctype="multipart/form-data">
+                    <!-- รูปภาพ -->
+                    <div class="form-group text-center">
+                             <img id="image-preview1" class="rounded-full mx-auto h-80 w-auto"
+                                src="<?php echo $setting->getImgProfile().$userData['Teach_photo'];?>"
+                                alt="<?php echo $userData['Teach_name'];?>">
+                        <label for="image1" class="mt-3">ภาพประจำตัว:</label>
+                        <input type="file" class="form-control" name="image1" id="image1" accept="image/*">
+                    </div>
+
+                    <!-- ชื่อ-นามสกุล -->
+                    <div class="form-group">
+                        <label for="Teach_name">👤 ชื่อ-นามสกุล</label>
+                        <input type="text" class="form-control" id="Teach_name" name="Teach_name" value="<?php echo $userData['Teach_name']; ?>" required>
+                    </div>
+
+                    <!-- เพศ -->
+                    <div class="form-group">
+                        <label for="Teach_sex">🚻 เพศ</label>
+                        <select name="Teach_sex" id="Teach_sex" class="form-control" required>
+                            <option value="<?php echo $userData['Teach_sex']; ?>"><?php echo $userData['Teach_sex']; ?></option>
+                            <option value="ชาย">ชาย</option>
+                            <option value="หญิง">หญิง</option>
+                        </select>
+                    </div>
+
+                    <!-- วัน/เดือน/ปีเกิด -->
+                    <div class="form-group">
+                        <label for="Teach_birth">🎂 วัน/เดือน/ปีเกิด</label>
+                        <input type="date" class="form-control" id="Teach_birth" name="Teach_birth" value="<?php echo $userData['Teach_birth']; ?>" required>
+                    </div>
+
+                    <!-- ที่อยู่ -->
+                    <div class="form-group">
+                        <label for="Teach_addr">🏠 ที่อยู่</label>
+                        <input type="text" class="form-control" id="Teach_addr" name="Teach_addr" value="<?php echo $userData['Teach_addr']; ?>" required>
+                    </div>
+
+                    <!-- กลุ่มสาระ -->
+                    <div class="form-group">
+                        <label for="Teach_major">🏠 กลุ่มสาระ</label>
+                        <select name="Teach_major" id="Teach_major" class="form-control">
+                            <option value="<?php echo $userData['Teach_major']; ?>"><?php echo $userData['Teach_major']; ?></option>
+                            <option value="ภาษาไทย">ภาษาไทย</option>
+                            <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                            <option value="วิทยาศาสตร์">วิทยาศาสตร์และเทคโนโลยี</option>
+                            <option value="สังคมศึกษาฯ">สังคมศึกษาฯ</option>
+                            <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+                            <option value="ศิลปะ">ศิลปะ</option>
+                            <option value="การงานอาชีพฯ">การงานอาชีพฯ</option>
+                            <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
+                            <option value="พัฒนาผู้เรียน">พัฒนาผู้เรียน</option>
+                        </select>
+                    </div>
+
+                    <!-- เบอร์โทรศัพท์ -->
+                    <div class="form-group">
+                        <label for="Teach_phone">📞 เบอร์โทรศัพท์</label>
+                        <input type="tel" class="form-control" id="Teach_phone" name="Teach_phone" value="<?php echo $userData['Teach_phone']; ?>" pattern="\d{10}" maxlength="10" required>
+                    </div>
+
+                    <!-- ครูที่ปรึกษาประจำชั้น -->
+                    <div class="form-group">
+                        <label>👨‍🏫 ครูที่ปรึกษาประจำชั้น</label>
+                        <div class="row">
+                            <div class="col-auto">
+                                <label for="Teach_class">ม.</label>
+                                <select name="Teach_class" id="Teach_class" class="form-control" required>
+                                    <option value="<?php echo $userData['Teach_class']; ?>"><?php echo $userData['Teach_class']; ?></option>
+                                    <?php for ($i = 1; $i <= 6; $i++) { echo "<option value='$i'>$i</option>"; } ?>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <label for="Teach_room">ห้อง</label>
+                                <select name="Teach_room" id="Teach_room" class="form-control" required>
+                                    <option value="<?php echo $userData['Teach_room']; ?>"><?php echo $userData['Teach_room']; ?></option>
+                                    <?php for ($i = 1; $i <= 12; $i++) { echo "<option value='$i'>$i</option>"; } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="Teach_id" id="Teach_id" value="<?php echo $userData['Teach_id']; ?>">
+                    <input type="hidden" name="Teach_photo" id="Teach_photo" value="<?php echo $userData['Teach_photo']; ?>">
+                </form>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                <button type="button" class="btn btn-primary" id="saveChanges">บันทึกการเปลี่ยนแปลง</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <?php require_once('script.php'); ?>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('donutChart').getContext('2d');
-    const donutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: ['#4BC0C0', '#FF6384', '#36A2EB', '#FFCE56', '#9966FF', '#FF9F40']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            let value = tooltipItem.raw || 0;
-                            return `${value} คน`; // เพิ่มหน่วย คน
-                        }
-                    }
-                }
-            }
-        }
+    // เปิด modal เมื่อคลิกปุ่ม editBtn
+    document.getElementById('editBtn').addEventListener('click', function() {
+        $('#editTeacherModal').modal('show'); // ใช้ Bootstrap modal
     });
 
-    function fetchData() {
-        fetch(`api/fetch_chart_studentcome.php?class=<?=$class?>&room=<?=$room?>&date=<?=$currentDate?>`)
-            .then(response => response.json())
-            .then(data => {
-                donutChart.data.labels = data.map(item => item.status_name);
-                donutChart.data.datasets[0].data = data.map(item => parseFloat(item.count_total)); // แปลงเป็นตัวเลข
-                donutChart.update();
-            });
-    }
+    // บันทึกการเปลี่ยนแปลง
+    document.getElementById('saveChanges').addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('editTeacherForm'));
 
-    fetchData(); // Initial fetch
+        // ส่งข้อมูลไปยังเซิร์ฟเวอร์
+        fetch('api/update_teacher.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success').then(() => {
+                    location.reload(); // โหลดหน้าใหม่เพื่อแสดงข้อมูลที่อัปเดต
+                });
+            } else {
+                Swal.fire('ข้อผิดพลาด', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+            console.error(error);
+        });
+    });
 });
 </script>
 </body>
