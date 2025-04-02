@@ -231,5 +231,31 @@ class Teacher {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function getTeachersByClassAndRoomDuo($class, $room) {
+        try {
+            $query = "SELECT Teach_name FROM {$this->table_name} 
+                      WHERE Teach_class = :class AND Teach_room = :room AND Teach_status = 1";
+    
+            // Prepare the statement
+            $stmt = $this->conn->prepare($query);
+    
+            // Bind the parameters
+            $stmt->bindParam(':class', $class);
+            $stmt->bindParam(':room', $room);
+    
+            // Execute the query
+            $stmt->execute();
+    
+            // Fetch the results
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            // Return the results
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Database query error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

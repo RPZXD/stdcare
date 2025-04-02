@@ -94,7 +94,7 @@
                             echo '
                             <div class="text-center">
                                 <label for="' . $image['id'] . '" class="block text-base font-medium">' . $image['label'] . ': <span class="text-red-500">' . $image['description'] . '</span></label>
-                                <input type="file" class="mt-2 block w-full text-base text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*">
+                                <input type="file" class="mt-2 block w-full text-base text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/jpeg, image/png, image/gif">
                             </div>';
                         }
                         ?>

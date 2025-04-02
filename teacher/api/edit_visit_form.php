@@ -35,7 +35,7 @@
 
     <div class="w-full mt-6">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-6 rounded-lg">
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" id="editVisitForm" enctype="multipart/form-data">
                 <p class="text-base font-medium mb-4">กรอกข้อมูลในแบบฟอร์มให้ตรงตามความเป็นจริง</p>
 
                 <?php
@@ -91,12 +91,32 @@
                                 "id" => "image1", 
                                 "label" => "รูปภาพที่ 1", 
                                 "description" => "* ภาพตัวบ้านนักเรียน (ให้เห็นทั้งหลัง)", 
-                                "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture1']
+                                "picture" => $data['picture1']
                             ],
-                            ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => "* ภาพภายในบ้านนักเรียน", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture2']],
-                            ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture3']],
-                            ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "=> ภาพเพิ่มเติม", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture4']],
-                            ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "=> ภาพเพิ่มเติม", "picture" => 'https://std.phichai.ac.th/teacher/uploads/visithome' . $yearImg . '/' . $data['picture5']],
+                            [
+                                "id" => "image2", 
+                                "label" => "รูปภาพที่ 2", 
+                                "description" => "* ภาพภายในบ้านนักเรียน", 
+                                "picture" => $data['picture2']
+                            ],
+                            [
+                                "id" => "image3", 
+                                "label" => "รูปภาพที่ 3", 
+                                "description" => "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", 
+                                "picture" => $data['picture3']
+                            ],
+                            [
+                                "id" => "image4", 
+                                "label" => "รูปภาพที่ 4", 
+                                "description" => "=> ภาพเพิ่มเติม", 
+                                "picture" => $data['picture4']
+                            ],
+                            [
+                                "id" => "image5", 
+                                "label" => "รูปภาพที่ 5", 
+                                "description" => "=> ภาพเพิ่มเติม", 
+                                "picture" => $data['picture5']
+                            ],
                         ];
 
                         foreach ($images as $image) {
@@ -104,10 +124,10 @@
                             echo '
                             <div class="text-center">
                                 <label for="' . $image['id'] . '" class="block text-base font-medium">' . $image['label'] . ': <span class="text-red-500">' . $image['description'] . '</span></label>
-                                <input type="file" class="mt-2 block w-full text-base text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*">
+                                <input type="file" class="mt-2 block w-full text-base text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/jpeg, image/png, image/gif">
                                 <p class="mt-2">';
                             if ($imagePath) {
-                                echo '<img src="' . $imagePath . '" alt="Uploaded Image" class="w-[250] h-[100] object-cover rounded-lg">';
+                                echo '<img src="../teacher/uploads/visithome' . $data['Pee'] - 543 . '/' . $imagePath . '" alt="Uploaded Image" class="w-[250] h-[100] object-cover rounded-lg">';
                             } else {
                                 echo 'No image uploaded';
                             }

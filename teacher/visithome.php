@@ -64,7 +64,7 @@ require_once('header.php');
                         </h5>
                     </div>
                     <div class="text-left mt-4">
-                        <button type="button" id="addButton" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 mb-3">
+                        <button type="button" id="addButton" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 mb-3" onclick="window.location.href='visithome_report_class.php'">
                             ➕ รายงานสถิติข้อมูลการเยี่ยมบ้าน ➕
                         </button>
                         <button class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 mb-3" id="printButton" onclick="printPage()">
@@ -144,7 +144,7 @@ require_once('header.php');
                 </div>
                 <div class="flex justify-end">
                 <button type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-400" data-dismiss="modal">ปิด</button>
-                <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveChanges">บันทึกการเปลี่ยนแปลง</button>
+                <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveEditVisit">บันทึกการเปลี่ยนแปลง</button>
             </div>
             </div>
             
@@ -183,7 +183,7 @@ $(document).ready(function() {
 
   // Function to handle printing
   window.printPage = function() {
-      let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
+      let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info, .btn-warning, .btn-primary');
 
       // Hide the export to Excel button
       $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
@@ -322,20 +322,22 @@ window.editVisit = function(term, stuId) {
 
 // Handle save button click
 $('#saveEditVisit').on('click', function () {
-    const formData = $('#editVisitForm').serialize(); // Serialize form data
+    const formData = new FormData($('#editVisitForm')[0]); // Use FormData for file uploads
 
-    // Make an AJAX request to save the edited data
     $.ajax({
-        url: 'api/update_visit_data.php', // API สำหรับบันทึกข้อมูลการเยี่ยมบ้าน
+        url: 'api/update_visit_data.php', // API for saving visit data
         method: 'POST',
         data: formData,
+        processData: false, // Required for FormData
+        contentType: false, // Required for FormData
         success: function (response) {
-            if (response.success) {
+            const res = JSON.parse(response);
+            if (res.success) {
                 Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
                 $('#editVisitModal').modal('hide'); // Close the modal
                 loadTable(); // Reload the table
             } else {
-                Swal.fire('ข้อผิดพลาด', response.message, 'error');
+                Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
             }
         },
         error: function () {

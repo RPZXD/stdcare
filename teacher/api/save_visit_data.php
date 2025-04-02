@@ -47,13 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     for ($i = 1; $i <= 3; $i++) {
         $fileKey = "image$i";
         if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(['success' => false, 'message' => "ไฟล์ที่ $i ไม่สาเว้นรถเว้นว่างได้"]);
+            echo json_encode(['success' => false, 'message' => "ไฟล์ที่ $i ไม่สามารถเว้นว่างได้"]);
             exit;
         }
     }
 
     // Handle file uploads
-    $uploadDir = "../uploads/visithome/";
+    $uploadDir = "../uploads/visithome". $_POST['pee'] - 543 ."/";
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
     }
@@ -61,7 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     for ($i = 1; $i <= 5; $i++) {
         $fileKey = "image$i";
         if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
-            $fileName = uniqid() . "_" . basename($_FILES[$fileKey]['name']);
+            $fileExtension = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
+            $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . ".{$fileExtension}";
             $filePath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES[$fileKey]['tmp_name'], $filePath)) {

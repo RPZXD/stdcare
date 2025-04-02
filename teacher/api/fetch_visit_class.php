@@ -7,15 +7,6 @@ require_once "../../class/StudentVisit.php";
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
-// Check if the user is logged in
-// if (!isset($_SESSION['Teacher_login'])) {
-//     echo json_encode([
-//         "success" => false,
-//         "message" => "Unauthorized access. Please log in."
-//     ]);
-//     exit;
-// }
-
 // Get the class and room from the request
 $class = isset($_GET['class']) ? intval($_GET['class']) : null;
 $room = isset($_GET['room']) ? intval($_GET['room']) : null;
