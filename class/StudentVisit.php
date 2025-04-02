@@ -133,6 +133,41 @@ class StudentVisit {
         return $result ?: null;
     }
 
+    /**
+     * Get student details by ID.
+     * @param string $stuId The student ID.
+     * @return array|null The student details or null if not found.
+     */
+    public function getStudentById($stuId) {
+        $query = "
+            SELECT 
+                Stu_id,
+                Stu_pre,
+                Stu_name,
+                Stu_sur,
+                Stu_major,
+                Stu_room,
+                Stu_addr,
+                Stu_phone
+            FROM {$this->table_student}
+            WHERE Stu_id = :stuId
+            LIMIT 1
+        ";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters
+        $stmt->bindParam(':stuId', $stuId, PDO::PARAM_STR);
+
+        // Execute the query
+        $stmt->execute();
+
+        // Fetch the result
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
     public function updateVisitData($data) {
         $query = "
             UPDATE {$this->table_visithome}

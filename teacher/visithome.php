@@ -48,19 +48,11 @@ require_once('header.php');
     <?php require_once('wrapper.php');?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+  <div class="content justify-center items-center flex flex-col">
 
-  <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0"></h1>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
     <!-- /.content-header -->
-    <section class="content">
+
+    <section class="content mt-4 mb-4">
         <div class="container mx-auto px-4">
             <div class="col-md-12">
                 <div class="bg-white border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md">
@@ -156,6 +148,29 @@ require_once('header.php');
             </div>
             </div>
             
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding Visit -->
+<div class="modal fade" id="addVisitModal" tabindex="-1" aria-labelledby="addVisitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-lg text-bold" id="addVisitModalLabel">เพิ่มข้อมูลการเยี่ยมบ้าน</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addVisitContent">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-400" data-dismiss="modal">ปิด</button>
+                    <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveAddVisit">บันทึกข้อมูล</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -265,10 +280,10 @@ async function loadTable() {
                     item.FullName, // Full name
                     item.visit_status1 === 1
                         ? '<span class="text-success">✅</span> <button class="btn btn-warning btn-sm" onclick="editVisit(1, \'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn btn-primary btn-sm" onclick="saveVisit(1, \'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', // Visit status for Term 1
+                        : '<span class="text-danger">❌</span> <button class="btn btn-primary btn-sm" onclick="addVisit(1, \'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', // Visit status for Term 1
                     item.visit_status2 === 1
                         ? '<span class="text-success">✅</span> <button class="btn btn-warning btn-sm" onclick="editVisit(2, \'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn btn-primary btn-sm" onclick="saveVisit(2, \'' + item.Stu_id + '\')">i class="fas fa-save"></i> บันทึก</button>' // Visit status for Term 2
+                        : '<span class="text-danger">❌</span> <button class="btn btn-primary btn-sm" onclick="addVisit(2, \'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>' // Visit status for Term 2
                 ]);
             });
         }
@@ -318,6 +333,56 @@ $('#saveEditVisit').on('click', function () {
             if (response.success) {
                 Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
                 $('#editVisitModal').modal('hide'); // Close the modal
+                loadTable(); // Reload the table
+            } else {
+                Swal.fire('ข้อผิดพลาด', response.message, 'error');
+            }
+        },
+        error: function () {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+        }
+    });
+});
+
+// Define the addVisit function globally
+window.addVisit = function(term, stuId) {
+    var pee = <?= $pee ?>;
+
+    // Make an AJAX request to fetch the add visit form
+    $.ajax({
+        url: 'api/add_visit_form.php',
+        method: 'GET',
+        data: { term: term, pee: pee, stuId: stuId },
+        dataType: 'html',
+        success: function(response) {
+            console.log("Add Visit Form Response:", response); // Debugging log
+            if (response.trim() === '') {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+                return;
+            }
+            $('#addVisitContent').html(response);
+            $('#addVisitModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", error); // Debugging log
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้: ' + error, 'error');
+        }
+    });
+};
+
+// Handle save button click for adding visit
+$('#saveAddVisit').on('click', function () {
+    const formData = $('#addVisitForm').serialize(); // Serialize form data
+
+    // Make an AJAX request to save the new visit data
+    $.ajax({
+        url: 'api/save_visit_data.php', // API สำหรับบันทึกข้อมูลการเยี่ยมบ้านใหม่
+        method: 'POST',
+        data: formData,
+        success: function (response) {
+            if (response.success) {
+                Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                $('#addVisitModal').modal('hide'); // Close the modal
                 loadTable(); // Reload the table
             } else {
                 Swal.fire('ข้อผิดพลาด', response.message, 'error');

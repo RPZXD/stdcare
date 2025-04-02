@@ -35,15 +35,16 @@ if (isset($_SESSION['Teacher_login'])) {
 
 require_once('header.php');
 
-
 ?>
+
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+  <div class="content flex flex-col justify-center items-center w-full p-8">
+    <!-- Content Header (Page header) -->
 
   <div class="content-header">
       <div class="container-fluid">
@@ -56,8 +57,8 @@ require_once('header.php');
     </div>
     <!-- /.content-header -->
 
-    <section class="content py-8">
-      <div class="container mx-auto">
+    <section class="content">
+      <div class="container">
 
         <div class="col-md-12 mx-auto">
           <div class="bg-gray-100 border-l-4 border-gray-500 text-gray-700 p-6 rounded-lg shadow">
