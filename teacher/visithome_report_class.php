@@ -136,8 +136,8 @@ require_once('header.php');
                                     </button>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 500px; max-width: 100%;"></canvas>
+                            <div id="chartsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- กราฟแต่ละประเภทจะถูกเพิ่มที่นี่ -->
                             </div>
                         </div>
                     </div>  
@@ -296,7 +296,7 @@ async function loadTableByTerm(term) {
             initializeTablePagination();
             
             // Update the chart with the data
-            updateChart(dataArray);
+            updateChartsByItemType(dataArray);
         } else {
             // Display no data message
             $('#record_table').html(`
@@ -372,86 +372,104 @@ function initializeTablePagination() {
 }
 
 // Function to update the chart with data
-function updateChart(data) {
+function updateChartsByItemType(data) {
     if (!data || !Array.isArray(data) || data.length === 0) {
         console.log('No chart data available');
         return;
     }
-    
-    console.log('Updating chart with data:', data.length, 'entries');
-    
-    // Group data by item_type to better visualize in chart
-    let chartData = {};
+
+    console.log('Updating charts by item_type with data:', data.length, 'entries');
+
+    // Group data by item_type
+    const chartData = {};
     data.forEach(item => {
         if (!chartData[item.item_type]) {
             chartData[item.item_type] = [];
         }
         chartData[item.item_type].push(item);
     });
-    
-    // Get unique item_type values for chart sections
-    const itemTypes = Object.keys(chartData).filter(type => type !== '');
-    const labels = itemTypes.map(type => type.replace(/^\d+\.\s+/, '')); // Remove numbering
-    const values = itemTypes.map(type => {
-        return chartData[type].reduce((sum, item) => sum + parseInt(item.Stu_total), 0);
-    });
-    const bgColors = itemTypes.map((type, index) => {
-        const item = chartData[type][0];
-        return item.bg_color || getRandomColor();
-    });
-    
-    // Get the canvas element
-    const ctx = document.getElementById('donutChart').getContext('2d');
-    
-    // Destroy previous chart if exists
-    if (window.myDonutChart) {
-        window.myDonutChart.destroy();
-    }
-    
-    console.log('Creating chart with:', { labels, values, bgColors });
-    
-    // Create new chart
-    window.myDonutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: bgColors,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                            const percentage = Math.round((value / total) * 100);
-                            return `${label}: ${value} คน (${percentage}%)`;
+
+    // Clear existing charts
+    const chartsContainer = document.getElementById('chartsContainer');
+    chartsContainer.innerHTML = '';
+
+    // Tailwind CSS colors
+    const tailwindColors = [
+        'rgba(59, 130, 246, 0.7)', // Tailwind Blue-500
+        'rgba(34, 197, 94, 0.7)',  // Tailwind Green-500
+        'rgba(234, 88, 12, 0.7)',  // Tailwind Orange-500
+        'rgba(239, 68, 68, 0.7)',  // Tailwind Red-500
+        'rgba(139, 92, 246, 0.7)', // Tailwind Purple-500
+        'rgba(16, 185, 129, 0.7)', // Tailwind Emerald-500
+        'rgba(249, 115, 22, 0.7)', // Tailwind Amber-500
+        'rgba(236, 72, 153, 0.7)', // Tailwind Pink-500
+    ];
+
+    // Create a chart for each item_type
+    Object.keys(chartData).forEach(itemType => {
+        const items = chartData[itemType];
+        const labels = items.map(item => item.item_list);
+        const values = items.map(item => parseInt(item.Stu_total));
+        
+        // Generate colors for each segment using Tailwind CSS colors
+        const bgColors = items.map((_, index) => tailwindColors[index % tailwindColors.length]);
+
+        // Create a card container for the chart
+        const card = document.createElement('div');
+        card.className = 'bg-white border rounded-lg shadow-md p-4';
+
+        // Add a title for the chart
+        const title = document.createElement('h5');
+        title.className = 'text-center font-bold mb-4';
+        title.textContent = `กราฟสำหรับ ${itemType}`;
+        card.appendChild(title);
+
+        // Create a new canvas element for the chart
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart-${itemType}`;
+        canvas.style.minHeight = '100px';
+        canvas.style.maxHeight = '200px';
+        canvas.style.maxWidth = '100%';
+        card.appendChild(canvas);
+
+        // Append the card to the charts container
+        chartsContainer.appendChild(card);
+
+        // Create the chart
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: bgColors, // Use Tailwind CSS colors
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} คน (${percentage}%)`;
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
 }
-
-// Generate random color for chart segments
-function getRandomColor() {
-    const r = Math.floor(Math.random() * 255);
-    const g = Math.floor(Math.random() * 255);
-    const b = Math.floor(Math.random() * 255);
-    return `rgba(${r}, ${g}, ${b}, 0.7)`; 
-}
-
 // Function to load initial table data
 function loadTable() {
     // Default to term 1 if none selected

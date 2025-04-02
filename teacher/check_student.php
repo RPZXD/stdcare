@@ -54,21 +54,12 @@ require_once('header.php');
     <?php require_once('wrapper.php');?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+  <div class="content">
 
-  <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0"></h1>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
     <!-- /.content-header -->
 
-<section class="content">
-    <div class="container-fluid">
+    <section class="content mt-4 mb-4">
+        <div class="container mx-auto px-4">
 
         <div class="row my-3 mx-3">
             <div class="w-full">

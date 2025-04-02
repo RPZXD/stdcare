@@ -46,12 +46,7 @@ require_once('header.php');
 
 ?>
 
-<style>
-    .form-check-input {
-        transform: scale(2);
-        margin-right: 30px;
-    }
-</style>
+
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 

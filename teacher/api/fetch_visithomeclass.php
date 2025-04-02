@@ -27,6 +27,30 @@ try {
     $current_question = ""; // Store the current question
     $color_map = array(); // Map to store generated colors for each item type
     
+    // Define Tailwind CSS colors
+    $tailwindColors = [
+        '#EF4444', // red-500
+        '#3B82F6', // blue-500
+        '#10B981', // green-500
+        '#F59E0B', // yellow-500
+        '#8B5CF6', // purple-500
+        '#EC4899', // pink-500
+        '#6366F1', // indigo-500
+        '#06B6D4', // cyan-500
+        '#14B8A6', // teal-500
+        '#F97316', // orange-500
+        '#A855F7', // purple-600
+        '#2563EB', // blue-600
+        '#DC2626', // red-600
+        '#0D9488', // teal-600
+        '#0891B2', // cyan-600
+        '#4338CA', // indigo-700
+        '#0369A1', // sky-700
+        '#15803D'  // green-700
+    ];
+    $colorIndex = 0;
+    $totalColors = count($tailwindColors);
+    
     // Get all questions information for reference
     $allQuestions = array();
     for ($i = 1; $i <= 18; $i++) {
@@ -37,9 +61,10 @@ try {
     
     // Process each item type and include all possible answers
     foreach ($allQuestions as $i => $question) {
-        // Generate or retrieve background color for this item type
+        // Assign Tailwind CSS color to this item type
         if (!isset($color_map[$question])) {
-            $color_map[$question] = '#' . substr(md5(mt_rand()), 0, 6); // Random hex color
+            $color_map[$question] = $tailwindColors[$colorIndex % $totalColors];
+            $colorIndex++;
         }
         $bg_color = $color_map[$question];
         

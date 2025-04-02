@@ -46,12 +46,6 @@ require_once('header.php');
 
 ?>
 
-<style>
-    .form-check-input {
-        transform: scale(2);
-        margin-right: 30px;
-    }
-</style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
@@ -59,67 +53,60 @@ require_once('header.php');
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-12">
 
-  <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0"></h1>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
+          <!-- /.content-header -->
+
+          <section class="content mt-4 mb-5 pb-5">
+              <div class="container mx-auto px-4">
+                  <div class="col-md-12">
+                      <div class="bg-white border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md mb-5">
+                          <div class="text-center">
+                              <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
+                              <h5 class="text-center text-lg">รายงานกิจกรรมโฮมรูม<br>ระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
+                              <h5 class="text-center text-lg">ภาคเรียนที่ <?=$term?> ปีการศึกษา <?=$pee?></h5>
+
+                          <div class="text-left">
+
+                          <button type="button" id="addButton" class="btn bg-blue-500 text-white text-left mb-3 mt-2" data-toggle="modal" data-target="#addhomeModal">
+                          <i class="fas fa-plus"></i> เพิ่มกิจกรรมโฮมรูม <i class="fas fa-plus"></i></button>
+                          <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
+                          </div>
+                          <div class="row justify-content-center">
+                              <div class="col-md-12 mt-3 mb-3 mx-auto">
+                                  <div class="table-responsive mx-auto">
+                                  <table id="example2" class="display table-bordered table-hover" style="width:100%">
+                                  <thead class="thead-secondary bg-purple-400 text-white">
+                                      <tr >
+                                          <th  class=" text-center">#</th>
+                                          <th  class=" text-center">วันที่</th>
+                                          <th  class=" text-center">ประเภท</th>
+                                          <th  class=" text-center">หัวข้อเรื่อง</th>
+                                          <th  class=" text-center">รายละเอียดกิจกรรม</th>
+                                          <th  class=" text-center">ผลที่คาดว่าจะได้รับ</th>
+                                          <th  class=" text-center" style="width:18%;">จัดการ</th>
+                                          <!-- Add more table column headers as needed -->
+                                      </tr>
+                                  </thead>
+                                  <tbody> 
+                                  </tbody>
+                                  </table>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div><!-- /.container-fluid -->
+          </section>
+          <!-- /.content -->
+        </div>
+      </div>
     </div>
-    <!-- /.content-header -->
-    <!-- Modal -->
-
-  <section class="content">
-        <div class="container-fluid">
-            <div class="col-md-12">
-                <div class="callout callout-success text-center">
-                <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
-                        <h5 class="text-center text-lg">รายงานกิจกรรมโฮมรูม<br>ระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
-                        <h5 class="text-center text-lg">ภาคเรียนที่ <?=$term?> ปีการศึกษา <?=$pee?></h5>
-
-
-                    <div class="text-left">
-
-                    <button type="button" id="addButton" class="btn bg-blue-500 text-white text-left mb-3 mt-2" data-toggle="modal" data-target="#addhomeModal">
-                    <i class="fas fa-plus"></i> เพิ่มกิจกรรมโฮมรูม <i class="fas fa-plus"></i></button>
-                    <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
-                    </div>
-                    <div class="row justify-content-center">
-                        <div class="col-md-12 mt-3 mb-3 mx-auto">
-                            <div class="table-responsive mx-auto">
-                            <table id="example2" class="display table-bordered table-hover" style="width:100%">
-                            <thead class="thead-secondary bg-purple-400 text-white">
-                                <tr >
-                                    <th  class=" text-center">#</th>
-                                    <th  class=" text-center">วันที่</th>
-                                    <th  class=" text-center">ประเภท</th>
-                                    <th  class=" text-center">หัวข้อเรื่อง</th>
-                                    <th  class=" text-center">รายละเอียดกิจกรรม</th>
-                                    <th  class=" text-center">ผลที่คาดว่าจะได้รับ</th>
-                                    <th  class=" text-center" style="width:18%;">จัดการ</th>
-                                    <!-- Add more table column headers as needed -->
-                                </tr>
-                            </thead>
-                            <tbody> 
-                            </tbody>
-                            </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /.container-fluid -->
-    </section>
-
-  <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  
-  <?php require_once('../footer.php');?>
-
+    <?php require_once('../footer.php'); ?>
 </div>
 <!-- ./wrapper -->
 
@@ -392,16 +379,33 @@ require_once('header.php');
             }
 
             $('#example2').DataTable({
-                "pageLength": 50,
+                "pageLength": 10,
                 "paging": true,
                 "lengthChange": true,
                 "searching": true,
                 "ordering": true,
                 "info": true,
-                "autoWidth": false,
+                "autoWidth": true,
                 "responsive": true,
-                "scrollX": false,
+                "scrollX": true,
+                "scrollY": "400px",  // กำหนดความสูงของตารางไม่เกิน 400px
+                "scrollCollapse": true,  // เปิดใช้งานให้ตารางย่อขนาดตามข้อมูลที่มี
+                "language": {
+                    "lengthMenu": "แสดง _MENU_ แถว",
+                    "zeroRecords": "ไม่พบข้อมูล",
+                    "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+                    "infoEmpty": "ไม่มีข้อมูล",
+                    "infoFiltered": "(กรองจาก _MAX_ ทั้งหมด)",
+                    "search": "ค้นหา:",
+                    "paginate": {
+                        "first": "แรก",
+                        "last": "สุดท้าย",
+                        "next": "ถัดไป",
+                        "previous": "ก่อนหน้า"
+                    }
+                }
             });
+
           },
           error: function(xhr, status, error) {
             Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');

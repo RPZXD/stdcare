@@ -4,7 +4,7 @@
         <a href="https://www.phichai.ac.th" class="text-blue-500 font-bold">by ICT @Phichai school</a>. 
         พัฒนาระบบโดย นายทิวา เรืองศรี ทีมงาน ICT โรงเรียนพิชัย
     </strong>
-    <div class="float-right d-none d-sm-inline-block space-x-4">
+    <div class="float-right d-none d-sm-inline-block">
         <a href="https://www.phichai.ac.th" target="_blank" class="text-gray-700 dark:text-gray-300">
             <i class="fas fa-globe fa-lg"></i>
         </a>
@@ -16,3 +16,5 @@
         </a> -->
     </div>
 </footer>
+
+
