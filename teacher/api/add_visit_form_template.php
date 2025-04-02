@@ -110,8 +110,17 @@
                     <input type="hidden" name="stuId" value="<?= $data['Stu_id'] ?? ''; ?>">
                     <input type="hidden" name="term" value="<?= $term ?? ''; ?>">
                     <input type="hidden" name="pee" value="<?= $pee ?? ''; ?>">
+                    
+                    <!-- Add submit button -->
+                   
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Include SweetAlert for better alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Include the form submission script -->
+<script src="../js/visithome.js"></script>

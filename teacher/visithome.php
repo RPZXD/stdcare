@@ -167,9 +167,9 @@ require_once('header.php');
                     <!-- Dynamic content will be loaded here -->
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-400" data-dismiss="modal">ปิด</button>
-                    <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveAddVisit">บันทึกข้อมูล</button>
-                </div>
+                        <button type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-400" data-dismiss="modal">ปิด</button>
+                        <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 ml-3" id="saveAddVisit">บันทึกข้อมูล</button>
+                    </div>
             </div>
         </div>
     </div>
@@ -355,7 +355,7 @@ window.addVisit = function(term, stuId) {
         data: { term: term, pee: pee, stuId: stuId },
         dataType: 'html',
         success: function(response) {
-            console.log("Add Visit Form Response:", response); // Debugging log
+            // console.log("Add Visit Form Response:", response); // Debugging log
             if (response.trim() === '') {
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
                 return;
@@ -372,20 +372,22 @@ window.addVisit = function(term, stuId) {
 
 // Handle save button click for adding visit
 $('#saveAddVisit').on('click', function () {
-    const formData = $('#addVisitForm').serialize(); // Serialize form data
+    const formData = new FormData($('#addVisitForm')[0]); // Use FormData for file uploads
 
-    // Make an AJAX request to save the new visit data
     $.ajax({
-        url: 'api/save_visit_data.php', // API สำหรับบันทึกข้อมูลการเยี่ยมบ้านใหม่
+        url: 'api/save_visit_data.php',
         method: 'POST',
         data: formData,
+        processData: false, // Required for FormData
+        contentType: false, // Required for FormData
         success: function (response) {
-            if (response.success) {
-                Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-                $('#addVisitModal').modal('hide'); // Close the modal
-                loadTable(); // Reload the table
+            const res = JSON.parse(response);
+            if (res.success) {
+                Swal.fire('สำเร็จ', res.message, 'success');
+                $('#addVisitModal').modal('hide');
+                loadTable();
             } else {
-                Swal.fire('ข้อผิดพลาด', response.message, 'error');
+                Swal.fire('ข้อผิดพลาด', res.message, 'error');
             }
         },
         error: function () {

@@ -215,5 +215,57 @@ class StudentVisit {
         // Execute the query
         return $stmt->execute();
     }
+
+    /**
+     * Save visit data for a student.
+     * @param array $data The visit data to save.
+     * @return bool True if the data was saved successfully, false otherwise.
+     */
+    public function saveVisitData($data) {
+        $query = "
+            INSERT INTO {$this->table_visithome} (
+                Stu_id, Term, Pee, vh1, vh2, vh3, vh4, vh5, vh6, vh7, vh8, vh9, vh10,
+                vh11, vh12, vh13, vh14, vh15, vh16, vh17, vh18, vh20, picture1, picture2,
+                picture3, picture4, picture5
+            ) VALUES (
+                :stuId, :term, :pee, :vh1, :vh2, :vh3, :vh4, :vh5, :vh6, :vh7, :vh8, :vh9, :vh10,
+                :vh11, :vh12, :vh13, :vh14, :vh15, :vh16, :vh17, :vh18, :vh20, :picture1, :picture2,
+                :picture3, :picture4, :picture5
+            )
+        ";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters
+        $stmt->bindParam(':stuId', $data['stuId'], PDO::PARAM_STR);
+        $stmt->bindParam(':term', $data['term'], PDO::PARAM_INT);
+        $stmt->bindParam(':pee', $data['pee'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh1', $data['vh1'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh2', $data['vh2'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh3', $data['vh3'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh4', $data['vh4'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh5', $data['vh5'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh6', $data['vh6'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh7', $data['vh7'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh8', $data['vh8'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh9', $data['vh9'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh10', $data['vh10'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh11', $data['vh11'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh12', $data['vh12'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh13', $data['vh13'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh14', $data['vh14'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh15', $data['vh15'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh16', $data['vh16'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh17', $data['vh17'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh18', $data['vh18'], PDO::PARAM_INT);
+        $stmt->bindParam(':vh20', $data['vh20'], PDO::PARAM_STR);
+        $stmt->bindParam(':picture1', $data['picture1'], PDO::PARAM_STR);
+        $stmt->bindParam(':picture2', $data['picture2'], PDO::PARAM_STR);
+        $stmt->bindParam(':picture3', $data['picture3'], PDO::PARAM_STR);
+        $stmt->bindParam(':picture4', $data['picture4'], PDO::PARAM_STR);
+        $stmt->bindParam(':picture5', $data['picture5'], PDO::PARAM_STR);
+
+        // Execute the query
+        return $stmt->execute();
+    }
 }
-?>
