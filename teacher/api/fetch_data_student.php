@@ -16,7 +16,7 @@ $room = isset($_GET['room']) ? $_GET['room'] : '';
 $response = array('success' => false, 'data' => array());
 
 if (!empty($class) && !empty($room)) {
-    $query = "SELECT Stu_id, Stu_no, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_phone, Stu_picture, Par_phone, Stu_citizenid, Stu_nick, Par_name, Stu_sex
+    $query = "SELECT Stu_id, Stu_no, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_phone, Stu_picture, Par_phone, Stu_nick, Par_name, Stu_sex
               FROM student
               WHERE Stu_major = :class AND Stu_room = :room AND Stu_status = 1
               ORDER BY Stu_no ASC";
