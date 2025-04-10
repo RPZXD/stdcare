@@ -106,90 +106,117 @@ require_once('header.php');
 <script src="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"></script>
 
 <script>
+    let cachedStudentInfo = {};
+    const cacheDuration = 30000; // Cache duration in milliseconds
+
     async function fetchStudentInfo(device = '') {
+        const now = Date.now();
+        if (cachedStudentInfo[device] && (now - cachedStudentInfo[device].timestamp < cacheDuration)) {
+            updateStudentDetails(cachedStudentInfo[device].data);
+            return;
+        }
+
         try {
-            const response = await fetch(`api/get_realtime_attendance.php?device=${device}`); // Replace with your API endpoint
+            const response = await fetch(`api/get_realtime_attendance.php?device=${device}`);
             const data = await response.json();
-            
-            // Update StudentProfile
-            document.getElementById('StudentProfile').src = `https://student.phichai.ac.th/photo/${data.Stu_picture}`;
-            
-            // Update StudentDetails
-            document.getElementById('StudentDetails').innerHTML = `
-                ชื่อ: ${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}<br>
-                รหัสประจำตัว: ${data.Stu_id}<br>
-                ห้อง: ม.${data.Stu_major}/${data.Stu_room}<br>
-                สถานะ: ${data.Study_status} <br>
-                วันเวลา: ${new Date(data.create_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}
-            `;
+            cachedStudentInfo[device] = { data, timestamp: now }; // Cache the result
+            updateStudentDetails(data);
         } catch (error) {
             console.error('Error fetching student info:', error);
         }
     }
 
-    // Fetch student info every 5 seconds
+    async function fetchAllData(device = '') {
+        try {
+            const response = await fetch(`api/get_combined_data.php?device=${device}`);
+            const data = await response.json();
+            updateStudentDetails(data.studentInfo);
+            updateTable(data.attendanceRecords);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    function getStatusWithEmoji(status) {
+        switch (status) {
+            case '1':
+                return 'มาเรียน ✅';
+            case '2':
+                return 'ขาดเรียน ❌';
+            case '3':
+                return 'มาสาย ⏰';
+            case '4':
+                return 'ลาป่วย 🤒';
+            case '5':
+                return 'ลากิจ 📝';
+            case '6':
+                return 'เข้าร่วมกิจกรรม 🎉';
+            default:
+                return 'สถานะไม่ทราบ';
+        }
+    }
+
+    function updateStudentDetails(data) {
+        document.getElementById('StudentProfile').src = `https://student.phichai.ac.th/photo/${data.Stu_picture}`;
+        document.getElementById('StudentDetails').innerHTML = `
+            ชื่อ: ${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}<br>
+            รหัสประจำตัว: ${data.Stu_id}<br>
+            ห้อง: ม.${data.Stu_major}/${data.Stu_room}<br>
+            สถานะ: ${data.Study_status} <br>
+            วันเวลา: ${new Date(data.create_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}
+        `;
+
+        const table = $('#recordTable').DataTable();
+        table.clear().rows.add(data.attendanceRecords).draw();
+    }
+
+    // Reduce request frequency to every 5 seconds
     setInterval(() => {
         const selectedDevice = document.getElementById('deviceSelect').value;
         fetchStudentInfo(selectedDevice);
-    }, 1000);
+    }, 5000);
 
     $(document).ready(function() {
         const table = $('#recordTable').DataTable({
             "pageLength": 10,
-            "order": [[4, "desc"]],
+            "serverSide": true,
             "ajax": {
                 "url": "api/get_realtime_attendance_records.php",
-                "dataSrc": ""
+                "type": "POST",
+                "data": function(d) {
+                    d.device = $('#deviceSelect').val();
+                }
             },
             "columns": [
                 { 
-                    "data": null,
+                    "data": null, 
                     "render": function (data, type, row, meta) {
-                        return meta.row + 1;
-                    }
+                        return meta.row + 1; // Generate index dynamically
+                    },
+                    "className": "text-center"
                 },
-                { "data": "Stu_id" },
+                { "data": "Stu_id", "className": "text-center" },
+                { "data": "full_name", "className": "text-center" },
                 { 
-                    "data": null,
+                    "data": null, 
                     "render": function (data, type, row) {
-                        return `${row.Stu_pre} ${row.Stu_name} ${row.Stu_sur}`;
-                    }
+                        return `ม.${row.Stu_major}/${row.Stu_room}`; // Combine Stu_major and Stu_room
+                    },
+                    "className": "text-center"
                 },
-                { 
-                    "data": null,
-                    "render": function (data, type, row) {
-                        return `ม.${row.Stu_major}/${row.Stu_room}`;
-                    }
-                },
-                { 
-                    "data": "create_at",
-                    "render": function (data, type, row) {
-                        const date = new Date(data);
-                        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
-                        return date.toLocaleDateString('th-TH', options);
-                    }
-                }
+                { "data": "create_at", "className": "text-center" }
             ]
         });
 
-        // Fetch device names and populate the dropdown
-        async function fetchDeviceNames() {
-            try {
-                const response = await fetch('api/get_device_names.php'); // Replace with your API endpoint
-                const devices = await response.json();
-                const deviceSelect = document.getElementById('deviceSelect');
-                devices.forEach(device => {
-                    const option = document.createElement('option');
-                    option.value = device.device;
-                    option.textContent = device.device;
-                    deviceSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error fetching device names:', error);
-            }
-        }
-
-        fetchDeviceNames();
+        // Populate the dropdown with predefined devices
+        const devices = ["raspberry_pi_01", "raspberry_pi_02", "raspberry_pi_03", "raspberry_pi_04", "raspberry_pi_05", "raspberry_pi_06", "raspberry_pi_07", "raspberry_pi_08", "raspberry_pi_09", "raspberry_pi_10"];
+        const deviceSelect = document.getElementById('deviceSelect');
+        devices.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device;
+            option.textContent = device;
+            deviceSelect.appendChild(option);
+        });
 
         // Filter student info based on selected device
         $('#deviceSelect').on('change', function() {
@@ -197,9 +224,10 @@ require_once('header.php');
             fetchStudentInfo(selectedDevice);
         });
 
+        // Reload table periodically
         setInterval(function() {
-            table.ajax.reload(null, false); // user paging is not reset on reload
-        }, 1000);
+            table.ajax.reload(null, false);
+        }, 10000); // Reload every 10 seconds
     });
 </script>
 

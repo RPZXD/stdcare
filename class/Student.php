@@ -378,14 +378,12 @@ class Student {
     }
 
     public function getTodayAttendanceRecords() {
-        $query = "SELECT sa.id, sa.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, sa.create_at
+        $query = "SELECT sa.id, sa.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, sa.create_at,
+                         CONCAT(s.Stu_pre, s.Stu_name, '  ', s.Stu_sur) AS full_name
                   FROM student_attendance AS sa
                   INNER JOIN student AS s ON sa.Stu_id = s.Stu_id
-                  WHERE DATE(sa.create_at) = CURDATE()";
-        if ($device) {
-            $query .= " AND sa.device = :device";
-        }
-        $query .= " ORDER BY sa.create_at DESC";
+                  WHERE DATE(sa.create_at) = CURDATE()
+                  ORDER BY sa.create_at DESC";
         $statement = $this->conn->prepare($query);
         $statement->execute();
         return $statement->fetchAll(PDO::FETCH_ASSOC);

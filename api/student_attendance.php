@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 
 try {
     // Initialize database connection
-    $connectDB = new Database_User();
+    $connectDB = new Database("phichaia_student");
     $db = $connectDB->getConnection();
 
     // Initialize UserLogin class
@@ -21,18 +21,21 @@ try {
 
     // Check if the request method is POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Get the raw POST data
+        $input = json_decode(file_get_contents('php://input'), true);
+
         // Validate input
-        if (!isset($_POST['Stu_id']) || empty($_POST['Stu_id'])) {
+        if (!isset($input['Stu_id']) || empty($input['Stu_id'])) {
             echo json_encode(['error' => 'Student ID is required']);
             exit;
         }
 
-        $stu_id = intval($_POST['Stu_id']); // Ensure it's an integer
+        $stu_id = intval($input['Stu_id']); // Ensure it's an integer
         $study_date = date('Y-m-d');
         $study_status = '1';
         $study_term = $term;
         $study_pee = $pee;
-        $device_id = $_POST['device_id'] ?? null;
+        $device_id = $input['device_id'] ?? null;
 
         // Prepare the SQL query
         $query = "INSERT INTO student_attendance (Stu_id, Study_date, Study_status, Study_term, Study_pee, device)

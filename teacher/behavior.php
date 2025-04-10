@@ -105,7 +105,7 @@ require_once('header.php');
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-center">
+                <div class="flex justify-center my-4">
                     <div class="w-full max-w-3xl p-6 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-md">
                         <h4 class="text-xl font-bold text-red-600 flex items-center">
                             <span class="text-2xl">⚠️</span>

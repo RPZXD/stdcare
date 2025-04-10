@@ -5,7 +5,7 @@ require_once '../class/Student.php';
 require_once '../class/Utils.php';
 
 // Initialize database connection
-$database = new Database_User();
+$database = new Database("phichaia_student");
 $db = $database->getConnection();
 
 // Initialize Student class
