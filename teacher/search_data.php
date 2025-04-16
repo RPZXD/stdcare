@@ -2,10 +2,10 @@
 session_start();
 
 
-include_once("../config/Database.php");
-include_once("../class/UserLogin.php");
-include_once("../class/Student.php");
-include_once("../class/Utils.php");
+require_once("../config/Database.php");
+require_once("../class/UserLogin.php");
+require_once("../class/Student.php");
+require_once("../class/Utils.php");
 
 // Initialize database connection
 $connectDB = new Database("phichaia_student");
@@ -14,6 +14,7 @@ $db = $connectDB->getConnection();
 // Initialize UserLogin class
 $user = new UserLogin($db);
 $student = new Student($db);
+
 
 // Fetch terms and pee
 $term = $user->getTerm();
@@ -61,6 +62,7 @@ require_once('header.php');
             <h5 class="text-center text-lg text-gray-600 mt-2">
                 (พิมพ์ <span class="font-semibold">เลขประจำตัว</span>, <span class="font-semibold">ชื่อ</span>, หรือ <span class="font-semibold">นามสกุล</span> เพื่อค้นหา)
             </h5>
+           
             <div class="flex justify-center mt-8">
                 <div class="w-full max-w-2xl">
                     <!-- Form ค้นหา -->
@@ -119,6 +121,8 @@ $(document).ready(function() {
                 if (response.length > 0) {
                     response.forEach(item => {
                         let card = '';
+                        let linkprofile = '<?=htmlspecialchars($setting->getImgProfile())?>';
+                        let linkprofileStudent = '<?=htmlspecialchars($setting->getImgProfileStudent())?>';
 
                         if (type === 'teacher') {
                             // แสดงข้อมูลครู
@@ -130,7 +134,7 @@ $(document).ready(function() {
                                         </div>
                                         <div class="p-6">
                                             <div class="text-center">
-                                                <img class="rounded-full mx-auto h-80 w-auto" src="uploads/phototeach/${item.Teach_photo}" alt="${item.Teach_name}">
+                                                <img class="rounded-full mx-auto h-80 w-auto" src="${linkprofile}${item.Teach_photo}" alt="${item.Teach_name}">
                                             </div>
                                             <h3 class="text-center text-xl font-semibold mt-4">${item.Teach_name}</h3>
                                             <p class="text-center text-gray-600">${item.Teach_major}</p>
@@ -148,8 +152,8 @@ $(document).ready(function() {
                         } else if (type === 'student') {
                             // แสดงข้อมูลนักเรียน
                             card = `
-                                <div class="card my-4 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105">
-                                    <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/${item.Stu_picture}" alt="Student Picture" style="height: 350px; object-fit: cover;">
+                                <div class="card my-2 mx-2 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105">
+                                    <img class="card-img-top rounded-lg mb-4" src="${linkprofileStudent}${item.Stu_picture}" alt="Student Picture" style="height: 350px; object-fit: cover;">
                                     <div class="card-body space-y-3">
                                         <h5 class="card-title text-base font-bold text-gray-800">${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}</h5><br>
                                         <p class="card-text text-gray-600 text-left">รหัสนักเรียน: <span class="font-semibold text-blue-600">${item.Stu_id}</span></p>

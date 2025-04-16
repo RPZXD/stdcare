@@ -38,7 +38,7 @@ class Setting {
     }
 
     public function getImgProfileStudent() {
-        return $this->getImgProfileStudent;
+        return $this->imgProfileStudent;
     }
 
     public function getImgAwards() {

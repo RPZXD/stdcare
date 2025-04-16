@@ -12,7 +12,7 @@ $search = $_POST['search'] ?? '';
 $data = [];
 
 if ($type === 'teacher') {
-    $query = "SELECT * FROM teacher WHERE Teach_name LIKE :search OR Teach_id LIKE :search LIMIT 10";
+    $query = "SELECT * FROM teacher WHERE ( Teach_name LIKE :search OR Teach_id LIKE :search ) AND Teach_status = 1 LIMIT 10";
     $stmt = $db->prepare($query);
     $stmt->bindValue(':search', '%' . $search . '%');
     $stmt->execute();
@@ -20,10 +20,11 @@ if ($type === 'teacher') {
 } elseif ($type === 'student') {
     // ปรับคำสั่ง SQL ให้ค้นหาชื่อเต็ม
     $query = "SELECT * FROM student 
-              WHERE CONCAT(Stu_name, ' ', Stu_sur) LIKE :search 
+              WHERE ( CONCAT(Stu_name, ' ', Stu_sur) LIKE :search 
               OR Stu_name LIKE :search 
               OR Stu_sur LIKE :search 
-              OR Stu_id LIKE :search 
+              OR Stu_id LIKE :search )
+              AND Stu_status = 1
               LIMIT 10";
     $stmt = $db->prepare($query);
     $stmt->bindValue(':search', '%' . $search . '%');

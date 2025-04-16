@@ -177,13 +177,14 @@ async function loadTable() {
         var classValue = <?= $class ?>;
         var roomValue = <?= $room ?>;
         var peeValue = <?= $pee ?>;
+        var termValue = <?= $term ?>;
 
         // Make an AJAX request to the API
         const response = await $.ajax({
             url: 'api/fetch_sdq_classroom.php',
             method: 'GET',
             dataType: 'json',
-            data: { class: classValue, room: roomValue, pee: peeValue }
+            data: { class: classValue, room: roomValue, pee: peeValue, term: termValue }
         });
 
         // Check if the API response is successful
@@ -231,7 +232,7 @@ async function loadTable() {
                     item.full_name, // Full name
                     item.self_ishave === 1
                         ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQstd(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + item.Stu_class + '\', \'' + item.Stu_room + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
+                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
                     item.par_ishave === 1
                         ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
                         : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
@@ -255,19 +256,19 @@ async function loadTable() {
 }
 
 // Function to handle addSDQstd
-window.addSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Pee) {
+window.addSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
     $.ajax({
         url: 'template_form/form_sdq_self.php',
         method: 'GET',
-        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee },
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
         success: function(response) {
             // Create and display the modal
             const modalHtml = `
                 <div class="modal fade" id="sdqModal" tabindex="-1" role="dialog" aria-labelledby="sdqModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-dialog modal-xl" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="sdqModalLabel">บันทึกข้อมูล SDQ</h5>
+                                <h5 class="modal-title" id="sdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับนักเรียนประเมินตนเอง)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -289,21 +290,45 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
             // Handle save button click
             $('#saveSDQ').on('click', function() {
                 const formData = $('#sdqForm').serialize(); // Assuming the form has id="sdqForm"
+
+                // แสดงหน้าต่างโหลด
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading(); // แสดงวงกลมโหลด
+                    }
+                });
+
                 $.ajax({
                     url: 'api/save_sdq_self.php',
                     method: 'POST',
                     data: formData,
                     success: function(saveResponse) {
-                        Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-                        $('#sdqModal').modal('hide');
-                        $('#sdqModal').remove();
-                        loadTable(); // Reload the table
+                        Swal.fire({
+                            title: 'สำเร็จ',
+                            text: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            $('#sdqModal').modal('hide');
+                            $('#sdqModal').remove();
+                            window.location.reload(); // รีโหลดหน้า
+                        });
                     },
                     error: function() {
-                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้',
+                            icon: 'error'
+                        });
                     }
                 });
             });
+
+
 
             // Remove modal from DOM after hiding
             $('#sdqModal').on('hidden.bs.modal', function() {
