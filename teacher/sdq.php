@@ -231,7 +231,7 @@ async function loadTable() {
                     item.full_name, // Full name
                     item.self_ishave === 1
                         ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQstd(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
+                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + item.Stu_class + '\', \'' + item.Stu_room + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
                     item.par_ishave === 1
                         ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
                         : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
@@ -255,11 +255,11 @@ async function loadTable() {
 }
 
 // Function to handle addSDQstd
-window.addSDQstd = function(studentId) {
+window.addSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Pee) {
     $.ajax({
-        url: 'form/form_sdq_self.php',
+        url: 'template_form/form_sdq_self.php',
         method: 'GET',
-        data: { student_id: studentId },
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee },
         success: function(response) {
             // Create and display the modal
             const modalHtml = `
