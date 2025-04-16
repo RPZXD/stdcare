@@ -29,19 +29,27 @@ class UserLogin {
     }
 
     public function verifyPassword() {
-        $query = "SELECT Teach_id, Teach_password FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT Teach_id, password FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
-    
+
         if ($stmt->rowCount() == 1) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $password = $this->password;
-            $Confirmpassword = $row['Teach_password'];
-            
-            if ($password == $Confirmpassword) {
+            $storedPassword = $row['password'];
+
+            if (empty($storedPassword)) {
+                // Redirect to password change page if password field is empty
                 $_SESSION['user'] = $row['Teach_id'];
-                return  $_SESSION['user']; // Return user ID
+                
+                header("Location: change_password.php");
+                exit();
+            }
+
+            if (password_verify($password, $storedPassword)) {
+                $_SESSION['user'] = $row['Teach_id'];
+                return $_SESSION['user']; // Return user ID
             } else {
                 return false;
             }

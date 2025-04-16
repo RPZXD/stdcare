@@ -94,6 +94,7 @@ redirectUser(); // Ensure this is called before any HTML output
                             ];
                             
                             if (in_array($userRole, $allowedUserRoles[$role])) {
+                                $_SESSION['user'] = $username; // Ensure $_SESSION['user'] is set
                                 $_SESSION[$role . '_login'] = $_SESSION['user'];
 
                                 $sw2 = new SweetAlert2(
