@@ -254,9 +254,67 @@ async function loadTable() {
     }
 }
 
+// Function to handle addSDQstd
+window.addSDQstd = function(studentId) {
+    $.ajax({
+        url: 'form/form_sdq_self.php',
+        method: 'GET',
+        data: { student_id: studentId },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="sdqModal" tabindex="-1" role="dialog" aria-labelledby="sdqModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="sdqModalLabel">บันทึกข้อมูล SDQ</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="btn btn-primary" id="saveSDQ">บันทึก</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#sdqModal').modal('show');
 
+            // Handle save button click
+            $('#saveSDQ').on('click', function() {
+                const formData = $('#sdqForm').serialize(); // Assuming the form has id="sdqForm"
+                $.ajax({
+                    url: 'api/save_sdq_self.php',
+                    method: 'POST',
+                    data: formData,
+                    success: function(saveResponse) {
+                        Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                        $('#sdqModal').modal('hide');
+                        $('#sdqModal').remove();
+                        loadTable(); // Reload the table
+                    },
+                    error: function() {
+                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                    }
+                });
+            });
 
-
+            // Remove modal from DOM after hiding
+            $('#sdqModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
 
 // Call the loadTable function when the page is loaded
 loadTable();
