@@ -1,13 +1,24 @@
 <?php
+require_once '../../class/SDQ.php';
+require_once '../../config/Database.php'; // Assuming this file initializes $db
+
 $student_id = $_GET['student_id'] ?? '';
-$student_name = $_GET['student_name'] ?? '';
-$student_no = $_GET['student_no'] ?? '';
-$student_class = $_GET['student_class'] ?? '';
-$student_room = $_GET['student_room'] ?? '';
 $pee = $_GET['pee'] ?? '';
 $term = $_GET['term'] ?? '';
-// รายการคำถาม SDQ 25 ข้อ (ตัวอย่างจริง ใช้ทั้งหมด)
-// รูปแบบ: [id, คำถาม, หมวด]
+
+
+// Initialize SDQ class
+// Initialize database connection
+$connectDB = new Database("phichaia_student");
+$db = $connectDB->getConnection();
+$sdq = new SDQ($db);
+
+// Fetch existing data
+$existingData = $sdq->getSDQTeachData($student_id, $pee, $term);
+$answers = $existingData['answers'] ?? [];
+$memo = $existingData['memo'] ?? '';
+
+// ...existing code defining $questions and $choices...
 $questions = [
     ['q1', 'ฉันพยายามจะทำตัวดีกับคนอื่น ฉันใส่ใจความรู้สึกคนอื่น', 'จุดแข็ง 🤝'],
     ['q2', 'ฉันไม่อยู่นิ่ง ฉันนั่งนานๆ ไม่ได้', 'สมาธิ/ไฮเปอร์ ⚡'],
@@ -44,18 +55,17 @@ $choices = [
 ];
 ?>
 
-<form id="sdqForm" class="space-y-6">
+<form id="sdqEditForm" class="space-y-6">
     <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
 
-
     <div class="bg-emerald-500 border rounded-lg shadow-sm p-4 mb-4">
-        <h2 class="text-lg font-semibold text-white">🎓 ข้อมูลนักเรียน</h2>
-        <p class="text-white">ชื่อ: <?= htmlspecialchars($student_name) ?>  เลขที่: <?= htmlspecialchars($student_no) ?>   ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?></p>
+        <h2 class="text-lg font-semibold text-white">🎓 แก้ไขข้อมูลนักเรียน</h2>
+        <p class="text-white">ชื่อ: <?= htmlspecialchars($_GET['student_name'] ?? '') ?>  เลขที่: <?= htmlspecialchars($_GET['student_no'] ?? '') ?>   ชั้น: ม.<?= htmlspecialchars($_GET['student_class'] ?? '') ?>/<?= htmlspecialchars($_GET['student_room'] ?? '') ?></p>
         <p class="text-white">บันทึกข้อมูลของ ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?></p>
     </div>
 
     <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md">
-        📋 <strong>คำชี้แจง:</strong> กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา
+        📋 <strong>คำชี้แจง:</strong> กรุณาแก้ไขคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา
     </div>
 
     <table class="w-full border-collapse border border-gray-300">
@@ -77,7 +87,7 @@ $choices = [
                         <div class="flex flex-col sm:flex-row gap-3">
                             <?php foreach ($choices as $value => $label): ?>
                                 <label class="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="<?= $id ?>" value="<?= $value ?>" required class="form-radio text-blue-600">
+                                    <input type="radio" name="<?= $id ?>" value="<?= $value ?>" <?= isset($answers[$id]) && $answers[$id] == $value ? 'checked' : '' ?> required class="form-radio text-blue-600">
                                     <span><?= $label ?></span>
                                 </label>
                             <?php endforeach; ?>
@@ -90,12 +100,11 @@ $choices = [
 
     <div class="p-4 bg-white border rounded-lg shadow-sm hover:shadow-md transition">
         <p class="mb-2 font-semibold text-gray-800">
-            เธอมีอย่างอื่นที่จะบอกอีกหรือไม่? <span class="text-sm text-gray-500">[เพิ่มเติม]</span>
+            มีอย่างอื่นที่จะบอกอีกหรือไม่? <span class="text-sm text-gray-500">[เพิ่มเติม]</span>
         </p>
-        <textarea name="memo" rows="4" class="w-full border rounded-md p-2" placeholder="กรุณาเขียนข้อความเพิ่มเติมที่นี่..."></textarea>
+        <textarea name="memo" rows="4" class="w-full border rounded-md p-2" placeholder="กรุณาเขียนข้อความเพิ่มเติมที่นี่..."><?= htmlspecialchars($memo) ?></textarea>
     </div>
     <input type="text" name="pee" value="<?= htmlspecialchars($pee) ?>" class="hidden">
     <input type="text" name="term" value="<?= htmlspecialchars($term) ?>" class="hidden">
     <input type="text" name="student_id" value="<?= htmlspecialchars($student_id) ?>" class="hidden">
 </form>
-

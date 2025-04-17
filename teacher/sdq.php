@@ -97,7 +97,9 @@ require_once('header.php');
                                                 <th class="text-center">เลขประจำตัว</th>
                                                 <th class="text-center">ชื่อ-นามสกุล</th>
                                                 <th class="text-center">นักเรียน</th>
+                                                <th class="text-center">แปลผล</th>
                                                 <th class="text-center">ครู</th>
+                                                <th class="text-center">แปลผล</th>
                                                 <th class="text-center">ผู้ปกครอง</th>
                                                 <th class="text-center">แปลผล</th>
                                             </tr>
@@ -173,13 +175,11 @@ function convertToThaiDate(dateString) {
 
 async function loadTable() {
     try {
-        // Get class, room, and pee values from PHP variables
-        var classValue = <?= $class ?>;
-        var roomValue = <?= $room ?>;
-        var peeValue = <?= $pee ?>;
-        var termValue = <?= $term ?>;
+        const classValue = <?= $class ?>;
+        const roomValue = <?= $room ?>;
+        const peeValue = <?= $pee ?>;
+        const termValue = <?= $term ?>;
 
-        // Make an AJAX request to the API
         const response = await $.ajax({
             url: 'api/fetch_sdq_classroom.php',
             method: 'GET',
@@ -187,73 +187,83 @@ async function loadTable() {
             data: { class: classValue, room: roomValue, pee: peeValue, term: termValue }
         });
 
-        // Check if the API response is successful
         if (!response.success) {
             Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
             return;
         }
 
-        // Initialize or destroy the DataTable instance
         const table = $('#record_table').DataTable({
-            destroy: true, // Destroy the previous instance of DataTable
+            destroy: true,
             pageLength: 50,
             lengthMenu: [10, 25, 50, 100],
-            order: [[0, 'asc']], // Sort by the first column (index 0)
+            order: [[0, 'asc']],
             columnDefs: [
-                { targets: 0, className: 'text-center' }, // Center align first column
-                { targets: 1, className: 'text-center' }, // Center align second column
-                { targets: 2, className: 'text-left text-semibold' }, // Left align third column
-                { targets: 3, className: 'text-center' }, // Center align fourth column
-                { targets: 4, className: 'text-center' } // Center align fifth column
+                { targets: '_all', className: 'text-center' },
+                { targets: 2, className: 'text-left text-semibold' }
             ],
             autoWidth: false,
-            info: true,
-            lengthChange: true,
-            ordering: true,
             responsive: true,
-            paging: true,
             searching: true
         });
 
-        // Clear old data without destroying DataTable
         table.clear();
 
-        // Check if there is data in the response
+        function createActionButton(isHave, type, item) {
+            const color = isHave ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-500 hover:bg-blue-600';
+            const icon = isHave ? 'fa-edit' : 'fa-save';
+            const text = isHave ? 'แก้ไข' : 'บันทึก';
+            const statusIcon = isHave ? '✅' : '❌';
+            const method = (isHave ? 'edit' : 'add') + 'SDQ' + type;
+
+            return `
+                <span class="${isHave ? 'text-success' : 'text-danger'}">${statusIcon}</span>
+                <button class="btn ${color} text-white px-4 py-2 rounded-lg shadow-md btn-sm"
+                    onclick="${method}('${item.Stu_id}', '${item.full_name}', '${item.Stu_no}', '${classValue}', '${roomValue}', '${termValue}', '${peeValue}')">
+                    <i class="fas ${icon}"></i> ${text}
+                </button>`;
+        }
+
+        function createResultButton(type, isHave, item) {
+            if (!isHave) {
+                return `<span class="text-danger">❌ ยังไม่ประเมิน</span>`;
+            }
+
+            const method = `resultSDQ${type}`;
+            return `
+                <button class="btn bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600 btn-sm"
+                    onclick="${method}('${item.Stu_id}', '${item.full_name}', '${item.Stu_no}', '${<?=$class?>}', '${<?=$room?>}', '${<?=$term?>}', '${<?=$pee?>}')">
+                    💻 แปลผล
+                </button>`;
+        }
+
+
         if (response.data.length === 0) {
             table.row.add([
-                '<td colspan="5" class="text-center">ไม่พบข้อมูล</td>'
+                '-', '-', '-', '-', '<td colspan="5" class="text-center">ไม่พบข้อมูล</td>'
             ]);
         } else {
-            // Populate the table with data
             response.data.forEach((item, index) => {
                 table.row.add([
-                    item.Stu_no, // Row number
-                    item.Stu_id, // Student ID
-                    item.full_name, // Full name
-                    item.self_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQstd(\''+ item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
-                    item.teach_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQteach(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQteach(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
-                    item.par_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQpar(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQpar(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
-                    item.self_ishave === 1 && item.par_ishave === 1 && item.teach_ishave === 1
-                        ? '<button class="btn bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600 btn-sm" onclick="resultSDQ(\'' + item.Stu_id + '\')">💻 แปลผล</button>'
-                        : '<span class="text-danger">❌ โปรดประเมินให้ครบ</span>'
-
+                    item.Stu_no,
+                    item.Stu_id,
+                    item.full_name,
+                    createActionButton(item.self_ishave === 1, 'std', item),
+                    createResultButton('std', item.self_ishave === 1, item),
+                    createActionButton(item.teach_ishave === 1, 'teach', item),
+                    createResultButton('teach', item.teach_ishave === 1, item),
+                    createActionButton(item.par_ishave === 1, 'par', item),
+                    createResultButton('par', item.par_ishave === 1, item)
                 ]);
             });
         }
 
-        // Re-draw the table after data is updated
         table.draw();
     } catch (error) {
         Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
         console.error(error);
     }
 }
+
 
 // Function to handle addSDQstd
 window.addSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
@@ -289,15 +299,14 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
 
             // Handle save button click
             $('#saveSDQ').on('click', function() {
-                const formData = $('#sdqForm').serialize(); // Assuming the form has id="sdqForm"
+                const formData = $('#sdqForm').serialize();
 
-                // แสดงหน้าต่างโหลด
                 Swal.fire({
                     title: 'กำลังบันทึกข้อมูล...',
                     text: 'กรุณารอสักครู่',
                     allowOutsideClick: false,
                     didOpen: () => {
-                        Swal.showLoading(); // แสดงวงกลมโหลด
+                        Swal.showLoading();
                     }
                 });
 
@@ -305,18 +314,26 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
                     url: 'api/save_sdq_self.php',
                     method: 'POST',
                     data: formData,
-                    success: function(saveResponse) {
-                        Swal.fire({
-                            title: 'สำเร็จ',
-                            text: 'บันทึกข้อมูลเรียบร้อยแล้ว',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            $('#sdqModal').modal('hide');
-                            $('#sdqModal').remove();
-                            window.location.reload(); // รีโหลดหน้า
-                        });
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'สำเร็จ',
+                                text: response.message,
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#sdqModal').modal('hide');
+                                $('#sdqModal').remove();
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาด',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
                     },
                     error: function() {
                         Swal.fire({
@@ -341,7 +358,6 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
     });
 };
 
-
 // Function to handle editSDQstd
 window.editSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
     $.ajax({
@@ -355,7 +371,7 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
                     <div class="modal-dialog modal-xl" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editSdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ)</h5>
+                                <h5 class="modal-title" id="editSdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับนักเรียนประเมินตนเอง)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -425,11 +441,10 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
         }
     });
 };
-
 // Function to handle addSDQteach
 window.addSDQteach = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
     $.ajax({
-        url: 'template_form/form_sdq_self.php',
+        url: 'template_form/form_sdq_teach.php',
         method: 'GET',
         data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
         success: function(response) {
@@ -439,7 +454,7 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
                     <div class="modal-dialog modal-xl" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="sdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับนักเรียนประเมินตนเอง)</h5>
+                                <h5 class="modal-title" id="sdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับครูเป็นผู้ประเมิน)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -460,34 +475,41 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
 
             // Handle save button click
             $('#saveSDQ').on('click', function() {
-                const formData = $('#sdqForm').serialize(); // Assuming the form has id="sdqForm"
+                const formData = $('#sdqForm').serialize();
 
-                // แสดงหน้าต่างโหลด
                 Swal.fire({
                     title: 'กำลังบันทึกข้อมูล...',
                     text: 'กรุณารอสักครู่',
                     allowOutsideClick: false,
                     didOpen: () => {
-                        Swal.showLoading(); // แสดงวงกลมโหลด
+                        Swal.showLoading();
                     }
                 });
 
                 $.ajax({
-                    url: 'api/save_sdq_self.php',
+                    url: 'api/save_sdq_teach.php',
                     method: 'POST',
                     data: formData,
-                    success: function(saveResponse) {
-                        Swal.fire({
-                            title: 'สำเร็จ',
-                            text: 'บันทึกข้อมูลเรียบร้อยแล้ว',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            $('#sdqModal').modal('hide');
-                            $('#sdqModal').remove();
-                            window.location.reload(); // รีโหลดหน้า
-                        });
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'สำเร็จ',
+                                text: response.message,
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#sdqModal').modal('hide');
+                                $('#sdqModal').remove();
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาด',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
                     },
                     error: function() {
                         Swal.fire({
@@ -511,8 +533,388 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
         }
     });
 };
+// Function to handle editSDQteach
+window.editSDQteach = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_teach_edit.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="editSdqModal" tabindex="-1" role="dialog" aria-labelledby="editSdqModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editSdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับครูเป็นผู้ประเมิน)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#editSdqModal').modal('show');
+
+            // Handle update button click
+            $('#updateSDQ').on('click', function() {
+                const formData = $('#sdqEditForm').serialize(); // Assuming the form has id="sdqEditForm"
+
+                // Show loading alert
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: 'api/update_sdq_teach.php',
+                    method: 'POST',
+                    data: formData,
+                    success: function(updateResponse) {
+                        Swal.fire({
+                            title: 'สำเร็จ',
+                            text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            $('#editSdqModal').modal('hide');
+                            $('#editSdqModal').remove();
+                            window.location.reload(); // Reload the page
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+            // Remove modal from DOM after hiding
+            $('#editSdqModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+// Function to handle addSDQpar
+window.addSDQpar = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_par.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="sdqModal" tabindex="-1" role="dialog" aria-labelledby="sdqModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="sdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับผู้ปกครองเป็นผู้ประเมิน)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="btn btn-primary" id="saveSDQ">บันทึก</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#sdqModal').modal('show');
+
+            // Handle save button click
+            $('#saveSDQ').on('click', function() {
+                const formData = $('#sdqForm').serialize();
+
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: 'api/save_sdq_par.php',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'สำเร็จ',
+                                text: response.message,
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#sdqModal').modal('hide');
+                                $('#sdqModal').remove();
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาด',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
 
 
+
+            // Remove modal from DOM after hiding
+            $('#sdqModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+// Function to handle editSDQpar
+window.editSDQpar = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_par_edit.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="editSdqModal" tabindex="-1" role="dialog" aria-labelledby="editSdqModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editSdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับผู้ปกครองเป็นผู้ประเมิน)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#editSdqModal').modal('show');
+
+            // Handle update button click
+            $('#updateSDQ').on('click', function() {
+                const formData = $('#sdqEditForm').serialize(); // Assuming the form has id="sdqEditForm"
+
+                // Show loading alert
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: 'api/update_sdq_par.php',
+                    method: 'POST',
+                    data: formData,
+                    success: function(updateResponse) {
+                        Swal.fire({
+                            title: 'สำเร็จ',
+                            text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            $('#editSdqModal').modal('hide');
+                            $('#editSdqModal').remove();
+                            window.location.reload(); // Reload the page
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+            // Remove modal from DOM after hiding
+            $('#editSdqModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+// Function to handle resultSDQstd
+window.resultSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_result_self.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับนักเรียนประเมินตนเอง)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#resultModal').modal('show');
+
+
+            // Remove modal from DOM after hiding
+            $('#resultModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+window.resultSDQteach = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_result_teach.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับครูเป็นผู้ประเมิน)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#resultModal').modal('show');
+
+
+            // Remove modal from DOM after hiding
+            $('#resultModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+window.resultSDQpar = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_result_par.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับผู้ปกครองเป็นผู้ประเมิน)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#resultModal').modal('show');
+
+
+            // Remove modal from DOM after hiding
+            $('#resultModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
 // Call the loadTable function when the page is loaded
 loadTable();
 });

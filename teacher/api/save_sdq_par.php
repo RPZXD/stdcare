@@ -42,7 +42,7 @@ try {
     }
 
     // Save SDQ data
-    $sdq->saveSDQSelf($student_id, $answers, $memo, $pee, $term);
+    $sdq->saveSDQpar($student_id, $answers, $memo, $pee, $term);
 
     echo json_encode(['success' => true, 'message' => 'บันทึกข้อมูลสำเร็จ']);
 } catch (Exception $e) {

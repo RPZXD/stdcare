@@ -103,6 +103,100 @@ class SDQ {
             throw $e;
         }
     }
+    public function saveSDQteach($student_id, $answers, $memo, $pee, $term) {
+        $this->db->beginTransaction();
+
+        try {
+            // Delete existing data for the student
+            $deleteQuery = "DELETE FROM sdq_teach WHERE Stu_id = :student_id AND Pee = :pee AND Term = :term";
+            $deleteStmt = $this->db->prepare($deleteQuery);
+            $deleteStmt->execute([
+                ':student_id' => $student_id,
+                ':pee' => $pee,
+                ':term' => $term
+            ]);
+
+            // Prepare insert query
+            $insertQuery = "
+                INSERT INTO sdq_teach (
+                    Stu_id, Sdq1, Sdq2, Sdq3, Sdq4, Sdq5, Sdq6, Sdq7, Sdq8, Sdq9, Sdq10,
+                    Sdq11, Sdq12, Sdq13, Sdq14, Sdq15, Sdq16, Sdq17, Sdq18, Sdq19, Sdq20,
+                    Sdq21, Sdq22, Sdq23, Sdq24, Sdq25, Memo, Term, Pee
+                ) VALUES (
+                    :student_id, :Sdq1, :Sdq2, :Sdq3, :Sdq4, :Sdq5, :Sdq6, :Sdq7, :Sdq8, :Sdq9, :Sdq10,
+                    :Sdq11, :Sdq12, :Sdq13, :Sdq14, :Sdq15, :Sdq16, :Sdq17, :Sdq18, :Sdq19, :Sdq20,
+                    :Sdq21, :Sdq22, :Sdq23, :Sdq24, :Sdq25, :memo, :term, :pee
+                )
+            ";
+            $insertStmt = $this->db->prepare($insertQuery);
+
+            // Map answers to query parameters
+            $params = [
+                ':student_id' => $student_id,
+                ':memo' => $memo,
+                ':term' => $term,
+                ':pee' => $pee
+            ];
+            for ($i = 1; $i <= 25; $i++) {
+                $params[":Sdq$i"] = $answers["q$i"] ?? null;
+            }
+
+            // Execute insert query
+            $insertStmt->execute($params);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+    public function saveSDQpar($student_id, $answers, $memo, $pee, $term) {
+        $this->db->beginTransaction();
+
+        try {
+            // Delete existing data for the student
+            $deleteQuery = "DELETE FROM sdq_par WHERE Stu_id = :student_id AND Pee = :pee AND Term = :term";
+            $deleteStmt = $this->db->prepare($deleteQuery);
+            $deleteStmt->execute([
+                ':student_id' => $student_id,
+                ':pee' => $pee,
+                ':term' => $term
+            ]);
+
+            // Prepare insert query
+            $insertQuery = "
+                INSERT INTO sdq_par (
+                    Stu_id, Sdq1, Sdq2, Sdq3, Sdq4, Sdq5, Sdq6, Sdq7, Sdq8, Sdq9, Sdq10,
+                    Sdq11, Sdq12, Sdq13, Sdq14, Sdq15, Sdq16, Sdq17, Sdq18, Sdq19, Sdq20,
+                    Sdq21, Sdq22, Sdq23, Sdq24, Sdq25, Memo, Term, Pee
+                ) VALUES (
+                    :student_id, :Sdq1, :Sdq2, :Sdq3, :Sdq4, :Sdq5, :Sdq6, :Sdq7, :Sdq8, :Sdq9, :Sdq10,
+                    :Sdq11, :Sdq12, :Sdq13, :Sdq14, :Sdq15, :Sdq16, :Sdq17, :Sdq18, :Sdq19, :Sdq20,
+                    :Sdq21, :Sdq22, :Sdq23, :Sdq24, :Sdq25, :memo, :term, :pee
+                )
+            ";
+            $insertStmt = $this->db->prepare($insertQuery);
+
+            // Map answers to query parameters
+            $params = [
+                ':student_id' => $student_id,
+                ':memo' => $memo,
+                ':term' => $term,
+                ':pee' => $pee
+            ];
+            for ($i = 1; $i <= 25; $i++) {
+                $params[":Sdq$i"] = $answers["q$i"] ?? null;
+            }
+
+            // Execute insert query
+            $insertStmt->execute($params);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
 
     public function getSDQSelfData($student_id, $pee, $term) {
         $query = "
@@ -138,5 +232,74 @@ class SDQ {
 
         return ['answers' => [], 'memo' => ''];
     }
+    public function getSDQTeachData($student_id, $pee, $term) {
+        $query = "
+            SELECT
+                Sdq1, Sdq2, Sdq3, Sdq4, Sdq5, Sdq6, Sdq7, Sdq8, Sdq9, Sdq10,
+                Sdq11, Sdq12, Sdq13, Sdq14, Sdq15, Sdq16, Sdq17, Sdq18, Sdq19, Sdq20,
+                Sdq21, Sdq22, Sdq23, Sdq24, Sdq25, Memo
+            FROM
+                sdq_teach
+            WHERE
+                Stu_id = :student_id AND Pee = :pee AND Term = :term
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            ':student_id' => $student_id,
+            ':pee' => $pee,
+            ':term' => $term
+        ]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $answers = [];
+            for ($i = 1; $i <= 25; $i++) {
+                $answers["q$i"] = $result["Sdq$i"] ?? null;
+            }
+            return [
+                'answers' => $answers,
+                'memo' => $result['Memo'] ?? ''
+            ];
+        }
+
+        return ['answers' => [], 'memo' => ''];
+    }
+    public function getSDQParData($student_id, $pee, $term) {
+        $query = "
+            SELECT
+                Sdq1, Sdq2, Sdq3, Sdq4, Sdq5, Sdq6, Sdq7, Sdq8, Sdq9, Sdq10,
+                Sdq11, Sdq12, Sdq13, Sdq14, Sdq15, Sdq16, Sdq17, Sdq18, Sdq19, Sdq20,
+                Sdq21, Sdq22, Sdq23, Sdq24, Sdq25, Memo
+            FROM
+                sdq_par
+            WHERE
+                Stu_id = :student_id AND Pee = :pee AND Term = :term
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            ':student_id' => $student_id,
+            ':pee' => $pee,
+            ':term' => $term
+        ]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $answers = [];
+            for ($i = 1; $i <= 25; $i++) {
+                $answers["q$i"] = $result["Sdq$i"] ?? null;
+            }
+            return [
+                'answers' => $answers,
+                'memo' => $result['Memo'] ?? ''
+            ];
+        }
+
+        return ['answers' => [], 'memo' => ''];
+    }
+
 }
 ?>
