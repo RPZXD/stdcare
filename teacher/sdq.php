@@ -231,14 +231,14 @@ async function loadTable() {
                     item.Stu_id, // Student ID
                     item.full_name, // Full name
                     item.self_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQstd(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
+                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQstd(\''+ item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
                         : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQstd(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
-                    item.par_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQpar(\'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
                     item.teach_ishave === 1
-                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQteach(\'' + item.Stu_id + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
-                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQteach(\'' + item.Stu_id + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
+                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="edit้SDQteach(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
+                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQteach(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
+                    item.par_ishave === 1
+                        ? '<span class="text-success">✅</span> <button class="btn bg-amber-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 btn-sm" onclick="editSDQpar(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-edit"></i> แก้ไข</button>'
+                        : '<span class="text-danger">❌</span> <button class="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 btn-sm" onclick="addSDQpar(\'' + item.Stu_id + '\', \'' + item.full_name + '\', \'' + item.Stu_no + '\', \'' + <?=$class ?> + '\', \'' + <?=$room ?> + '\', \'' + <?=$term ?> + '\', \'' + <?=$pee ?> + '\')"><i class="fas fa-save"></i> บันทึก</button>', 
                     item.self_ishave === 1 && item.par_ishave === 1 && item.teach_ishave === 1
                         ? '<button class="btn bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600 btn-sm" onclick="resultSDQ(\'' + item.Stu_id + '\')">💻 แปลผล</button>'
                         : '<span class="text-danger">❌ โปรดประเมินให้ครบ</span>'
@@ -332,6 +332,90 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
 
             // Remove modal from DOM after hiding
             $('#sdqModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        },
+        error: function() {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error');
+        }
+    });
+};
+
+// Function to handle editSDQstd
+window.editSDQstd = function(studentId, studentName, studentNo, studentClass, studentRoom, Term, Pee) {
+    $.ajax({
+        url: 'template_form/form_sdq_self_edit.php',
+        method: 'GET',
+        data: { student_id: studentId, student_name: studentName, student_no: studentNo, student_class: studentClass, student_room: studentRoom, pee: Pee, term: Term },
+        success: function(response) {
+            // Create and display the modal
+            const modalHtml = `
+                <div class="modal fade" id="editSdqModal" tabindex="-1" role="dialog" aria-labelledby="editSdqModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editSdqModalLabel">แบบฟอร์มแก้ไขข้อมูลแบบประเมินตนเอง (SDQ)</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${response}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            $('#editSdqModal').modal('show');
+
+            // Handle update button click
+            $('#updateSDQ').on('click', function() {
+                const formData = $('#sdqEditForm').serialize(); // Assuming the form has id="sdqEditForm"
+
+                // Show loading alert
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: 'api/update_sdq_self.php',
+                    method: 'POST',
+                    data: formData,
+                    success: function(updateResponse) {
+                        Swal.fire({
+                            title: 'สำเร็จ',
+                            text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            $('#editSdqModal').modal('hide');
+                            $('#editSdqModal').remove();
+                            window.location.reload(); // Reload the page
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+            // Remove modal from DOM after hiding
+            $('#editSdqModal').on('hidden.bs.modal', function() {
                 $(this).remove();
             });
         },

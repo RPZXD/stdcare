@@ -232,8 +232,14 @@ async function loadStudentData() {
                             <p class="card-text text-gray-600 text-left">รหัสนักเรียน: <span class="font-semibold text-blue-600">${item.Stu_id}</span></p>
                             <p class="card-text text-gray-600 text-left">เลขที่: ${item.Stu_no}</p>
                             <p class="card-text text-gray-600 text-left">ชื่อเล่น: <span class="italic text-purple-500">${item.Stu_nick}</span></p>
-                            <p class="card-text text-gray-600 text-left">เบอร์โทร: ${item.Stu_phone}</p>
-                            <p class="card-text text-gray-600 text-left">เบอร์ผู้ปกครอง: ${item.Par_phone}</p>
+                            <p class="card-text text-gray-600 text-left">
+                                เบอร์โทร: 
+                                <a href="tel:${item.Stu_phone}" class="text-blue-500 hover:underline">${item.Stu_phone}</a>
+                            </p>
+                            <p class="card-text text-gray-600 text-left">
+                                เบอร์ผู้ปกครอง: 
+                                <a href="tel:${item.Par_phone}" class="text-blue-500 hover:underline">${item.Par_phone}</a>
+                            </p>
                             <div class="flex space-x-2">
                                 <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 btn-view" data-id="${item.Stu_id}">👀 ดู</button>
                                 <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 btn-edit" data-id="${item.Stu_id}">✏️ แก้ไข</button>

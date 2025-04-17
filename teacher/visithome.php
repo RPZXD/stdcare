@@ -42,20 +42,31 @@ $currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
 require_once('header.php');
 
 ?>
+
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content justify-center items-center flex flex-col">
+  <div class="content-wrapper">
 
+  <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0"></h1>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
     <!-- /.content-header -->
+    <!-- Modal -->
 
-    <section class="content mt-4 mb-4">
-        <div class="container mx-auto px-4">
+    <section class="content">
+        <div class="container-fluid">
             <div class="col-md-12">
-                <div class="bg-white border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md">
+                <div class="callout callout-success text-center">
                     <div class="text-center">
                         <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="mx-auto w-16 h-16 mb-3">
                         <h5 class="text-lg font-bold">
@@ -88,8 +99,8 @@ require_once('header.php');
                         </table>
                     </div>
                 </div>
-                <div class="mt-6">
-                    <div class="bg-red-100 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
+                <div class="my-4 callout callout-danger text-center bg-red-100 p-6 rounded-lg shadow-md">
+
                         <h4 class="text-xl font-bold text-red-600 flex items-center">
                             ⚠️ <span class="ml-3">คำแนะนำ</span>
                         </h4>
@@ -116,15 +127,19 @@ require_once('header.php');
                                 📖 <span class="ml-3">โดยกรอกข้อมูลของนักเรียนเฉพาะรายบุคคลเท่านั้น</span>
                             </p>
                         </div>
-                    </div>
+                    
                 </div>
             </div>
-        </div>
+            </div>
+        </div><!-- /.container-fluid -->
     </section>
-    <!-- /.content -->
+
+  <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-    <?php require_once('../footer.php'); ?>
+  
+  <?php require_once('../footer.php');?>
+
 </div>
 <!-- ./wrapper -->
 

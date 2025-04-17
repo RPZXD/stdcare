@@ -48,73 +48,82 @@ require_once('header.php');
 
 
 ?>
+
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content">
+  <div class="content-wrapper">
 
+  <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0"></h1>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
     <!-- /.content-header -->
+    <!-- Modal -->
 
-    <section class="content mt-4 mb-4">
-        <div class="container mx-auto px-4">
-
-        <div class="row my-3 mx-3">
-            <div class="w-full">
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center">
+    <section class="content">
+        <div class="container-fluid">
+            <div class="col-md-12">
+                <div class="callout callout-success text-center">
+                <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
                     <h4 class="text-lg font-semibold">การเช็คชื่อของนักเรียนชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?>
                     <br>บันทึกเวลาเรียนประจำวันที่ <span id="textdate"></span></h4>
-                </div>
-            </div>
-        </div>
+                
 
-        <div class="row justify-content-center">
-            <div class="col-md-12 col-sm-12 col-lg-8">
-            <div class="flex flex-wrap mt-4">
-            <div class="w-full md:w-1/1 px-2 mb-4">
-                <div class="callout">
-                <form id="attendanceForm" method="POST" enctype="multipart/form-data">
-                      
-                      <!-- เพิ่ม input date ที่นี่ -->
-                        <div class="form-group">
-                            <label for="attendance_date">เลือกวันที่:</label>
-                            <input type="date" id="attendance_date" name="attendance_date" class="form-control text-center" value="<?= date('Y-m-d'); ?>" required>
-                        </div>
-                      
-                        <div class="table-responsive">
-                            <table id="example2" class="display responsive nowrap" style="width:100%">
-                                <thead class="bg-dark text-light">
-                                    <tr>
-                                        <th class=" text-center" style="width:5%">#</th>
-                                        <th class=" text-center" style="width:10%">เลขประจำตัว</th>
-                                        <th class=" text-center">ชื่อ-นามสกุล</th>
-                                        <th class=" text-center" style="width:20%">เช็ค</th>
-                                        <!-- Add more table column headers as needed -->
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-
-                        <br>
-                    <div class="form-group">
-                        <input type="hidden" name="class" value="<?=$class?>">
-                        <input type="hidden" name="room" value="<?=$room?>">
-                        <input type="hidden" name="term" value="<?=$term?>">
-                        <input type="hidden" name="pee" value="<?=$pee?>">
-                        <input type="hidden" name="teacher_id" value="<?=$teacher_id?>">
-                        <input type="hidden" name="teacher_name" value="<?=$userData['Teach_name']?>">
+                  <form id="attendanceForm" method="POST" enctype="multipart/form-data">
                         
-                        <input type="submit" id="btn_submit" class="btn-lg btn-success" style="width: 100%;" value="บันทึกข้อมูล">
-                    </div>
-              </form>
-              </div>
-            </div>
-            </div>
-            </div>
-        </div>
+                        <!-- เพิ่ม input date ที่นี่ -->
+                          <div class="my-3">
+                              <label for="attendance_date" class="block text-base font-medium">เลือกวันที่:</label>
+                              <input 
+                                  type="date" 
+                                  id="attendance_date" 
+                                  name="attendance_date" 
+                                  class="mt-1 w-1:3 rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-left text-base" 
+                                  value="<?= date('Y-m-d'); ?>" 
+                                  required
+                              >
+                          </div>
+                        
+                      <div class="row justify-content-center">
+                        <div class="col-md-12 mt-3 mb-3 mx-auto">
+                            <div class="table-responsive mx-auto">
+                            <table id="example2" class="display table-bordered table-hover" style="width:100%">
+                            <thead class="thead-secondary bg-indigo-500 text-white">
+                                      <tr>
+                                          <th class=" text-center">เลขที่</th>
+                                          <th class=" text-center">เลขประจำตัว</th>
+                                          <th class=" text-center">ชื่อ-นามสกุล</th>
+                                          <th class=" text-center">เช็ค</th>
+                                          <!-- Add more table column headers as needed -->
+                                      </tr>
+                                  </thead>
+                                  <tbody></tbody>
+                              </table>
+                          </div>
+
+                          <br>
+                      <div class="form-group">
+                          <input type="hidden" name="class" value="<?=$class?>">
+                          <input type="hidden" name="room" value="<?=$room?>">
+                          <input type="hidden" name="term" value="<?=$term?>">
+                          <input type="hidden" name="pee" value="<?=$pee?>">
+                          <input type="hidden" name="teacher_id" value="<?=$teacher_id?>">
+                          <input type="hidden" name="teacher_name" value="<?=$userData['Teach_name']?>">
+                          
+                          <input type="submit" id="btn_submit" class="btn-lg btn-success" style="width: 100%;" value="บันทึกข้อมูล">
+                      </div> <!-- Fixed closing tag for div -->
+                </form> <!-- Fixed closing tag for form -->
+            </div> <!-- Added closing div for col-md-12 -->
+        </div> <!-- Added closing div for row -->
 
     </div><!-- /.container-fluid -->
 </section>
@@ -181,11 +190,11 @@ require_once('header.php');
             } else {
                 $.each(data.data, function(index, item) {
                     const row = '<tr class="text-center">' +
-                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + item.Stu_no + '</td>' +
                         '<td><input type="hidden" name="stu_id[]" value="' + item.Stu_id + '" />' + item.Stu_id + '</td>' +
-                        '<td>' + (item.Stu_pre + item.Stu_name + ' ' + item.Stu_sur) + '</td>' +
+                        '<td class="text-left">' + (item.Stu_pre + item.Stu_name + ' ' + item.Stu_sur) + '</td>' +
                         '<td>' +
-                            '<select name="check[]" class="form-control text-center ">' +
+                            '<select name="check[]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base text-center">' +
                                 '<option value="1"' + (item.Study_status == 1 ? ' selected' : '') + ' class="text-success">มาเรียน</option>' +
                                 '<option value="2"' + (item.Study_status == 2 ? ' selected' : '') + ' class="text-danger">ขาดเรียน</option>' +
                                 '<option value="3"' + (item.Study_status == 3 ? ' selected' : '') + ' class="text-warning">มาสาย</option>' +
@@ -210,6 +219,20 @@ require_once('header.php');
                 "autoWidth": false,
                 "responsive": true, // ปิด responsive mode
                 "scrollX": false, // เลื่อนแนวนอนได้
+                "language": {
+                    "lengthMenu": "แสดง _MENU_ แถว",
+                    "zeroRecords": "ไม่พบข้อมูล",
+                    "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ แถว",
+                    "infoEmpty": "แสดง 0 ถึง 0 จากทั้งหมด 0 แถว",
+                    "infoFiltered": "(กรองจากทั้งหมด _MAX_ แถว)",
+                    "search": "ค้นหา:",
+                    "paginate": {
+                        "first": "หน้าแรก",
+                        "last": "หน้าสุดท้าย",
+                        "next": "ถัดไป",
+                        "previous": "ก่อนหน้า"
+                    }
+                }
             });
 
           },

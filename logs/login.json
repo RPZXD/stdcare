@@ -1,0 +1,67 @@
+[
+    {
+        "user_id": "1052",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-17T07:14:15+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 401,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_attempt",
+        "session_id": "dajf22slb9eeh4emm1dtjgn2ta",
+        "message": "Incorrect password"
+    },
+    {
+        "user_id": "1052",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-17T07:14:21+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "dajf22slb9eeh4emm1dtjgn2ta",
+        "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-17T08:38:28+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 401,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_attempt",
+        "session_id": "dajf22slb9eeh4emm1dtjgn2ta",
+        "message": "Incorrect password"
+    },
+    {
+        "user_id": "1052",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-17T08:38:35+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "dajf22slb9eeh4emm1dtjgn2ta",
+        "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "ip_address": "192.168.10.1",
+        "user_agent": "Mozilla\/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/18.3.1 Mobile\/15E148 Safari\/604.1",
+        "access_time": "2025-04-17T09:08:19+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/192.168.10.81\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "trfathv7un8dadrdhcull1uafl",
+        "message": "Login successful"
+    }
+]
