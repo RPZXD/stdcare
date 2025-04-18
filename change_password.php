@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="row flex items-center justify-center bg-gray-100">
                 <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-                    <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">กรุณาเปลี่ยนรหัสผ่าน <?= $_SESSION['user'] ?></h2>
+                    <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">กรุณาเปลี่ยนรหัสผ่าน </h2>
                     <form method="POST" action="change_password.php" class="space-y-4">
                         <div>
                             <label for="new_password" class="block text-gray-600 mb-1">รหัสผ่านใหม่:</label>
