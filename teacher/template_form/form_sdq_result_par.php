@@ -73,7 +73,7 @@ $impact_score = array_sum([
 ]);
 ?>
 
-
+<div>
 
 <div class="flex flex-wrap -mx-4 mb-4">
     <!-- Left Column -->
@@ -85,13 +85,6 @@ $impact_score = array_sum([
                     ชื่อ: <?= htmlspecialchars($student_name) ?>  
                     เลขที่: <?= htmlspecialchars($student_no) ?>  
                     ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?>
-                </p>
-                <p class="text-white">
-                    บันทึกข้อมูลของ
-                </p>
-                <p class="text-white">
-                    ภาคเรียนที่ <?= htmlspecialchars($term) ?> 
-                    ปีการศึกษา <?= htmlspecialchars($pee) ?>
                 </p>
             </div>
         </div>

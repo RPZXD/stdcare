@@ -86,13 +86,6 @@ $impact_score = array_sum([
                     เลขที่: <?= htmlspecialchars($student_no) ?>  
                     ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?>
                 </p>
-                <p class="text-white">
-                    บันทึกข้อมูลของ
-                </p>
-                <p class="text-white">
-                    ภาคเรียนที่ <?= htmlspecialchars($term) ?> 
-                    ปีการศึกษา <?= htmlspecialchars($pee) ?>
-                </p>
             </div>
         </div>
     </div>
