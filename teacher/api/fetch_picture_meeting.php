@@ -31,7 +31,7 @@ try {
         foreach (['picture1', 'picture2', 'picture3', 'picture4'] as $pictureColumn) {
             if (!empty($row[$pictureColumn])) {
                 $pictures[] = [
-                    'url' => 'https://std.phichai.ac.th/teacher/uploads/picmeeting'.$pee.'/'.$row[$pictureColumn],
+                    'url' => '../teacher/uploads/picmeeting'.$term.$pee.'/'.$row[$pictureColumn],
                     'alt' => "$pictureColumn"
                 ];
             }

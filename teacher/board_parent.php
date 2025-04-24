@@ -73,7 +73,7 @@ require_once('header.php');
     <!-- /.content-header -->
     <!-- Modal -->
 
-  <section class="content">
+    <section class="content">
         <div class="container-fluid">
             <div class="card col-md-12">
                 <div class="card-body text-center">
@@ -91,7 +91,7 @@ require_once('header.php');
                     <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
                     </div>
                     <div class="row justify-content-center">
-                        <div class="col-md-12 mt-3 mb-3 mx-auto">
+                    <div class="col-md-12 mt-3 mb-3 mx-auto">
                             <div class="table-responsive mx-auto">
                             <table id="record_table" class="display table-bordered table-hover" style="width:100%">
                             <thead class="thead-secondary bg-emerald-500 text-white">
@@ -412,25 +412,57 @@ $(document).ready(function() {
     });
 
     // Function to handle printing
-    window.printPage = function() {
-        let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
+        // Function to handle printing
+        window.printPage = function () {
+        const printContents = document.querySelector('.card').cloneNode(true);
+        const printWindow = window.open('', '', 'width=900,height=700');
 
-        // Hide the last column (จัดการ) during printing
-        $('#record_table th:last-child, #record_table td:last-child').hide();
+        // สร้างส่วนลายเซ็นต์ครูที่ปรึกษา
+        let teacherSignatures = '<div class="flex justify-end mt-8"><div class="text-center">';
+        teachers.forEach(teacher => {
+            teacherSignatures += '<p class="text-lg font-bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ลงชื่อ...............................................ครูที่ปรึกษา</p>';
+            teacherSignatures += `<p class="text-lg">(${teacher.Teach_name})</p>`;
+            teacherSignatures += '<br>';
+        });
+        teacherSignatures += '</div></div>';
 
-        // Hide the export to Excel button
-        $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
+        printWindow.document.open();
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>พิมพ์รายงาน</title>
+                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: "TH Sarabun New", sans-serif;
+                            margin: 20px;
+                            background: none;
+                            color: black;
+                        }
+                        @media print {
+                            button {
+                                display: none !important;
+                            }
+                        }
+                        body {
+                            background: none !important;
+                        }
+                    </style>
+                </head>
+                <body class="p-4">
+                    ${printContents.innerHTML}
+                    <br>
+                    ${teacherSignatures}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
 
-        // Hide the elements you want to exclude from the print
-        elementsToHide.hide();
-        $('thead').css('display', 'table-header-group'); // Ensure header shows
-
-        setTimeout(() => {
-            window.print();
-            elementsToHide.show();
-            $('#record_table_wrapper .dt-buttons').show();
-            $('#record_table th:last-child, #record_table td:last-child').show(); // Show the last column again
-        }, 100);
+        printWindow.onload = function () {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        };
     };
 
     // Function to set up the print layout

@@ -180,5 +180,18 @@
         "action_type": "login_success",
         "session_id": "iv7gv07eblb0q7lae8arctv2bk",
         "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-24T17:18:29+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "jpjo6g1oir4qrljm44i5cj390g",
+        "message": "Login successful"
     }
 ]

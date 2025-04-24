@@ -93,9 +93,7 @@ require_once('header.php');
                     </div>
                     <div class="row justify-content-center">
                         <div class="col-md-12 mt-3 mb-3 mx-auto">
-                            <div id="pictureGrid" class="grid grid-cols-2 gap-4 items-center justify-items-center">
-                                <!-- รูปภาพจะถูกเพิ่มที่นี่โดย JavaScript -->
-                            </div>
+                            <div id="pictureGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
                         </div>
                     </div>
                 </div>
@@ -201,6 +199,20 @@ $(document).ready(function() {
         }
     }
 
+    // Attach the previewImage function to file inputs
+    $('#uploadImage1').on('change', function() {
+        previewImage(this, 'preview1');
+    });
+    $('#uploadImage2').on('change', function() {
+        previewImage(this, 'preview2');
+    });
+    $('#uploadImage3').on('change', function() {
+        previewImage(this, 'preview3');
+    });
+    $('#uploadImage4').on('change', function() {
+        previewImage(this, 'preview4');
+    });
+
     $.ajax({
         url: 'api/fetch_picture_meeting.php',
         method: 'GET',
@@ -216,7 +228,10 @@ $(document).ready(function() {
                 const pictureGrid = $('#pictureGrid');
                 response.data.forEach(picture => {
                     const imgElement = `
-                        <img src="${picture.url}" alt="${picture.alt}" class="w-full h-auto rounded shadow-md border border-black" style="max-width: 600px; max-height: 800px; object-fit: cover;">
+                        <a href="${picture.url}" target="_blank" rel="noopener noreferrer">
+                            <img src="${picture.url}" alt="${picture.alt}"
+                                class="w-full max-w-[600px] h-auto max-h-[300px] rounded shadow-md border border-black object-cover mx-auto" />
+                        </a>
                     `;
                     pictureGrid.append(imgElement);
                 });
@@ -229,7 +244,35 @@ $(document).ready(function() {
         }
     });
 
+    // Handle form submission for uploading images
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
 
+        const formData = new FormData(this);
+        formData.append('class', <?= $class ?>);
+        formData.append('room', <?= $room ?>);
+        formData.append('term', <?= $term ?>);
+        formData.append('pee', <?= $pee ?>);
+
+        $.ajax({
+            url: 'api/insert_picture_meeting.php',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    alert('อัปโหลดรูปภาพสำเร็จ');
+                    location.reload();
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+            }
+        });
+    });
 
     // Function to handle printing
     window.printPage = function () {
@@ -284,10 +327,6 @@ $(document).ready(function() {
         };
     };
 
-
-
-
-
     // Function to set up the print layout
     function setupPrintLayout() {
         var style = '@page { size: A4 portrait; margin: 0.5in; }';
@@ -295,8 +334,6 @@ $(document).ready(function() {
         printStyle.appendChild(document.createTextNode(style));
         document.head.appendChild(printStyle);
     }
-
-
     
 });
 </script>
