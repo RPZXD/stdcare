@@ -254,7 +254,10 @@ require_once('header.php');
 $(document).ready(function() {
     const classId = <?= $class ?>;
     const roomId = <?= $room ?>;
+    const termValue = <?= $term ?>;
     const PeeValue = <?= $pee?>;
+
+    const teachers = <?= json_encode($teacher->getTeachersByClassAndRoom($class, $room)); ?>;
 
     // Fetch student data for the dropdown in addModal
     $.ajax({
@@ -318,15 +321,15 @@ $(document).ready(function() {
                 ordering: false,
                 order: [[0, 'asc']],
                 columnDefs: [
-                    { targets: 0, className: 'text-center' },
-                    { targets: 1, className: 'text-center' },
-                    { targets: 2, className: 'text-left text-semibold' },
-                    { targets: 3, className: 'text-center' },
-                    { targets: 4, className: 'text-center' },
-                    { targets: 5, className: 'text-center' },
-                    { targets: 6, className: 'text-center' }
+                    { targets: 0, className: 'text-center', width: '6%' },  // แถวที่ 1
+                    { targets: 1, className: 'text-center', width: '20%' }, // แถวที่ 2
+                    { targets: 2, className: 'text-left text-semibold' },   // แถวที่ 3 (ไม่กำหนดความกว้าง)
+                    { targets: 3, className: 'text-center', width: '10%' }, // แถวที่ 4
+                    { targets: 4, className: 'text-center', width: '10%' }, // แถวที่ 5
+                    { targets: 5, className: 'text-center', width: '15%' }, // แถวที่ 6 (ไม่กำหนดความกว้าง)
+                    { targets: 6, className: 'text-center', width: '10%' }  // แถวที่ 7 (ไม่กำหนดความกว้าง)
                 ],
-                info: true,
+                info: false,
                 lengthChange: true,
             });
 
@@ -412,9 +415,14 @@ $(document).ready(function() {
     });
 
     // Function to handle printing
-        // Function to handle printing
-        window.printPage = function () {
-        const printContents = document.querySelector('.card').cloneNode(true);
+    window.printPage = function () {
+        const cardElement = document.querySelector('.card');
+        if (!cardElement) {
+            alert('ไม่พบเนื้อหาที่จะพิมพ์');
+            return;
+        }
+    
+        const printContents = cardElement.cloneNode(true);
         const printWindow = window.open('', '', 'width=900,height=700');
 
         // สร้างส่วนลายเซ็นต์ครูที่ปรึกษา
@@ -425,7 +433,7 @@ $(document).ready(function() {
             teacherSignatures += '<br>';
         });
         teacherSignatures += '</div></div>';
-
+    
         printWindow.document.open();
         printWindow.document.write(`
             <html>
@@ -439,13 +447,37 @@ $(document).ready(function() {
                             background: none;
                             color: black;
                         }
+                        table {
+                            border-collapse: collapse;
+                            width: 100%;
+                        }
+                        th, td {
+                            border: 1px solid #000;
+                            padding: 8px;
+                        }
+                        th {
+                            background-color: #4CAF50 !important;
+                            color: white !important;
+                            text-align: center;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f2f2f2 !important;
+                        }
+                        tr:hover {
+                            background-color: #ddd !important;
+                        }
                         @media print {
                             button {
                                 display: none !important;
                             }
-                        }
-                        body {
-                            background: none !important;
+                            table th:nth-child(7), /* ซ่อนหัวคอลัมน์ "จัดการ" */
+                            table td:nth-child(7) { /* ซ่อนข้อมูลในคอลัมน์ "จัดการ" */
+                                display: none;
+                            }
+                            body {
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
                         }
                     </style>
                 </head>
@@ -457,7 +489,7 @@ $(document).ready(function() {
             </html>
         `);
         printWindow.document.close();
-
+    
         printWindow.onload = function () {
             printWindow.focus();
             printWindow.print();
