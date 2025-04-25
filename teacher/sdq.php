@@ -917,6 +917,8 @@ window.resultSDQpar = function(studentId, studentName, studentNo, studentClass, 
 };
 // Call the loadTable function when the page is loaded
 loadTable();
+
+
 });
 
 </script>

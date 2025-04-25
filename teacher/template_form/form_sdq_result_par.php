@@ -128,7 +128,9 @@ $impact_score = array_sum([
                 $status = scoreLevel($score, $label);
                 $color = strpos($status, 'ปกติ') !== false ? 'bg-green-500' : (strpos($status, 'เสี่ยง') !== false ? 'bg-yellow-500' : 'bg-red-500');
             ?>
-            <div class="<?= $color ?> text-xs font-medium text-white text-center p-0.5 leading-none rounded-full" style="width: <?= $percent ?>%"><?= $score ?> คะแนน = <?= $status ?></div>
+            <div class="<?= $color ?> text-xs font-medium text-white text-center p-0.5 leading-none rounded-full" style="width: <?= $percent ?>%; min-width: 120px; white-space: nowrap;">
+                <?= $score ?> คะแนน = <?= $status ?>
+            </div>
         </div>
     </div>
 <?php endforeach; ?>
