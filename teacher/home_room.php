@@ -51,28 +51,33 @@ require_once('header.php');
 
     <?php require_once('wrapper.php');?>
 
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <div class="container-fluid">
-      <div class="row justify-content-center">
-        <div class="col-md-12">
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
 
-          <!-- /.content-header -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"></h1>
+                </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.content-header -->
 
-          <section class="content mt-4 mb-5 pb-5">
-              <div class="container mx-auto px-4">
-                  <div class="col-md-12">
-                      <div class="bg-white border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md mb-5">
-                          <div class="text-center">
+        <!-- EQ Report Section -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card col-md-12">
+                    <div class="card-body text-center">
                               <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
                               <h5 class="text-center text-lg">รายงานกิจกรรมโฮมรูม<br>ระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
                               <h5 class="text-center text-lg">ภาคเรียนที่ <?=$term?> ปีการศึกษา <?=$pee?></h5>
 
                           <div class="text-left">
-
-                          <button type="button" id="addButton" class="btn bg-blue-500 text-white text-left mb-3 mt-2" data-toggle="modal" data-target="#addhomeModal">
-                          <i class="fas fa-plus"></i> เพิ่มกิจกรรมโฮมรูม <i class="fas fa-plus"></i></button>
-                          <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
+                            <button type="button" id="addButton" class="btn bg-blue-500 text-white text-left mb-3 mt-2" data-toggle="modal" data-target="#addhomeModal">
+                            <i class="fas fa-plus"></i> เพิ่มกิจกรรมโฮมรูม <i class="fas fa-plus"></i></button>
+                            <button class="btn bg-green-500 text-white text-left mb-3 mt-2" id="printButton" onclick="printPage()"> <i class="fa fa-print" aria-hidden="true"></i> พิมพ์รายงาน  <i class="fa fa-print" aria-hidden="true"></i></button>
                           </div>
                           <div class="row justify-content-center">
                               <div class="col-md-12 mt-3 mb-3 mx-auto">
@@ -96,9 +101,9 @@ require_once('header.php');
                                   </div>
                               </div>
                           </div>
-                      </div>
-                  </div>
-              </div><!-- /.container-fluid -->
+                    </div>
+               </div>
+            </div><!-- /.container-fluid -->
           </section>
           <!-- /.content -->
         </div>
@@ -288,35 +293,99 @@ require_once('header.php');
 
 <script>
     $(document).ready(function() {
+        const classId = <?= $class ?>;
+        const roomId = <?= $room ?>;
+        const termValue = <?= $term ?>;
+        const PeeValue = <?= $pee?>;
 
+        const teachers = <?= json_encode($teacher->getTeachersByClassAndRoom($class, $room)); ?>;
           // Function to handle printing
-        window.printPage = function() {
-            let elementsToHide = $('#addButton, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
+    window.printPage = function () {
+        const printContents = document.querySelector('.card').cloneNode(true);
+        const printWindow = window.open('', '', 'width=900,height=700');
 
-            // Hide the export to Excel button
-            $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
+        // สร้างส่วนลายเซ็นต์ครูที่ปรึกษา
+        let teacherSignatures = '<div class="flex justify-end mt-8"><div class="text-center">';
+        teachers.forEach(teacher => {
+            teacherSignatures += '<p class="text-lg font-bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ลงชื่อ...............................................ครูที่ปรึกษา</p>';
+            teacherSignatures += `<p class="text-lg">(${teacher.Teach_name})</p>`;
+            teacherSignatures += '<br>';
+        });
+        teacherSignatures += '</div></div>';
 
-            // Hide the elements you want to exclude from the print
-            elementsToHide.hide();
-            $('thead').css('display', 'table-header-group'); // Ensure header shows
+        printWindow.document.open();
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>พิมพ์รายงาน</title>
+                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                    <style>
+                        body {
+                            background: none !important;
+                        }
+                            body {
+                            font-family: "TH Sarabun New", sans-serif;
+                            margin: 20px;
+                            background: none;
+                            color: black;
+                        }
+                        table {
+                            border-collapse: collapse;
+                            width: 100%;
+                        }
+                        th, td {
+                            border: 1px solid #000;
+                            padding: 8px;
+                        }
+                        th {
+                            background-color:rgb(192, 132, 252) !important;
+                            color: white !important;
+                            text-align: center;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f2f2f2 !important;
+                        }
+                        tr:hover {
+                            background-color: #ddd !important;
+                        }
+                        @media print {
+                            button,
+                            .dataTables_length,
+                            .dataTables_filter,
+                            .dataTables_info,
+                            .dataTables_paginate,
+                            th:last-child,
+                            td:last-child {
+                                display: none !important;
+                            }
+                            button {
+                                display: none !important;
+                            }
+                            table th:nth-child(6), /* ซ่อนหัวคอลัมน์ "จัดการ" */
+                            table td:nth-child(6) { /* ซ่อนข้อมูลในคอลัมน์ "จัดการ" */
+                                display: none;
+                            }
+                            body {
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
+                        }
+                    </style>
+                </head>
+                <body class="p-4">
+                    ${printContents.innerHTML}
+                    ${teacherSignatures}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
 
-            // Hide the last column
-            $('table tr').each(function() {
-                $(this).find('td:last-child, th:last-child').hide();
-            });
-            
-
-            setTimeout(() => {
-                window.print();
-                elementsToHide.show();
-
-                // After printing, restore the last column
-                $('table tr').each(function() {
-                    $(this).find('td:last-child, th:last-child').show();
-                });
-                $('#record_table_wrapper .dt-buttons').show();
-            }, 100);
+        printWindow.onload = function () {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
         };
+    };
 
 
 
@@ -387,9 +456,6 @@ require_once('header.php');
                 "info": true,
                 "autoWidth": true,
                 "responsive": true,
-                "scrollX": true,
-                "scrollY": "400px",  // กำหนดความสูงของตารางไม่เกิน 400px
-                "scrollCollapse": true,  // เปิดใช้งานให้ตารางย่อขนาดตามข้อมูลที่มี
                 "language": {
                     "lengthMenu": "แสดง _MENU_ แถว",
                     "zeroRecords": "ไม่พบข้อมูล",

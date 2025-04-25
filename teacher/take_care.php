@@ -83,7 +83,7 @@ require_once('header.php');
                   <ul class="ml-6 space-y-2">
                     <li><a href="sdq.php" class="text-blue-500 hover:underline">2.1 แบบประเมินพฤติกรรมนักเรียน (SDQ)</a></li>
                     <li><a href="eq.php" class="text-blue-500 hover:underline">2.2 แบบประเมินความฉลาดทางอารมณ์ (EQ)</a></li>
-                    <li><a href="view_screen11.php" class="text-blue-500 hover:underline">2.3 แบบคัดกรองนักเรียน 11 ด้าน</a></li>
+                    <li><a href="screen11.php" class="text-blue-500 hover:underline">2.3 แบบคัดกรองนักเรียน 11 ด้าน</a></li>
                     <li><a href="#" class="text-blue-500 hover:underline">2.4 แบบคัดกรองนักเรียนเชิงประจักษ์</a></li>
                   </ul>
                 </li>
