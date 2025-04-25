@@ -287,8 +287,8 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -380,8 +380,8 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -463,8 +463,8 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -555,8 +555,8 @@ window.editSDQteach = function(studentId, studentName, studentNo, studentClass, 
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -638,8 +638,8 @@ window.addSDQpar = function(studentId, studentName, studentNo, studentClass, stu
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -730,8 +730,8 @@ window.editSDQpar = function(studentId, studentName, studentNo, studentClass, st
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                                <button type="button" class="btn btn-primary" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -802,7 +802,7 @@ window.resultSDQstd = function(studentId, studentName, studentNo, studentClass, 
             const modalHtml = `
                 <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
+                        <div class="modal-content" id="modalContentToPrint">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับนักเรียนประเมินตนเอง)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -812,8 +812,9 @@ window.resultSDQstd = function(studentId, studentName, studentNo, studentClass, 
                             <div class="modal-body">
                                 ${response}
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <div class="modal-footer print-hide">
+                                <button type="button" class="btn btn-success" id="printModalBtn"><i class="fas fa-print"></i> พิมพ์</button>
+                                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
                             </div>
                         </div>
                     </div>
@@ -822,6 +823,37 @@ window.resultSDQstd = function(studentId, studentName, studentNo, studentClass, 
             $('body').append(modalHtml);
             $('#resultModal').modal('show');
 
+            // Print only modal content
+            $('#printModalBtn').on('click', function() {
+                let printContents = document.getElementById('modalContentToPrint').innerHTML;
+                let printWindow = window.open('', '', 'height=800,width=900');
+                printWindow.document.write('<html><head><title>พิมพ์รายงาน SDQ</title>');
+                // include all styles
+                $('link[rel=stylesheet], style').each(function() {
+                    printWindow.document.write(this.outerHTML);
+                });
+                // Add print CSS to hide buttons and set A4 portrait
+                printWindow.document.write(`
+                    <style>
+                        @media print {
+                            .print-hide, .modal-header .close { display: none !important; }
+                            body { -webkit-print-color-adjust: exact; }
+                        }
+                        @page { size: A4 portrait; margin: 20mm 15mm 20mm 15mm; }
+                        html, body { width: 210mm; height: 297mm; }
+                        .modal-content { box-shadow: none !important; border: none !important; }
+                    </style>
+                `);
+                printWindow.document.write('</head><body style="background:white;">');
+                printWindow.document.write('<div style="margin:0;">' + printContents + '</div>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            });
 
             // Remove modal from DOM after hiding
             $('#resultModal').on('hidden.bs.modal', function() {
@@ -843,7 +875,7 @@ window.resultSDQteach = function(studentId, studentName, studentNo, studentClass
             const modalHtml = `
                 <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
+                        <div class="modal-content" id="modalContentToPrint">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับครูเป็นผู้ประเมิน)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -853,8 +885,9 @@ window.resultSDQteach = function(studentId, studentName, studentNo, studentClass
                             <div class="modal-body">
                                 ${response}
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <div class="modal-footer print-hide">
+                                <button type="button" class="btn btn-success" id="printModalBtn"><i class="fas fa-print"></i> พิมพ์</button>
+                                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
                             </div>
                         </div>
                     </div>
@@ -863,6 +896,35 @@ window.resultSDQteach = function(studentId, studentName, studentNo, studentClass
             $('body').append(modalHtml);
             $('#resultModal').modal('show');
 
+            // Print only modal content
+            $('#printModalBtn').on('click', function() {
+                let printContents = document.getElementById('modalContentToPrint').innerHTML;
+                let printWindow = window.open('', '', 'height=800,width=900');
+                printWindow.document.write('<html><head><title>พิมพ์รายงาน SDQ</title>');
+                $('link[rel=stylesheet], style').each(function() {
+                    printWindow.document.write(this.outerHTML);
+                });
+                printWindow.document.write(`
+                    <style>
+                        @media print {
+                            .print-hide, .modal-header .close { display: none !important; }
+                            body { -webkit-print-color-adjust: exact; }
+                        }
+                        @page { size: A4 portrait; margin: 20mm 15mm 20mm 15mm; }
+                        html, body { width: 210mm; height: 297mm; }
+                        .modal-content { box-shadow: none !important; border: none !important; }
+                    </style>
+                `);
+                printWindow.document.write('</head><body style="background:white;">');
+                printWindow.document.write('<div style="margin:0;">' + printContents + '</div>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            });
 
             // Remove modal from DOM after hiding
             $('#resultModal').on('hidden.bs.modal', function() {
@@ -884,7 +946,7 @@ window.resultSDQpar = function(studentId, studentName, studentNo, studentClass, 
             const modalHtml = `
                 <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
+                        <div class="modal-content" id="modalContentToPrint">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="resultModalLabel">แปลผลข้อมูลแบบประเมินตนเอง (SDQ) (ฉบับผู้ปกครองเป็นผู้ประเมิน)</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -894,8 +956,9 @@ window.resultSDQpar = function(studentId, studentName, studentNo, studentClass, 
                             <div class="modal-body">
                                 ${response}
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <div class="modal-footer print-hide">
+                                <button type="button" class="btn btn-success" id="printModalBtn"><i class="fas fa-print"></i> พิมพ์</button>
+                                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
                             </div>
                         </div>
                     </div>
@@ -904,6 +967,35 @@ window.resultSDQpar = function(studentId, studentName, studentNo, studentClass, 
             $('body').append(modalHtml);
             $('#resultModal').modal('show');
 
+            // Print only modal content
+            $('#printModalBtn').on('click', function() {
+                let printContents = document.getElementById('modalContentToPrint').innerHTML;
+                let printWindow = window.open('', '', 'height=800,width=900');
+                printWindow.document.write('<html><head><title>พิมพ์รายงาน SDQ</title>');
+                $('link[rel=stylesheet], style').each(function() {
+                    printWindow.document.write(this.outerHTML);
+                });
+                printWindow.document.write(`
+                    <style>
+                        @media print {
+                            .print-hide, .modal-header .close { display: none !important; }
+                            body { -webkit-print-color-adjust: exact; }
+                        }
+                        @page { size: A4 portrait; margin: 20mm 15mm 20mm 15mm; }
+                        html, body { width: 210mm; height: 297mm; }
+                        .modal-content { box-shadow: none !important; border: none !important; }
+                    </style>
+                `);
+                printWindow.document.write('</head><body style="background:white;">');
+                printWindow.document.write('<div style="margin:0;">' + printContents + '</div>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                setTimeout(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            });
 
             // Remove modal from DOM after hiding
             $('#resultModal').on('hidden.bs.modal', function() {

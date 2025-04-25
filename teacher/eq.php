@@ -453,8 +453,8 @@ window.openResultModal = function(studentId, studentName, studentNo, studentClas
                                 ${response}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" id="printResultModal">🖨️ พิมพ์</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                                <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal">🖨️ พิมพ์</button>
+                                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
                             </div>
                         </div>
                     </div>
