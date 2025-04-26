@@ -79,6 +79,14 @@ require_once('header.php');
                 <h5 class="text-center text-lg">รายชื่อนักเรียนระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h5>
                 <h5 class="text-center text-lg">ปีการศึกษา <?=$pee?></h5>
 
+                <!-- เพิ่มกล่องค้นหา -->
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-6">
+                        <!-- <input type="text" id="studentSearch" class="form-control text-lg" placeholder="🔍 ค้นหาด้วยชื่อหรือรหัสนักเรียน..."> -->
+                        <input type="text" id="studentSearch" class="form-control border border-gray-300 rounded px-3 py-2" placeholder="🔍 ค้นหาชื่อนักเรียน, รหัส, เลขที่ หรือชื่อเล่น...">
+                    </div>
+                </div>
+
                 <div class="row justify-content-center">
                     <div id="showDataStudent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- การ์ดนักเรียนจะถูกแทรกที่นี่ -->
@@ -146,60 +154,6 @@ require_once('header.php');
 <script>
 $(document).ready(function() {
 
-// Function to handle printing
-window.printPage = function() {
-    let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
-
-    // Hide the export to Excel button
-    $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
-
-    // Hide the elements you want to exclude from the print
-    elementsToHide.hide();
-    $('thead').css('display', 'table-header-group'); // Ensure header shows
-
-    setTimeout(() => {
-        window.print();
-        elementsToHide.show();
-        $('#record_table_wrapper .dt-buttons').show();
-    }, 100);
-};
-
-// Function to set up the print layout
-function setupPrintLayout() {
-    var style = '@page { size: A4 portrait; margin: 0.5in; }';
-    var printStyle = document.createElement('style');
-    printStyle.appendChild(document.createTextNode(style));
-    document.head.appendChild(printStyle);
-}
-
-$('#stuid').on('input', function() {
-    var stuid = $(this).val();
-    if (stuid !== '') {
-        $.ajax({
-            type: 'POST',
-            url: 'api/search_data_stu.php',
-            data: { stuid: stuid },
-            success: function(response) {
-                $('#searchResults').html(response);
-            }
-        });
-    } else {
-        $('#searchResults').empty();
-    }
-});
-
-function convertToThaiDate(dateString) {
-    const months = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear() + 543; // Convert to Buddhist year
-    return `${day} ${month} ${year}`;
-}
-
 async function loadStudentData() {
     try {
         var classValue = <?=$class?>;
@@ -218,14 +172,18 @@ async function loadStudentData() {
         }
 
         const showDataStudent = $('#showDataStudent');
-        showDataStudent.empty(); // เคลียร์ข้อมูลเก่า
+        showDataStudent.empty();
 
         if (response.data.length === 0) {
             showDataStudent.html('<p class="text-center text-xl font-semibold text-gray-600">ไม่พบข้อมูลนักเรียน</p>');
         } else {
             response.data.forEach((item, index) => {
                 const studentCard = `
-                    <div class="card my-4 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105">
+                    <div class="card my-4 p-4 max-w-xs bg-white rounded-lg shadow-lg border border-gray-200 transition transform hover:scale-105 student-card"
+                        data-name="${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}"
+                        data-id="${item.Stu_id}"
+                        data-no="${item.Stu_no}"
+                        data-nick="${item.Stu_nick}">
                         <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/${item.Stu_picture}" alt="Student Picture" style="height: 350px; object-fit: cover;">
                         <div class="card-body space-y-3">
                             <h5 class="card-title text-base font-bold text-gray-800">${item.Stu_pre}${item.Stu_name} ${item.Stu_sur} </h5><br>
@@ -247,7 +205,7 @@ async function loadStudentData() {
                         </div>
                     </div>
                 `;
-                showDataStudent.append(studentCard); // แทรกการ์ดลงใน div
+                showDataStudent.append(studentCard);
             });
         }
 
@@ -256,6 +214,29 @@ async function loadStudentData() {
         console.error(error);
     }
 }
+
+loadStudentData();
+
+// ฟิลเตอร์การ์ดนักเรียนแบบ client-side
+$('#studentSearch').on('input', function() {
+    const val = $(this).val().trim().toLowerCase();
+    $('.student-card').each(function() {
+        const name = ($(this).attr('data-name') || '').toLowerCase();
+        const id = ($(this).attr('data-id') || '').toLowerCase();
+        const no = ($(this).attr('data-no') || '').toLowerCase();
+        const nick = ($(this).attr('data-nick') || '').toLowerCase();
+        if (
+            name.includes(val) ||
+            id.includes(val) ||
+            no.includes(val) ||
+            nick.includes(val)
+        ) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+});
 
 // Use event delegation to handle dynamically added elements
 $(document).on('click', '.btn-view', function() {
@@ -305,40 +286,8 @@ $('#saveChanges').on('click', function() {
 });
 
 
-
-
-$('#addBehaviorModal form').on('submit', function(event) {
-    event.preventDefault(); // ป้องกันการ submit ฟอร์มปกติ
-
-    var formData = new FormData(this); // เก็บข้อมูลทั้งหมดจากฟอร์ม
-
-
-    $.ajax({
-        url: 'api/insert_behavior.php',
-        type: 'POST',
-        data: formData,
-        processData: false,  // ไม่ให้ jQuery จัดการกับข้อมูล
-        contentType: false,  // ไม่กำหนด content-type ด้วยตัวเอง
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                Swal.fire('สำเร็จ', response.message, 'success');
-                $('#addBehaviorModal').modal('hide'); // ปิด modal หลังจากบันทึกข้อมูล
-                loadTable(); // รีเฟรชข้อมูลในตาราง
-            } else {
-                Swal.fire('ข้อผิดพลาด', response.message, 'error');
-            }
-        },
-        error: function(xhr, status, error) {
-            Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
-        }
-    });
-});
-
 loadStudentData(); // Load data when page is loaded
 });
-
-
 </script>
 </body>
 </html>

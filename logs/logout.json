@@ -128,5 +128,31 @@
         "action_type": "logout",
         "session_id": "jpjo6g1oir4qrljm44i5cj390g",
         "message": "Logout successful"
+    },
+    {
+        "user_id": "26479",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-26T10:17:00+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/student\/std_behavior.php",
+        "action_type": "logout",
+        "session_id": "o7e699hac5hg3kc9enuut1tmrv",
+        "message": "Logout successful"
+    },
+    {
+        "user_id": "26490",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-26T11:28:38+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/student\/index.php",
+        "action_type": "logout",
+        "session_id": "o7e699hac5hg3kc9enuut1tmrv",
+        "message": "Logout successful"
     }
 ]

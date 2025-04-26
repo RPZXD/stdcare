@@ -70,45 +70,48 @@ $teacherid = $_POST['teacherid']; // Teacher ID (set as static here, you can adj
 $term = $_POST['term']; // Term (set as static here, you can adjust as needed)
 $pee = $_POST['pee']; // Pee (set as static here, you can adjust as needed)
 
-// Check if a behavior entry already exists for the same student and date
+// Check if a behavior entry already exists for the same student and date (any type)
 $dateTime = new DateTime($currentDate);
 $dateTime->modify('+543 years');
-
 $newDate = $dateTime->format('Y-m-d');
 
-try {
-    $select_stmt = $db->prepare("SELECT behavior_date, behavior_type FROM behavior WHERE stu_id = :stu_id AND behavior_date = :udate AND behavior_type = :utype");
-    $select_stmt->execute(array(
+// ตรวจสอบเฉพาะ "มาโรงเรียนสาย" ว่ามีซ้ำในวันเดียวกันหรือไม่
+if ($type == 'มาโรงเรียนสาย') {
+    $select_stmt = $db->prepare("SELECT 1 FROM behavior WHERE stu_id = :stu_id AND behavior_date = :udate AND behavior_type = :utype");
+    $select_stmt->execute([
         ':stu_id' => $stu_id,
         ':udate' => $newDate,
         ':utype' => $type
-    ));
-    $row = $select_stmt->fetch(PDO::FETCH_ASSOC);
-
-    // ตรวจสอบว่ามีข้อมูลใน $row หรือไม่
-    if ($row && $row['behavior_date'] == $newDate && ($row['behavior_type'] == 'มาโรงเรียนสาย' || $row['behavior_type'] == 'แต่งกาย/ทรงผมผิดระเบียบ')) {
+    ]);
+    if ($select_stmt->fetch(PDO::FETCH_ASSOC)) {
         echo json_encode(['warning' => true, 'message' => 'มีการหักคะแนนพฤติกรรมประเภท ' . $type . ' ของวันนี้ไปแล้ว (' . $newDate . ')']);
+        exit;
+    }
+}
 
+// If no existing behavior, proceed to insert new behavior
+$behavior->stu_id = $stu_id;
+$behavior->behavior_date = $newDate;
+$behavior->behavior_type = $type;
+$behavior->behavior_name = $detail;
+$behavior->behavior_score = $score;
+$behavior->teach_id = $teacherid;
+$behavior->term = $term;
+$behavior->pee = $pee;
+
+// Call the create function from the Behavior class to insert data
+try {
+    if ($behavior->create()) {
+        echo json_encode(['success' => true, 'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว']);
     } else {
-        // If no existing behavior, proceed to insert new behavior
-        $behavior->stu_id = $stu_id;
-        $behavior->behavior_date = $newDate;
-        $behavior->behavior_type = $type;
-        $behavior->behavior_name = $detail;
-        $behavior->behavior_score = $score;
-        $behavior->teach_id = $teacherid;
-        $behavior->term = $term;
-        $behavior->pee = $pee;
-
-        // Call the create function from the Behavior class to insert data
-        if ($behavior->create()) {
-            echo json_encode(['success' => true, 'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล']);
-        }
+        echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล']);
     }
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $e->getMessage()]);
+    if ($e->getCode() == 23000) {
+        echo json_encode(['warning' => true, 'message' => 'มีข้อมูลซ้ำในระบบ ไม่สามารถบันทึกข้อมูลซ้ำได้']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+    }
 }
 
 ?>

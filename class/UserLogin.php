@@ -60,13 +60,13 @@ class UserLogin {
     }
 
     public function getUserRole() {
-        $query = "SELECT role_general FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT role_std FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($result) {
-            return $result['role_general'];
+            return $result['role_std'];
         }
         return null;
     }

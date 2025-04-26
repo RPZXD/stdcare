@@ -90,6 +90,7 @@ redirectUser(); // Ensure this is called before any HTML output
                         if ($user->studentNotExists()) {
                             $logger->log([
                                 "user_id" => null,
+                                "role" => $role,
                                 "ip_address" => $ipAddress,
                                 "user_agent" => $userAgent,
                                 "access_time" => $accessTime,
@@ -115,6 +116,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                     $_SESSION['Student_login'] = $_SESSION['user'];
                                     $logger->log([
                                         "user_id" => $username,
+                                        "role" => $role,
                                         "ip_address" => $ipAddress,
                                         "user_agent" => $userAgent,
                                         "access_time" => $accessTime,
@@ -135,6 +137,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                 } else {
                                     $logger->log([
                                         "user_id" => $username,
+                                        "role" => $role,
                                         "ip_address" => $ipAddress,
                                         "user_agent" => $userAgent,
                                         "access_time" => $accessTime,
@@ -156,6 +159,7 @@ redirectUser(); // Ensure this is called before any HTML output
                             } else {
                                 $logger->log([
                                     "user_id" => $username,
+                                    "role" => $role,
                                     "ip_address" => $ipAddress,
                                     "user_agent" => $userAgent,
                                     "access_time" => $accessTime,
@@ -179,6 +183,7 @@ redirectUser(); // Ensure this is called before any HTML output
                         if ($user->userNotExists()) {
                             $logger->log([
                                 "user_id" => null,
+                                "role" => $role,
                                 "ip_address" => $ipAddress,
                                 "user_agent" => $userAgent,
                                 "access_time" => $accessTime,
@@ -210,6 +215,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                     $_SESSION[$role . '_login'] = $_SESSION['user'];
                                     $logger->log([
                                         "user_id" => $username,
+                                        "role" => $role,
                                         "ip_address" => $ipAddress,
                                         "user_agent" => $userAgent,
                                         "access_time" => $accessTime,
@@ -230,6 +236,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                 } else {
                                     $logger->log([
                                         "user_id" => $username,
+                                        "role" => $role,
                                         "ip_address" => $ipAddress,
                                         "user_agent" => $userAgent,
                                         "access_time" => $accessTime,
@@ -251,6 +258,7 @@ redirectUser(); // Ensure this is called before any HTML output
                             } else {
                                 $logger->log([
                                     "user_id" => $username,
+                                    "role" => $role,
                                     "ip_address" => $ipAddress,
                                     "user_agent" => $userAgent,
                                     "access_time" => $accessTime,

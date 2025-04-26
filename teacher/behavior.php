@@ -43,6 +43,7 @@ $currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
 
 require_once('header.php');
 
+$currentDate = date("Y-m-d");
 
 ?>
 
@@ -106,7 +107,7 @@ require_once('header.php');
                     </div>
                 </div>
                 <div class="flex justify-center my-4">
-                    <div class="w-full max-w-3xl p-6 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-md">
+                    <div class="w-full max-w-8xl p-6 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-md">
                         <h4 class="text-xl font-bold text-red-600 flex items-center">
                             <span class="text-2xl">⚠️</span>
                             <span class="ml-3">คำแนะนำ</span>
@@ -168,7 +169,7 @@ require_once('header.php');
                     <div class="row mb-3">
                         <div class="col">
                             <label for="date">วันที่:</label>
-                            <input type="date" name="date" id="date" class="form-control form-control-lg text-center" required>
+                            <input type="date" name="date" id="date" class="form-control form-control-lg text-center" value="<?=$currentDate?>" required>
                             <small class="text-danger" id="dateError"></small>
                         </div>
                     </div>
@@ -310,11 +311,6 @@ async function loadTable() {
                 { targets: 4, className: 'text-center' }, // Center align fifth column
                 { targets: 5, className: 'text-left' } // Left align sixth column
             ],
-            fixedHeader: true,
-            fixedColumns: true,
-            // scrollY: '400px',
-            // scrollCollapse: true,
-            scrollX: true,
             autoWidth: false,
             info: true,
             lengthChange: true,
@@ -368,6 +364,34 @@ async function loadTable() {
 
 $('#addBehaviorModal form').on('submit', function(event) {
     event.preventDefault(); // ป้องกันการ submit ฟอร์มปกติ
+
+    // ตรวจสอบค่าก่อนส่ง
+    let valid = true;
+    let stuid = $('#stuid').val().trim();
+    let date = $('#date').val().trim();
+    let type = $('#type').val().trim();
+
+    // ล้าง error เดิม
+    $('#stuidError').text('');
+    $('#dateError').text('');
+    $('#typeError').text('');
+
+    if (!stuid) {
+        $('#stuidError').text('กรุณากรอกเลขประจำตัวนักเรียน');
+        valid = false;
+    }
+    if (!date) {
+        $('#dateError').text('กรุณาเลือกวันที่');
+        valid = false;
+    }
+    if (!type) {
+        $('#typeError').text('กรุณาเลือกประเภทพฤติกรรม');
+        valid = false;
+    }
+
+    if (!valid) {
+        return; // ไม่ส่งฟอร์มหากข้อมูลไม่ครบ
+    }
 
     var formData = new FormData(this); // เก็บข้อมูลทั้งหมดจากฟอร์ม
 

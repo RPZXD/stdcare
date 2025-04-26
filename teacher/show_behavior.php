@@ -112,7 +112,7 @@ require_once('header.php');
                     </div>
                 </div>
                 <div class="flex justify-center">
-                    <div class="w-full max-w-3xl p-6 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-md">
+                    <div class="w-full max-w-8xl p-6 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-md">
                         <h4 class="text-xl font-bold text-red-600 flex items-center">
                             <span class="text-2xl">⚠️</span>
                             <span class="ml-3">คำแนะนำ</span>
@@ -362,7 +362,15 @@ $(document).ready(function() {
 
             if (response.data.length === 0) {
                 table.row.add([
-                    '<td colspan="8" class="text-center">ไม่พบข้อมูล</td>'
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    'ไม่พบข้อมูล'
+
                 ]);
             } else {
                 response.data.forEach((item, index) => {
