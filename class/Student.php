@@ -5,7 +5,7 @@ class Student {
     private $table_student = "student";
     private $table_behavior = "behavior";
 
-   // คุณสมบัติของนักเรียน
+    // คุณสมบัติของนักเรียน
     public $Stu_id;
     public $Stu_pre;
     public $Stu_name;
@@ -38,6 +38,22 @@ class Student {
     public $Addr;
     public $Phone;
     public $Status;
+
+    // Add all missing properties to avoid deprecated warnings
+    public $Stu_status;
+    public $Par_phone;
+    public $Stu_citizenid;
+    public $Father_name;
+    public $Father_occu;
+    public $Father_income;
+    public $Mother_name;
+    public $Mother_occu;
+    public $Mother_income;
+    public $Par_name;
+    public $Par_relate;
+    public $Par_occu;
+    public $Par_income;
+    public $Par_addr;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -183,25 +199,6 @@ class Student {
                     Stu_sur = :surStu,
                     Stu_major = :stuClass,
                     Stu_room = :stuRoom,
-                    Stu_nick = :nickName,
-                    Stu_birth = :birth,
-                    Stu_religion = :religion,
-                    Stu_blood = :blood,
-                    Stu_addr = :addr,
-                    Stu_phone = :phone,
-                    Par_phone = :parPhone,
-                    Stu_citizenid = :stuCitizenId,
-                    Father_name = :fatherName,
-                    Father_occu = :fatherOccu,
-                    Father_income = :fatherIncome,
-                    Mother_name = :motherName,
-                    Mother_occu = :motherOccu,
-                    Mother_income = :motherIncome,
-                    Par_name = :parName,
-                    Par_relate = :parRelate,
-                    Par_occu = :parOccu,
-                    Par_income = :parIncome,
-                    Par_addr = :parAddr,
                     Stu_status = :status
                 WHERE Stu_id = :oldStuId";
 
@@ -217,26 +214,7 @@ class Student {
         $stmt->bindParam(':surStu', $this->Stu_sur);
         $stmt->bindParam(':stuClass', $this->Stu_major);
         $stmt->bindParam(':stuRoom', $this->Stu_room);
-        $stmt->bindParam(':nickName', $this->Stu_nick);
-        $stmt->bindParam(':birth', $this->Stu_birth);
-        $stmt->bindParam(':religion', $this->Stu_religion);
-        $stmt->bindParam(':blood', $this->Stu_blood);
-        $stmt->bindParam(':addr', $this->Stu_addr);
-        $stmt->bindParam(':phone', $this->Stu_phone);
-        $stmt->bindParam(':parPhone', $this->Par_phone);
-        $stmt->bindParam(':stuCitizenId', $this->Stu_citizenid);
-        $stmt->bindParam(':fatherName', $this->Father_name);
-        $stmt->bindParam(':fatherOccu', $this->Father_occu);
-        $stmt->bindParam(':fatherIncome', $this->Father_income);
-        $stmt->bindParam(':motherName', $this->Mother_name);
-        $stmt->bindParam(':motherOccu', $this->Mother_occu);
-        $stmt->bindParam(':motherIncome', $this->Mother_income);
-        $stmt->bindParam(':parName', $this->Par_name);
-        $stmt->bindParam(':parRelate', $this->Par_relate);
-        $stmt->bindParam(':parOccu', $this->Par_occu);
-        $stmt->bindParam(':parIncome', $this->Par_income);
-        $stmt->bindParam(':parAddr', $this->Par_addr);
-        $stmt->bindParam(':status', $this->Stu_status);
+        $stmt->bindParam(':status', $this->Stu_status); // <-- เพิ่มบรรทัดนี้
         $stmt->bindParam(':oldStuId', $this->OldStu_id);
 
         return $stmt->execute();

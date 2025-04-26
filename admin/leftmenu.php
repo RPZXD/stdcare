@@ -34,7 +34,7 @@ $menuItems = [
     ['href' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ครูและบุคลากร'],
     ['href' => 'data_student.php', 'icon' => 'fa-user-graduate', 'text' => 'ข้อมูลนักเรียน'],
     ['href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
-    ['href' => 'behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
+    ['href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
     ['href' => 'settings.php', 'icon' => 'fa-cog', 'text' => 'การตั้งค่า'],
     ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
     ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],

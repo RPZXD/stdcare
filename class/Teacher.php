@@ -147,7 +147,8 @@ class Teacher {
         try {
             $query = "SELECT DISTINCT Teach_major FROM {$this->table_name}";
             $stmt = $this->conn->prepare($query);
-            return $this->fetchResults($stmt);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Database query error: " . $e->getMessage());
             return false;
@@ -256,6 +257,14 @@ class Teacher {
             error_log("Database query error: " . $e->getMessage());
             return false;
         }
+    }
+
+    // เพิ่มฟังก์ชัน resetPasswordToId
+    public function resetPasswordToId() {
+        $query = "UPDATE {$this->table_name} SET password = '' WHERE Teach_id = :Teach_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':Teach_id', $this->Teach_id);
+        return $stmt->execute();
     }
 }
 ?>

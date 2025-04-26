@@ -30,17 +30,17 @@ echo createNavItemName(htmlspecialchars($setting->getImgProfile().$userData['Tea
 echo "<br>";
 
 $menuItems = [
-    ['href' => 'index.php', 'icon' => 'fas fa-home', 'text' => 'หน้าหลัก'],
-    ['href' => 'check_student.php', 'icon' => 'fas fa-check', 'text' => 'บันทึกเวลาเรียน'],
-    ['href' => 'home_room.php', 'icon' => 'fas fa-plus-circle', 'text' => 'บันทึกโฮมรูม'],
-    ['href' => 'take_care.php', 'icon' => 'fas fa-hand-holding-medical', 'text' => 'ระบบการดูแล'],
-    ['href' => 'behavior.php', 'icon' => 'fas fa-child', 'text' => 'คะแนนพฤติกรรม'],
-    ['href' => 'data_student.php', 'icon' => 'fas fa-users', 'text' => 'ข้อมูลนักเรียน'],
-    ['href' => 'data_parent.php', 'icon' => 'fas fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
-    ['href' => 'search_data.php', 'icon' => 'fas fa-search', 'text' => 'ค้นหาข้อมูล'],
-    ['href' => 'report.php', 'icon' => 'fas fa-pen-square', 'text' => 'รายงานข้อมูล'],
-    ['href' => 'information.php', 'icon' => 'fas fa-chalkboard-teacher', 'text' => 'ข้อมูลครู'],
-    ['href' => '../logout.php', 'icon' => 'fas fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
+    ['href' => 'index.php', 'icon' => 'fa-home', 'text' => 'หน้าหลัก'],
+    ['href' => 'check_student.php', 'icon' => 'fa-clock', 'text' => 'บันทึกเวลาเรียน'],
+    ['href' => 'home_room.php', 'icon' => 'fa-home', 'text' => 'บันทึกโฮมรูม'], // ใช้ icon ที่เหมาะสมกับโฮมรูม
+    ['href' => 'take_care.php', 'icon' => 'fa-hand-holding-heart', 'text' => 'ระบบการดูแล'],
+    ['href' => 'behavior.php', 'icon' => 'fa-star', 'text' => 'คะแนนพฤติกรรม'],
+    ['href' => 'data_student.php', 'icon' => 'fa-user-graduate', 'text' => 'ข้อมูลนักเรียน'],
+    ['href' => 'data_parent.php', 'icon' => 'fa-user-friends', 'text' => 'ข้อมูลผู้ปกครอง'],
+    ['href' => 'search_data.php', 'icon' => 'fa-search', 'text' => 'ค้นหาข้อมูล'],
+    ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
+    ['href' => 'information.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ข้อมูลครู'],
+    ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
 ];
 
 foreach ($menuItems as $item) {
