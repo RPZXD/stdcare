@@ -43,8 +43,10 @@ foreach ($fields as $field) {
 }
 
 // special_ability_detail อาจถูก serialize เป็น JSON แล้วจากฟอร์ม
-if (!empty($data['special_ability_detail']) && is_string($data['special_ability_detail'])) {
-    // ถ้าเป็น array อยู่แล้วไม่ต้อง encode ซ้ำ
+if (empty($data['special_ability_detail'])) {
+    $data['special_ability_detail'] = null;
+} else {
+    // ถ้าไม่ใช่ valid JSON ให้ encode
     json_decode($data['special_ability_detail']);
     if (json_last_error() !== JSON_ERROR_NONE) {
         $data['special_ability_detail'] = json_encode($data['special_ability_detail'], JSON_UNESCAPED_UNICODE);

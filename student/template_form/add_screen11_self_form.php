@@ -1,15 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION['Student_login'])) {
-    echo '<div class="text-red-500">ไม่ได้รับอนุญาต</div>';
-    exit;
-}
+$stuId = $_GET['stuId'] ?? '';
+$pee = $_GET['pee'] ?? '';
+$term = $_GET['term'] ?? '';
 
 ?>
 
 <!-- เปลี่ยน id ฟอร์ม -->
 <form id="screen11Form" method="POST" class="space-y-6">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
+    <input type="hidden" name="student_id" value="<?= htmlspecialchars($stuId) ?>">
     <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
     <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
 
@@ -578,11 +576,26 @@ function collectSpecialAbilityDetail() {
 
 // ก่อน submit form ให้ set ค่า detail ลง hidden input
 document.getElementById('screen11Form').addEventListener('submit', function(e) {
+    e.preventDefault(); // ป้องกัน reload page
+
     // รายละเอียดความสามารถพิเศษ
     const detail = collectSpecialAbilityDetail();
     document.getElementById('special_ability_detail').value = Object.keys(detail).length > 0 ? JSON.stringify(detail) : '';
 
-    // ...สามารถเพิ่ม logic สำหรับ field อื่นๆ ที่ต้อง serialize array เป็น JSON ได้ที่นี่...
+    // SweetAlert2 ยืนยันก่อนบันทึก
+    Swal.fire({
+        title: 'ยืนยันการบันทึกข้อมูล?',
+        text: 'คุณต้องการบันทึกข้อมูลแบบคัดกรอง 11 ด้าน ใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'บันทึก',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // ให้ trigger click ที่ปุ่ม #saveScreen11Btn เพื่อให้ parent page จัดการ AJAX
+            document.getElementById('saveScreen11Btn').click();
+        }
+    });
 });
 
 </script>

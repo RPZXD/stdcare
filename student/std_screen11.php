@@ -42,7 +42,7 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
             </div>
         </div>
         <section class="content">
-            <div id="screen11-status" class="max-w-4xl mx-auto mt-6"></div>
+            <div id="screen11-status" class="max-w-6xl mx-auto mt-6"></div>
         </section>
     </div>
     <?php require_once('../footer.php'); ?>
@@ -51,7 +51,7 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
 <!-- Modal สำหรับฟอร์มบันทึก 11 ด้าน -->
 <div class="modal fade" id="addScreen11Modal" tabindex="-1" aria-labelledby="addScreen11ModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div id="addScreen11ModalDialog" class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title text-lg font-semibold" id="addScreen11ModalLabel">บันทึกแบบคัดกรองนักเรียน 11 ด้าน</h3>
@@ -133,17 +133,32 @@ $(function() {
 
     // Modal logic for 11 ด้าน Self
     window.addScreen11Self = function() {
+        setModalSize('lg');
         showScreen11Modal('template_form/add_screen11_self_form.php', 'บันทึกแบบคัดกรองนักเรียน 11 ด้าน (นักเรียนประเมินตนเอง)', true);
     };
     window.editScreen11Self = function() {
+        setModalSize('lg');
         showScreen11Modal('template_form/edit_screen11_self_form.php', 'แก้ไขแบบคัดกรองนักเรียน 11 ด้าน (นักเรียนประเมินตนเอง)', true);
     };
     window.viewScreen11Self = function() {
+        setModalSize('lg');
         showScreen11Modal('template_form/view_screen11_self_form.php', 'ดูแบบคัดกรองนักเรียน 11 ด้าน (นักเรียนประเมินตนเอง)', false);
     };
     window.interpretScreen11Self = function() {
+        setModalSize('xl');
         showScreen11Modal('template_form/interpret_screen11_self.php', 'แปลผลแบบคัดกรองนักเรียน 11 ด้าน (นักเรียนประเมินตนเอง)', false);
     };
+
+    // ปรับขนาด modal ตามประเภทฟอร์ม
+    function setModalSize(size) {
+        const modalDialog = $('#addScreen11ModalDialog');
+        modalDialog.removeClass('modal-lg modal-xl');
+        if (size === 'xl') {
+            modalDialog.addClass('modal-xl');
+        } else {
+            modalDialog.addClass('modal-lg');
+        }
+    }
 
     // Generic modal loader
     function showScreen11Modal(url, title, showSave) {
@@ -171,14 +186,14 @@ $(function() {
     }
 
     // Save 11 ด้าน form (AJAX submit)
-    $('#saveScreen11Btn').on('click', function () {
+    $(document).on('click', '#saveScreen11Btn', function (e) {
+        e.preventDefault(); // ป้องกัน reload page
         const form = $('#screen11Form');
-
-
         const formData = new FormData(form[0]);
         let isEdit = $('#addScreen11ModalLabel').text().includes('แก้ไข');
         let apiUrl = isEdit ? 'api/update_screen11_data.php' : 'api/save_screen11_data.php';
 
+        console.log('Form data:', formData); // Debugging line
         $.ajax({
             url: apiUrl,
             method: 'POST',
@@ -196,6 +211,7 @@ $(function() {
                     Swal.fire('สำเร็จ', res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
                     $('#addScreen11Modal').modal('hide');
                     loadScreen11Table();
+                    window.location.reload(); // Reload the page to reflect changes
                 } else {
                     Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
                 }

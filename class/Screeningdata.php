@@ -91,7 +91,11 @@ class ScreeningData {
         $stmt->bindParam(':student_id', $data['student_id']);
         $stmt->bindParam(':pee', $data['pee']);
         $stmt->bindParam(':special_ability', $data['special_ability']);
-        $stmt->bindParam(':special_ability_detail', $data['special_ability_detail']);
+        if ($data['special_ability_detail'] === null) {
+            $stmt->bindValue(':special_ability_detail', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':special_ability_detail', $data['special_ability_detail'], PDO::PARAM_STR);
+        }
         $stmt->bindParam(':study_status', $data['study_status']);
         $stmt->bindParam(':study_risk', $data['study_risk']);
         $stmt->bindParam(':study_problem', $data['study_problem']);

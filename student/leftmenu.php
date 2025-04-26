@@ -61,9 +61,9 @@ $menuItems = [
     ['submenu' => true, 'icon' => 'fas fa-database', 'text' => 'ข้อมูล', 'items' => [
         ['href' => 'std_checktime.php', 'text' => 'ข้อมูลเวลาเรียน'],
         ['href' => 'std_roomdata.php', 'text' => 'ข้อมูลห้องเรียน'],
-        ['href' => 'std_search_data.php', 'text' => 'ค้นหาข้อมูล'],
         ['href' => 'std_information.php', 'text' => 'ข้อมูลนักเรียน'],
         ['href' => 'std_behavior.php', 'text' => 'คะแนนพฤติกรรม'],
+        ['href' => 'std_search_data.php', 'text' => 'ค้นหาข้อมูล'],
     ]],
     // Sub-menu for "บันทึก"
     ['submenu' => true, 'icon' => 'fas fa-plus-circle', 'text' => 'บันทึก', 'items' => [
