@@ -103,14 +103,14 @@ class EQ {
             ";
             $insertStmt = $this->db->prepare($insertQuery);
 
-            // Map answers to query parameters
+            // Map answers to query parameters (default '0' if not set)
             $params = [
                 ':student_id' => $student_id,
                 ':term' => $term,
                 ':pee' => $pee
             ];
             for ($i = 1; $i <= 52; $i++) {
-                $params[":EQ$i"] = $answers["q$i"] ?? null;
+                $params[":EQ$i"] = isset($answers["eq$i"]) ? $answers["eq$i"] : (isset($answers["q$i"]) ? $answers["q$i"] : '0');
             }
 
             // Execute insert query
@@ -132,7 +132,7 @@ class EQ {
         ];
         for ($i = 1; $i <= 52; $i++) {
             $set[] = "EQ$i = :EQ$i";
-            $params[":EQ$i"] = $answers["q$i"] ?? null;
+            $params[":EQ$i"] = $answers["eq$i"] ?? null;
         }
         $setStr = implode(', ', $set);
 

@@ -75,7 +75,7 @@ redirectUser(); // Ensure this is called before any HTML output
                     $sessionId = session_id();
                     $accessTime = date("c"); // ISO 8601 format
 
-                    $allowed_roles = ['Admin', 'Teacher', 'Officer'];
+                    $allowed_roles = ['Admin', 'Teacher', 'Officer', 'Student'];
                     $role = filter_input(INPUT_POST, 'txt_role', FILTER_SANITIZE_STRING);
                     
                     if (!in_array($role, $allowed_roles)) {
@@ -85,81 +85,11 @@ redirectUser(); // Ensure this is called before any HTML output
                     $user->setUsername($username);
                     $user->setPassword($password);
 
-                    if ($user->userNotExists()) {
-                        $logger->log([
-                            "user_id" => null,
-                            "ip_address" => $ipAddress,
-                            "user_agent" => $userAgent,
-                            "access_time" => $accessTime,
-                            "url" => $_SERVER['REQUEST_URI'],
-                            "method" => $_SERVER['REQUEST_METHOD'],
-                            "status_code" => 401,
-                            "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
-                            "action_type" => "login_attempt",
-                            "session_id" => $sessionId,
-                            "message" => "User does not exist"
-                        ]);
-                        $sw2 = new SweetAlert2(
-                            'ไม่มีชื่อผู้ใช้นี้',
-                            'error',
-                            'login.php' // Redirect URL
-                        );
-                        $sw2->renderAlert();
-                    } else {
-                        if ($user->verifyPassword()) {
-                            $userRole = $user->getUserRole();
-                            $allowedUserRoles = [
-                                'Teacher' => ['T', 'ADM', 'VP', 'OF', 'DIR'],
-                                'Officer' => ['ADM', 'OF'],
-                                'Admin' => ['ADM']
-                            ];
-                            
-                            if (in_array($userRole, $allowedUserRoles[$role])) {
-                                $_SESSION['user'] = $username; // Ensure $_SESSION['user'] is set
-                                $_SESSION[$role . '_login'] = $_SESSION['user'];
-                                $logger->log([
-                                    "user_id" => $username,
-                                    "ip_address" => $ipAddress,
-                                    "user_agent" => $userAgent,
-                                    "access_time" => $accessTime,
-                                    "url" => $_SERVER['REQUEST_URI'],
-                                    "method" => $_SERVER['REQUEST_METHOD'],
-                                    "status_code" => 200,
-                                    "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
-                                    "action_type" => "login_success",
-                                    "session_id" => $sessionId,
-                                    "message" => "Login successful"
-                                ]);
-                                $sw2 = new SweetAlert2(
-                                    'ลงชื่อเข้าสู่ระบบเรียบร้อย',
-                                    'success',
-                                    strtolower($role) . '/index.php' // Redirect URL
-                                );
-                                $sw2->renderAlert();
-                            } else {
-                                $logger->log([
-                                    "user_id" => $username,
-                                    "ip_address" => $ipAddress,
-                                    "user_agent" => $userAgent,
-                                    "access_time" => $accessTime,
-                                    "url" => $_SERVER['REQUEST_URI'],
-                                    "method" => $_SERVER['REQUEST_METHOD'],
-                                    "status_code" => 403,
-                                    "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
-                                    "action_type" => "login_attempt",
-                                    "session_id" => $sessionId,
-                                    "message" => "Invalid role"
-                                ]);
-                                $sw2 = new SweetAlert2(
-                                    'บทบาทผู้ใช้ไม่ถูกต้อง',
-                                    'error',
-                                    'login.php' // Redirect URL
-                                );
-                                $sw2->renderAlert();
-                            } 
-                        } else {
+                    if ($role === 'Student') {
+                        // Student login logic
+                        if ($user->studentNotExists()) {
                             $logger->log([
-                                "user_id" => $username,
+                                "user_id" => null,
                                 "ip_address" => $ipAddress,
                                 "user_agent" => $userAgent,
                                 "access_time" => $accessTime,
@@ -169,14 +99,176 @@ redirectUser(); // Ensure this is called before any HTML output
                                 "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
                                 "action_type" => "login_attempt",
                                 "session_id" => $sessionId,
-                                "message" => "Incorrect password"
+                                "message" => "Student does not exist"
                             ]);
                             $sw2 = new SweetAlert2(
-                                'พาสเวิร์ดไม่ถูกต้อง',
+                                'ไม่มีชื่อนักเรียนนี้',
+                                'error',
+                                'login.php'
+                            );
+                            $sw2->renderAlert();
+                        } else {
+                            if ($user->verifyStudentPassword()) {
+                                $stuStatus = $user->getUserRoleStudent();
+                                if ($stuStatus == 1) { // เฉพาะนักเรียนสถานะปกติ
+                                    $_SESSION['user'] = $username;
+                                    $_SESSION['Student_login'] = $_SESSION['user'];
+                                    $logger->log([
+                                        "user_id" => $username,
+                                        "ip_address" => $ipAddress,
+                                        "user_agent" => $userAgent,
+                                        "access_time" => $accessTime,
+                                        "url" => $_SERVER['REQUEST_URI'],
+                                        "method" => $_SERVER['REQUEST_METHOD'],
+                                        "status_code" => 200,
+                                        "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                        "action_type" => "login_success",
+                                        "session_id" => $sessionId,
+                                        "message" => "Student login successful"
+                                    ]);
+                                    $sw2 = new SweetAlert2(
+                                        'ลงชื่อเข้าสู่ระบบเรียบร้อย',
+                                        'success',
+                                        'student/index.php'
+                                    );
+                                    $sw2->renderAlert();
+                                } else {
+                                    $logger->log([
+                                        "user_id" => $username,
+                                        "ip_address" => $ipAddress,
+                                        "user_agent" => $userAgent,
+                                        "access_time" => $accessTime,
+                                        "url" => $_SERVER['REQUEST_URI'],
+                                        "method" => $_SERVER['REQUEST_METHOD'],
+                                        "status_code" => 403,
+                                        "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                        "action_type" => "login_attempt",
+                                        "session_id" => $sessionId,
+                                        "message" => "Student not active"
+                                    ]);
+                                    $sw2 = new SweetAlert2(
+                                        'นักเรียนนี้ไม่มีสถานะปกติ',
+                                        'error',
+                                        'login.php'
+                                    );
+                                    $sw2->renderAlert();
+                                }
+                            } else {
+                                $logger->log([
+                                    "user_id" => $username,
+                                    "ip_address" => $ipAddress,
+                                    "user_agent" => $userAgent,
+                                    "access_time" => $accessTime,
+                                    "url" => $_SERVER['REQUEST_URI'],
+                                    "method" => $_SERVER['REQUEST_METHOD'],
+                                    "status_code" => 401,
+                                    "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                    "action_type" => "login_attempt",
+                                    "session_id" => $sessionId,
+                                    "message" => "Incorrect student password"
+                                ]);
+                                $sw2 = new SweetAlert2(
+                                    'พาสเวิร์ดไม่ถูกต้อง',
+                                    'error',
+                                    'login.php'
+                                );
+                                $sw2->renderAlert();
+                            }
+                        }
+                    } else {
+                        if ($user->userNotExists()) {
+                            $logger->log([
+                                "user_id" => null,
+                                "ip_address" => $ipAddress,
+                                "user_agent" => $userAgent,
+                                "access_time" => $accessTime,
+                                "url" => $_SERVER['REQUEST_URI'],
+                                "method" => $_SERVER['REQUEST_METHOD'],
+                                "status_code" => 401,
+                                "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                "action_type" => "login_attempt",
+                                "session_id" => $sessionId,
+                                "message" => "User does not exist"
+                            ]);
+                            $sw2 = new SweetAlert2(
+                                'ไม่มีชื่อผู้ใช้นี้',
                                 'error',
                                 'login.php' // Redirect URL
                             );
                             $sw2->renderAlert();
+                        } else {
+                            if ($user->verifyPassword()) {
+                                $userRole = $user->getUserRole();
+                                $allowedUserRoles = [
+                                    'Teacher' => ['T', 'ADM', 'VP', 'OF', 'DIR'],
+                                    'Officer' => ['ADM', 'OF'],
+                                    'Admin' => ['ADM']
+                                ];
+                                
+                                if (in_array($userRole, $allowedUserRoles[$role])) {
+                                    $_SESSION['user'] = $username; // Ensure $_SESSION['user'] is set
+                                    $_SESSION[$role . '_login'] = $_SESSION['user'];
+                                    $logger->log([
+                                        "user_id" => $username,
+                                        "ip_address" => $ipAddress,
+                                        "user_agent" => $userAgent,
+                                        "access_time" => $accessTime,
+                                        "url" => $_SERVER['REQUEST_URI'],
+                                        "method" => $_SERVER['REQUEST_METHOD'],
+                                        "status_code" => 200,
+                                        "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                        "action_type" => "login_success",
+                                        "session_id" => $sessionId,
+                                        "message" => "Login successful"
+                                    ]);
+                                    $sw2 = new SweetAlert2(
+                                        'ลงชื่อเข้าสู่ระบบเรียบร้อย',
+                                        'success',
+                                        strtolower($role) . '/index.php' // Redirect URL
+                                    );
+                                    $sw2->renderAlert();
+                                } else {
+                                    $logger->log([
+                                        "user_id" => $username,
+                                        "ip_address" => $ipAddress,
+                                        "user_agent" => $userAgent,
+                                        "access_time" => $accessTime,
+                                        "url" => $_SERVER['REQUEST_URI'],
+                                        "method" => $_SERVER['REQUEST_METHOD'],
+                                        "status_code" => 403,
+                                        "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                        "action_type" => "login_attempt",
+                                        "session_id" => $sessionId,
+                                        "message" => "Invalid role"
+                                    ]);
+                                    $sw2 = new SweetAlert2(
+                                        'บทบาทผู้ใช้ไม่ถูกต้อง',
+                                        'error',
+                                        'login.php' // Redirect URL
+                                    );
+                                    $sw2->renderAlert();
+                                } 
+                            } else {
+                                $logger->log([
+                                    "user_id" => $username,
+                                    "ip_address" => $ipAddress,
+                                    "user_agent" => $userAgent,
+                                    "access_time" => $accessTime,
+                                    "url" => $_SERVER['REQUEST_URI'],
+                                    "method" => $_SERVER['REQUEST_METHOD'],
+                                    "status_code" => 401,
+                                    "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
+                                    "action_type" => "login_attempt",
+                                    "session_id" => $sessionId,
+                                    "message" => "Incorrect password"
+                                ]);
+                                $sw2 = new SweetAlert2(
+                                    'พาสเวิร์ดไม่ถูกต้อง',
+                                    'error',
+                                    'login.php' // Redirect URL
+                                );
+                                $sw2->renderAlert();
+                            }
                         }
                     }
                 }
@@ -211,7 +303,10 @@ redirectUser(); // Ensure this is called before any HTML output
                                 <label class="block text-gray-600 mb-1">ประเภทผู้ใช้</label>
                                 <select name="txt_role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-center">
                                     <option value="Teacher" selected>ครู</option>
+                                    <option value="Student">นักเรียน</option>
+                                    <option value="Parent">ผู้ปกครอง</option>
                                     <option value="Officer">เจ้าหน้าที่</option>
+                                    <option value="Director">ผู้อำนวยการ</option>
                                     <option value="Admin">Admin</option>
                                 </select>
                             </div>

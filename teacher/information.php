@@ -188,24 +188,20 @@ require_once('header.php');
 
                     <!-- ครูที่ปรึกษาประจำชั้น -->
                     <div class="form-group">
-                        <label>👨‍🏫 ครูที่ปรึกษาประจำชั้น</label>
-                        <div class="row">
-                            <div class="col-auto">
-                                <label for="Teach_class">ม.</label>
-                                <select name="Teach_class" id="Teach_class" class="form-control" required>
-                                    <option value="<?php echo $userData['Teach_class']; ?>"><?php echo $userData['Teach_class']; ?></option>
-                                    <?php for ($i = 1; $i <= 6; $i++) { echo "<option value='$i'>$i</option>"; } ?>
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <label for="Teach_room">ห้อง</label>
-                                <select name="Teach_room" id="Teach_room" class="form-control" required>
-                                    <option value="<?php echo $userData['Teach_room']; ?>"><?php echo $userData['Teach_room']; ?></option>
-                                    <?php for ($i = 1; $i <= 12; $i++) { echo "<option value='$i'>$i</option>"; } ?>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                      <label>👨‍🏫 ครูที่ปรึกษาประจำชั้น</label>
+                      <div class="row">
+                          <div class="col-auto">
+                              <label for="Teach_class">ม.</label>
+                              <input type="text" class="form-control" value="<?php echo $userData['Teach_class']; ?>" readonly>
+                          </div>
+                          <div class="col-auto">
+                              <label for="Teach_room">ห้อง</label>
+                              <input type="text" class="form-control" value="<?php echo $userData['Teach_room']; ?>" readonly>
+                          </div>
+                      </div>
+                  </div>
+                    <input type="hidden" name="Teach_class" id="Teach_class" value="<?php echo $userData['Teach_class']; ?>">
+                    <input type="hidden" name="Teach_room" id="Teach_room" value="<?php echo $userData['Teach_room']; ?>">
                     <input type="hidden" name="Teach_id" id="Teach_id" value="<?php echo $userData['Teach_id']; ?>">
                     <input type="hidden" name="Teach_photo" id="Teach_photo" value="<?php echo $userData['Teach_photo']; ?>">
                 </form>

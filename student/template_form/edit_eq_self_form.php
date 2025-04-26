@@ -1,31 +1,32 @@
 <?php
-require_once "../../config/Database.php";
-require_once "../../class/EQ.php";
+session_start();
+if (!isset($_SESSION['Student_login'])) {
+    echo '<div class="text-red-500">ไม่ได้รับอนุญาต</div>';
+    exit;
+}
 
-$student_id = $_GET['student_id'] ?? '';
-$student_name = $_GET['student_name'] ?? '';
-$student_no = $_GET['student_no'] ?? '';
-$student_class = $_GET['student_class'] ?? '';
-$student_room = $_GET['student_room'] ?? '';
+require_once('../../config/Database.php');
+require_once('../../class/EQ.php');
+
+$student_id = $_GET['stuId'] ?? '';
 $pee = $_GET['pee'] ?? '';
 $term = $_GET['term'] ?? '';
 
-// Initialize database and EQ class
-$db = (new Database("phichaia_student"))->getConnection();
-$eq = new EQ($db);
+// ดึงข้อมูลนักเรียน
+$db = new Database("phichaia_student");
+$conn = $db->getConnection();
+$eq = new EQ($conn);
 
-// Fetch EQ data
 $eqData = $eq->getEQData($student_id, $pee, $term);
 
 // Map EQ data keys to match form input names
 $mappedEqData = [];
-foreach ($eqData as $key => $value) {
-    $mappedKey = strtolower(str_replace('EQ', 'q', $key)); // Convert "EQ1" to "q1"
-    $mappedEqData[$mappedKey] = $value;
+if ($eqData) {
+    foreach ($eqData as $key => $value) {
+        $mappedKey = strtolower(str_replace('EQ', 'q', $key)); // Convert "EQ1" to "q1"
+        $mappedEqData[$mappedKey] = $value;
+    }
 }
-
-// Add console.log for debugging
-// echo "<script>console.log(" . json_encode($mappedEqData) . ");</script>";
 
 // List of EQ questions
 $questions = [
@@ -92,16 +93,12 @@ $choices = [
 ];
 ?>
 
-<form id="eqEditForm" class="space-y-6">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
+<form id="eqForm" class="space-y-6">
+    <input type="hidden" name="stuId" value="<?= htmlspecialchars($student_id) ?>">
+    <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
+    <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
 
-    <div class="bg-green-500 border rounded-lg shadow-sm p-4 mb-4 text-white">
-        <h2 class="text-lg font-semibold">🎓 ข้อมูลนักเรียน</h2>
-        <p>ชื่อ: <?= htmlspecialchars($student_name) ?> เลขที่: <?= htmlspecialchars($student_no) ?> ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?></p>
-        <p>บันทึกข้อมูลของ ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?></p>
-    </div>
-
-    <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md">
+    <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md mb-4">
         📋 <strong>คำชี้แจง:</strong> กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา
     </div>
 
@@ -110,6 +107,7 @@ $choices = [
             <tr class="bg-blue-500 text-white text-center">
                 <th class="border px-4 py-2">ข้อ</th>
                 <th class="border px-4 py-2">รายการประเมิน</th>
+                <th class="border px-4 py-2">กลุ่ม</th>
                 <th class="border px-4 py-2">คำตอบ</th>
             </tr>
         </thead>
@@ -117,24 +115,20 @@ $choices = [
             <?php foreach ($questions as $index => [$id, $text, $category]): ?>
                 <tr class="hover:bg-gray-50">
                     <td class="border px-4 py-2 text-center"><?= $index + 1 ?></td>
+                    <td class="border px-4 py-2"><?= htmlspecialchars($text) ?></td>
+                    <td class="border px-4 py-2 text-sm text-gray-500"><?= $category ?></td>
                     <td class="border px-4 py-2">
-                        <?= htmlspecialchars($text) ?> <span class="text-sm text-gray-500">[<?= $category ?>]</span>
-                    </td>
-                    <td class="border px-4 py-2">
-                        <div class="flex flex-col sm:flex-row gap-3">
-                        <?php foreach ($choices as $value => $label): ?>
-                            <label class="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="<?= $id ?>" value="<?= $value ?>" <?= isset($mappedEqData[$id]) && $mappedEqData[$id] == $value ? 'checked' : '' ?> required class="form-radio text-blue-600">
-                                <span><?= $label ?></span>
-                            </label>
-                        <?php endforeach; ?>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <?php foreach ($choices as $value => $label): ?>
+                                <label class="inline-flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer <?= (isset($mappedEqData[$id]) && $mappedEqData[$id] == $value) ? 'bg-blue-200 font-bold' : '' ?>">
+                                    <input type="radio" name="eq<?= $index+1 ?>" value="<?= $value ?>" <?= (isset($mappedEqData[$id]) && $mappedEqData[$id] == $value) ? 'checked' : '' ?> required>
+                                    <span><?= $label ?></span>
+                                </label>
+                            <?php endforeach; ?>
                         </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-    <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-    <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
 </form>

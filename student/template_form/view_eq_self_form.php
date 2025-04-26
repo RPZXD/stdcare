@@ -1,33 +1,36 @@
 <?php
-require_once "../../config/Database.php";
-require_once "../../class/EQ.php";
-
-$student_id = $_GET['student_id'] ?? '';
-$student_name = $_GET['student_name'] ?? '';
-$student_no = $_GET['student_no'] ?? '';
-$student_class = $_GET['student_class'] ?? '';
-$student_room = $_GET['student_room'] ?? '';
-$pee = $_GET['pee'] ?? '';
-$term = $_GET['term'] ?? '';
-
-// Initialize database and EQ class
-$db = (new Database("phichaia_student"))->getConnection();
-$eq = new EQ($db);
-
-// Fetch EQ data
-$eqData = $eq->getEQData($student_id, $pee, $term);
-
-// Map EQ data keys to match form input names
-$mappedEqData = [];
-foreach ($eqData as $key => $value) {
-    $mappedKey = strtolower(str_replace('EQ', 'q', $key)); // Convert "EQ1" to "q1"
-    $mappedEqData[$mappedKey] = $value;
+session_start();
+if (!isset($_SESSION['Student_login'])) {
+    echo '<div class="text-red-500">ไม่ได้รับอนุญาต</div>';
+    exit;
 }
 
-// Add console.log for debugging
-// echo "<script>console.log(" . json_encode($mappedEqData) . ");</script>";
+require_once('../../config/Database.php');
+require_once('../../class/EQ.php');
 
-// List of EQ questions
+$student_id = $_GET['stuId'] ?? null;
+$pee = $_GET['pee'] ?? null;
+$term = $_GET['term'] ?? null;
+
+if (!$student_id || !$pee || !$term) {
+    echo '<div class="text-red-500">ไม่พบข้อมูลที่ต้องการ</div>';
+    exit;
+}
+
+$db = new Database("phichaia_student");
+$conn = $db->getConnection();
+$eq = new EQ($conn);
+
+$data = $eq->getEQData($student_id, $pee, $term);
+
+if (!$data) {
+    echo '<div class="text-red-500">ยังไม่มีการบันทึกข้อมูล EQ สำหรับปีการศึกษาและภาคเรียนนี้</div>';
+    exit;
+}
+?>
+
+<?php
+// List of EQ questions (เหมือนใน form_eq_edit.php)
 $questions = [
     ['q1', 'ฉันเข้าใจความรู้สึกของตัวเองเวลาที่โกรธ เสียใจ หรือดีใจ', 'รู้จักและเข้าใจตนเอง'],
     ['q2', 'ฉันสามารถบอกความรู้สึกของตัวเองได้เมื่อมีอารมณ์ต่าง ๆ', 'รู้จักและเข้าใจตนเอง'],
@@ -83,7 +86,7 @@ $questions = [
     ['q52', 'ฉันสามารถปรับอารมณ์ให้กลับมาสงบได้เร็ว', 'การควบคุมอารมณ์'],
 ];
 
-// Answer choices
+// ตัวเลือกคำตอบ
 $choices = [
     '0' => '❌ ไม่จริง',
     '1' => '😐 จริงบางครั้ง',
@@ -92,24 +95,14 @@ $choices = [
 ];
 ?>
 
-<form id="eqEditForm" class="space-y-6">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-
-    <div class="bg-green-500 border rounded-lg shadow-sm p-4 mb-4 text-white">
-        <h2 class="text-lg font-semibold">🎓 ข้อมูลนักเรียน</h2>
-        <p>ชื่อ: <?= htmlspecialchars($student_name) ?> เลขที่: <?= htmlspecialchars($student_no) ?> ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?></p>
-        <p>บันทึกข้อมูลของ ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?></p>
-    </div>
-
-    <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md">
-        📋 <strong>คำชี้แจง:</strong> กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา
-    </div>
-
+<div class="space-y-4">
+    <h4 class="font-semibold text-lg mb-2">คำตอบแบบประเมิน EQ</h4>
     <table class="w-full border-collapse border border-gray-300">
         <thead>
             <tr class="bg-blue-500 text-white text-center">
                 <th class="border px-4 py-2">ข้อ</th>
                 <th class="border px-4 py-2">รายการประเมิน</th>
+                <th class="border px-4 py-2">กลุ่ม</th>
                 <th class="border px-4 py-2">คำตอบ</th>
             </tr>
         </thead>
@@ -117,24 +110,22 @@ $choices = [
             <?php foreach ($questions as $index => [$id, $text, $category]): ?>
                 <tr class="hover:bg-gray-50">
                     <td class="border px-4 py-2 text-center"><?= $index + 1 ?></td>
+                    <td class="border px-4 py-2"><?= htmlspecialchars($text) ?></td>
+                    <td class="border px-4 py-2 text-sm text-gray-500"><?= $category ?></td>
                     <td class="border px-4 py-2">
-                        <?= htmlspecialchars($text) ?> <span class="text-sm text-gray-500">[<?= $category ?>]</span>
-                    </td>
-                    <td class="border px-4 py-2">
-                        <div class="flex flex-col sm:flex-row gap-3">
-                        <?php foreach ($choices as $value => $label): ?>
-                            <label class="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="<?= $id ?>" value="<?= $value ?>" <?= isset($mappedEqData[$id]) && $mappedEqData[$id] == $value ? 'checked' : '' ?> required class="form-radio text-blue-600">
-                                <span><?= $label ?></span>
-                            </label>
-                        <?php endforeach; ?>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <?php foreach ($choices as $value => $label): 
+                                $checked = (isset($data['EQ'.($index+1)]) && $data['EQ'.($index+1)] == $value);
+                            ?>
+                                <label class="inline-flex items-center gap-2 px-2 py-1 rounded-md <?= $checked ? 'bg-blue-200 font-bold' : 'text-gray-400' ?>">
+                                    <input type="radio" disabled <?= $checked ? 'checked' : '' ?>>
+                                    <span><?= $label ?></span>
+                                </label>
+                            <?php endforeach; ?>
                         </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-    <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-    <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-</form>
+</div>

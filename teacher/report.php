@@ -94,6 +94,7 @@ require_once('header.php');
                   <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li>
                   <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li>
                   <li><a href="report_study_leave.php" class="text-blue-500 hover:underline">🚫 รายชื่อนักเรียนที่ไม่มาเรียน</a></li>
+                  <li><a href="report_board_parent.php" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 รายงานรายชื่อประธานเครือข่ายผู้ปกครองระดับชั้น</a></li>
                   <li><a href="#" class="text-blue-500 hover:underline">📈 SDQ (นักเรียนประเมิน)</a></li>
                   <li><a href="#" class="text-blue-500 hover:underline">📉 SDQ (ครูประเมิน)</a></li>
                   <li><a href="#" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 SDQ (ผู้ปกครองประเมิน)</a></li>
