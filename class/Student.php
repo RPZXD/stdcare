@@ -367,6 +367,24 @@ class Student {
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    public function promoteAllStudents() {
+        try {
+            $this->conn->beginTransaction();
+    
+            // 1. จบการศึกษานักเรียนที่อยู่ชั้น ม.3 หรือ ม.6 ก่อน (ก่อนเลื่อน)
+            $this->conn->query("UPDATE student SET Stu_status = 2 WHERE Stu_major IN (3,6) AND Stu_status = 1");
+    
+            // 2. เลื่อนชั้นปีให้นักเรียนที่เหลือ
+            $this->conn->query("UPDATE student SET Stu_major = Stu_major + 1 WHERE Stu_major IN (1,2,4,5) AND Stu_status = 1");
+    
+            $this->conn->commit();
+            return ['success' => true, 'message' => 'เลื่อนชั้นปีสำเร็จ'];
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+    
 
   
 

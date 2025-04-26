@@ -71,7 +71,7 @@ require_once('header.php');
                 </div>
                 <!-- Tab Contents -->
                 <div id="termTab" class="tab-content">
-                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" action="#" autocomplete="off">
+                    <form id="SetPeeForm" class="bg-white shadow rounded p-6 space-y-4" method="post" action="#" autocomplete="off">
                         <div>
                             <label class="block mb-1 font-medium" for="academic_year">
                                 ปีการศึกษา <span class="text-red-500">*</span>
@@ -103,24 +103,33 @@ require_once('header.php');
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">บันทึกการตั้งค่า</button>
                         </div>
                     </form>
+                    <div id="setPeeMsg" class="mt-2 text-sm"></div>
                 </div>
                 <div id="promoteTab" class="tab-content hidden">
-                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" action="#" autocomplete="off">
+                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" id="setUpdateClassForm"  autocomplete="off">
                         <div>
                             <p class="mb-2 font-medium">เลื่อนชั้นปีของนักเรียน</p>
                             <p class="text-gray-600 text-sm mb-4">ระบบจะเลื่อนชั้นปีของนักเรียนทุกคนโดยอัตโนมัติ และ ม.3, ม.6 จะถูกบันทึกเป็น "จบปีการศึกษา"</p>
                         </div>
                         <div class="text-right">
-                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition" onclick="return confirm('ยืนยันการเลื่อนชั้นปี?')">เลื่อนชั้นปี</button>
+                            <!-- ลบ onclick ออก ไม่ต้องมี confirm() -->
+                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition">เลื่อนชั้นปี</button>
                         </div>
                     </form>
                 </div>
                 <div id="advisorTab" class="tab-content hidden">
-                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" action="#" enctype="multipart/form-data" autocomplete="off">
+                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" id="advisorForm" enctype="multipart/form-data" autocomplete="off">
                         <div>
                             <label class="block mb-1 font-medium" for="advisor_excel">อัปโหลดไฟล์ Excel ตั้งค่าครูที่ปรึกษา <span class="text-red-500">*</span></label>
                             <input type="file" id="advisor_excel" name="advisor_excel" accept=".xlsx,.xls" required class="block w-full text-sm text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring focus:border-blue-300 py-2 px-3">
-                            <p class="text-gray-500 text-xs mt-1">รองรับไฟล์ .xlsx, .xls เท่านั้น</p>
+                            <p class="text-gray-500  mt-1">รองรับไฟล์ .xlsx, .xls เท่านั้น</p>
+                            <div class="mt-2">
+                                <a href="api/advisor_sample.php" class="btn bg-green-500 text-white hover:bg-green-600 transition" download>ดาวน์โหลดไฟล์ตัวอย่าง (ข้อมูลปัจจุบัน)</a>
+                            </div>
+                            <p class="text-gray-700 text-lg mt-1">
+                                <strong>หมายเหตุ:</strong> แถวแรกของไฟล์ต้องประกอบด้วยหัวข้อ <strong class="text-rose-500">รหัสครู</strong>, <strong class="text-rose-500">ชั้นปี</strong>, <strong class="text-rose-500">ห้อง</strong> ตามลำดับ<br>
+                                ระบบจะอัปเดตข้อมูลครูที่ปรึกษาตาม <strong class="text-rose-500">รหัสครู</strong> ที่ระบุในไฟล์
+                            </p>
                         </div>
                         <div class="text-right">
                             <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition">บันทึกการตั้งค่า</button>
@@ -141,6 +150,136 @@ require_once('header.php');
                 }
                 // Default tab
                 showTab('termTab');
+
+                // --- เพิ่ม JavaScript สำหรับ SetPeeForm ---
+                document.addEventListener('DOMContentLoaded', function() {
+                    const setPeeForm = document.getElementById('SetPeeForm');
+                    if(setPeeForm) {
+                        setPeeForm.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const formData = new FormData(setPeeForm);
+                            fetch('api/update_pee_term.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(typeof Swal !== "undefined") {
+                                    if(data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'สำเร็จ',
+                                            text: 'บันทึกสำเร็จ'
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'เกิดข้อผิดพลาด',
+                                            text: data.message || 'เกิดข้อผิดพลาด'
+                                        });
+                                    }
+                                } else {
+                                    // fallback
+                                    alert(data.success ? 'บันทึกสำเร็จ' : (data.message || 'เกิดข้อผิดพลาด'));
+                                }
+                            })
+                            .catch(() => {
+                                if(typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'เกิดข้อผิดพลาด',
+                                        text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                                    });
+                                } else {
+                                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+                                }
+                            });
+                        });
+                    }
+
+                    // --- เพิ่ม JavaScript สำหรับ setUpdateClassForm ---
+                    const setUpdateClassForm = document.getElementById('setUpdateClassForm');
+                    if(setUpdateClassForm) {
+                        setUpdateClassForm.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'ยืนยันการเลื่อนชั้นปี?',
+                                text: 'ระบบจะเลื่อนชั้นปีของนักเรียนทุกคนโดยอัตโนมัติ และ ม.3, ม.6 จะถูกบันทึกเป็น "จบปีการศึกษา"',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'ยืนยัน',
+                                cancelButtonText: 'ยกเลิก'
+                            }).then((result) => {
+                                if(result.isConfirmed) {
+                                    const formData = new FormData(setUpdateClassForm);
+                                    fetch('api/promote_students.php', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data.success) {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'สำเร็จ',
+                                                text: data.message || 'เลื่อนชั้นปีสำเร็จ'
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'เกิดข้อผิดพลาด',
+                                                text: data.message || 'เกิดข้อผิดพลาด'
+                                            });
+                                        }
+                                    })
+                                    .catch(() => {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'เกิดข้อผิดพลาด',
+                                            text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                                        });
+                                    });
+                                }
+                            });
+                        });
+                    }
+
+                    // --- เพิ่ม JavaScript สำหรับ advisorForm ---
+                    const advisorForm = document.getElementById('advisorForm');
+                    if(advisorForm) {
+                        advisorForm.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const formData = new FormData(advisorForm);
+                            fetch('api/advisor_advisor_upload.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        icon: data.success ? 'success' : 'error',
+                                        title: data.success ? 'สำเร็จ' : 'เกิดข้อผิดพลาด',
+                                        text: data.message
+                                    });
+                                } else {
+                                    alert(data.message);
+                                }
+                            })
+                            .catch(() => {
+                                if(typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'เกิดข้อผิดพลาด',
+                                        text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                                    });
+                                } else {
+                                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+                                }
+                            });
+                        });
+                    }
+                });
             </script>
         </section>
     </div>
