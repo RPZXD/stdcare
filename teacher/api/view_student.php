@@ -20,7 +20,7 @@ if (!empty($stu_id)) {
 
         echo "<div class='p-6 '>";
         echo "<div class='flex flex-col items-center'>";
-        echo "<img class='rounded-lg shadow-md mb-4' src='https://student.phichai.ac.th/photo/" . $data['Stu_picture'] . "' alt='Student Picture' style='max-height:300px;max-width:280px;'>";
+        echo "<img class='rounded-lg shadow-md mb-4' src='https://std.phichai.ac.th/photo/" . $data['Stu_picture'] . "' alt='Student Picture' style='max-height:300px;max-width:280px;'>";
         echo "<h1 class='text-2xl font-bold text-gray-800 mb-2'>👨‍🎓 ข้อมูลนักเรียน</h1>";
         echo "</div>";
 

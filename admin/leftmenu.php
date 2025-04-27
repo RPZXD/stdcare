@@ -36,6 +36,7 @@ $menuItems = [
     ['href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
     ['href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
     ['href' => 'settings.php', 'icon' => 'fa-cog', 'text' => 'การตั้งค่า'],
+    ['href' => 'log.php', 'icon' => 'fa-clipboard-list', 'text' => 'Log'],
     // ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
     ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
 ];

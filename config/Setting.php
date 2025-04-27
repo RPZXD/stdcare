@@ -7,7 +7,7 @@ class Setting {
     private $logoImage = "/dist/img/logo-phicha.png";
     private $imgProfile = "https://std.phichai.ac.th/teacher/uploads/phototeach/";
     private $imgVisitHome = "https://std.phichai.ac.th/teacher/uploads/visithome/";
-    private $imgProfileStudent = "https://student.phichai.ac.th/photo/";
+    private $imgProfileStudent = "https://std.phichai.ac.th/photo/";
     private $imgAwards = "https://person.phichai.ac.th/teacher/uploads/file_award/";
     // private $imgAwards = "uploads/file_award/";
     private $imgTraining = "https://person.phichai.ac.th/teacher/uploads/file_seminar/";

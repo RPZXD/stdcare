@@ -3,19 +3,26 @@ include_once("../../config/Database.php");
 include_once("../../class/Teacher.php");
 
 header('Content-Type: application/json; charset=utf-8');
-
-// Define your API token key here (change to a secure value in production)
-// define('API_TOKEN_KEY', 'YOUR_SECURE_TOKEN_HERE');
-
-// Function to check token from GET or POST
-// function check_api_token() {
-//     $token = $_GET['token'] ?? $_POST['token'] ?? '';
-//     if ($token !== API_TOKEN_KEY) {
-//         echo json_encode(['success' => false, 'message' => 'Invalid or missing API token']);
-//         exit;
-//     }
-// }
-// check_api_token();
+$allowed_referers = [
+    'http://localhost/stdcare/admin/',
+    'https://std.phichai.ac.th/admin/'
+];
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$referer_ok = false;
+foreach ($allowed_referers as $allowed) {
+    if (strpos($referer, $allowed) === 0) {
+        $referer_ok = true;
+        break;
+    }
+}
+if (!$referer_ok) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Forbidden'
+    ]);
+    exit;
+}
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
@@ -65,6 +72,7 @@ switch ($action) {
         $teacher->Teach_room = $_POST['editTeach_room'] ?? '';
         $teacher->Teach_status = $_POST['editTeach_status'] ?? 1;
         $teacher->role_std = $_POST['editrole_std'] ?? '';
+        $teacher->Teach_password = $teacher->Teach_id; // เพิ่มบรรทัดนี้
         $success = $teacher->update();
         echo json_encode(['success' => $success]);
         break;

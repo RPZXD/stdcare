@@ -51,7 +51,7 @@ $selected_level = isset($_GET['level']) ? $_GET['level'] : '';
                 <tr class="bg-purple-100 text-gray-700">
                     <th class="py-2 px-3 border-b text-center">ลำดับ</th>
                     <th class="py-2 px-3 border-b text-center">ชื่อ-นามสกุล</th>
-                    <th class="py-2 px-3 border-b text-center">ระดับ/ห้อง</th>
+                    <th class="py-2 px-3 border-b text-center">ระดับชั้น/ห้อง</th>
                     <th class="py-2 px-3 border-b text-center">ตำแหน่ง</th>
                     <th class="py-2 px-3 border-b text-center">เบอร์โทรศัพท์</th>
                 </tr>
@@ -90,7 +90,7 @@ function renderTable(data, level) {
         html += `<tr class="${i % 2 === 0 ? 'bg-gray-50' : ''}">
             <td class="py-2 px-3 border-b text-center">${i + 1}</td>
             <td class="py-2 px-3 border-b text-left">${row.parn_name ? row.parn_name : ''}</td>
-            <td class="py-2 px-3 border-b text-center">${row.parn_lev ? row.parn_lev : ''}/${row.parn_room ? row.parn_room : ''}</td>
+            <td class="py-2 px-3 border-b text-center">ม.${row.parn_lev ? row.parn_lev : ''}/${row.parn_room ? row.parn_room : ''}</td>
             <td class="py-2 px-3 border-b text-center">ประธาน</td>
             <td class="py-2 px-3 border-b text-center">${row.parn_tel ? row.parn_tel : ''}</td>
         </tr>`;

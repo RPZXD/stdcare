@@ -183,6 +183,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         showStudentListModal(major, room, label);
                     });
                 });
+                // Attach event listeners for "ดูสรุป" (ภายใน modal-room-detail)
+                document.querySelectorAll('#modal-room-content .view-summary-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const major = this.getAttribute('data-major');
+                        const room = this.getAttribute('data-room');
+                        const label = this.getAttribute('data-label');
+                        showSummaryModal(major, room, label);
+                    });
+                });
                 // Add print button for student list modal (if not exists)
                 if (!document.getElementById('print-student-btn')) {
                     const btn = document.createElement('button');

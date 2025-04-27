@@ -125,8 +125,8 @@ require_once('wrapper.php');
                                             <tr>
                                                 <td colspan="4" class="text-center">
                                                     <?php foreach($grouped['1'] ?? [] as $stu): ?>
-                                                        <a href="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" target="_blank">
-                                                            <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" style="height:70px;width:auto;">
+                                                        <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" target="_blank">
+                                                            <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" style="height:70px;width:auto;">
                                                         </a>
                                                         <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
                                                     <?php endforeach; ?>
@@ -147,8 +147,8 @@ require_once('wrapper.php');
                                                 <?php foreach(['5','2','3','4'] as $key): ?>
                                                     <td class="text-center">
                                                         <?php foreach($grouped[$key] ?? [] as $stu): ?>
-                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
-                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
+                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
+                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
                                                             </a>
                                                             <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
                                                         <?php endforeach; ?>
@@ -179,8 +179,8 @@ require_once('wrapper.php');
                                                 <?php foreach(['6','7','8','9'] as $key): ?>
                                                     <td class="text-center">
                                                         <?php if(!empty($grouped[$key][$i])): $stu = $grouped[$key][$i]; ?>
-                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
-                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://student.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
+                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
+                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
                                                             </a>
                                                             <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
                                                         <?php endif; ?>

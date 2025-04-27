@@ -3,19 +3,27 @@ include_once("../../config/Database.php");
 include_once("../../class/Student.php");
 
 header('Content-Type: application/json; charset=utf-8');
-
-// Define your API token key here (must match the frontend and other APIs)
-define('API_TOKEN_KEY', 'YOUR_SECURE_TOKEN_HERE');
-
-// Function to check token from GET or POST
-function check_api_token() {
-    $token = $_GET['token'] ?? $_POST['token'] ?? '';
-    if ($token !== API_TOKEN_KEY) {
-        echo json_encode(['success' => false, 'message' => 'Invalid or missing API token']);
-        exit;
+$allowed_referers = [
+    'http://localhost/stdcare/admin/',
+    'https://std.phichai.ac.th/admin/'
+];
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$referer_ok = false;
+foreach ($allowed_referers as $allowed) {
+    if (strpos($referer, $allowed) === 0) {
+        $referer_ok = true;
+        break;
     }
 }
-check_api_token();
+if (!$referer_ok) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Forbidden'
+    ]);
+    exit;
+}
+
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
@@ -63,29 +71,66 @@ switch ($action) {
         } else if ($stu_pre === 'เด็กหญิง' || $stu_pre === 'นางสาว') {
             $stu_sex = 2;
         }
-        $student->StuId = $_POST['addStu_id'] ?? '';
-        $student->StuPass = $_POST['addStu_id'] ?? '';
-        $student->StuNo = $_POST['addStu_no'] ?? '';
-        $student->StuSex = $stu_sex;
-        $student->PreStu = $stu_pre;
-        $student->NameStu = $_POST['addStu_name'] ?? '';
-        $student->SurStu = $_POST['addStu_sur'] ?? '';
-        $student->StuClass = $_POST['addStu_major'] ?? '';
-        $student->StuRoom = $_POST['addStu_room'] ?? '';
-        $student->NickName = '';
-        $student->Birth = '';
-        $student->Religion = '';
-        $student->Blood = '';
-        $student->Addr = '';
-        $student->Phone = '';
+        // กำหนด property ให้ตรงกับฐานข้อมูล
+        $student->Stu_id = $_POST['addStu_id'] ?? '';
+        $student->Stu_no = $_POST['addStu_no'] ?? '';
+        $student->Stu_password = $_POST['addStu_id'] ?? '';
+        $student->Stu_sex = $stu_sex;
+        $student->Stu_pre = $stu_pre;
+        $student->Stu_name = $_POST['addStu_name'] ?? '';
+        $student->Stu_sur = $_POST['addStu_sur'] ?? '';
+        $student->Stu_major = $_POST['addStu_major'] ?? '';
+        $student->Stu_room = $_POST['addStu_room'] ?? '';
+        $student->Stu_nick = '';
+        $student->Stu_birth = '';
+        $student->Stu_religion = '';
+        $student->Stu_blood = '';
+        $student->Stu_addr = '';
+        $student->Stu_phone = '';
+        $student->Stu_status = 1;
         // ตรวจสอบว่ามี Stu_id ซ้ำหรือไม่
-        $exists = $student->getStudentById($student->StuId);
+        $exists = $student->getStudentById($student->Stu_id);
         if ($exists && isset($exists[0])) {
             echo json_encode(['success' => false, 'message' => 'รหัสนักเรียนนี้มีอยู่ในระบบแล้ว']);
             break;
         }
-        $success = $student->create();
-        echo json_encode(['success' => $success]);
+        try {
+            $stmt = $db->prepare("INSERT INTO student 
+                (Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone, Stu_status)
+                VALUES (:Stu_id, :Stu_no, :Stu_password, :Stu_sex, :Stu_pre, :Stu_name, :Stu_sur, :Stu_major, :Stu_room, :Stu_nick, :Stu_birth, :Stu_religion, :Stu_blood, :Stu_addr, :Stu_phone, :Stu_status)
+            ");
+            $success = $stmt->execute([
+                ':Stu_id' => $student->Stu_id,
+                ':Stu_no' => $student->Stu_no,
+                ':Stu_password' => $student->Stu_password,
+                ':Stu_sex' => $student->Stu_sex,
+                ':Stu_pre' => $student->Stu_pre,
+                ':Stu_name' => $student->Stu_name,
+                ':Stu_sur' => $student->Stu_sur,
+                ':Stu_major' => $student->Stu_major,
+                ':Stu_room' => $student->Stu_room,
+                ':Stu_nick' => $student->Stu_nick !== '' ? $student->Stu_nick : null,
+                ':Stu_birth' => $student->Stu_birth !== '' ? $student->Stu_birth : null,
+                ':Stu_religion' => $student->Stu_religion !== '' ? $student->Stu_religion : null,
+                ':Stu_blood' => $student->Stu_blood !== '' ? $student->Stu_blood : null,
+                ':Stu_addr' => $student->Stu_addr !== '' ? $student->Stu_addr : null,
+                ':Stu_phone' => $student->Stu_phone !== '' ? $student->Stu_phone : null,
+                ':Stu_status' => $student->Stu_status
+            ]);
+            if ($success) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'ไม่สามารถเพิ่มข้อมูลได้'
+                ]);
+            }
+        } catch (PDOException $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'เกิดข้อผิดพลาดขณะเพิ่มข้อมูล'
+            ]);
+        }
         break;
     case 'update':
         // รับค่าจากฟอร์ม edit

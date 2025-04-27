@@ -55,6 +55,9 @@ class Teacher {
     }
 
     public function update() {
+        // กำหนด password เป็นรหัสครู (Teach_id) ทุกครั้งที่แก้ไข
+        $this->Teach_password = $this->Teach_id;
+
         $query = "UPDATE {$this->table_name}
                   SET Teach_id = :Teach_id, 
                       Teach_password = :Teach_password, 

@@ -1,6 +1,7 @@
 <?php
-require_once(dirname(__DIR__, 2) . '/config/database.php');
-require_once(dirname(__DIR__, 2) . '/class/Behavior.php');
+// เปลี่ยน path ให้ถูกต้อง (จาก ../../ เป็น ../)
+include_once("../../config/Database.php");
+include_once("../../class/Behavior.php");
 
 $group = $_GET['group'] ?? '';
 $type = $_GET['type'] ?? 'all';
@@ -8,6 +9,7 @@ $term = $_GET['term'] ?? '1';
 $pee = $_GET['pee'] ?? '2567';
 $level = $_GET['level'] ?? '';
 $class = $_GET['class'] ?? '';
+
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
@@ -17,6 +19,7 @@ function buildTableRows($students) {
     $html = '';
     $i = 1;
     foreach ($students as $stu) {
+
         $score = intval($stu['behavior_count']);
         $barColor = 'bg-green-500';
         if ($score > 50) $barColor = 'bg-red-500';
@@ -40,6 +43,7 @@ if ($type === 'all') {
     $allStudents = [];
     for ($g = 1; $g <= 3; $g++) {
         $students = $behavior->getScoreBehaviorsGroup($g, $term, $pee);
+
         if ($students && is_array($students)) {
             $allStudents = array_merge($allStudents, $students);
         }
@@ -50,22 +54,25 @@ if ($type === 'all') {
         if ($a['Stu_room'] != $b['Stu_room']) return $a['Stu_room'] - $b['Stu_room'];
         return $a['Stu_no'] - $b['Stu_no'];
     });
-    $html = buildTableRows($allStudents);
+
     if (empty($allStudents)) {
         $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
     }
 } elseif ($type === 'level') {
     $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
+
     if (!$students) $students = [];
     // filter เฉพาะช่วงชั้นที่เลือก
     if ($level === 'lower') {
         $students = array_filter($students, fn($s) => intval($s['Stu_major']) >= 1 && intval($s['Stu_major']) <= 3);
+
         $html = buildTableRows($students);
         if (empty($students)) {
             $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
         }
     } else if ($level === 'upper') {
         $students = array_filter($students, fn($s) => intval($s['Stu_major']) >= 4 && intval($s['Stu_major']) <= 6);
+
         $html = buildTableRows($students);
         if (empty($students)) {
             $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
@@ -84,10 +91,11 @@ if ($type === 'all') {
     }
 } elseif ($type === 'class') {
     $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
+
     if (!$students) $students = [];
     if ($class) {
         $classStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($class));
-        $html = buildTableRows($classStudents);
+
         if (empty($classStudents)) {
             $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
         }

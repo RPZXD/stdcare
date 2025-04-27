@@ -226,8 +226,8 @@ require_once('header.php');
             </div>
         </div>
         <script>
-        // ใส่ token key ที่นี่ (ต้องตรงกับใน api_student.php)
-        const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
+        // ลบ token key ออก (ไม่ต้องใช้)
+        // const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
         let studentTable;
         $(document).ready(function() {
             studentTable = $('#studentTable').DataTable({
@@ -262,8 +262,7 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_student.php?action=create&token=' + encodeURIComponent(API_TOKEN_KEY), {
+                const res = await fetch('api/api_student.php?action=create', {
                     method: 'POST',
                     body: formData
                 });
@@ -293,8 +292,7 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_student.php?action=update&token=' + encodeURIComponent(API_TOKEN_KEY), {
+                const res = await fetch('api/api_student.php?action=update', {
                     method: 'POST',
                     body: formData
                 });
@@ -324,7 +322,7 @@ require_once('header.php');
 
         // เพิ่มเติม: โหลดค่า filter class/room
         function populateFilterSelects() {
-            fetch('api/api_student.php?action=filters&token=' + encodeURIComponent(API_TOKEN_KEY))
+            fetch('api/api_student.php?action=filters')
                 .then(res => res.json())
                 .then(data => {
                     // เติม class
@@ -345,7 +343,7 @@ require_once('header.php');
         async function loadStudents() {
             const classVal = document.getElementById('filterClass').value;
             const roomVal = document.getElementById('filterRoom').value;
-            let url = 'api/api_student.php?action=list&token=' + encodeURIComponent(API_TOKEN_KEY);
+            let url = 'api/api_student.php?action=list';
             if (classVal) url += '&class=' + encodeURIComponent(classVal);
             if (roomVal) url += '&room=' + encodeURIComponent(roomVal);
             const res = await fetch(url);
@@ -387,10 +385,10 @@ require_once('header.php');
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_student.php?action=resetpwd&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            const res = await fetch('api/api_student.php?action=resetpwd', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(API_TOKEN_KEY)
+                body: 'id=' + encodeURIComponent(id)
             });
             const response = await res.json();
             if (response.success) {
@@ -411,7 +409,7 @@ require_once('header.php');
         });
 
         async function openEditStudentModal(id) {
-            const res = await fetch('api/api_student.php?action=get&id=' + id + '&token=' + encodeURIComponent(API_TOKEN_KEY));
+            const res = await fetch('api/api_student.php?action=get&id=' + id);
             const data = await res.json();
             if (data.error) {
                 Swal.fire({
@@ -456,10 +454,10 @@ require_once('header.php');
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_student.php?action=delete&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            const res = await fetch('api/api_student.php?action=delete', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(API_TOKEN_KEY)
+                body: 'id=' + encodeURIComponent(id)
             });
             const response = await res.json();
             if (response.success) {

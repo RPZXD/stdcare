@@ -21,8 +21,6 @@ $db = $connectDB->getConnection();
 $sql = "SELECT Teach_id, Teach_name, Teach_class, Teach_room , Teach_major
         FROM teacher 
         WHERE Teach_status = 1 
-          AND Teach_class > 0 
-          AND Teach_room > 0
         ORDER BY Teach_class, Teach_room, Teach_id";
 $stmt = $db->prepare($sql);
 $stmt->execute();
