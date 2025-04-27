@@ -5,17 +5,17 @@ include_once("../../class/Teacher.php");
 header('Content-Type: application/json; charset=utf-8');
 
 // Define your API token key here (change to a secure value in production)
-define('API_TOKEN_KEY', 'YOUR_SECURE_TOKEN_HERE');
+// define('API_TOKEN_KEY', 'YOUR_SECURE_TOKEN_HERE');
 
 // Function to check token from GET or POST
-function check_api_token() {
-    $token = $_GET['token'] ?? $_POST['token'] ?? '';
-    if ($token !== API_TOKEN_KEY) {
-        echo json_encode(['success' => false, 'message' => 'Invalid or missing API token']);
-        exit;
-    }
-}
-check_api_token();
+// function check_api_token() {
+//     $token = $_GET['token'] ?? $_POST['token'] ?? '';
+//     if ($token !== API_TOKEN_KEY) {
+//         echo json_encode(['success' => false, 'message' => 'Invalid or missing API token']);
+//         exit;
+//     }
+// }
+// check_api_token();
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();

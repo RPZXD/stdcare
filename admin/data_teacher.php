@@ -90,7 +90,6 @@ require_once('header.php');
             <div class="modal-body">
                 <form id="addTeacherForm">
                         <div class="form-group">
-                            <input type="hidden" id="addTeach_id_old" name="addTeach_id_old" required>
                             <label for="addTeach_id">รหัสครู : </label>
                             <input type="text" class="form-control text-center" id="addTeach_id" name="addTeach_id" maxlength="5" required>
                         </div>
@@ -262,8 +261,6 @@ require_once('header.php');
 
 <script>
         let teacherTable;
-        // ใส่ token key ที่นี่ (ต้องตรงกับใน api_teacher.php)
-        const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
         // Initial load
         $(document).ready(function() {
             // สร้าง DataTable ครั้งเดียว
@@ -291,7 +288,6 @@ require_once('header.php');
             // ปุ่มเพิ่มครู
             $('#btnAddTeacher').on('click', function() {
                 $('#addTeacherForm')[0].reset();
-                $('#addTeach_id_old').val('');
                 $('#addTeacherModalLabel').text('เพิ่มข้อมูลครู');
                 $('#addTeacherModal').modal('show');
             });
@@ -304,10 +300,10 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_teacher.php?action=create&token=' + encodeURIComponent(API_TOKEN_KEY), {
+                const res = await fetch('api/api_teacher.php?action=create', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin'
                 });
                 const result = await res.json();
                 if (result.success) {
@@ -336,10 +332,10 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_teacher.php?action=update&token=' + encodeURIComponent(API_TOKEN_KEY), {
+                const res = await fetch('api/api_teacher.php?action=update', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin'
                 });
                 const result = await res.json();
                 if (result.success) {
@@ -390,7 +386,7 @@ fetch('api/fet_major.php')
 
         // Fetch and render teacher data
         async function loadTeachers() {
-            const res = await fetch('api/api_teacher.php?action=list&token=' + encodeURIComponent(API_TOKEN_KEY));
+            const res = await fetch('api/api_teacher.php?action=list');
             const data = await res.json();
             teacherTable.clear();
             data.forEach(teacher => {
@@ -462,10 +458,10 @@ fetch('api/fet_major.php')
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_teacher.php?action=resetpwd&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            const res = await fetch('api/api_teacher.php?action=resetpwd', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(API_TOKEN_KEY)
+                body: 'id=' + encodeURIComponent(id)
             });
             const response = await res.json();
             if (response.success) {
@@ -487,7 +483,7 @@ fetch('api/fet_major.php')
 
         // เปิด modal แก้ไข
         async function openEditModal(id) {
-            const res = await fetch('api/api_teacher.php?action=get&id=' + id + '&token=' + encodeURIComponent(API_TOKEN_KEY));
+            const res = await fetch('api/api_teacher.php?action=get&id=' + id);
             const data = await res.json();
             // console.log(data); // debug ดูข้อมูลที่ได้
             // ตรวจสอบข้อมูลก่อนแสดง modal
@@ -534,10 +530,11 @@ fetch('api/fet_major.php')
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_teacher.php?action=delete&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            const res = await fetch('api/api_teacher.php?action=delete', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(API_TOKEN_KEY)
+                body: 'id=' + encodeURIComponent(id),
+                credentials: 'same-origin'
             });
             const response = await res.json();
             if (response.success) {
