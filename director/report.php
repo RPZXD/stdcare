@@ -19,8 +19,8 @@ $student = new Student($db);
 $term = $user->getTerm();
 $pee = $user->getPee();
 
-if (isset($_SESSION['Officer_login'])) {
-    $userid = $_SESSION['Officer_login'];
+if (isset($_SESSION['Director_login'])) {
+    $userid = $_SESSION['Director_login'];
     $userData = $user->userData($userid);
 } else {
     $sw2 = new SweetAlert2(

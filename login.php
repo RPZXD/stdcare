@@ -75,7 +75,7 @@ redirectUser(); // Ensure this is called before any HTML output
                     $sessionId = session_id();
                     $accessTime = date("c"); // ISO 8601 format
 
-                    $allowed_roles = ['Admin', 'Teacher', 'Officer', 'Student'];
+                    $allowed_roles = ['Admin', 'Teacher', 'Officer', 'Director', 'Parent', 'Student'];
                     $role = filter_input(INPUT_POST, 'txt_role', FILTER_SANITIZE_STRING);
                     
                     if (!in_array($role, $allowed_roles)) {
@@ -207,6 +207,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                 $allowedUserRoles = [
                                     'Teacher' => ['T', 'ADM', 'VP', 'OF', 'DIR'],
                                     'Officer' => ['ADM', 'OF'],
+                                    'Director' => ['VP', 'DIR', 'ADM'],
                                     'Admin' => ['ADM']
                                 ];
                                 
@@ -312,7 +313,7 @@ redirectUser(); // Ensure this is called before any HTML output
                                 <select name="txt_role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-center">
                                     <option value="Teacher" selected>ครู</option>
                                     <option value="Student">นักเรียน</option>
-                                    <option value="Parent">ผู้ปกครอง</option>
+                                    <!-- <option value="Parent">ผู้ปกครอง</option> -->
                                     <option value="Officer">เจ้าหน้าที่</option>
                                     <option value="Director">ผู้อำนวยการ</option>
                                     <option value="Admin">Admin</option>

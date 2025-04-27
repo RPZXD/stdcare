@@ -1,6 +1,6 @@
 <?php
-require_once("../config/Database.php");
-require_once("../class/Behavior.php");
+require_once("../../config/Database.php");
+require_once("../../class/Behavior.php");
 header('Content-Type: application/json');
 
 $class = $_GET['class'] ?? null;
