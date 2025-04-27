@@ -65,19 +65,19 @@ require_once('header.php');
                 <!-- Tabs -->
                 <div class="flex border-b mb-6">
                     <a href="?tab=late" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'late' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600' ?>">
-                        ⏰ รายงานข้อมูลมาสาย
+                        ⏰ ข้อมูลมาสาย
                     </a>
                     <a href="?tab=homevisit" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'homevisit' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-green-600' ?>">
-                        🏠 รายงานสถิติการเยี่ยมบ้านนักเรียน
+                        🏠 การเยี่ยมบ้านนักเรียน
                     </a>
                     <a href="?tab=deduct-room" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'deduct-room' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-yellow-600' ?>">
-                        🏫 รายงานการหักคะแนน (รายห้อง)
+                        🏫 การหักคะแนน (รายห้อง)
                     </a>
                     <a href="?tab=deduct-group" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'deduct-group' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-pink-600' ?>">
-                        📊 รายงานการหักคะแนน (แบ่งตามกลุ่ม)
+                        📊 การหักคะแนน (แบ่งตามกลุ่ม)
                     </a>
                     <a href="?tab=parent-leader" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'parent-leader' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-purple-600' ?>">
-                        👨‍👩‍👧‍👦 รายงานรายชื่อประธานเครือข่ายผู้ปกครอง
+                        👨‍👩‍👧‍👦 รายชื่อประธานเครือข่ายผู้ปกครอง
                     </a>
                 </div>
                 <div class="bg-white rounded-lg shadow p-6 mt-4">
