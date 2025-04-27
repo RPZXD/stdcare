@@ -19,8 +19,8 @@ $student = new Student($db);
 $term = $user->getTerm();
 $pee = $user->getPee();
 
-if (isset($_SESSION['Admin_login'])) {
-    $userid = $_SESSION['Admin_login'];
+if (isset($_SESSION['Officer_login'])) {
+    $userid = $_SESSION['Officer_login'];
     $userData = $user->userData($userid);
 } else {
     $sw2 = new SweetAlert2(
@@ -44,7 +44,7 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">Admin Dashboard</h5>
+                        <h5 class="m-0">Officer Dashboard</h5>
                     </div>
                 </div>
             </div>

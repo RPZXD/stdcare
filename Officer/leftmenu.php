@@ -19,7 +19,7 @@ function createNavItemName($avatar, $text) {
             <p class="text-white font-bold">'. $text . '</p>
         </div>
         <div class="nav-link text-center">
-            <p class="text-white font-bold">ตำแหน่ง : Admin</p>
+            <p class="text-white font-bold">ตำแหน่ง : เจ้าหน้าที่</p>
         </div>
     </li>';
 }
@@ -29,14 +29,14 @@ echo createNavItemName(htmlspecialchars($setting->getImgProfile().$userData['Tea
 // echo "<hr style='border: 1px solid #ffffff;'>";
 echo "<br>";
 
+// เมนูสำหรับเจ้าหน้าที่
 $menuItems = [
     ['href' => 'index.php', 'icon' => 'fa-home', 'text' => 'หน้าหลัก'],
-    ['href' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ครูและบุคลากร'],
     ['href' => 'data_student.php', 'icon' => 'fa-user-graduate', 'text' => 'ข้อมูลนักเรียน'],
+    ['href' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ครูและบุคลากร'],
     ['href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
     ['href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
-    ['href' => 'settings.php', 'icon' => 'fa-cog', 'text' => 'การตั้งค่า'],
-    // ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
+    ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
     ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
 ];
 
