@@ -37,7 +37,7 @@ foreach ($stu_ids as $stu_id) {
         // Always use 'มาโรงเรียนสาย' for late
         $behavior_type = 'มาโรงเรียนสาย';
         $behavior_name = $behavior_names[$stu_id] ?? 'มาโรงเรียนสาย';
-        $behavior_score = !empty($behavior_scores[$stu_id]) && $behavior_scores[$stu_id] != 5 ? $behavior_scores[$stu_id] : -5;
+        $behavior_score = !empty($behavior_scores[$stu_id]) && $behavior_scores[$stu_id] != 5 ? $behavior_scores[$stu_id] : 5;
         $teach_id = $teach_ids[$stu_id] ?? ($_SESSION['Teacher_login'] ?? null);
         $this_term = $term;
         $this_pee = $year;

@@ -89,6 +89,10 @@ $pee = $user->getPee();
         .attendance-radio input:checked + span {
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+        /* เพิ่ม CSS ให้แน่ใจว่าฟอร์มแก้ไขถูกซ่อนเสมอตอนเริ่มต้น */
+        .edit-attendance-form {
+            display: none !important;
+        }
     </style>
     <form method="post" action="api/check_std_action.php">
         <?php
@@ -153,7 +157,55 @@ $pee = $user->getPee();
                             <td class="px-3 py-2 border text-center">
                                 <?php
                                 if (!empty($std['attendance_status'])) {
-                                    echo !empty($std['attendance_date']) ? htmlspecialchars($std['attendance_date']) : '-';
+                                    // --- เพิ่มปุ่มแก้ไข ---
+                                    ?>
+                                    <div>
+                                        <?= !empty($std['attendance_date']) ? htmlspecialchars($std['attendance_date']) : '-' ?>
+                                        <button type="button" class="btn bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 ml-2 text-white  text-sm edit-attendance-btn" data-stu-id="<?= htmlspecialchars($std['Stu_id']) ?>">แก้ไข</button>
+                                    </div>
+                                    <!-- ฟอร์มแก้ไข (ซ่อนอยู่) - Removed inline style -->
+                                    <form method="post" action="api/check_std_action.php" class="edit-attendance-form mt-2 hidden" id="edit-form-<?= htmlspecialchars($std['Stu_id']) ?>">
+                                        <input type="hidden" name="edit_mode" value="1">
+                                        <input type="hidden" name="Stu_id[]" value="<?= htmlspecialchars($std['Stu_id']) ?>">
+                                        <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
+                                        <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
+                                        <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
+                                        <input type="hidden" name="teach_id[<?= htmlspecialchars($std['Stu_id']) ?>]" value="<?= htmlspecialchars($_SESSION['Teacher_login'] ?? '') ?>">
+                                        <div class="flex flex-wrap gap-2 mb-1 justify-center attendance-radio">
+                                            <?php
+                                            $status_options = [
+                                                '1' => ['✅ มา', 'bg-green-100 text-green-700 peer-checked:bg-green-500 peer-checked:text-white shadow'],
+                                                '2' => ['❌ ขาด', 'bg-red-100 text-red-700 peer-checked:bg-red-500 peer-checked:text-white shadow'],
+                                                '3' => ['🕒 สาย', 'bg-yellow-100 text-yellow-700 peer-checked:bg-yellow-500 peer-checked:text-white shadow'],
+                                                '4' => ['🤒 ป่วย', 'bg-blue-100 text-blue-700 peer-checked:bg-blue-500 peer-checked:text-white shadow'],
+                                                '5' => ['📝 กิจ', 'bg-purple-100 text-purple-700 peer-checked:bg-purple-500 peer-checked:text-white shadow'],
+                                                '6' => ['🎉 กิจกรรม', 'bg-pink-100 text-pink-700 peer-checked:bg-pink-500 peer-checked:text-white shadow'],
+                                            ];
+                                            foreach ($status_options as $val => [$label, $cls]) {
+                                                ?>
+                                                <label class="cursor-pointer">
+                                                    <input type="radio"
+                                                        name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]"
+                                                        value="<?= $val ?>"
+                                                        class="hidden peer"
+                                                        <?= $std['attendance_status'] == $val ? 'checked' : '' ?>>
+                                                    <span class="px-2 py-1 rounded <?= $cls ?>">
+                                                        <?= $label ?>
+                                                    </span>
+                                                </label>
+                                                <?php
+                                            }
+                                            ?>
+                                        </div>
+                                        <input type="text" name="reason[<?= htmlspecialchars($std['Stu_id']) ?>]" placeholder="สาเหตุ (ถ้ามี)" class="border rounded px-2 py-1 mb-1" value="<?= htmlspecialchars($std['reason'] ?? '') ?>" />
+                                        <!-- สำหรับบันทึก behavior กรณีมาสาย -->
+                                        <input type="hidden" name="behavior_type[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
+                                        <input type="hidden" name="behavior_name[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
+                                        <input type="hidden" name="behavior_score[<?= htmlspecialchars($std['Stu_id']) ?>]" value="5">
+                                        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2">บันทึก</button>
+                                        <button type="button" class="cancel-edit-btn btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 ml-2">ยกเลิก</button>
+                                    </form>
+                                    <?php
                                 } else {
                                     // radio group: name="attendance_status[Stu_id]"
                                     ?>
@@ -278,3 +330,40 @@ $pee = $user->getPee();
         <?php endif; ?>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CSS rule `.edit-attendance-form { display: none !important; }` should handle initial hiding.
+    // No need for explicit JS hiding here if the CSS rule is effective.
+
+    // เมื่อกดปุ่ม "แก้ไข"
+    document.querySelectorAll('.edit-attendance-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            // ปิดฟอร์มอื่นๆ ก่อน (Set display to none, CSS rule will take over)
+            document.querySelectorAll('.edit-attendance-form').forEach(function(f) {
+                f.style.display = 'none';
+            });
+            // เปิดฟอร์มของแถวนี้
+            var tr = btn.closest('tr');
+            if (tr) {
+                var form = tr.querySelector('.edit-attendance-form');
+                if (form) {
+                    // Use setProperty to override the CSS !important rule
+                    form.style.setProperty('display', 'block', 'important');
+                }
+            }
+        });
+    });
+    // เมื่อกดปุ่ม "ยกเลิก"
+    document.querySelectorAll('.cancel-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var form = btn.closest('.edit-attendance-form');
+            if (form) {
+                // Set display to none, the CSS rule will ensure it stays hidden
+                form.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
