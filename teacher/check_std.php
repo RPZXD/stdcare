@@ -23,7 +23,8 @@ function convertToBuddhistYear($date) {
     return $date;
 }
 
-function thaiDateFormat($date) {
+// ฟังก์ชันแปลงวันที่เป็น วัน เดือน ปี พ.ศ. ภาษาไทย
+function thaiDate($date) {
     $months = [
         1 => 'มกราคม', 2 => 'กุมภาพันธ์', 3 => 'มีนาคม', 4 => 'เมษายน',
         5 => 'พฤษภาคม', 6 => 'มิถุนายน', 7 => 'กรกฎาคม', 8 => 'สิงหาคม',
@@ -40,6 +41,7 @@ function thaiDateFormat($date) {
 }
 
 // ใช้งาน
+date_default_timezone_set('Asia/Bangkok');
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $dateC = convertToBuddhistYear($date);
 
@@ -51,17 +53,43 @@ $pee = $user->getPee();
 
 <div class="mb-4 flex flex-wrap gap-4 items-center">
     <div class="text-blue-700 font-semibold">
-        เช็คชื่อนักเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> ของวันที่ <?= htmlspecialchars(thaiDateFormat($dateC)) ?>
+        เช็คชื่อนักเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> ของวันที่ <?= htmlspecialchars(thaiDate($dateC)) ?>
     </div>
     <form method="get" class="flex items-center gap-2">
         <input type="hidden" name="tab" value="check">
-        <label for="date" class="text-gray-700">เลือกวันที่:(ค.ศ.)</label>
+        <label for="date" class="text-gray-700">เลือกวันที่:</label>
         <input type="date" id="date" name="date" value="<?= htmlspecialchars($date) ?>" class="border rounded px-2 py-1">
         <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">แสดง</button>
     </form>
 </div>
 
 <div class="overflow-x-auto">
+    <style>
+        /* เพิ่มลูกเล่น hover และ effect ให้ radio */
+        .attendance-radio label {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .attendance-radio label:active {
+            transform: scale(0.97);
+        }
+        .attendance-radio input:focus + span {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+        .attendance-radio span {
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            transition: background 0.2s, color 0.2s;
+        }
+        /* เพิ่ม effect เล็กน้อยเมื่อเลือก */
+        .attendance-radio input:checked + span {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+    </style>
     <form method="post" action="api/check_std_action.php">
         <?php
         // แปลงปีใน $date ให้เป็น พ.ศ.
@@ -73,7 +101,7 @@ $pee = $user->getPee();
         <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-        <table class="min-w-full border border-gray-200 rounded-lg">
+        <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
             <thead class="bg-blue-100">
                 <tr>
                     <th class="px-3 py-2 border text-center">เลขที่</th>
@@ -88,7 +116,7 @@ $pee = $user->getPee();
             <tbody>
                 <?php if (!empty($students)): ?>
                     <?php foreach ($students as $idx => $std): ?>
-                        <tr class="hover:bg-blue-50">
+                        <tr class="hover:bg-blue-50 transition-colors">
                             <td class="px-3 py-2 border text-center"><?= htmlspecialchars($std['Stu_no']) ?></td>
                             <td class="px-3 py-2 border"><?= htmlspecialchars($std['Stu_id']) ?></td>
                             <td class="px-3 py-2 border"><?= htmlspecialchars($std['Stu_pre'] . $std['Stu_name'] . ' ' . $std['Stu_sur']) ?></td>
@@ -129,7 +157,7 @@ $pee = $user->getPee();
                                 } else {
                                     // radio group: name="attendance_status[Stu_id]"
                                     ?>
-                                    <div class="flex flex-wrap gap-2 mb-1 justify-center">
+                                    <div class="flex flex-wrap gap-2 mb-1 justify-center attendance-radio">
                                     <input type="hidden" name="Stu_id[]" value="<?= htmlspecialchars($std['Stu_id']) ?>">
                                     <!-- สำหรับบันทึก behavior กรณีมาสาย -->
                                     <input type="hidden" name="behavior_type[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
@@ -142,8 +170,8 @@ $pee = $user->getPee();
                                             value="1" 
                                             class="hidden peer" 
                                             checked>
-                                        <span class="px-2 py-1 rounded bg-green-100 text-green-700 peer-checked:bg-green-500 peer-checked:text-white">
-                                            มาเรียน
+                                        <span class="px-2 py-1 rounded bg-green-100 text-green-700 peer-checked:bg-green-500 peer-checked:text-white shadow">
+                                            ✅ มา
                                         </span>
                                     </label>
 
@@ -152,8 +180,8 @@ $pee = $user->getPee();
                                             name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]" 
                                             value="2" 
                                             class="hidden peer">
-                                        <span class="px-2 py-1 rounded bg-red-100 text-red-700 peer-checked:bg-red-500 peer-checked:text-white">
-                                            ขาดเรียน
+                                        <span class="px-2 py-1 rounded bg-red-100 text-red-700 peer-checked:bg-red-500 peer-checked:text-white shadow">
+                                            ❌ ขาด
                                         </span>
                                     </label>
 
@@ -162,8 +190,8 @@ $pee = $user->getPee();
                                             name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]" 
                                             value="3" 
                                             class="hidden peer">
-                                        <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 peer-checked:bg-yellow-500 peer-checked:text-white">
-                                            มาสาย
+                                        <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 peer-checked:bg-yellow-500 peer-checked:text-white shadow">
+                                            🕒 สาย
                                         </span>
                                     </label>
 
@@ -172,8 +200,8 @@ $pee = $user->getPee();
                                             name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]" 
                                             value="4" 
                                             class="hidden peer">
-                                        <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 peer-checked:bg-blue-500 peer-checked:text-white">
-                                            ลาป่วย
+                                        <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 peer-checked:bg-blue-500 peer-checked:text-white shadow">
+                                            🤒 ป่วย
                                         </span>
                                     </label>
 
@@ -182,8 +210,8 @@ $pee = $user->getPee();
                                             name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]" 
                                             value="5" 
                                             class="hidden peer">
-                                        <span class="px-2 py-1 rounded bg-purple-100 text-purple-700 peer-checked:bg-purple-500 peer-checked:text-white">
-                                            ลากิจ
+                                        <span class="px-2 py-1 rounded bg-purple-100 text-purple-700 peer-checked:bg-purple-500 peer-checked:text-white shadow">
+                                            📝 กิจ
                                         </span>
                                     </label>
 
@@ -192,8 +220,8 @@ $pee = $user->getPee();
                                             name="attendance_status[<?= htmlspecialchars($std['Stu_id']) ?>]" 
                                             value="6" 
                                             class="hidden peer">
-                                        <span class="px-2 py-1 rounded bg-pink-100 text-pink-700 peer-checked:bg-pink-500 peer-checked:text-white">
-                                            เข้าร่วมกิจกรรม
+                                        <span class="px-2 py-1 rounded bg-pink-100 text-pink-700 peer-checked:bg-pink-500 peer-checked:text-white shadow">
+                                            🎉 กิจกรรม
                                         </span>
                                     </label>
                                 </div>
