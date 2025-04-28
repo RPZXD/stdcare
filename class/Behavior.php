@@ -21,21 +21,38 @@ class Behavior {
 
     // Insert behavior data into the database
     public function create() {
+        // Standardize behavior_type for late
+        if ($this->behavior_type === 'late' || $this->behavior_type === 'มาสาย') {
+            $this->behavior_type = 'มาโรงเรียนสาย';
+        }
+
+        // Check for duplicate before insert
+        $checkQuery = "SELECT id FROM " . $this->table . " WHERE stu_id = :stu_id AND behavior_date = :behavior_date AND behavior_type = :behavior_type LIMIT 1";
+        $checkStmt = $this->conn->prepare($checkQuery);
+        $checkStmt->bindParam(':stu_id', $this->stu_id);
+        $checkStmt->bindParam(':behavior_date', $this->behavior_date);
+        $checkStmt->bindParam(':behavior_type', $this->behavior_type);
+        $checkStmt->execute();
+        if ($checkStmt->fetch()) {
+            // Duplicate found, do not insert
+            return false;
+        }
+
         $query = "INSERT INTO " . $this->table . " 
                   (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
                   VALUES (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :term, :pee)";
         
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize input data
-        $this->stu_id = htmlspecialchars(strip_tags($this->stu_id));
-        $this->behavior_date = htmlspecialchars(strip_tags($this->behavior_date));
-        $this->behavior_type = htmlspecialchars(strip_tags($this->behavior_type));
-        $this->behavior_name = htmlspecialchars(strip_tags($this->behavior_name));
-        $this->behavior_score = htmlspecialchars(strip_tags($this->behavior_score));
-        $this->teach_id = htmlspecialchars(strip_tags($this->teach_id));
-        $this->term = htmlspecialchars(strip_tags($this->term));
-        $this->pee = htmlspecialchars(strip_tags($this->pee));
+        // Sanitize input data (convert null/array to string to avoid fatal error)
+        $this->stu_id = is_scalar($this->stu_id) ? htmlspecialchars(strip_tags($this->stu_id)) : '';
+        $this->behavior_date = is_scalar($this->behavior_date) ? htmlspecialchars(strip_tags($this->behavior_date)) : '';
+        $this->behavior_type = is_scalar($this->behavior_type) ? htmlspecialchars(strip_tags($this->behavior_type)) : '';
+        $this->behavior_name = is_scalar($this->behavior_name) ? htmlspecialchars(strip_tags($this->behavior_name)) : '';
+        $this->behavior_score = is_scalar($this->behavior_score) ? htmlspecialchars(strip_tags($this->behavior_score)) : '';
+        $this->teach_id = is_scalar($this->teach_id) ? htmlspecialchars(strip_tags($this->teach_id)) : '';
+        $this->term = is_scalar($this->term) ? htmlspecialchars(strip_tags($this->term)) : '';
+        $this->pee = is_scalar($this->pee) ? htmlspecialchars(strip_tags($this->pee)) : '';
 
         // Bind data
         $stmt->bindParam(':stu_id', $this->stu_id);
