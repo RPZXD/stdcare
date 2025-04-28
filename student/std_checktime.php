@@ -29,8 +29,8 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
 // ดึงข้อมูลการเช็คชื่อของนักเรียนรายบุคคล
 $attendanceRows = [];
 try {
-    $stmt = $studentConn->prepare("SELECT * FROM student_attendance WHERE student_id = :stu_id ORDER BY attendance_date DESC");
-    $stmt->execute([':stu_id' => $student_id]);
+    $stmt = $studentConn->prepare("SELECT * FROM student_attendance WHERE student_id = :stu_id AND term = :term AND year = :year ORDER BY attendance_date DESC");
+    $stmt->execute([':stu_id' => $student_id, ':term' => $term, ':year' => $pee]);
     $attendanceRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $attendanceRows = [];
@@ -80,7 +80,7 @@ function thai_date($strDate) {
             <div class="container mx-auto px-4 py-6">
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h2 class="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
-                        ⏰ ตารางเวลาการมาเรียนของฉัน
+                        ⏰ ตารางเวลาการมาเรียนของฉัน ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?>
                     </h2>
                     <!-- Tabs -->
                     <div class="mb-6 border-b border-gray-200">
