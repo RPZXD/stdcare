@@ -308,7 +308,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DataTable
     if (window.DataTable) {
-        new DataTable('#attendanceTable', {
+        if (window.attendanceTableInstance) {
+            window.attendanceTableInstance.destroy();
+        }
+        window.attendanceTableInstance = new DataTable('#attendanceTable', {
+            destroy: true,
             perPage: 10,
             labels: {
                 placeholder: "ค้นหา...",
