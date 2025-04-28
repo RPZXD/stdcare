@@ -99,55 +99,59 @@ function thaiDateShort($date) {
 }
 ?>
 
-<div class="mb-4 flex flex-wrap gap-4 items-center" >
-    <div class="text-green-700 font-semibold">
-        สรุปการมาเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> วันที่ <?= htmlspecialchars(thaiDateShort($date)) ?>
-    </div>
-    <form method="get" class="flex items-center gap-2">
-        <input type="hidden" name="tab" value="summary-class">
-        <label for="date" class="text-gray-700">เลือกวันที่:</label>
-        <input type="date" id="date" name="date" value="<?= htmlspecialchars($date) ?>" class="border rounded px-2 py-1">
-        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">แสดง</button>
-    </form>
-    <button onclick="window.print()" class="ml-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 print:hidden">
-        🖨️ พิมพ์รายงานนี้
-    </button>
-</div>
-
-<!-- Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <?php foreach ($status_labels as $key => $info): ?>
-        <div class="rounded-lg shadow <?= $info['bg'] ?> p-4 flex flex-col">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="text-2xl"><?= $info['emoji'] ?></span>
-                <span class="font-bold <?= $info['text'] ?>"><?= $info['label'] ?></span>
-            </div>
-            <div class="text-3xl font-bold <?= $info['text'] ?>"><?= $status_count[$key] ?></div>
-            <div class="text-xs text-gray-500 mt-1">คิดเป็น <?= $total ? round($status_count[$key]*100/$total,1) : 0 ?>%</div>
+<div id="print-area">
+    <div class="mb-4 flex flex-wrap gap-4 items-center" >
+        <div class="text-green-700 font-semibold">
+            สรุปการมาเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> วันที่ <?= htmlspecialchars(thaiDateShort($date)) ?>
         </div>
-    <?php endforeach; ?>
-</div>
-
-<!-- Pie Chart -->
-<div class="mb-8 flex flex-col md:flex-row gap-8">
-    <div class="w-full md:w-1/3 flex justify-center items-center">
-        <canvas id="pieChart" width="180" height="180"></canvas>
+        <form method="get" class="flex items-center gap-2 print:hidden">
+            <input type="hidden" name="tab" value="summary-class">
+            <label for="date" class="text-gray-700">เลือกวันที่:</label>
+            <input type="date" id="date" name="date" value="<?= htmlspecialchars($date) ?>" class="border rounded px-2 py-1">
+            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">แสดง</button>
+        </form>
+        <button onclick="printReport()" class="ml-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 print:hidden">
+            🖨️ พิมพ์รายงานนี้
+        </button>
     </div>
-    <div class="w-full md:w-2/3">
+
+    <!-- Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 mb-6">
         <?php foreach ($status_labels as $key => $info): ?>
-            <div class="mb-3">
-                <div class="font-semibold <?= $info['text'] ?>"><?= $info['emoji'] ?> <?= $info['label'] ?> (<?= $status_count[$key] ?>)</div>
-                <?php if (!empty($status_names[$key])): ?>
-                    <ul class="list-disc ml-6 text-sm text-gray-700">
-                        <?php foreach ($status_names[$key] as $name): ?>
-                            <li><?= htmlspecialchars($name) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <div class="text-gray-400 text-xs ml-6">- ไม่มี -</div>
-                <?php endif; ?>
+            <div class="rounded-lg shadow <?= $info['bg'] ?> p-4 flex flex-col min-h-[110px]">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl"><?= $info['emoji'] ?></span>
+                    <span class="font-bold <?= $info['text'] ?>"><?= $info['label'] ?></span>
+                </div>
+                <div class="text-3xl font-bold <?= $info['text'] ?>"><?= $status_count[$key] ?></div>
+                <div class="text-xs text-gray-500 mt-1">คิดเป็น <?= $total ? round($status_count[$key]*100/$total,1) : 0 ?>%</div>
             </div>
         <?php endforeach; ?>
+    </div>
+
+    <!-- Pie Chart + รายชื่อ -->
+    <div class="flex flex-col md:flex-row print:flex-row gap-8 mb-8 print:mb-2">
+        <div class="w-full md:w-1/2 print:w-1/2 flex justify-center items-start">
+            <canvas id="pieChart" width="350" height="350" style="max-width:350px;max-height:350px;"></canvas>
+            <!-- สำหรับ print: แสดงรูป chart เป็นภาพแทน -->
+            <img id="pieChartImg" style="display:none;max-width:220px;margin:auto;" class="print:block hidden" />
+        </div>
+        <div class="w-full md:w-1/2 print:w-1/2">
+            <?php foreach ($status_labels as $key => $info): ?>
+                <div class="mb-2">
+                    <div class="font-semibold <?= $info['text'] ?>"><?= $info['emoji'] ?> <?= $info['label'] ?> (<?= $status_count[$key] ?>)</div>
+                    <?php if (!empty($status_names[$key])): ?>
+                        <ul class="list-disc ml-6 text-sm text-gray-700">
+                            <?php foreach ($status_names[$key] as $name): ?>
+                                <li><?= htmlspecialchars($name) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <div class="text-gray-400 text-xs ml-6">- ไม่มี -</div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
     </div>
 </div>
 
@@ -156,7 +160,7 @@ function thaiDateShort($date) {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var ctx = document.getElementById('pieChart').getContext('2d');
-    var chart = new Chart(ctx, {
+    window.pieChartObj = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: [
@@ -183,11 +187,59 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { font: { size: 16 } }
+                    labels: { font: { size: 14 } }
                 }
             }
         }
     });
+});
+
+// Print only report area, show chart as image when printing
+function printReport() {
+    var canvas = document.getElementById('pieChart');
+    var img = document.getElementById('pieChartImg');
+    if (canvas && img) {
+        // Chart.js อาจ render ไม่เสร็จ ให้ delay เล็กน้อย
+        setTimeout(function() {
+            img.src = canvas.toDataURL("image/png");
+            img.style.display = "block";
+            canvas.style.display = "none";
+            // พิมพ์เฉพาะส่วนรายงาน
+            let printContents = document.getElementById('print-area').innerHTML;
+            let originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+            window.location.reload();
+        }, 300);
+    } else {
+        // fallback
+        let printContents = document.getElementById('print-area').innerHTML;
+        let originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.location.reload();
+    }
+}
+
+// สำหรับ print ผ่าน Ctrl+P หรือเมนู browser
+window.addEventListener('beforeprint', function() {
+    var canvas = document.getElementById('pieChart');
+    var img = document.getElementById('pieChartImg');
+    if (canvas && img) {
+        img.src = canvas.toDataURL("image/png");
+        img.style.display = "block";
+        canvas.style.display = "none";
+    }
+});
+window.addEventListener('afterprint', function() {
+    var canvas = document.getElementById('pieChart');
+    var img = document.getElementById('pieChartImg');
+    if (canvas && img) {
+        img.style.display = "none";
+        canvas.style.display = "block";
+    }
 });
 </script>
 <style>
@@ -196,5 +248,48 @@ document.addEventListener('DOMContentLoaded', function() {
     body { background: #fff !important; }
     .content-header, .sidebar, .navbar, .footer, .wrapper > aside { display: none !important; }
     .content-wrapper, .container, .container-fluid { box-shadow: none !important; }
+    #print-area {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100vw !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+    }
+    .grid, .flex, .mb-4, .mb-6, .mb-8, .gap-4, .gap-8, .mt-4, .py-4, .px-4, .p-4, .rounded-lg, .shadow, .rounded, .min-h-\[110px\] {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 0.5rem !important;
+    }
+    .grid-cols-1, .md\:grid-cols-2, .print\:grid-cols-2 {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .w-full, .md\:w-1\/2, .print\:w-1\/2 {
+        width: 50% !important;
+        max-width: 50% !important;
+    }
+    canvas#pieChart {
+        display: none !important;
+    }
+    #pieChartImg {
+        display: block !important;
+        margin: 0 auto !important;
+        max-width: 220px !important;
+        max-height: 220px !important;
+        width: 220px !important;
+        height: 220px !important;
+    }
+    ul, ol {
+        margin-left: 1.2em !important;
+        font-size: 12px !important;
+    }
+    .mb-2, .mb-3, .mb-4, .mb-6, .mb-8 { margin-bottom: 0.5rem !important; }
+    .text-3xl { font-size: 1.5rem !important; }
+    .text-2xl { font-size: 1.2rem !important; }
+    .font-bold { font-weight: bold !important; }
+    .text-xs { font-size: 10px !important; }
+    .text-sm { font-size: 12px !important; }
+    .ml-6 { margin-left: 1em !important; }
 }
 </style>
