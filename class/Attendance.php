@@ -21,7 +21,7 @@ class Attendance {
     public function getStudentsWithAttendance($date, $class = null, $room = null, $term = null, $pee = null) {
         $query = "SELECT 
                     s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_status,
-                    a.id AS attendance_id, a.attendance_date, a.attendance_status, a.term, a.year, a.checked_by, a.device_id, a.reason
+                    a.id AS attendance_id, a.attendance_date, a.attendance_status, a.term, a.year, a.checked_by, a.device_id, a.reason, a.attendance_time
                   FROM {$this->table_student} s
                   LEFT JOIN {$this->table_attendance} a
                     ON s.Stu_id = a.student_id AND a.attendance_date = :date";

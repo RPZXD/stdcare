@@ -245,11 +245,18 @@ $pee = $user->getPee();
                                 <?php
                                 // เช็คจาก
                                 if (!empty($std['checked_by'])) {
-                                    echo $std['checked_by'] === 'system'
-                                        ? '<span class="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded">ครูที่ปรึกษา</span>'
-                                        : ($std['checked_by'] === 'rfid'
-                                            ? '<span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded">scan card</span>'
-                                            : htmlspecialchars($std['checked_by']));
+                                    if ($std['checked_by'] === 'system') {
+                                        echo '<span class="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded">ครูที่ปรึกษา</span>';
+                                    } elseif ($std['checked_by'] === 'rfid') {
+                                        $time = !empty($std['attendance_time']) ? date('H:i', strtotime($std['attendance_time'])) : null;
+                                        echo '<span class="inline-block px-2 py-1 bg-amber-100 text-gray-700 rounded">scan card';
+                                        if ($time !== null) {
+                                            echo ' <span class="text-xs text-gray-700 text-bold">เวลา: ' . htmlspecialchars($time) . ' น.</span>';
+                                        }
+                                        echo '</span>';
+                                    } else {
+                                        echo htmlspecialchars($std['checked_by']);
+                                    }
                                 } else {
                                     echo '-';
                                 }
