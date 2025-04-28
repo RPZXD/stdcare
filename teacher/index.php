@@ -68,80 +68,95 @@ require_once('header.php');
     <!-- /.content-header -->
 
 <section class="content">
-
-        <div class="container-fluid">
-            <div class="row">
-                <div class="w-full">
-                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center">
-                            <h4 class="text-lg font-semibold">ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name']. ' ' . $setting->getPageTitle()?></h4>
-                        </div>
-                    </div>
+    <div class="container-fluid">
+        <!-- Welcome -->
+        <div class="row mb-4">
+            <div class="w-full">
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 text-center rounded shadow">
+                    <h4 class="text-lg font-semibold">👩‍🏫 ยินดีต้อนรับคุณครู <?php echo $userData['Teach_name']. ' ' . $setting->getPageTitle()?></h4>
                 </div>
-                <div class="row justify-content-center">
-                <h3 class="text-lg font-semibold text-gray-900 mt-6">ยอดนักเรียนมาเรียน/ไม่มาเรียน</h3>
-
+            </div>
+        </div>
+        <!-- Card Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <!-- Attendance -->
+            <div class="bg-blue-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🗓️</span>
+                <div class="text-2xl font-bold text-blue-700"><?=$countAll?></div>
+                <div class="text-sm text-gray-700">นักเรียนทั้งหมด</div>
+                <div class="flex gap-2 mt-2">
+                    <span class="bg-green-200 text-green-800 px-2 py-1 rounded text-xs">✅ มาเรียน <?=$countStdCome?></span>
+                    <span class="bg-red-200 text-red-800 px-2 py-1 rounded text-xs">❌ ขาด <?=$countStdAbsent?></span>
                 </div>
-                    
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                    <div class="flex flex-wrap mt-4">
-                        <div class="w-full md:w-1/3 px-2 mb-4">
-                        <!-- small box -->
-                        <div class="bg-blue-500 text-white p-4 rounded-lg shadow">
-                            <div class="flex justify-between items-center">
-                            <h3 class="text-3xl font-bold"><?=$countAll?></h3>
-                            <i class="ion ion-person-add text-4xl"></i>
-                            </div>
-                            <p class="mt-2">จำนวนนักเรียนทั้งห้อง</p>
-                        </div>
-                        </div>
-                        <!-- ./col -->
-                        <div class="w-full md:w-1/3 px-2 mb-4">
-                        <!-- small box -->
-                        <div class="bg-green-500 text-white p-4 rounded-lg shadow">
-                            <div class="flex justify-between items-center">
-                            <h3 class="text-3xl font-bold"><?=$countStdCome?></h3>
-                            <i class="ion ion-person-add text-4xl"></i>
-                            </div>
-                            <p class="mt-2">มาเรียน</p>
-                        </div>
-                        </div>
+            </div>
+            <!-- Behavior -->
+            <div class="bg-yellow-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">📝</span>
+                <div class="text-2xl font-bold text-yellow-700" id="behaviorCount">-</div>
+                <div class="text-sm text-gray-700">พฤติกรรม (เดือนนี้)</div>
+            </div>
+            <!-- Visit Home -->
+            <div class="bg-purple-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🏠</span>
+                <div class="text-lg font-bold text-purple-700" id="visitCount">-</div>
+                <div class="text-sm text-gray-700">เยี่ยมบ้าน (ปีนี้)</div>
+            </div>
+            <!-- Poor Student -->
+            <div class="bg-pink-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">💸</span>
+                <div class="text-2xl font-bold text-pink-700" id="poorCount">-</div>
+                <div class="text-sm text-gray-700">นักเรียนยากจน</div>
+            </div>
+        </div>
 
-                        <div class="w-full md:w-1/3 px-2 mb-4">
-                        <!-- small box -->
-                        <div class="bg-red-500 text-white p-4 rounded-lg shadow">
-                            <div class="flex justify-between items-center">
-                            <h3 class="text-3xl font-bold"><?=$countStdAbsent?></h3>
-                            <i class="ion ion-person-add text-4xl"></i>
-                            </div>
-                            <p class="mt-2">ไม่มาเรียน</p>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
+        <!-- Card Summary 2 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <!-- SDQ -->
+            <div class="bg-green-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🧠</span>
+                <div class="text-lg font-bold text-green-700" id="sdqCount">-</div>
+                <div class="text-sm text-gray-700">SDQ ประเมินแล้ว</div>
+            </div>
+            <!-- EQ -->
+            <div class="bg-indigo-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🌈</span>
+                <div class="text-lg font-bold text-indigo-700" id="eqCount">-</div>
+                <div class="text-sm text-gray-700">EQ ประเมินแล้ว</div>
+            </div>
+            <!-- Screening -->
+            <div class="bg-orange-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🔎</span>
+                <div class="text-lg font-bold text-orange-700" id="screenCount">-</div>
+                <div class="text-sm text-gray-700">คัดกรอง11ด้านแล้ว</div>
+            </div>
+            <!-- Homeroom -->
+            <div class="bg-teal-100 rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-4xl mb-2">🏫</span>
+                <div class="text-lg font-bold text-teal-700" id="homeroomCount">-</div>
+                <div class="text-sm text-gray-700">กิจกรรมโฮมรูม</div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Attendance Donut -->
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center" style="min-height:320px;">
+                <h3 class="font-semibold mb-2">📊 สรุปการมาเรียน (วันนี้)</h3>
+                <div class="w-full flex-1 flex items-center justify-center">
+                    <canvas id="donutChart" style="max-height: 220px; max-width: 100%;"></canvas>
                 </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-8">
-
-                        <div class="w-full md:w-1/1 px-2 mb-4">
-                            <div class="card card-success">
-                                <div class="card-header">
-                                    <h3 class="card-title">สรุปการมาเรียนของนักเรียนประจำวันที่ <?=$currentDate2?></h3>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+            </div>
+            <!-- Behavior Bar -->
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center" style="min-height:320px;">
+                <h3 class="font-semibold mb-2">📝 กราฟพฤติกรรม (เทอมนี้)</h3>
+                <div class="w-full flex-1 flex items-center justify-center">
+                    <canvas id="behaviorChart" style="max-height: 220px; max-width: 100%;"></canvas>
                 </div>
-
-            </div><!-- /.container-fluid -->
-
+            </div>
+        </div>
+    </div>
 </section>
-    <!-- /.content -->
+<!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
     <?php require_once('../footer.php'); ?>
@@ -153,43 +168,126 @@ require_once('header.php');
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('donutChart').getContext('2d');
-    const donutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: ['#4BC0C0', '#FF6384', '#36A2EB', '#FFCE56', '#9966FF', '#FF9F40']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            let value = tooltipItem.raw || 0;
-                            return `${value} คน`; // เพิ่มหน่วย คน
+    // กราฟ donut การมาเรียน
+    const donutCanvas = document.getElementById('donutChart');
+    let donutChart = null;
+    if (donutCanvas) {
+        const ctx = donutCanvas.getContext('2d');
+        donutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: ['#4BC0C0', '#FF6384', '#36A2EB', '#FFCE56', '#9966FF', '#FF9F40']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                let value = tooltipItem.raw || 0;
+                                return `${value} คน`;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
 
-    function fetchData() {
-        fetch(`api/fetch_chart_studentcome.php?class=<?=$class?>&room=<?=$room?>&date=<?=$currentDate?>`)
-            .then(response => response.json())
-            .then(data => {
-                donutChart.data.labels = data.map(item => item.status_name);
-                donutChart.data.datasets[0].data = data.map(item => parseFloat(item.count_total)); // แปลงเป็นตัวเลข
-                donutChart.update();
-            });
+        function fetchData() {
+            fetch(`api/fetch_chart_studentcome.php?class=<?=$class?>&room=<?=$room?>&date=<?=$currentDate?>`)
+                .then(response => response.json())
+                .then(data => {
+                    donutChart.data.labels = data.map(item => item.status_name);
+                    donutChart.data.datasets[0].data = data.map(item => parseFloat(item.count_total));
+                    donutChart.update();
+                });
+        }
+        fetchData();
     }
 
-    fetchData(); // Initial fetch
+    // กราฟพฤติกรรม
+    const behaviorCanvas = document.getElementById('behaviorChart');
+    let behaviorChart = null;
+    if (behaviorCanvas) {
+        const behaviorCtx = behaviorCanvas.getContext('2d');
+        behaviorChart = new Chart(behaviorCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'จำนวนเหตุการณ์',
+                    data: [],
+                    backgroundColor: '#FFB300'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        function fetchBehaviorData() {
+            fetch(`api/fetch_chart_behavior.php?class=<?=$class?>&room=<?=$room?>&term=<?=$term?>&pee=<?=$pee?>`)
+                .then(response => response.json())
+                .then(data => {
+                    behaviorChart.data.labels = data.map(item => item.behavior_type);
+                    behaviorChart.data.datasets[0].data = data.map(item => parseInt(item.count_total));
+                    behaviorChart.update();
+                });
+        }
+        fetchBehaviorData();
+    }
+
+    // Fetch and update card summary (AJAX)
+    fetch('api/fetch_dashboard_summary.php?class=<?=$class?>&room=<?=$room?>&term=<?=$term?>&pee=<?=$pee?>')
+        .then(res => res.json())
+        .then(data => {
+            // พฤติกรรม (เดือนนี้)
+            document.getElementById('behaviorCount').textContent = data.behavior_count ?? '-';
+            // เยี่ยมบ้าน (แสดงรวม 2 เทอม)
+            let visitText = '-';
+            if (typeof data.visit_count_t1 !== 'undefined' && typeof data.visit_count_t2 !== 'undefined') {
+                visitText = `เทอม1: ${data.visit_count_t1} | เทอม2: ${data.visit_count_t2}`;
+            } else if (typeof data.visit_count !== 'undefined') {
+                visitText = data.visit_count;
+            }
+            document.getElementById('visitCount').textContent = visitText;
+            // นักเรียนยากจน
+            document.getElementById('poorCount').textContent = data.poor_count ?? '-';
+            // SDQ (แสดงรวม 2 เทอม)
+            let sdqText = '-';
+            if (typeof data.sdq_count_t1 !== 'undefined' && typeof data.sdq_count_t2 !== 'undefined') {
+                sdqText = `เทอม1: ${data.sdq_count_t1} | เทอม2: ${data.sdq_count_t2}`;
+            } else if (typeof data.sdq_count !== 'undefined') {
+                sdqText = data.sdq_count;
+            }
+            document.getElementById('sdqCount').textContent = sdqText;
+            // EQ (แสดงรวม 2 เทอม)
+            let eqText = '-';
+            if (typeof data.eq_count_t1 !== 'undefined' && typeof data.eq_count_t2 !== 'undefined') {
+                eqText = `เทอม1: ${data.eq_count_t1} | เทอม2: ${data.eq_count_t2}`;
+            } else if (typeof data.eq_count !== 'undefined') {
+                eqText = data.eq_count;
+            }
+            document.getElementById('eqCount').textContent = eqText;
+            // Screening (แสดงรวม 2 เทอม)
+            let screenText = '-';
+            if (typeof data.screen_count_t1 !== 'undefined' && typeof data.screen_count_t2 !== 'undefined') {
+                screenText = `เทอม1: ${data.screen_count_t1} | เทอม2: ${data.screen_count_t2}`;
+            } else if (typeof data.screen_count !== 'undefined') {
+                screenText = data.screen_count;
+            }
+            document.getElementById('screenCount').textContent = screenText;
+            // Homeroom
+            document.getElementById('homeroomCount').textContent = data.homeroom_count ?? '-';
+        });
 });
 </script>
 </body>

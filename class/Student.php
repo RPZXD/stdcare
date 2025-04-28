@@ -298,12 +298,12 @@ class Student {
     
         $query = "SELECT 
                         COUNT(*) AS total_count 
-                  FROM study AS st 
-                  INNER JOIN student AS s ON st.Stu_id = s.Stu_id 
+                  FROM student_attendance AS st 
+                  INNER JOIN student AS s ON st.student_id = s.Stu_id 
                   WHERE s.Stu_major = ? 
                   AND s.Stu_room = ?
-                  AND st.Study_status IN ($placeholders)
-                  AND st.Study_date = ?";
+                  AND st.attendance_status IN ($placeholders)
+                  AND st.attendance_date = ?";
     
         $statement = $this->conn->prepare($query);
     
