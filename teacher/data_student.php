@@ -275,6 +275,7 @@ async function loadStudentData() {
                             <div class="flex space-x-2">
                                 <button class="btn btn-primary bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 btn-view" data-id="${item.Stu_id}">👀 ดู</button>
                                 <button class="btn btn-warning bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 btn-edit" data-id="${item.Stu_id}">✏️ แก้ไข</button>
+                                <button class="btn btn-info bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 btn-edit-profile-pic" data-id="${item.Stu_id}">🖼️ รูป</button>
                             </div>
                         </div>
                     </div>
@@ -335,6 +336,52 @@ $(document).on('click', '.btn-edit', function() {
         success: function(response) {
             $('#editStudentModal .modal-body').html(response);
             $('#editStudentModal').modal('show');
+        }
+    });
+});
+
+// เพิ่ม event สำหรับปุ่มแก้ไขรูปโปรไฟล์
+$(document).on('click', '.btn-edit-profile-pic', function() {
+    var stuId = $(this).data('id');
+    Swal.fire({
+        title: 'เปลี่ยนรูปโปรไฟล์',
+        html: '<input type="file" id="profilePicInput" accept="image/*" class="swal2-input">',
+        showCancelButton: true,
+        confirmButtonText: 'อัปโหลด',
+        cancelButtonText: 'ยกเลิก',
+        preConfirm: () => {
+            const fileInput = Swal.getPopup().querySelector('#profilePicInput');
+            if (!fileInput.files[0]) {
+                Swal.showValidationMessage('กรุณาเลือกรูปภาพ');
+                return false;
+            }
+            return fileInput.files[0];
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            var formData = new FormData();
+            formData.append('profile_pic', result.value);
+            formData.append('Stu_id', stuId);
+            $.ajax({
+                url: 'api/update_profile_pic_std.php',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        Swal.fire('สำเร็จ', 'อัปโหลดรูปโปรไฟล์เรียบร้อยแล้ว', 'success').then(() => {
+                            loadStudentData();
+                        });
+                    } else {
+                        Swal.fire('ผิดพลาด', res.message || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาด', 'error');
+                }
+            });
         }
     });
 });
