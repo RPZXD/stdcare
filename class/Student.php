@@ -384,9 +384,64 @@ class Student {
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
 
-  
+    // ฟังก์ชันสำหรับนักเรียนแก้ไขข้อมูลตนเอง
+    public function updateStudentInfoByStudent($stu_id, $data) {
+        $sql = "UPDATE {$this->table_student} SET
+            Stu_sex = :Stu_sex,
+            Stu_pre = :Stu_pre,
+            Stu_name = :Stu_name,
+            Stu_sur = :Stu_sur,
+            Stu_major = :Stu_major,
+            Stu_room = :Stu_room,
+            Stu_nick = :Stu_nick,
+            Stu_birth = :Stu_birth,
+            Stu_religion = :Stu_religion,
+            Stu_blood = :Stu_blood,
+            Stu_addr = :Stu_addr,
+            Stu_phone = :Stu_phone,
+            Father_name = :Father_name,
+            Father_occu = :Father_occu,
+            Father_income = :Father_income,
+            Mother_name = :Mother_name,
+            Mother_occu = :Mother_occu,
+            Mother_income = :Mother_income,
+            Par_name = :Par_name,
+            Par_relate = :Par_relate,
+            Par_occu = :Par_occu,
+            Par_income = :Par_income,
+            Par_addr = :Par_addr,
+            Par_phone = :Par_phone
+        WHERE Stu_id = :Stu_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':Stu_id', $stu_id);
+        $stmt->bindValue(':Stu_sex', $data['Stu_sex']);
+        $stmt->bindValue(':Stu_pre', $data['Stu_pre']);
+        $stmt->bindValue(':Stu_name', $data['Stu_name']);
+        $stmt->bindValue(':Stu_sur', $data['Stu_sur']);
+        $stmt->bindValue(':Stu_major', $data['Stu_major']);
+        $stmt->bindValue(':Stu_room', $data['Stu_room']);
+        $stmt->bindValue(':Stu_nick', $data['Stu_nick']);
+        $stmt->bindValue(':Stu_birth', $data['Stu_birth']);
+        $stmt->bindValue(':Stu_religion', $data['Stu_religion']);
+        $stmt->bindValue(':Stu_blood', $data['Stu_blood']);
+        $stmt->bindValue(':Stu_addr', $data['Stu_addr']);
+        $stmt->bindValue(':Stu_phone', $data['Stu_phone']);
+        $stmt->bindValue(':Father_name', $data['Father_name']);
+        $stmt->bindValue(':Father_occu', $data['Father_occu']);
+        $stmt->bindValue(':Father_income', $data['Father_income']);
+        $stmt->bindValue(':Mother_name', $data['Mother_name']);
+        $stmt->bindValue(':Mother_occu', $data['Mother_occu']);
+        $stmt->bindValue(':Mother_income', $data['Mother_income']);
+        $stmt->bindValue(':Par_name', $data['Par_name']);
+        $stmt->bindValue(':Par_relate', $data['Par_relate']);
+        $stmt->bindValue(':Par_occu', $data['Par_occu']);
+        $stmt->bindValue(':Par_income', $data['Par_income']);
+        $stmt->bindValue(':Par_addr', $data['Par_addr']);
+        $stmt->bindValue(':Par_phone', $data['Par_phone']);
+        return $stmt->execute();
+    }
 
 }
+
 ?>

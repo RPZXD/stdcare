@@ -57,11 +57,11 @@ echo "<br>";
 
 $menuItems = [
     ['href' => 'index.php', 'icon' => 'fas fa-home', 'text' => 'หน้าหลัก'],
-    // Sub-menu for "ข้อมูล"
+    ['href' => 'std_information.php', 'icon' => 'fas fa-user-graduate', 'text' => 'ข้อมูลนักเรียน'], // เพิ่มเป็นเมนูหลัก
+    // Sub-menu for "ข้อมูล" (ลบ 'ข้อมูลนักเรียน' ออก)
     ['submenu' => true, 'icon' => 'fas fa-database', 'text' => 'ข้อมูล', 'items' => [
         ['href' => 'std_checktime.php', 'text' => 'ข้อมูลเวลาเรียน'],
         ['href' => 'std_roomdata.php', 'text' => 'ข้อมูลห้องเรียน'],
-        ['href' => 'std_information.php', 'text' => 'ข้อมูลนักเรียน'],
         ['href' => 'std_behavior.php', 'text' => 'คะแนนพฤติกรรม'],
         ['href' => 'std_search_data.php', 'text' => 'ค้นหาข้อมูล'],
     ]],

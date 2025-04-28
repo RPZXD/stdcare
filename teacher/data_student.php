@@ -87,6 +87,23 @@ require_once('header.php');
                     </div>
                 </div>
 
+                <!-- Slide Switch for Allowing Student Edit -->
+                <div class="row justify-content-left mb-4">
+                    <div class="col-md-6 flex items-center justify-center">
+                        <span class="mr-3 text-lg">🙅‍♂️</span>
+                        <label for="allowEditSwitch" class="inline-flex relative items-center cursor-pointer">
+                            <input type="checkbox" id="allowEditSwitch" class="sr-only peer">
+                            <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:bg-green-400 transition-all duration-300"></div>
+                            <div class="absolute left-0.5 top-0.5 bg-white border border-gray-300 h-6 w-6 rounded-full transition-all duration-300 peer-checked:translate-x-7 flex items-center justify-center text-xl">
+                                <span id="switchEmoji" class="text-xs">🔒</span>
+                            </div>
+                        </label>
+                        <span class="ml-3 text-lg">🙆‍♀️</span>
+                        <span class="ml-4 text-base font-medium" id="editStatusText">ปิดให้นักเรียนแก้ไขข้อมูล</span>
+                    </div>
+                </div>
+                <!-- End Slide Switch -->
+
                 <div class="row justify-content-center">
                     <div id="showDataStudent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- การ์ดนักเรียนจะถูกแทรกที่นี่ -->
@@ -154,6 +171,63 @@ require_once('header.php');
 <script>
 $(document).ready(function() {
 
+// --- Slide Switch Logic (Backend sync, per room) ---
+function updateSwitchUI(isAllowed, by, timestamp) {
+    $('#allowEditSwitch').prop('checked', isAllowed);
+    $('#switchEmoji').text(isAllowed ? '🔓' : '🔒');
+    $('#editStatusText').text(
+        isAllowed
+            ? 'เปิดให้นักเรียนแก้ไขข้อมูล'
+            : 'ปิดให้นักเรียนแก้ไขข้อมูล'
+    );
+    if (by && timestamp) {
+        $('#editStatusText').append(
+            `<br><span class="text-xs text-gray-500">โดย ${by} (${timestamp})</span>`
+        );
+    }
+}
+
+function getRoomKey(cls, rm) {
+    return cls + '-' + rm;
+}
+
+function fetchEditPermission() {
+    const classValue = <?= json_encode($class) ?>;
+    const roomValue = <?= json_encode($room) ?>;
+    const roomKey = getRoomKey(classValue, roomValue);
+    $.get('api/get_student_edit_permission.php', {
+        room_key: roomKey
+    }, function(res) {
+        // ป้องกันการลบข้อมูลห้องอื่น: ต้องให้ backend อัปเดตเฉพาะ key ที่ส่งมา ไม่เขียนทับทั้งไฟล์
+        let isAllowed = false, by = '', timestamp = '';
+        try {
+            const data = typeof res === 'string' ? JSON.parse(res) : res;
+            isAllowed = !!data.allowEdit;
+            by = data.by || '';
+            timestamp = data.timestamp || '';
+        } catch(e) {}
+        updateSwitchUI(isAllowed, by, timestamp);
+    });
+}
+
+$('#allowEditSwitch').on('change', function() {
+    const classValue = <?= json_encode($class) ?>;
+    const roomValue = <?= json_encode($room) ?>;
+    const roomKey = getRoomKey(classValue, roomValue);
+    const isAllowed = $(this).is(':checked') ? 1 : 0;
+    $.post('api/set_student_edit_permission.php', {
+        room_key: roomKey,
+        allowEdit: isAllowed,
+        by: <?= json_encode($teacher_name) ?>
+    }, function(res) {
+        // ป้องกันการลบข้อมูลห้องอื่น: ต้องให้ backend อัปเดตเฉพาะ key ที่ส่งมา ไม่เขียนทับทั้งไฟล์
+        fetchEditPermission();
+    });
+});
+
+fetchEditPermission();
+// --- End Slide Switch Logic (Backend sync, per room) ---
+
 async function loadStudentData() {
     try {
         var classValue = <?=$class?>;
@@ -215,8 +289,6 @@ async function loadStudentData() {
     }
 }
 
-loadStudentData();
-
 // ฟิลเตอร์การ์ดนักเรียนแบบ client-side
 $('#studentSearch').on('input', function() {
     const val = $(this).val().trim().toLowerCase();
@@ -275,9 +347,8 @@ $('#saveChanges').on('click', function() {
         data: formData,
         success: function(response) {
             $('#editStudentModal').modal('hide');
-            Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success').then(() => {
-                location.reload();
-            });
+            Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+            loadStudentData(); // โหลดข้อมูลใหม่ ไม่ต้อง reload ทั้งหน้า
         },
         error: function(xhr, status, error) {
             Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
@@ -285,7 +356,7 @@ $('#saveChanges').on('click', function() {
     });
 });
 
-
+// เรียก loadStudentData() แค่ครั้งเดียว
 loadStudentData(); // Load data when page is loaded
 });
 </script>

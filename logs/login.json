@@ -785,5 +785,19 @@
         "action_type": "login_success",
         "session_id": "o7e699hac5hg3kc9enuut1tmrv",
         "message": "Login successful"
+    },
+    {
+        "user_id": "26479",
+        "role": "Student",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-28T18:28:44+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "qj5fhambg4rt73oc0kmvg3qtmn",
+        "message": "Student login successful"
     }
 ]
