@@ -308,10 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DataTable
     if (window.DataTable) {
-        if (window.attendanceTableInstance) {
-            window.attendanceTableInstance.destroy();
-        }
-        window.attendanceTableInstance = new DataTable('#attendanceTable', {
+        new DataTable('#attendanceTable', {
             destroy: true,
             perPage: 10,
             labels: {
