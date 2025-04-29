@@ -125,7 +125,7 @@ try {
         $student->StuClass = $std_class;
         $student->StuRoom = $std_room;
         $student->NickName = '';
-        $student->Birth = '';
+        $student->Birth = '0000-00-00';
         $student->Religion = '';
         $student->Blood = '';
         $student->Addr = '';
