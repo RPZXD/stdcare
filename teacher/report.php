@@ -88,20 +88,23 @@ require_once('header.php');
               </div>
               <div class="mt-4">
                 <ul class="space-y-2">
-                  <!-- <li><a href="#" class="text-blue-500 hover:underline">🏠 รายงานโฮมรูมรายห้อง</a></li>
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">🏠 รายงานโฮมรูมรายห้อง</a></li> -->
+
                   <li><a href="report_study_late.php" class="text-blue-500 hover:underline">⏳ รายงานการมาสาย-ขาดเรียนรายห้อง</a></li>
-                  <li><a href="report_study_day.php" class="text-blue-500 hover:underline">📅 เวลาเรียนประจำวัน</a></li>
-                  <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li>
-                  <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li>
-                  <li><a href="report_study_leave.php" class="text-blue-500 hover:underline">🚫 รายชื่อนักเรียนที่ไม่มาเรียน</a></li> -->
+                  <!-- <li><a href="report_study_day.php" class="text-blue-500 hover:underline">📅 เวลาเรียนประจำวัน</a></li> -->
+                  <!-- <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li> -->
+                  <!-- <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li> -->
+                  <!-- <li><a href="report_study_leave.php" class="text-blue-500 hover:underline">🚫 รายชื่อนักเรียนที่ไม่มาเรียน</a></li> -->
+                   
                   <li><a href="report_board_parent.php" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 รายงานรายชื่อประธานเครือข่ายผู้ปกครองระดับชั้น</a></li>
-                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📈 SDQ (นักเรียนประเมิน)</a></li>
-                  <li><a href="#" class="text-blue-500 hover:underline">📉 SDQ (ครูประเมิน)</a></li>
-                  <li><a href="#" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 SDQ (ผู้ปกครองประเมิน)</a></li>
-                  <li><a href="#" class="text-blue-500 hover:underline">🔄 SDQ (รวมทั้ง 3 ฉบับ)</a></li>
-                  <li><a href="#" class="text-blue-500 hover:underline">📊 สรุป SDQ 3 ฉบับ(ย้อนหลัง)</a></li>
-                  <li><a href="#" class="text-blue-500 hover:underline">📊 สรุปสถิติการคัดกรองนักเรียน</a></li>
-                </ul> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📈 SDQ (นักเรียนประเมิน)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📈 SDQ (นักเรียนประเมิน)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📉 SDQ (ครูประเมิน)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 SDQ (ผู้ปกครองประเมิน)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">🔄 SDQ (รวมทั้ง 3 ฉบับ)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📊 สรุป SDQ 3 ฉบับ(ย้อนหลัง)</a></li> -->
+                  <!-- <li><a href="#" class="text-blue-500 hover:underline">📊 สรุปสถิติการคัดกรองนักเรียน</a></li> -->
+                </ul>
               </div>
             </div>
           </div>

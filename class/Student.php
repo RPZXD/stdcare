@@ -442,6 +442,16 @@ class Student {
         return $stmt->execute();
     }
 
+    // คืนค่าเบอร์โทรศัพท์ผู้ปกครองจาก Stu_id
+    public function getParentTel($stu_id) {
+        $query = "SELECT Par_phone FROM {$this->table_student} WHERE Stu_id = :stu_id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':stu_id', $stu_id);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row && !empty($row['Par_phone']) ? $row['Par_phone'] : null;
+    }
+
 }
 
 ?>

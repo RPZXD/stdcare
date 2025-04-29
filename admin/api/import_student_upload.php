@@ -104,7 +104,21 @@ try {
         $student->StuId = $std_id;
         $student->StuNo = $std_no;
         $student->StuPass = $std_id; // ตั้งรหัสผ่านเริ่มต้นเป็นเลขประจำตัว
-        $student->StuSex = ''; // ไม่ได้ระบุในไฟล์
+
+        // กำหนด StuSex ตาม Stu_pre
+        switch ($std_pre) {
+            case 'เด็กชาย':
+            case 'นาย':
+                $student->StuSex = '1';
+                break;
+            case 'เด็กหญิง':
+            case 'นางสาว':
+                $student->StuSex = '2';
+                break;
+            default:
+                $student->StuSex = '';
+        }
+
         $student->PreStu = $std_pre;
         $student->NameStu = $std_name;
         $student->SurStu = $std_sur;
