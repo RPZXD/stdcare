@@ -62,6 +62,8 @@ try {
 // SDQ (นับคนที่ประเมินแล้ว) - แยก 2 เทอม
 try {
     $sdq = new SDQ($db);
+    // Potential bottleneck: If getSDQByClassAndRoom fetches all terms and filters in PHP, it's slow.
+    // Suggestion: Ensure this method filters by term in SQL.
     $data1 = $sdq->getSDQByClassAndRoom($class, $room, $pee, 1);
     $data2 = $sdq->getSDQByClassAndRoom($class, $room, $pee, 2);
     $count1 = 0; $count2 = 0;
@@ -78,6 +80,7 @@ try {
 // EQ (นับคนที่ประเมินแล้ว) - แยก 2 เทอม
 try {
     $eq = new EQ($db);
+    // Potential bottleneck: Same as above, check getEQByClassAndRoom implementation.
     $data1 = $eq->getEQByClassAndRoom($class, $room, $pee, 1);
     $data2 = $eq->getEQByClassAndRoom($class, $room, $pee, 2);
     $count1 = 0; $count2 = 0;
@@ -94,15 +97,16 @@ try {
 // Screening (นับคนที่คัดกรอง 11 ด้านแล้ว) - แยก 2 เทอม
 try {
     $screen = new ScreeningData($db);
-    // สมมติว่ามี field term ใน student_screening ถ้าไม่มีให้ใช้ pee อย่างเดียว
-    $data1 = $screen->getScreenByClassAndRoom($class, $room, $pee);
-    $data2 = $screen->getScreenByClassAndRoom($class, $room, $pee);
+    // Potential bottleneck: getScreenByClassAndRoom called twice, but both times with same params.
+    // If this method fetches all terms and filters in PHP, it's slow.
+    $data1 = $screen->getScreenByClassAndRoom($class, $room, $pee, 1); // Pass term as param if possible
+    $data2 = $screen->getScreenByClassAndRoom($class, $room, $pee, 2);
     $count1 = 0; $count2 = 0;
     foreach ($data1 as $row) {
-        if ($row['screen_ishave'] ?? 0 && ($row['term'] ?? 1) == 1) $count1++;
+        if ($row['screen_ishave'] ?? 0) $count1++;
     }
     foreach ($data2 as $row) {
-        if ($row['screen_ishave'] ?? 0 && ($row['term'] ?? 2) == 2) $count2++;
+        if ($row['screen_ishave'] ?? 0) $count2++;
     }
     $result["screen_count_t1"] = $count1;
     $result["screen_count_t2"] = $count2;
