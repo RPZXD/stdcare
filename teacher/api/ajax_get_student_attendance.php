@@ -1,8 +1,15 @@
 <?php
 require_once("../../config/Database.php");
+require_once("../../class/UserLogin.php");
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
+
+$user = new UserLogin($db);
+
+$term = $user->getTerm();
+$pee = $user->getPee();
+
 
 $stu_id = isset($_GET['stu_id']) ? $_GET['stu_id'] : '';
 
@@ -16,8 +23,10 @@ if (!$stu_id) {
 $stmt = $db->prepare("SELECT attendance_date, attendance_status, reason 
                       FROM student_attendance 
                       WHERE student_id = :stu_id 
+                      AND attendance_term = :term
+                        AND attendance_year = :year
                       ORDER BY attendance_date DESC");
-$stmt->execute([':stu_id' => $stu_id]);
+$stmt->execute([':stu_id' => $stu_id, ':term' => $term, ':year' => $pee]);
 $records = [];
 $summary = [
     'present' => 0,
