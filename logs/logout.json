@@ -476,5 +476,47 @@
         "action_type": "logout",
         "session_id": "o7e699hac5hg3kc9enuut1tmrv",
         "message": "Logout successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "ADM",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-30T03:12:17+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/teacher\/information.php",
+        "action_type": "logout",
+        "session_id": "o7e699hac5hg3kc9enuut1tmrv",
+        "message": "Logout successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "ADM",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-30T05:55:54+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/admin\/data_teacher.php",
+        "action_type": "logout",
+        "session_id": "o7e699hac5hg3kc9enuut1tmrv",
+        "message": "Logout successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "ADM",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-04-30T06:36:36+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/teacher\/index.php",
+        "action_type": "logout",
+        "session_id": "o7e699hac5hg3kc9enuut1tmrv",
+        "message": "Logout successful"
     }
 ]

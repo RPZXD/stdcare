@@ -11,9 +11,6 @@
         <a href="https://www.facebook.com/PhichaischoolSec39" target="_blank" class="text-blue-600 dark:text-blue-400">
             <i class="fab fa-facebook fa-lg"></i>
         </a>
-        <!-- <a href="https://www.tiktok.com/@YOUR_TIKTOK_USERNAME" target="_blank" class="text-black">
-            <i class="fab fa-tiktok fa-lg"></i>
-        </a> -->
     </div>
 </footer>
 
