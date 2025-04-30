@@ -242,7 +242,7 @@ require_once('header.php');
                         <select class="form-control text-center" name="editrole_std" id="editrole_std">
                             <option value="">-- โปรดเลือกบทบาท --</option>
                             <option value="T">ครู</option>
-                            <option value="HOD">หัวหน้าแผนก/กลุ่มสาระ</option>
+                            <option value="OF">เจ้าหน้าที่</option>
                             <option value="VP">รองผู้อำนวยการ</option>
                             <option value="DIR">ผู้อำนวยการ</option>
                             <option value="ADM">Admin</option>
