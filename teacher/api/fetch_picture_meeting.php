@@ -28,13 +28,16 @@ try {
     $pictures = [];
     if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // เพิ่มรูปภาพที่ไม่ใช่ NULL ลงในอาร์เรย์
+        $idx = 0;
         foreach (['picture1', 'picture2', 'picture3', 'picture4'] as $pictureColumn) {
             if (!empty($row[$pictureColumn])) {
                 $pictures[] = [
                     'url' => '../teacher/uploads/picmeeting'.$term.$pee.'/'.$row[$pictureColumn],
-                    'alt' => "$pictureColumn"
+                    'alt' => "$pictureColumn",
+                    'id' => $idx // เพิ่ม index สำหรับลบ
                 ];
             }
+            $idx++;
         }
     }
 

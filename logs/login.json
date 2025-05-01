@@ -1009,5 +1009,33 @@
         "action_type": "login_success",
         "session_id": "om84s8v4kqt58m8s87uebqr6bm",
         "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "Admin",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-01T02:26:32+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "12crtv8cr6lne8btrv7eblk5mv",
+        "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "Teacher",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-01T09:34:12+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "12crtv8cr6lne8btrv7eblk5mv",
+        "message": "Login successful"
     }
 ]

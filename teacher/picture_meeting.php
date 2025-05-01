@@ -159,6 +159,7 @@ require_once('header.php');
 
 <?php require_once('script.php');?>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     const classId = <?= $class ?>;
@@ -226,20 +227,65 @@ $(document).ready(function() {
         success: function(response) {
             if (response.success && response.data.length > 0) {
                 const pictureGrid = $('#pictureGrid');
-                response.data.forEach(picture => {
+                response.data.forEach((picture, idx) => {
                     const imgElement = `
-                        <a href="${picture.url}" target="_blank" rel="noopener noreferrer">
-                            <img src="${picture.url}" alt="${picture.alt}"
-                                class="w-full max-w-[600px] h-auto max-h-[300px] rounded shadow-md border border-black object-cover mx-auto" />
-                        </a>
+                        <div class="flex flex-col items-center mb-4">
+                            <a href="${picture.url}" target="_blank" rel="noopener noreferrer">
+                                <img src="${picture.url}" alt="${picture.alt}"
+                                    class="w-full max-w-[600px] h-auto max-h-[300px] rounded shadow-md border border-black object-cover mx-auto" />
+                            </a>
+                            <button class="btn btn-danger mt-2 delete-picture-btn" data-id="${picture.id || idx}">
+                                <i class="fa fa-trash"></i> ลบรูป
+                            </button>
+                        </div>
                     `;
                     pictureGrid.append(imgElement);
+                });
+
+                // Attach delete handler
+                $('.delete-picture-btn').on('click', function() {
+                    const pictureIdx = $(this).data('id');
+                    Swal.fire({
+                        title: 'ยืนยันการลบ',
+                        text: 'คุณต้องการลบรูปภาพนี้ใช่หรือไม่?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'ใช่, ลบเลย!',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: 'api/delete_picture_meeting.php',
+                                method: 'POST',
+                                data: { id: pictureIdx, class: classId, room: roomId, term: termValue, pee: PeeValue },
+                                dataType: 'json',
+                                success: function(res) {
+                                    if (res.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'ลบรูปภาพสำเร็จ',
+                                            showConfirmButton: false,
+                                            timer: 1200
+                                        }).then(() => location.reload());
+                                    } else {
+                                        Swal.fire('เกิดข้อผิดพลาด', res.message, 'error');
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire('เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบรูปภาพ', 'error');
+                                }
+                            });
+                        }
+                    });
                 });
             } else {
                 $('#pictureGrid').html('<p class="text-center text-gray-500">ไม่มีรูปภาพที่จะแสดง</p>');
             }
         },
         error: function() {
+            Swal.fire('เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการโหลดรูปภาพ', 'error');
             $('#pictureGrid').html('<p class="text-center text-red-500">เกิดข้อผิดพลาดในการโหลดรูปภาพ</p>');
         }
     });
@@ -260,16 +306,21 @@ $(document).ready(function() {
             data: formData,
             processData: false,
             contentType: false,
+            dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    alert('อัปโหลดรูปภาพสำเร็จ');
-                    location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อัปโหลดรูปภาพสำเร็จ',
+                        showConfirmButton: false,
+                        timer: 1200
+                    }).then(() => location.reload());
                 } else {
-                    alert('เกิดข้อผิดพลาด: ' + response.message);
+                    Swal.fire('เกิดข้อผิดพลาด', response.message, 'error');
                 }
             },
             error: function() {
-                alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+                Swal.fire('เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ', 'error');
             }
         });
     });

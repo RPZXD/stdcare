@@ -546,5 +546,24 @@
         "action_type": "logout",
         "session_id": "om84s8v4kqt58m8s87uebqr6bm",
         "message": "Logout successful"
+    },
+    {
+        "user_id": {
+            "Teach_id": "1052",
+            "Teach_name": "\u0e19\u0e32\u0e22\u0e17\u0e34\u0e27\u0e32  \u0e40\u0e23\u0e37\u0e2d\u0e07\u0e28\u0e23\u0e35",
+            "role_edoc": "ADM",
+            "Teach_photo": "1052_R42vg3.jpg"
+        },
+        "role": "\u0e04\u0e23\u0e39",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-01T09:34:05+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/admin\/index.php",
+        "action_type": "logout",
+        "session_id": "12crtv8cr6lne8btrv7eblk5mv",
+        "message": "Logout successful"
     }
 ]
