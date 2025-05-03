@@ -67,7 +67,6 @@ $choices = [
                             <?php foreach ($choices as $value => $label): ?>
                                 <label class="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="<?= $id ?>" value="<?= $value ?>" required class="form-radio text-blue-600">
-                                    <span><?= $label ?></span>
                                 </label>
                             <?php endforeach; ?>
                         </div>
