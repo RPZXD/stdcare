@@ -15,6 +15,6 @@ echo createNavItem('statistics.php', 'fas fa-chart-bar ', 'สถิติกา
 // echo createNavItem('show_attendance.php', 'fas fa-credit-card ', 'SCANRFID');
 echo createNavItem('annouce.php', 'fas fa-tasks', 'การดำเนินการ');
 echo createNavItem('login.php', 'fas fa-sign-in-alt', 'ลงชื่อเข้าสู่ระบบ');
-echo createNavItem('', 'fas fa-ticket-alt', 'ระบบกิจกรรม');
+echo createNavItem('https://eventstd.phichai.ac.th', 'fas fa-ticket-alt', 'ระบบกิจกรรม');
 
 ?>
