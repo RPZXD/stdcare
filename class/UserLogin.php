@@ -20,7 +20,7 @@ class UserLogin {
     }
 
     public function userNotExists() {
-        $query = "SELECT Teach_id FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT Teach_id FROM {$this->table_teacher} WHERE Teach_id = :user AND Teach_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -29,7 +29,7 @@ class UserLogin {
     }
 
     public function verifyPassword() {
-        $query = "SELECT Teach_id, password FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT Teach_id, password FROM {$this->table_teacher} WHERE Teach_id = :user AND Teach_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -60,7 +60,7 @@ class UserLogin {
     }
 
     public function getUserRole() {
-        $query = "SELECT role_std FROM {$this->table_teacher} WHERE Teach_id = :user LIMIT 1";
+        $query = "SELECT role_std FROM {$this->table_teacher} WHERE Teach_id = :user AND Teach_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -74,7 +74,7 @@ class UserLogin {
 
     // เปลี่ยน getUserRoleStudent ให้คืน Stu_status
     public function getUserRoleStudent() {
-        $query = "SELECT Stu_status FROM {$this->table_student} WHERE Stu_id = :user LIMIT 1";
+        $query = "SELECT Stu_status FROM {$this->table_student} WHERE Stu_id = :user AND Stu_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -143,7 +143,7 @@ class UserLogin {
 
 
     public function studentNotExists() {
-        $query = "SELECT Stu_id FROM {$this->table_student} WHERE Stu_id = :user LIMIT 1";
+        $query = "SELECT Stu_id FROM {$this->table_student} WHERE Stu_id = :user AND Stu_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
@@ -151,7 +151,7 @@ class UserLogin {
     }
 
     public function verifyStudentPassword() {
-        $query = "SELECT Stu_id, Stu_password FROM {$this->table_student} WHERE Stu_id = :user LIMIT 1";
+        $query = "SELECT Stu_id, Stu_password FROM {$this->table_student} WHERE Stu_id = :user AND Stu_status = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user", $this->user);
         $stmt->execute();
