@@ -11,10 +11,10 @@ $channel_access_token = '3K7fh1bhbCn0uPjgNoGQpN3jNgpwpSoMA0QaE6m4dOMJkly+SeGyDyS
 // --- ฟังก์ชันสำหรับแมป class ไปยัง groupId ---
 function getGroupIdByClass($class) {
     $map = [
-        '1' => 'C4be823f58bf3d70d10f4024e01da302d',
-        '2' => 'C4be823f58bf3d70d10f4024e01da302d',
+        '1' => 'C0cf2923dbaf5ca2ff308a336bcaf1642', // invite
+        '2' => 'Ce05c66cecc5b60c51921d722c2825825', // updated groupId
         '3' => 'C4be823f58bf3d70d10f4024e01da302d',
-        '4' => 'C4be823f58bf3d70d10f4024e01da302d',
+        '4' => 'Cccc2671904450ba9977acd4992e99898', // invite
         '5' => 'C4be823f58bf3d70d10f4024e01da302d',
         '6' => 'C4be823f58bf3d70d10f4024e01da302d',
     ];
