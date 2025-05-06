@@ -565,5 +565,19 @@
         "action_type": "logout",
         "session_id": "12crtv8cr6lne8btrv7eblk5mv",
         "message": "Logout successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "admin",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/135.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-06T05:44:18+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/director\/index.php",
+        "action_type": "logout",
+        "session_id": "a4f882ntd8qj2vsehiej1t0rt4",
+        "message": "Logout successful"
     }
 ]

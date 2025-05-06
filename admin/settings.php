@@ -53,7 +53,7 @@ require_once('header.php');
         </div>
         <section class="content">
             <!-- ตั้งค่าระบบ -->
-            <div class="max-w-3xl mx-auto mt-6">
+            <div class="max-w-6xl mx-auto mt-6">
                 <h2 class="text-2xl font-bold mb-4">ตั้งค่าระบบ</h2>
                 <!-- Tabs -->
                 <div>
@@ -69,6 +69,9 @@ require_once('header.php');
                         </li>
                         <li>
                             <button class="bg-white inline-block py-2 px-4 font-semibold text-gray-500 hover:text-blue-700" onclick="showTab('importStudentTab')">นำเข้ารายชื่อนักเรียนใหม่</button>
+                        </li>
+                        <li>
+                            <button class="bg-white inline-block py-2 px-4 font-semibold text-gray-500 hover:text-blue-700" onclick="showTab('updateNumberTab')">อัพเดทเลขที่</button>
                         </li>
                     </ul>
                 </div>
@@ -158,6 +161,25 @@ require_once('header.php');
                         </div>
                     </form>
                 </div>
+                <div id="updateNumberTab" class="tab-content hidden">
+                    <form class="bg-white shadow rounded p-6 space-y-4" method="post" id="updateNumberForm" enctype="multipart/form-data" autocomplete="off">
+                        <div>
+                            <label class="block mb-1 font-medium" for="number_excel">อัปโหลดไฟล์ Excel อัพเดทเลขที่ <span class="text-red-500">*</span></label>
+                            <input type="file" id="number_excel" name="number_excel" accept=".xlsx,.xls" required class="block w-full text-sm text-gray-700 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring focus:border-blue-300 py-2 px-3">
+                            <p class="text-gray-500 mt-1">รองรับไฟล์ .xlsx, .xls เท่านั้น</p>
+                            <div class="mt-2">
+                                <a href="api/update_number_sample.php" class="btn bg-green-500 text-white hover:bg-green-600 transition" download>ดาวน์โหลดไฟล์ตัวอย่าง (ข้อมูลที่ต้องกรอก)</a>
+                            </div>
+                            <p class="text-gray-700 text-lg mt-1">
+                                <strong>หมายเหตุ:</strong> แถวแรกของไฟล์ต้องประกอบด้วยหัวข้อ <strong class="text-rose-500">เลขประจำตัว</strong>, <strong class="text-rose-500">ชั้นปี</strong>, <strong class="text-rose-500">ห้อง</strong>, <strong class="text-rose-500">เลขที่ใหม่</strong> ตามลำดับ<br>
+                                ใช้สำหรับอัพเดทเลขที่ของนักเรียนในแต่ละห้อง
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700 transition">อัพเดทเลขที่</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <script>
                 function showTab(tabId) {
@@ -170,6 +192,7 @@ require_once('header.php');
                     if(tabId === 'promoteTab') btns[1].classList.add('text-blue-700','border-blue-700','border-l','border-t','border-r','rounded-t');
                     if(tabId === 'advisorTab') btns[2].classList.add('text-blue-700','border-blue-700','border-l','border-t','border-r','rounded-t');
                     if(tabId === 'importStudentTab') btns[3].classList.add('text-blue-700','border-blue-700','border-l','border-t','border-r','rounded-t');
+                    if(tabId === 'updateNumberTab') btns[4].classList.add('text-blue-700','border-blue-700','border-l','border-t','border-r','rounded-t');
                 }
                 // Default tab
                 showTab('termTab');
@@ -310,6 +333,42 @@ require_once('header.php');
                             e.preventDefault();
                             const formData = new FormData(importStudentForm);
                             fetch('api/import_student_upload.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        icon: data.success ? 'success' : 'error',
+                                        title: data.success ? 'สำเร็จ' : 'เกิดข้อผิดพลาด',
+                                        text: data.message
+                                    });
+                                } else {
+                                    alert(data.message);
+                                }
+                            })
+                            .catch(() => {
+                                if(typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'เกิดข้อผิดพลาด',
+                                        text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                                    });
+                                } else {
+                                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+                                }
+                            });
+                        });
+                    }
+
+                    // --- เพิ่ม JavaScript สำหรับ updateNumberForm ---
+                    const updateNumberForm = document.getElementById('updateNumberForm');
+                    if(updateNumberForm) {
+                        updateNumberForm.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const formData = new FormData(updateNumberForm);
+                            fetch('api/update_number_upload.php', {
                                 method: 'POST',
                                 body: formData
                             })
