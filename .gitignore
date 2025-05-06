@@ -9,3 +9,4 @@ logs/login.json
 logs/logout.json
 /classes
 /logs
+test.php
