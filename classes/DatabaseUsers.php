@@ -11,10 +11,10 @@ class DatabaseUsers
     public function __construct(
         $host = 'localhost',
         $dbname = 'phichaia_student',
-        // $username = 'root',
-        // $password = ''
-        $username = 'phichaia_stdcare',
-        $password = '48dv_m64N'
+        $username = 'root',
+        $password = ''
+        // $username = 'phichaia_stdcare',
+        // $password = '48dv_m64N'
     ) {
         $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
         try {
