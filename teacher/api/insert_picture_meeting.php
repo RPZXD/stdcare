@@ -46,21 +46,41 @@ try {
         }
     }
 
-    // Insert or update the database record
-    $stmt = $db->prepare("
-        INSERT INTO tb_picmeeting (
-            Stu_major, Stu_room, term, pee,
-            picture1, picture2, picture3, picture4
-        ) VALUES (
-            :class, :room, :term, :pee,
-            :picture1, :picture2, :picture3, :picture4
-        )
-        ON DUPLICATE KEY UPDATE
-            picture1 = VALUES(picture1),
-            picture2 = VALUES(picture2),
-            picture3 = VALUES(picture3),
-            picture4 = VALUES(picture4)
+    // Check if record exists
+    $checkStmt = $db->prepare("
+        SELECT COUNT(*) FROM tb_picmeeting
+        WHERE Stu_major = :class AND Stu_room = :room AND term = :term AND pee = :pee
     ");
+    $checkStmt->execute([
+        ':class' => $class,
+        ':room' => $room,
+        ':term' => $term,
+        ':pee' => $pee
+    ]);
+    $exists = $checkStmt->fetchColumn() > 0;
+
+    if ($exists) {
+        // Update existing record
+        $stmt = $db->prepare("
+            UPDATE tb_picmeeting SET
+                picture1 = :picture1,
+                picture2 = :picture2,
+                picture3 = :picture3,
+                picture4 = :picture4
+            WHERE Stu_major = :class AND Stu_room = :room AND term = :term AND pee = :pee
+        ");
+    } else {
+        // Insert new record
+        $stmt = $db->prepare("
+            INSERT INTO tb_picmeeting (
+                Stu_major, Stu_room, term, pee,
+                picture1, picture2, picture3, picture4
+            ) VALUES (
+                :class, :room, :term, :pee,
+                :picture1, :picture2, :picture3, :picture4
+            )
+        ");
+    }
     $stmt->execute([
         ':class' => $class,
         ':room' => $room,
