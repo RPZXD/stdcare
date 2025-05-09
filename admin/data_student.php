@@ -131,7 +131,7 @@ require_once('header.php');
                                 <label for="addStu_room">ห้อง : </label>
                                 <select name="addStu_room" id="addStu_room" class="form-control text-center">
                                     <option value="">-- โปรดเลือกห้อง --</option>
-                                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                                    <?php for ($i = 1; $i <= 12; $i++): ?>
                                         <option value="<?= $i ?>"><?= $i ?></option>
                                     <?php endfor; ?>
                                 </select>
