@@ -1,13 +1,4 @@
 config/Database.php
-config/Setting.php
-logs/login.json
-/logs
-/logs
-logs/login.json
-logs/logout.json
-logs/login.json
-logs/logout.json
-/classes
-/logs
 test.php
 /classes
+/logs
