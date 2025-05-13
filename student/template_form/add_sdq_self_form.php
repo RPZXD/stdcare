@@ -60,7 +60,7 @@ $choices = [
                 <tr class="hover:bg-gray-50">
                     <td class="border border-gray-300 px-4 py-2 text-center"><?= ($index + 1) ?></td>
                     <td class="border border-gray-300 px-4 py-2">
-                        <?= htmlspecialchars($text) ?> <span class="text-sm text-gray-500">[<?= $category ?>]</span>
+                        <?= htmlspecialchars($text) ?>
                     </td>
                     <td class="border border-gray-300 px-4 py-2">
                         <div class="flex flex-col sm:flex-row gap-3">
