@@ -81,7 +81,7 @@ function thai_date($strDate) {
                                             data-id="<?= htmlspecialchars($item['Stu_id']) ?>"
                                             data-no="<?= htmlspecialchars($item['Stu_no']) ?>"
                                             data-nick="<?= htmlspecialchars($item['Stu_nick']) ?>">
-                                            <img class="card-img-top rounded-lg mb-4" src="https://student.phichai.ac.th/photo/<?= htmlspecialchars($item['Stu_picture']) ?>" alt="Student Picture" style="height: 350px; object-fit: cover;">
+                                            <img class="card-img-top rounded-lg mb-4" src="https://std.phichai.ac.th/photo/<?= htmlspecialchars($item['Stu_picture']) ?>" alt="Student Picture" style="height: 350px; object-fit: cover;">
                                             <div class="card-body space-y-3">
                                                 <h5 class="card-title text-base font-bold text-gray-800"><?= htmlspecialchars($item['Stu_pre'].$item['Stu_name'].' '.$item['Stu_sur']) ?></h5><br>
                                                 <p class="card-text text-gray-600 text-left">รหัสนักเรียน: <span class="font-semibold text-blue-600"><?= htmlspecialchars($item['Stu_id']) ?></span></p>
