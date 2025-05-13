@@ -21,7 +21,6 @@ function getGroupIdByClass($class) {
     return $map[$class] ?? '';
 }
 
-
 $date = $_REQUEST['date'] ?? date('Y-m-d');
 
 // --- เตรียมข้อมูล ---
@@ -36,24 +35,6 @@ $pee = $user->getPee();
 
 // --- เพิ่ม: include class AttendanceSummary ---
 require_once(__DIR__ . '/../../AttendanceSummary.php');
-
-// --- กำหนด groupId ตาม class ---
-// เดิม: $groupId = getGroupIdByClass($class);
-// ใหม่: รองรับหลาย class
-$allClassGroupIds = [];
-if ($class === 'all') {
-    // ส่งทุก class ที่มีใน map
-    $allClassGroupIds = [
-        '1' => getGroupIdByClass('1'),
-        '2' => getGroupIdByClass('2'),
-        '3' => getGroupIdByClass('3'),
-        '4' => getGroupIdByClass('4'),
-        '5' => getGroupIdByClass('5'),
-        '6' => getGroupIdByClass('6'),
-    ];
-} else {
-    $allClassGroupIds = [$class => getGroupIdByClass($class)];
-}
 
 // --- แปลงวันที่ ---
 function convertToBuddhistYear($date) {
@@ -81,65 +62,45 @@ function thaiDateShort($date) {
 }
 $dateC = convertToBuddhistYear($date);
 
-// --- เช็คถ้าเป็นวันเสาร์หรืออาทิตย์ ไม่ต้องส่ง message ---
-$weekday = date('N', strtotime($date)); // 6=Saturday, 7=Sunday
-$isWeekend = ($weekday == 6 || $weekday == 7);
-
-// --- ดึงรายชื่อห้องทั้งหมดใน class นี้ ---
+// --- ส่ง flex ของทุก class ทุก room ---
 $results = [];
-if (!$isWeekend) {
-    foreach ($allClassGroupIds as $classKey => $groupId) {
-        // ดึงห้องของแต่ละ class
-        $stmt = $db->prepare("SELECT DISTINCT Stu_room FROM student WHERE Stu_major = :class AND Stu_status = 1 ORDER BY Stu_room ASC");
-        $stmt->execute([':class' => $classKey]);
-        $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
+$classMap = [
+    '1' => getGroupIdByClass('1'),
+    '2' => getGroupIdByClass('2'),
+    '3' => getGroupIdByClass('3'),
+    '4' => getGroupIdByClass('4'),
+    '5' => getGroupIdByClass('5'),
+    '6' => getGroupIdByClass('6'),
+];
+foreach ($classMap as $classKey => $groupId) {
+    // ดึงห้องของแต่ละ class
+    $stmt = $db->prepare("SELECT DISTINCT Stu_room FROM student WHERE Stu_major = :class AND Stu_status = 1 ORDER BY Stu_room ASC");
+    $stmt->execute([':class' => $classKey]);
+    $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        foreach ($rooms as $room) {
-            $students_all = $attendance->getStudentsWithAttendance($dateC, $classKey, $room, $term, $pee);
+    foreach ($rooms as $room) {
+        $students_all = $attendance->getStudentsWithAttendance($dateC, $classKey, $room, $term, $pee);
 
-            // --- ใช้คลาส AttendanceSummary ---
-            $summary = new AttendanceSummary($students_all, $classKey, $room, $date, $term, $pee);
-            $text_message = $summary->getTextSummary();
-            $flex = $summary->getFlexMessage();
+        // --- ใช้คลาส AttendanceSummary ---
+        $summary = new AttendanceSummary($students_all, $classKey, $room, $date, $term, $pee);
+        $text_message = $summary->getTextSummary();
+        $flex = $summary->getFlexMessage();
 
-            // --- ส่ง Flex Message ไปยังกลุ่ม LINE (Messaging API) ---
-            $results[] = [
-                'class' => $classKey,
-                'room' => $room,
-                'groupId' => $groupId,
-                'line_flex_response' => send_line_flex($channel_access_token, $groupId, $flex),
-                'flex_example' => $flex
-            ];
-        }
+        // --- ส่ง Flex Message ไปยังกลุ่ม LINE (Messaging API) ---
+        $results[] = [
+            'class' => $classKey,
+            'room' => $room,
+            'groupId' => $groupId,
+            'line_flex_response' => send_line_flex($channel_access_token, $groupId, $flex),
+            'flex_example' => $flex
+        ];
     }
-}
-
-// --- ส่งข้อความไป LINE Notify (ข้อความธรรมดาเท่านั้น) เฉพาะ class/room ที่รับมาจาก request (optional) ---
-if (isset($_REQUEST['room'])) {
-    $room = $_REQUEST['room'];
-    $students_all = $attendance->getStudentsWithAttendance($dateC, $class, $room, $term, $pee);
-
-    // --- ใช้คลาส AttendanceSummary ---
-    $summary = new AttendanceSummary($students_all, $class, $room, $date, $term, $pee);
-    $text_message = $summary->getTextSummary();
-
-    // --- ส่งข้อความไป LINE Notify (ข้อความธรรมดาเท่านั้น) ---
-    if (!$isWeekend) {
-        $notify_response = send_line_notify($line_token, $text_message);
-    } else {
-        $notify_response = null;
-    }
-} else {
-    $notify_response = null;
 }
 
 // --- ตอบกลับ ---
 echo json_encode([
     'status' => 'ok',
-    'class' => $class,
-    'groupIds' => $allClassGroupIds,
-    'results' => $results,
-    'line_notify_response' => $notify_response
+    'results' => $results
 ]);
 
 // --- ฟังก์ชันส่งข้อความไป LINE Notify ---
