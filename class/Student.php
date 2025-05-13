@@ -136,7 +136,7 @@ class Student {
                      Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone, 
                      Stu_status
                   FROM {$this->table_student} 
-                  WHERE Stu_status = 1";
+                  ";
         
         // Add class filter if provided
         if (!empty($class)) {
