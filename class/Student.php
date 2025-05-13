@@ -130,36 +130,35 @@ class Student {
     }
 
 
-    public function fetchFilteredStudents($class = '', $room = '') {
-        // Base query with default filters
+    public function fetchFilteredStudents($class = '', $room = '', $status = '') {
         $query = "SELECT Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, 
                      Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone, 
                      Stu_status
                   FROM {$this->table_student} 
-                  ";
+                  WHERE 1=1"; // Base query
         
-        // Add class filter if provided
         if (!empty($class)) {
             $query .= " AND Stu_major = :class";
         }
-        
-        // Add room filter if provided
         if (!empty($room)) {
             $query .= " AND Stu_room = :room";
         }
+        if (!empty($status)) {
+            $query .= " AND Stu_status = :status"; // Add status filter
+        }
         
-        // Add ordering
         $query .= " ORDER BY Stu_no ASC";
         
         $stmt = $this->conn->prepare($query);
         
-        // Bind parameters if filters are provided
         if (!empty($class)) {
             $stmt->bindParam(':class', $class);
         }
-        
         if (!empty($room)) {
             $stmt->bindParam(':room', $room);
+        }
+        if (!empty($status)) {
+            $stmt->bindParam(':status', $status);
         }
         
         $stmt->execute();
