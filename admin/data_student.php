@@ -53,6 +53,14 @@ require_once('header.php');
                         <select id="filterRoom" class="form-control d-inline-block" style="width:auto;display:inline-block;">
                             <option value="">-- เลือกห้อง --</option>
                         </select>
+                        <select id="filterStatus" class="form-control d-inline-block" style="width:auto;display:inline-block;">
+                            <option value="">-- สถานะ --</option>
+                            <option value="1">✅ ปกติ</option>
+                            <option value="2">🎓 จบการศึกษา</option>
+                            <option value="3">🚚 ย้ายโรงเรียน</option>
+                            <option value="4">❌ ออกกลางคัน</option>
+                            <option value="9">🕊️ เสียชีวิต</option>
+                        </select>
                         <button id="btnAddStudent" class="btn btn-primary ml-2">+ เพิ่มนักเรียน</button>
                     </div>
                 </div>
@@ -315,7 +323,7 @@ require_once('header.php');
                 }
             });
 
-            $('#filterClass, #filterRoom').on('change', function() {
+            $('#filterClass, #filterRoom, #filterStatus').on('change', function() {
                 loadStudents();
             });
         });
@@ -343,9 +351,11 @@ require_once('header.php');
         async function loadStudents() {
             const classVal = document.getElementById('filterClass').value;
             const roomVal = document.getElementById('filterRoom').value;
+            const statusVal = document.getElementById('filterStatus').value;
             let url = 'api/api_student.php?action=list';
             if (classVal) url += '&class=' + encodeURIComponent(classVal);
             if (roomVal) url += '&room=' + encodeURIComponent(roomVal);
+            if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
             const res = await fetch(url);
             const data = await res.json();
             studentTable.clear();
@@ -355,13 +365,24 @@ require_once('header.php');
                     student.Stu_id,
                     student.Stu_pre + student.Stu_name + ' ' + student.Stu_sur,
                     'ม.' + student.Stu_major + '/' + student.Stu_room,
-                    student.Stu_status == 1 ? 'ปกติ' : 'ลาออก/จบ',
+                    getStatusEmoji(student.Stu_status),
                     `<button class="btn btn-warning btn-sm editStudentBtn" data-id="${student.Stu_id}">แก้ไข</button>
                      <button class="btn btn-danger btn-sm deleteStudentBtn" data-id="${student.Stu_id}">ลบ</button>
                      <button class="btn btn-secondary btn-sm resetStuPwdBtn" data-id="${student.Stu_id}">รีเซ็ตรหัสผ่าน</button>`
                 ]);
             });
             studentTable.draw();
+        }
+
+        function getStatusEmoji(status) {
+            switch (status) {
+                case 1: return '✅ ปกติ';
+                case 2: return '🎓 จบการศึกษา';
+                case 3: return '🚚 ย้ายโรงเรียน';
+                case 4: return '❌ ออกกลางคัน';
+                case 9: return '🕊️ เสียชีวิต';
+                default: return '❓ ไม่ระบุ';
+            }
         }
 
         $(document).on('click', '.editStudentBtn', function() {
