@@ -74,6 +74,10 @@ function thaiDateShort($date) {
 }
 $dateC = convertToBuddhistYear($date);
 
+// --- เช็คถ้าเป็นวันเสาร์หรืออาทิตย์ ไม่ต้องส่ง message ---
+$weekday = date('N', strtotime($date)); // 6=Saturday, 7=Sunday
+$isWeekend = ($weekday == 6 || $weekday == 7);
+
 // --- ดึงรายชื่อห้องทั้งหมดใน class นี้ ---
 $stmt = $db->prepare("SELECT DISTINCT Stu_room FROM student WHERE Stu_major = :class AND Stu_status = 1 ORDER BY Stu_room ASC");
 $stmt->execute([':class' => $class]);
@@ -81,20 +85,22 @@ $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 // --- ส่ง flex ของทุก room ---
 $results = [];
-foreach ($rooms as $room) {
-    $students_all = $attendance->getStudentsWithAttendance($dateC, $class, $room, $term, $pee);
+if (!$isWeekend) {
+    foreach ($rooms as $room) {
+        $students_all = $attendance->getStudentsWithAttendance($dateC, $class, $room, $term, $pee);
 
-    // --- ใช้คลาส AttendanceSummary ---
-    $summary = new AttendanceSummary($students_all, $class, $room, $date, $term, $pee);
-    $text_message = $summary->getTextSummary();
-    $flex = $summary->getFlexMessage();
+        // --- ใช้คลาส AttendanceSummary ---
+        $summary = new AttendanceSummary($students_all, $class, $room, $date, $term, $pee);
+        $text_message = $summary->getTextSummary();
+        $flex = $summary->getFlexMessage();
 
-    // --- ส่ง Flex Message ไปยังกลุ่ม LINE (Messaging API) ---
-    $results[] = [
-        'room' => $room,
-        'line_flex_response' => send_line_flex($channel_access_token, $groupId, $flex),
-        'flex_example' => $flex
-    ];
+        // --- ส่ง Flex Message ไปยังกลุ่ม LINE (Messaging API) ---
+        $results[] = [
+            'room' => $room,
+            'line_flex_response' => send_line_flex($channel_access_token, $groupId, $flex),
+            'flex_example' => $flex
+        ];
+    }
 }
 
 // --- ส่งข้อความไป LINE Notify (ข้อความธรรมดาเท่านั้น) เฉพาะ class/room ที่รับมาจาก request (optional) ---
@@ -107,7 +113,11 @@ if (isset($_REQUEST['room'])) {
     $text_message = $summary->getTextSummary();
 
     // --- ส่งข้อความไป LINE Notify (ข้อความธรรมดาเท่านั้น) ---
-    $notify_response = send_line_notify($line_token, $text_message);
+    if (!$isWeekend) {
+        $notify_response = send_line_notify($line_token, $text_message);
+    } else {
+        $notify_response = null;
+    }
 } else {
     $notify_response = null;
 }
