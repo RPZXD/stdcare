@@ -209,7 +209,7 @@ require_once('header.php');
                                 <label for="editStu_room">ห้อง : </label>
                                 <select name="editStu_room" id="editStu_room" class="form-control text-center">
                                     <option value="">-- โปรดเลือกห้อง --</option>
-                                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                                    <?php for ($i = 1; $i <= 12; $i++): ?>
                                         <option value="<?= $i ?>"><?= $i ?></option>
                                     <?php endfor; ?>
                                 </select>
