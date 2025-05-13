@@ -18,6 +18,14 @@ function getGroupIdByClass($class) {
         '5' => 'Cccc2671904450ba9977acd4992e99898', // invite
         '6' => 'Ce05c66cecc5b60c51921d722c2825825', // invite
     ];
+    // $map = [
+    //     '1' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '2' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // updated groupId
+    //     '3' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f',
+    //     '4' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '5' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '6' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    // ];
     return $map[$class] ?? '';
 }
 
@@ -34,7 +42,7 @@ $term = $user->getTerm();
 $pee = $user->getPee();
 
 // --- เพิ่ม: include class AttendanceSummary ---
-require_once(__DIR__ . '/../../AttendanceSummary.php');
+require_once('../../class/AttendanceSummary.php');
 
 // --- แปลงวันที่ ---
 function convertToBuddhistYear($date) {
