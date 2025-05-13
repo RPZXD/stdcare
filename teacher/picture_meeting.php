@@ -80,7 +80,7 @@ require_once('header.php');
                 <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-80 mb-3 w-12 h-12 mx-auto">
                         <h5 class="text-center text-lg">ภาพกิจกรรมการประชุมผู้ปกครอง ระดับชั้นมัธยมศึกษาปีที่ <?= $class.'/'.$room; ?></h5>
                         <h5 class="text-center text-lg">ภาคเรียนที่ <?= $term; ?> ปีการศึกษา <?=$pee?></h5>
-                        <h5 class="text-center text-lg" id="dateMeeting">วันเสาร์ที่ 14 ธันวาคม พ.ศ.2567</h5>
+                        <h5 class="text-center text-lg" id="dateMeeting">วันที่ 8-9 พฤษภาคม พ.ศ.2568</h5>
                         <h5 class="text-center text-lg" >โรงเรียนพิชัย อำเภอพิชัย จังหวัดอุตรดิตถ์</h5>
 
 
