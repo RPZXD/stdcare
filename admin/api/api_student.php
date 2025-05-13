@@ -36,8 +36,8 @@ switch ($action) {
         // ดึงค่าชั้นและห้องที่มีในระบบ
         $classes = [];
         $rooms = [];
-        $sqlClass = "SELECT DISTINCT Stu_major FROM student WHERE Stu_major IS NOT NULL AND Stu_major != '' AND Stu_status = 1 ORDER BY Stu_major ASC";
-        $sqlRoom = "SELECT DISTINCT Stu_room FROM student WHERE Stu_room IS NOT NULL AND Stu_room != '' AND Stu_status = 1 ORDER BY Stu_room ASC";
+        $sqlClass = "SELECT DISTINCT Stu_major FROM student WHERE Stu_major IS NOT NULL AND Stu_major != '' ORDER BY Stu_major ASC";
+        $sqlRoom = "SELECT DISTINCT Stu_room FROM student WHERE Stu_room IS NOT NULL AND Stu_room != '' ORDER BY Stu_room ASC";
         $classes = array_map(function($row) { return $row['Stu_major']; }, $db->query($sqlClass)->fetchAll(PDO::FETCH_ASSOC));
         $rooms = array_map(function($row) { return $row['Stu_room']; }, $db->query($sqlRoom)->fetchAll(PDO::FETCH_ASSOC));
         echo json_encode(['classes' => $classes, 'rooms' => $rooms]);
