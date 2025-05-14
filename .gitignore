@@ -1,4 +1,5 @@
-config/Database.php
+config/
+classes/
+logs/
+vendor/
 test.php
-/classes
-/logs
