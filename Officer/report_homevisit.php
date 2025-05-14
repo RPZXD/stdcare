@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <thead>
                     <tr class="bg-blue-50">
                         <th class="px-4 py-2 border text-blue-700 text-lg text-center align-middle" rowspan="2">🏫 ระดับชั้น</th>
-                        <th class="px-4 py-2 border text-green-700 text-lg text-center" colspan="2">✅ เทอม 1<br><span class="text-xs text-gray-500">(เป้าหมาย 100%)</span></th>
-                        <th class="px-4 py-2 border text-green-700 text-lg text-center" colspan="2">✅ เทอม 2<br><span class="text-xs text-gray-500">(เป้าหมาย 25%)</span></th>
+                        <th class="px-4 py-2 border text-green-700 text-lg text-center" colspan="2">✅ ภาคเรียนที่ 1<br><span class="text-xs text-gray-500">(เป้าหมาย 100%)</span></th>
+                        <th class="px-4 py-2 border text-green-700 text-lg text-center" colspan="2">✅ ภาคเรียนที่ 2<br><span class="text-xs text-gray-500">(เป้าหมาย 25%)</span></th>
                         <th class="px-4 py-2 border text-center text-gray-700 text-lg  align-middle" rowspan="2">👥 นักเรียนทั้งหมด</th>
                         <th class="px-4 py-2 border text-center text-blue-700" rowspan="2">👁️ ดูรายชื่อ</th>
                         <th class="px-4 py-2 border text-center text-yellow-700" rowspan="2">📊 ดูสรุป</th>
@@ -142,10 +142,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <thead>
                         <tr class="bg-indigo-50">
                             <th class="px-4 py-2 border  text-indigo-700">🚪 ห้อง</th>
-                            <th class="px-4 py-2 border  text-green-700">✅ เทอม 1<br><span class="text-xs text-gray-500">(เป้าหมาย 100%)</span></th>
-                            <th class="px-4 py-2 border  text-pink-700">📈 เทอม 1 (%)</th>
-                            <th class="px-4 py-2 border  text-green-700">✅ เทอม 2<br><span class="text-xs text-gray-500">(เป้าหมาย 25%)</span></th>
-                            <th class="px-4 py-2 border  text-pink-700">📈 เทอม 2 (%)</th>
+                            <th class="px-4 py-2 border  text-green-700">✅ ภาคเรียนที่ 1<br><span class="text-xs text-gray-500">(เป้าหมาย 100%)</span></th>
+                            <th class="px-4 py-2 border  text-pink-700">📈 ภาคเรียนที่ 1 (%)</th>
+                            <th class="px-4 py-2 border  text-green-700">✅ ภาคเรียนที่ 2<br><span class="text-xs text-gray-500">(เป้าหมาย 25%)</span></th>
+                            <th class="px-4 py-2 border  text-pink-700">📈 ภาคเรียนที่ 2 (%)</th>
                             <th class="px-4 py-2 border  text-gray-700">👥 นักเรียนทั้งหมด</th>
                             <th class="px-4 py-2 border  text-blue-700">👁️ ดูรายชื่อ</th>
                             <th class="px-4 py-2 border  text-yellow-700">📊 ดูสรุป</th>
@@ -231,8 +231,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr class="bg-blue-100">
                             <th class="px-4 py-2 border">เลขที่</th>
                             <th class="px-4 py-2 border">ชื่อ-สกุล</th>
-                            <th class="px-4 py-2 border">เยี่ยมบ้าน เทอม 1</th>
-                            <th class="px-4 py-2 border">เยี่ยมบ้าน เทอม 2</th>
+                            <th class="px-4 py-2 border">เยี่ยมบ้าน ภาคเรียนที่ 1</th>
+                            <th class="px-4 py-2 border">เยี่ยมบ้าน ภาคเรียนที่ 2</th>
                         </tr>
                     </thead>
                     <tbody>

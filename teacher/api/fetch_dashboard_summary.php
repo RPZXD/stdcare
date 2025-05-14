@@ -44,7 +44,7 @@ try {
     $result["behavior_count"] = (int)$stmt->fetchColumn();
 } catch (\Throwable $e) {}
 
-// Visit Home (เยี่ยมบ้าน) - แยก 2 เทอม
+// Visit Home (เยี่ยมบ้าน) - แยก 2 ภาคเรียน
 try {
     $visit = new StudentVisit($db);
     $result["visit_count_t1"] = (int)$visit->getTotalVisitCount($class, $room, 1, $pee);
@@ -59,7 +59,7 @@ try {
     $result["poor_count"] = (int)$stmt->fetchColumn();
 } catch (\Throwable $e) {}
 
-// SDQ (นับคนที่ประเมินแล้ว) - แยก 2 เทอม
+// SDQ (นับคนที่ประเมินแล้ว) - แยก 2 ภาคเรียน
 try {
     $sdq = new SDQ($db);
     // Potential bottleneck: If getSDQByClassAndRoom fetches all terms and filters in PHP, it's slow.
@@ -77,7 +77,7 @@ try {
     $result["sdq_count_t2"] = $count2;
 } catch (\Throwable $e) {}
 
-// EQ (นับคนที่ประเมินแล้ว) - แยก 2 เทอม
+// EQ (นับคนที่ประเมินแล้ว) - แยก 2 ภาคเรียน
 try {
     $eq = new EQ($db);
     // Potential bottleneck: Same as above, check getEQByClassAndRoom implementation.
@@ -94,7 +94,7 @@ try {
     $result["eq_count_t2"] = $count2;
 } catch (\Throwable $e) {}
 
-// Screening (นับคนที่คัดกรอง 11 ด้านแล้ว) - แยก 2 เทอม
+// Screening (นับคนที่คัดกรอง 11 ด้านแล้ว) - แยก 2 ภาคเรียน
 try {
     $screen = new ScreeningData($db);
     // Potential bottleneck: getScreenByClassAndRoom called twice, but both times with same params.

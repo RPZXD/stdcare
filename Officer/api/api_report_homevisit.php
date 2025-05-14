@@ -33,14 +33,14 @@ foreach ($levels as $level) {
     $stmt->execute();
     $total = (int)$stmt->fetchColumn();
 
-    // นักเรียนที่เยี่ยมบ้านแล้ว (เทอม 1)
+    // นักเรียนที่เยี่ยมบ้านแล้ว (ภาคเรียนที่ 1)
     $stmt1 = $db->prepare("SELECT COUNT(DISTINCT student.Stu_id) FROM student INNER JOIN visithome ON student.Stu_id = visithome.Stu_id WHERE student.Stu_major = :major AND student.Stu_status = 1 AND visithome.Term = 1 AND visithome.Pee = :pee");
     $stmt1->bindParam(':major', $major, PDO::PARAM_INT);
     $stmt1->bindParam(':pee', $pee, PDO::PARAM_INT);
     $stmt1->execute();
     $visited_term1 = (int)$stmt1->fetchColumn();
 
-    // นักเรียนที่เยี่ยมบ้านแล้ว (เทอม 2)
+    // นักเรียนที่เยี่ยมบ้านแล้ว (ภาคเรียนที่ 2)
     $stmt2 = $db->prepare("SELECT COUNT(DISTINCT student.Stu_id) FROM student INNER JOIN visithome ON student.Stu_id = visithome.Stu_id WHERE student.Stu_major = :major AND student.Stu_status = 1 AND visithome.Term = 2 AND visithome.Pee = :pee");
     $stmt2->bindParam(':major', $major, PDO::PARAM_INT);
     $stmt2->bindParam(':pee', $pee, PDO::PARAM_INT);

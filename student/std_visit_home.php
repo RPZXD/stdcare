@@ -101,7 +101,7 @@ $(function() {
                 for (let i = 1; i <= 2; i++) {
                     const visit = data.visits.find(v => v.visit_no == i);
                     html += `<tr>
-                        <td class="px-4 py-2">ครั้งที่ ${i}  (เทอมที่ ${i})</td>`;
+                        <td class="px-4 py-2">ครั้งที่ ${i}  (ภาคเรียนที่ ${i})</td>`;
                     if (visit && visit.status === 'saved') {
                         html += `<td class="px-4 py-2"><span class="inline-block px-2 py-1 bg-green-100 text-green-800 rounded">บันทึกแล้ว</span></td>
                             <td class="px-4 py-2 space-x-2">

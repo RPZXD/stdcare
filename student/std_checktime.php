@@ -87,7 +87,7 @@ function thai_date($strDate) {
                         <nav class="flex space-x-4" id="attendanceTabs">
                             <button class="tab-btn px-4 py-2 text-blue-700 border-b-2 border-blue-700 font-semibold focus:outline-none" data-tab="tab1">การมาเรียน</button>
                             <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab2">สรุปรายเดือน</button>
-                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab3">สรุปรายเทอม</button>
+                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab3">สรุปรายภาคเรียนที่</button>
                         </nav>
                     </div>
                     <!-- Tab Contents -->
@@ -212,7 +212,7 @@ function thai_date($strDate) {
                         </div>
                     </div>
                     <div id="tab3" class="tab-content hidden">
-                        <!-- สรุปรายเทอม: กราฟ + Card -->
+                        <!-- สรุปรายภาคเรียนที่: กราฟ + Card -->
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                             <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟢</span>
@@ -248,7 +248,7 @@ function thai_date($strDate) {
                         <div class="bg-white rounded-lg shadow p-4 mb-6">
                             <canvas id="termChart" height="100"></canvas>
                         </div>
-                        <!-- ตารางสรุปรายเทอม -->
+                        <!-- ตารางสรุปรายภาคเรียนที่ -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm">
                                 <thead>
@@ -272,7 +272,7 @@ function thai_date($strDate) {
                                     </tr>
                                     <?php endforeach; else: ?>
                                     <tr>
-                                        <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในเทอมนี้</td>
+                                        <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในภาคเรียนที่นี้</td>
                                     </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
             elseif ($status == '5') $monthStats['activity']++;
             elseif ($status == '6') $monthStats['event']++;
         }
-        // รายเทอม
+        // รายภาคเรียนที่
         if ($status == '1') $termStats['present']++;
         elseif ($status == '2') $termStats['absent']++;
         elseif ($status == '3') $termStats['late']++;

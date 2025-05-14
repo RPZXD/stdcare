@@ -42,7 +42,7 @@ require_once('header.php');
                             🏷️ เช็คชื่อด้วย RFID
                         </h1>
                         <div class="text-gray-600 mt-2">
-                             ปีการศึกษา <?= htmlspecialchars($pee) ?> เทอม <?= htmlspecialchars($term) ?>
+                             ปีการศึกษา <?= htmlspecialchars($pee) ?> ภาคเรียนที่ <?= htmlspecialchars($term) ?>
                         </div>
                     </div>
                 </div>

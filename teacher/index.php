@@ -148,7 +148,7 @@ require_once('header.php');
             </div>
             <!-- Behavior Bar -->
             <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center" style="min-height:320px;">
-                <h3 class="font-semibold mb-2">📝 กราฟพฤติกรรม (เทอมนี้)</h3>
+                <h3 class="font-semibold mb-2">📝 กราฟพฤติกรรม (ภาคเรียนนี้)</h3>
                 <div class="w-full flex-1 flex items-center justify-center">
                     <canvas id="behaviorChart" style="max-height: 220px; max-width: 100%;"></canvas>
                 </div>
@@ -251,36 +251,36 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             // พฤติกรรม (เดือนนี้)
             document.getElementById('behaviorCount').textContent = data.behavior_count ?? '-';
-            // เยี่ยมบ้าน (แสดงรวม 2 เทอม)
+            // เยี่ยมบ้าน (แสดงรวม 2 ภาคเรียนที่ )
             let visitText = '-';
             if (typeof data.visit_count_t1 !== 'undefined' && typeof data.visit_count_t2 !== 'undefined') {
-                visitText = `เทอม1: ${data.visit_count_t1} | เทอม2: ${data.visit_count_t2}`;
+                visitText = `ภาคเรียนที่ 1: ${data.visit_count_t1} | ภาคเรียนที่ 2: ${data.visit_count_t2}`;
             } else if (typeof data.visit_count !== 'undefined') {
                 visitText = data.visit_count;
             }
             document.getElementById('visitCount').textContent = visitText;
             // นักเรียนยากจน
             document.getElementById('poorCount').textContent = data.poor_count ?? '-';
-            // SDQ (แสดงรวม 2 เทอม)
+            // SDQ (แสดงรวม 2 ภาคเรียนที่ )
             let sdqText = '-';
             if (typeof data.sdq_count_t1 !== 'undefined' && typeof data.sdq_count_t2 !== 'undefined') {
-                sdqText = `เทอม1: ${data.sdq_count_t1} | เทอม2: ${data.sdq_count_t2}`;
+                sdqText = `ภาคเรียนที่ 1: ${data.sdq_count_t1} | ภาคเรียนที่ 2: ${data.sdq_count_t2}`;
             } else if (typeof data.sdq_count !== 'undefined') {
                 sdqText = data.sdq_count;
             }
             document.getElementById('sdqCount').textContent = sdqText;
-            // EQ (แสดงรวม 2 เทอม)
+            // EQ (แสดงรวม 2 ภาคเรียนที่ )
             let eqText = '-';
             if (typeof data.eq_count_t1 !== 'undefined' && typeof data.eq_count_t2 !== 'undefined') {
-                eqText = `เทอม1: ${data.eq_count_t1} | เทอม2: ${data.eq_count_t2}`;
+                eqText = `ภาคเรียนที่ 1: ${data.eq_count_t1} | ภาคเรียนที่ 2: ${data.eq_count_t2}`;
             } else if (typeof data.eq_count !== 'undefined') {
                 eqText = data.eq_count;
             }
             document.getElementById('eqCount').textContent = eqText;
-            // Screening (แสดงรวม 2 เทอม)
+            // Screening (แสดงรวม 2 ภาคเรียนที่ )
             let screenText = '-';
             if (typeof data.screen_count_t1 !== 'undefined' && typeof data.screen_count_t2 !== 'undefined') {
-                screenText = `เทอม1: ${data.screen_count_t1} | เทอม2: ${data.screen_count_t2}`;
+                screenText = `ภาคเรียนที่ 1: ${data.screen_count_t1} | ภาคเรียนที่ 2: ${data.screen_count_t2}`;
             } else if (typeof data.screen_count !== 'undefined') {
                 screenText = data.screen_count;
             }

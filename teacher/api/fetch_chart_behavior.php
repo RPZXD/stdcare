@@ -18,7 +18,7 @@ if ($pee === '') {
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
-// ดึงข้อมูลพฤติกรรมแบบ group by behavior_type เฉพาะเทอมนี้
+// ดึงข้อมูลพฤติกรรมแบบ group by behavior_type เฉพาะเภาคเรียนนี้
 $stmt = $db->prepare("
     SELECT behavior_type, COUNT(*) AS count_total
     FROM behavior

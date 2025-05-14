@@ -25,7 +25,7 @@ $stmt->execute();
 $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // ดึงคะแนนพฤติกรรมรวม
-// ดึงเทอมและปีการศึกษา
+// ดึงภาคเรียนที่และปีการศึกษา
 $term = null;
 $pee = null;
 if (method_exists($user, 'getTerm')) {
