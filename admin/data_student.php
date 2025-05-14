@@ -237,6 +237,8 @@ require_once('header.php');
         // ลบ token key ออก (ไม่ต้องใช้)
         // const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
         let studentTable;
+        let studentTableInterval = null; // <-- Add this line
+
         $(document).ready(function() {
             studentTable = $('#studentTable').DataTable({
                 columnDefs: [
@@ -256,6 +258,16 @@ require_once('header.php');
             });
             loadStudents();
             populateFilterSelects();
+
+            // Start polling for real-time updates every 5 seconds
+            studentTableInterval = setInterval(loadStudents, 5000);
+
+            // Pause polling when modals are open, resume when closed
+            $('#addStudentModal, #editStudentModal').on('show.bs.modal', function() {
+                if (studentTableInterval) clearInterval(studentTableInterval);
+            }).on('hidden.bs.modal', function() {
+                studentTableInterval = setInterval(loadStudents, 5000);
+            });
 
             $('#btnAddStudent').on('click', function() {
                 $('#addStudentForm')[0].reset();
@@ -372,7 +384,15 @@ require_once('header.php');
                 ]);
             });
             studentTable.draw();
+            makeTableEditable(); // เรียกทุกครั้งหลังโหลดข้อมูล
         }
+
+        // Status mapping:
+        // 1 = ปกติ
+        // 2 = จบการศึกษา
+        // 3 = ย้ายโรงเรียน
+        // 4 = ออกกลางคัน
+        // 9 = เสียชีวิต
 
         function getStatusEmoji(status) {
             switch (status) {
@@ -495,6 +515,161 @@ require_once('header.php');
                     title: 'เกิดข้อผิดพลาด',
                     text: response.message || 'ไม่สามารถลบข้อมูลได้'
                 });
+            }
+        }
+
+        // เพิ่ม inline edit ให้กับ cell ที่ต้องการ
+        function makeTableEditable() {
+            $('#studentTable tbody').off('dblclick').on('dblclick', 'td', function () {
+                const cell = studentTable.cell(this);
+                const colIdx = cell.index().column;
+                const rowIdx = cell.index().row;
+                const rowData = studentTable.row(rowIdx).data();
+                // เฉพาะคอลัมน์ที่อนุญาตให้แก้ไข
+                // 0: เลขที่, 2: ชื่อ-นามสกุล, 3: ชั้น, 4: สถานะ
+                if (![0,2,3,4].includes(colIdx)) return;
+
+                let field, oldValue = cell.data(), input;
+                const stu_id = rowData[1];
+
+                if (colIdx === 0) { // เลขที่
+                    field = 'Stu_no';
+                    input = `<input type="number" min="1" max="50" class="form-control form-control-sm" value="${oldValue}" style="width:60px;">`;
+                    cell.data(input).draw();
+                    const $input = $(cell.node()).find('input').first();
+                    $input.focus();
+                    $input.on('keydown', async function(e) {
+                        if (e.key === 'Enter') {
+                            await saveInlineEdit(cell, field, stu_id, colIdx);
+                        }
+                    }).on('blur', async function() {
+                        await saveInlineEdit(cell, field, stu_id, colIdx);
+                    });
+                } else if (colIdx === 2) { // ชื่อ-นามสกุล
+                    // SweetAlert2 modal
+                    const preMatch = rowData[2].match(/^(เด็กชาย|เด็กหญิง|นาย|นางสาว)/);
+                    const pre = preMatch ? preMatch[1] : '';
+                    const nameSur = rowData[2].replace(pre, '').trim().split(' ');
+                    const name = nameSur[0] || '';
+                    const sur = nameSur[1] || '';
+                    Swal.fire({
+                        title: 'แก้ไขชื่อ-นามสกุล',
+                        html:
+                            `<select id="swal-pre" class="swal2-input" style="width:90%;margin-bottom:8px;">
+                                <option value="">-- โปรดเลือกคำนำหน้า --</option>
+                                <option value="เด็กชาย"${pre === 'เด็กชาย' ? ' selected' : ''}>เด็กชาย</option>
+                                <option value="เด็กหญิง"${pre === 'เด็กหญิง' ? ' selected' : ''}>เด็กหญิง</option>
+                                <option value="นาย"${pre === 'นาย' ? ' selected' : ''}>นาย</option>
+                                <option value="นางสาว"${pre === 'นางสาว' ? ' selected' : ''}>นางสาว</option>
+                            </select>
+                            <input id="swal-name" class="swal2-input" placeholder="ชื่อ" value="${name}">
+                            <input id="swal-sur" class="swal2-input" placeholder="นามสกุล" value="${sur}">`,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        confirmButtonText: 'บันทึก',
+                        cancelButtonText: 'ยกเลิก',
+                        preConfirm: () => {
+                            const preVal = $('#swal-pre').val();
+                            const nameVal = $('#swal-name').val();
+                            const surVal = $('#swal-sur').val();
+                            if (!preVal || !nameVal || !surVal) {
+                                Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+                                return false;
+                            }
+                            return { pre: preVal, name: nameVal, sur: surVal };
+                        }
+                    }).then(async (result) => {
+                        if (result.isConfirmed && result.value) {
+                            // ส่งข้อมูลไป API
+                            let value = { pre: result.value.pre, name: result.value.name, sur: result.value.sur };
+                            let body = `id=${encodeURIComponent(stu_id)}&field=Stu_pre_name_sur&value=${encodeURIComponent(JSON.stringify(value))}`;
+                            const res = await fetch('api/api_student.php?action=inline_update', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                                body
+                            });
+                            const apiResult = await res.json();
+                            if (apiResult.success) {
+                                // โหลดข้อมูลใหม่เฉพาะแถวนี้
+                                const res2 = await fetch('api/api_student.php?action=get&id=' + stu_id);
+                                const data = await res2.json();
+                                if (data && data.Stu_id) {
+                                    cell.data(data.Stu_pre + data.Stu_name + ' ' + data.Stu_sur).draw();
+                                }
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: apiResult.message || 'ไม่สามารถบันทึกข้อมูลได้' });
+                                cell.data(cell.data()).draw();
+                            }
+                        }
+                    });
+                } else if (colIdx === 3) { // ชั้น/ห้อง
+                    field = 'Stu_major_room';
+                    const [major, room] = rowData[3].replace('ม.','').split('/');
+                    input = `<input type="number" min="1" max="6" class="form-control form-control-sm" value="${major}" style="width:50px;display:inline-block;"> / <input type="number" min="1" max="12" class="form-control form-control-sm" value="${room}" style="width:50px;display:inline-block;">`;
+                    cell.data(input).draw();
+                    const $inputs = $(cell.node()).find('input');
+                    $inputs.first().focus();
+                    $inputs.on('keydown', async function(e) {
+                        if (e.key === 'Enter') {
+                            await saveInlineEdit(cell, field, stu_id, colIdx);
+                        }
+                    }).on('blur', async function() {
+                        await saveInlineEdit(cell, field, stu_id, colIdx);
+                    });
+                } else if (colIdx === 4) { // สถานะ
+                    field = 'Stu_status';
+                    input = `<select class="form-control form-control-sm" style="width:120px;">
+                        <option value="1">✅ ปกติ</option>
+                        <option value="2">🎓 จบการศึกษา</option>
+                        <option value="3">🚚 ย้ายโรงเรียน</option>
+                        <option value="4">❌ ออกกลางคัน</option>
+                        <option value="9">🕊️ เสียชีวิต</option>
+                    </select>`;
+                    cell.data(input).draw();
+                    const $input = $(cell.node()).find('select').first();
+                    $input.focus();
+                    $input.on('keydown', async function(e) {
+                        if (e.key === 'Enter') {
+                            await saveInlineEdit(cell, field, stu_id, colIdx);
+                        }
+                    }).on('blur', async function() {
+                        await saveInlineEdit(cell, field, stu_id, colIdx);
+                    });
+                }
+            });
+        }
+
+        async function saveInlineEdit(cell, field, stu_id, colIdx) {
+            let value;
+            if (field === 'Stu_no') {
+                value = $(cell.node()).find('input').val();
+            } else if (field === 'Stu_major_room') {
+                const major = $(cell.node()).find('input').eq(0).val();
+                const room = $(cell.node()).find('input').eq(1).val();
+                value = { major, room };
+            } else if (field === 'Stu_status') {
+                value = $(cell.node()).find('select').val();
+            }
+            // ส่งข้อมูลไป API
+            let body = `id=${encodeURIComponent(stu_id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(typeof value === 'object' ? JSON.stringify(value) : value)}`;
+            const res = await fetch('api/api_student.php?action=inline_update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body
+            });
+            const result = await res.json();
+            if (result.success) {
+                // โหลดข้อมูลใหม่เฉพาะแถวนี้
+                const res2 = await fetch('api/api_student.php?action=get&id=' + stu_id);
+                const data = await res2.json();
+                if (data && data.Stu_id) {
+                    if (colIdx === 0) cell.data(data.Stu_no).draw();
+                    if (colIdx === 3) cell.data('ม.' + data.Stu_major + '/' + data.Stu_room).draw();
+                    if (colIdx === 4) cell.data(getStatusEmoji(data.Stu_status)).draw();
+                }
+            } else {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: result.message || 'ไม่สามารถบันทึกข้อมูลได้' });
+                cell.data(cell.data()).draw(); // คืนค่าเดิม
             }
         }
         </script>

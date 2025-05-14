@@ -223,6 +223,52 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'รหัสนักเรียนไม่ถูกต้อง']);
         }
         break;
+    case 'inline_update':
+        $stu_id = $_POST['id'] ?? '';
+        $field = $_POST['field'] ?? '';
+        $value = $_POST['value'] ?? '';
+        if (!$stu_id || !$field) {
+            echo json_encode(['success' => false, 'message' => 'ข้อมูลไม่ครบถ้วน']);
+            break;
+        }
+        $updateFields = [];
+        $params = [];
+        if ($field === 'Stu_no') {
+            $updateFields[] = 'Stu_no = :val';
+            $params[':val'] = $value;
+        } else if ($field === 'Stu_name') {
+            $obj = json_decode($value, true);
+            $updateFields[] = 'Stu_name = :name';
+            $updateFields[] = 'Stu_sur = :sur';
+            $params[':name'] = $obj['name'];
+            $params[':sur'] = $obj['sur'];
+        } else if ($field === 'Stu_pre_name_sur') {
+            $obj = json_decode($value, true);
+            $updateFields[] = 'Stu_pre = :pre';
+            $updateFields[] = 'Stu_name = :name';
+            $updateFields[] = 'Stu_sur = :sur';
+            $params[':pre'] = $obj['pre'];
+            $params[':name'] = $obj['name'];
+            $params[':sur'] = $obj['sur'];
+        } else if ($field === 'Stu_major_room') {
+            $obj = json_decode($value, true);
+            $updateFields[] = 'Stu_major = :major';
+            $updateFields[] = 'Stu_room = :room';
+            $params[':major'] = $obj['major'];
+            $params[':room'] = $obj['room'];
+        } else if ($field === 'Stu_status') {
+            $updateFields[] = 'Stu_status = :val';
+            $params[':val'] = $value;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'ไม่รองรับฟิลด์นี้']);
+            break;
+        }
+        $params[':id'] = $stu_id;
+        $sql = "UPDATE student SET " . implode(',', $updateFields) . " WHERE Stu_id = :id";
+        $stmt = $db->prepare($sql);
+        $success = $stmt->execute($params);
+        echo json_encode(['success' => $success]);
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
 }

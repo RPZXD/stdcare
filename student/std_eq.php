@@ -105,7 +105,6 @@ $(function() {
                     html += `<td class="px-4 py-2"><span class="inline-block px-2 py-1 bg-green-100 text-green-800 rounded">บันทึกแล้ว</span></td>
                         <td class="px-4 py-2 space-x-2">
                             <button type="button" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" onclick="viewEQSelf()">ดู</button>
-                            <button type="button" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onclick="editEQSelf()">แก้ไข</button>
                             <button type="button" class="inline-block bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded" onclick="interpretEQSelf()">แปลผล</button>
                         </td>`;
                 } else {
