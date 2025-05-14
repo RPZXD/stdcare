@@ -103,7 +103,7 @@ $choices = [
                             <?php foreach ($choices as $value => $label): ?>
                                 <label class="inline-flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer">
                                     <input type="radio" name="eq<?= $index+1 ?>" value="<?= $value ?>" required>
-                                   
+                                    <span><?= $label ?></span>
                                 </label>
                             <?php endforeach; ?>
                         </div>

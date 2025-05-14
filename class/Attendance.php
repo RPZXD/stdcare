@@ -14,7 +14,7 @@ class Attendance {
      * @param string $date วันที่ต้องการเช็คชื่อ (Y-m-d)
      * @param int|null $class เลขชั้น (Stu_major) ถ้าไม่ระบุจะดึงทุกชั้น
      * @param int|null $room เลขห้อง (Stu_room) ถ้าไม่ระบุจะดึงทุกห้อง
-     * @param string|null $term เทอม (optional)
+     * @param string|null $term ภาคเรียนที่ (optional)
      * @param string|null $pee ปีการศึกษา (optional)
      * @return array
      */

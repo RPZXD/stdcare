@@ -161,7 +161,7 @@ selectRoom.addEventListener('change', function() {
                     printBtn.style.display = '';
                     // ตั้งค่าหัวข้อรายงาน
                     printClassTitle.textContent = `รายงานสถิติการหักคะแนนของนักเรียน ชั้นมัธยมศึกษาปีที่ ${selectClass.value}/${selectRoom.value}`;
-                    printTermTitle.textContent = `เทอม ${term} ปีการศึกษา ${pee}`;
+                    printTermTitle.textContent = `ภาคเรียนที่ ${term} ปีการศึกษา ${pee}`;
                 } else {
                     tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
                     printBtn.style.display = 'none';

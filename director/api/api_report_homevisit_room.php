@@ -35,7 +35,7 @@ foreach ($rooms as $room) {
     $stmtTotal->execute();
     $total = (int)$stmtTotal->fetchColumn();
 
-    // นักเรียนที่เยี่ยมบ้านแล้วในห้องนี้ (เทอม 1)
+    // นักเรียนที่เยี่ยมบ้านแล้วในห้องนี้ (ภาคเรียนที่ 1)
     $stmtVisited1 = $db->prepare("SELECT COUNT(DISTINCT student.Stu_id) FROM student INNER JOIN visithome ON student.Stu_id = visithome.Stu_id WHERE student.Stu_major = :major AND student.Stu_room = :room AND student.Stu_status = 1 AND visithome.Term = 1 AND visithome.Pee = :pee");
     $stmtVisited1->bindParam(':major', $major, PDO::PARAM_INT);
     $stmtVisited1->bindParam(':room', $room, PDO::PARAM_INT);
@@ -43,7 +43,7 @@ foreach ($rooms as $room) {
     $stmtVisited1->execute();
     $visited_term1 = (int)$stmtVisited1->fetchColumn();
 
-    // นักเรียนที่เยี่ยมบ้านแล้วในห้องนี้ (เทอม 2)
+    // นักเรียนที่เยี่ยมบ้านแล้วในห้องนี้ (ภาคเรียนที่ 2)
     $stmtVisited2 = $db->prepare("SELECT COUNT(DISTINCT student.Stu_id) FROM student INNER JOIN visithome ON student.Stu_id = visithome.Stu_id WHERE student.Stu_major = :major AND student.Stu_room = :room AND student.Stu_status = 1 AND visithome.Term = 2 AND visithome.Pee = :pee");
     $stmtVisited2->bindParam(':major', $major, PDO::PARAM_INT);
     $stmtVisited2->bindParam(':room', $room, PDO::PARAM_INT);
