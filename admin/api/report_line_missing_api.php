@@ -80,18 +80,38 @@ foreach ($classMap as $classKey => $groupId) {
 
         if (empty($stu_ids)) continue;
 
-        // ตรวจสอบว่ามีใครในห้องนี้บันทึกการมาเรียนในวันนั้นหรือยัง
+        // ตรวจสอบว่ามีการบันทึกการมาเรียน "ของห้องนี้" ในวันนี้หรือยัง
+        // เงื่อนไข: มี student_id ใดในห้องนี้ที่มีบันทึกในวันนี้อย่างน้อย 1 คน = ห้องนี้ "รายงานแล้ว"
+        // --- ตรวจสอบทั้งแบบ ค.ศ. และ พ.ศ. ---
         $placeholders = implode(',', array_fill(0, count($stu_ids), '?'));
-        $sql = "SELECT COUNT(*) FROM student_attendance WHERE attendance_date = ? AND student_id IN ($placeholders)";
-        $params = array_merge([$date], $stu_ids);
+        $dateAD = '';
+        $dateBE = '';
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dateC, $m)) {
+            $year = (int)$m[1];
+            if ($year > 2400) {
+                $dateAD = ($year - 543) . '-' . $m[2] . '-' . $m[3];
+                $dateBE = $dateC;
+            } else {
+                $dateAD = $dateC;
+                $dateBE = ($year + 543) . '-' . $m[2] . '-' . $m[3];
+            }
+        } else {
+            $dateAD = $dateC;
+            $dateBE = $dateC;
+        }
+        $sql = "SELECT COUNT(*) FROM student_attendance WHERE (attendance_date = ? OR attendance_date = ?) AND student_id IN ($placeholders)";
+        $params = array_merge([$dateAD, $dateBE], $stu_ids);
         $stmt2 = $db->prepare($sql);
         $stmt2->execute($params);
         $count = $stmt2->fetchColumn();
 
-        // ถ้าไม่มีเลย แสดงว่ายังไม่ได้รายงาน
-        if ($count == 0) {
-            $missing_rooms[] = $room;
+        // ถ้า count > 0 แสดงว่าห้องนี้มีการรายงานแล้ว ให้ข้าม
+        if ($count > 0) {
+            continue;
         }
+
+        // ถ้าไม่มีเลย แสดงว่ายังไม่ได้รายงาน
+        $missing_rooms[] = $room;
     }
 
     if (count($missing_rooms) > 0) {
