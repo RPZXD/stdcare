@@ -35,6 +35,16 @@ function convertToBuddhistYear($date) {
 $date = $_REQUEST['date'] ?? date('Y-m-d');
 $dateC = convertToBuddhistYear($date);
 
+// เช็คถ้าเป็นวันเสาร์หรืออาทิตย์ ไม่ต้องส่งข้อความ
+$dayOfWeek = date('N', strtotime($date)); // 6=Saturday, 7=Sunday
+if ($dayOfWeek == 6 || $dayOfWeek == 7) {
+    echo json_encode([
+        'status' => 'skip',
+        'message' => 'ไม่ส่งข้อความในวันเสาร์-อาทิตย์'
+    ]);
+    exit;
+}
+
 $dbObj = new Database("phichaia_student");
 $db = $dbObj->getConnection();
 $attendance = new Attendance($db);
