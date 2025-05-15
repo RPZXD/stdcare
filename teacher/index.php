@@ -86,7 +86,7 @@ require_once('header.php');
                 <div class="text-sm text-gray-700">นักเรียนทั้งหมด</div>
                 <div class="flex gap-2 mt-2">
                     <span class="bg-green-200 text-green-800 px-2 py-1 rounded text-xs">✅ มาเรียน <?=$countStdCome?></span>
-                    <span class="bg-red-200 text-red-800 px-2 py-1 rounded text-xs">❌ ขาด <?=$countStdAbsent?></span>
+                    <span class="bg-red-200 text-red-800 px-2 py-1 rounded text-xs">❌ ไม่มาเรียน <?=$countStdAbsent?></span>
                 </div>
             </div>
             <!-- Behavior -->
