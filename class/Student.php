@@ -490,6 +490,19 @@ class Student {
         return $row && !empty($row['Par_phone']) ? $row['Par_phone'] : null;
     }
 
+    // ดึงข้อมูลนักเรียนตามระดับชั้น ห้อง และสถานะ (ใช้สำหรับพิมพ์บัตรรายห้อง)
+    public function getStudentsByMajorRoom($major, $room, $status = 1) {
+        $query = "SELECT * FROM {$this->table_student} 
+                  WHERE Stu_major = :major AND Stu_room = :room AND Stu_status = :status
+                  ORDER BY Stu_no ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':major', $major);
+        $stmt->bindParam(':room', $room);
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 
 ?>

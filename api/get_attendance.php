@@ -28,12 +28,24 @@ try {
 
     $data = [];
     foreach ($rows as $row) {
+        // กำหนดข้อความสถานะ
+        $statusText = '';
+        if ($row['attendance_status'] == '1') {
+            $statusText = 'มาเรียน';
+        } elseif ($row['attendance_status'] == '2') {
+            $statusText = 'ขาดเรียน';
+        } elseif ($row['attendance_status'] == '3') {
+            $statusText = 'มาสาย';
+        } else {
+            $statusText = $row['attendance_status'];
+        }
+
         $data[] = [
             'student_id' => $row['student_id'],
             'fullname' => $row['Stu_name'] . ' ' . $row['Stu_sur'],
             'class' => $row['Stu_major'] . '/' . $row['Stu_room'],
             'time' => date('H:i:s', strtotime($row['time'])),
-            'status' => ($row['attendance_status'] == '1') ? 'มาเรียน' : 'ขาดเรียน'
+            'status' => $statusText
         ];
     }
 

@@ -55,10 +55,8 @@ try {
     // กำหนด attendance_status ตามช่วงเวลา
     if ($now < '08:00:00') {
         $attendance_status = '1'; // มาเรียน
-    } elseif ($now < '09:00:00') {
+    }  else {
         $attendance_status = '3'; // สาย
-    } else {
-        $attendance_status = '2'; // ขาด
     }
 
     // ตรวจสอบว่ามี record วันนี้หรือยัง

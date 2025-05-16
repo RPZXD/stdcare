@@ -40,5 +40,19 @@
         "action_type": "logout",
         "session_id": "7tso7fbk1bq55mjem5n0sn01np",
         "message": "Logout successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "ADM",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-16T05:41:34+02:00",
+        "url": "\/stdcare\/logout.php",
+        "method": "GET",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/officer\/rfid.php",
+        "action_type": "logout",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Logout successful"
     }
 ]

@@ -67,7 +67,12 @@ require_once('header.php');
                     </div>
                     <!-- 5. รายการ RFID ที่ลงทะเบียนแล้ว -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
-                        <div class="mb-2 font-semibold text-blue-700">รายการ RFID ที่ลงทะเบียนแล้ว</div>
+                        <div class="mb-2 font-semibold text-blue-700 flex items-center gap-4">
+                            รายการ RFID ที่ลงทะเบียนแล้ว
+                            <button id="btnPrintRoomCards" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded font-semibold text-xs shadow">
+                                🖨️ พิมพ์บัตรทั้งห้อง
+                            </button>
+                        </div>
                         <div class="overflow-x-auto">
                             <table id="rfidTable" class="min-w-full text-sm">
                                 <thead>
@@ -549,6 +554,47 @@ $(document).ready(function() {
             '&rfid=' + encodeURIComponent(rfid),
             '_blank'
         );
+    });
+
+    // --- ปุ่มพิมพ์บัตรทั้งห้อง ---
+    $('#btnPrintRoomCards').click(function() {
+        // เลือกห้องที่ต้องการพิมพ์
+        Swal.fire({
+            title: 'เลือกห้องที่ต้องการพิมพ์บัตร',
+            html: `
+                <div class="flex flex-col gap-2 items-center">
+                    <select id="swal_major" class="border border-blue-200 rounded px-2 py-1">
+                        <option value="">เลือกระดับชั้น</option>
+                        ${majors.map(m => `<option value="${m}">${m}</option>`).join('')}
+                    </select>
+                    <select id="swal_room" class="border border-blue-200 rounded px-2 py-1">
+                        <option value="">เลือกห้อง</option>
+                        ${rooms.map(r => `<option value="${r}">${r}</option>`).join('')}
+                    </select>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'พิมพ์บัตร',
+            cancelButtonText: 'ยกเลิก',
+            preConfirm: () => {
+                const major = $('#swal_major').val();
+                const room = $('#swal_room').val();
+                if (!major || !room) {
+                    Swal.showValidationMessage('กรุณาเลือกระดับชั้นและห้อง');
+                    return false;
+                }
+                return {major, room};
+            }
+        }).then(result => {
+            if (result.isConfirmed && result.value) {
+                const {major, room} = result.value;
+                window.open(
+                    'print_card_room.php?major=' + encodeURIComponent(major) +
+                    '&room=' + encodeURIComponent(room),
+                    '_blank'
+                );
+            }
+        });
     });
 
     // --- Autofocus RFID input เมื่อโหลดหน้า ---

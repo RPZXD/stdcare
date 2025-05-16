@@ -63,7 +63,17 @@ $pee = $user->getPee();
     </form>
 </div>
 
+<div class="mb-4 flex gap-2">
+    <p class="text-red-500 text-base">** ระบบจะทำการเช็ค "มาเรียน" เป็นค่าเริ่มต้น หากท่านเปิดในอุปกรณ์มือถือ และต้องการเช็ค สถานะอื่น ให้กดเครื่องหมาย <span class="text-blue-500 text-2xl text-bold">+</span> หน้าแถวของชื่อนักเรียนเพื่อทำการเช็คสถานะ **</p>
+</div>
+
+
 <div class="overflow-x-auto">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <!-- DataTables JS + jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <style>
         /* เพิ่มลูกเล่น hover และ effect ให้ radio */
         .attendance-radio label {
@@ -105,7 +115,7 @@ $pee = $user->getPee();
         <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-        <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+        <table id="attendance-table" class="min-w-full border border-gray-200 rounded-lg shadow-sm">
             <thead class="bg-blue-100">
                 <tr>
                     <th class="px-3 py-2 border text-center">เลขที่</th>
@@ -333,8 +343,26 @@ $pee = $user->getPee();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // CSS rule `.edit-attendance-form { display: none !important; }` should handle initial hiding.
-    // No need for explicit JS hiding here if the CSS rule is effective.
+    // DataTables initialization
+    $('#attendance-table').DataTable({
+        responsive: true,
+        autoWidth: false,
+        lengthChange: false,
+        pageLength: 50,
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        // Do not set scrollY, so table height is not fixed
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json"
+        },
+        columnDefs: [
+            { orderable: false, targets: [3, 4, 5] } // Disable sorting on specific columns
+        ],
+        scrollY: false,
+        scrollX: true,
+    });
 
     // เมื่อกดปุ่ม "แก้ไข"
     document.querySelectorAll('.edit-attendance-btn').forEach(function(btn) {
