@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $student = new Student($db);
 
     try {
-        $data = $student->fetchFilteredStudents($class, $room);
+        $data = $student->fetchFilteredStudents2($class, $room);
         echo json_encode(['success' => true, 'data' => $data]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

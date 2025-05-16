@@ -165,6 +165,37 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function fetchFilteredStudents2($class = '', $room = '') {
+        $query = "SELECT Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, 
+                     Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone, 
+                     Stu_status
+                  FROM {$this->table_student} 
+                  WHERE 1=1"; // Base query
+        
+        if (!empty($class)) {
+            $query .= " AND Stu_major = :class";
+        }
+        if (!empty($room)) {
+            $query .= " AND Stu_room = :room";
+        }
+
+        $query .= " 
+            AND Stu_status = 1
+            ORDER BY Stu_no ASC";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        if (!empty($class)) {
+            $stmt->bindParam(':class', $class);
+        }
+        if (!empty($room)) {
+            $stmt->bindParam(':room', $room);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getStudentById($stu_id) {
         try {
             $query = "SELECT * 
