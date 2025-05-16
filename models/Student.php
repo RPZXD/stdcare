@@ -17,6 +17,7 @@ class Student
         $sql = "SELECT 
             Stu_id, Stu_no, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status 
             FROM student 
+            WHERE Stu_status = '1'
             ORDER BY Stu_major, Stu_room, Stu_no, Stu_name";
         return $this->db->query($sql)->fetchAll();
     }
