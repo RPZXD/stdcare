@@ -53,5 +53,5 @@ foreach ($students as $stu) {
     }
 }
 
-echo json_encode($date);
+echo json_encode($result);
 exit;
