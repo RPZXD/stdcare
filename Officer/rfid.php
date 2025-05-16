@@ -79,6 +79,7 @@ require_once('header.php');
                                         <th class="px-2 py-1">วันที่ลงทะเบียน</th>
                                         <th class="px-2 py-1">แก้ไข</th>
                                         <th class="px-2 py-1">ลบ</th>
+                                        <th class="px-2 py-1">พิมพ์บัตร</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -160,7 +161,8 @@ $(document).ready(function() {
     // --- โหลดข้อมูลนักเรียนทั้งหมด ---
     function loadStudents() {
         $.getJSON('../controllers/StudentController.php?action=list', function(data) {
-            students = data;
+            // กรองเฉพาะ Stu_status == 1
+            students = (data || []).filter(s => String(s.Stu_status) === '1');
             majors = [...new Set(students.map(s => s.Stu_major).filter(Boolean))];
             rooms = [...new Set(students.map(s => s.Stu_room).filter(Boolean))];
             fillMajorRoomFilter();
@@ -201,12 +203,21 @@ $(document).ready(function() {
             return;
         }
         filteredStudents.forEach(s => {
+            // ตรวจสอบว่านักเรียนนี้มี RFID แล้วหรือยัง
+            let rfidRegistered = false;
+            if (window.rfidList && Array.isArray(window.rfidList)) {
+                rfidRegistered = window.rfidList.some(r => r.stu_id == s.Stu_id);
+            }
             $tbody.append(`<tr>
                 <td class="px-2 py-1">${s.Stu_id}</td>
                 <td class="px-2 py-1">${s.Stu_name} ${s.Stu_sur||''}</td>
                 <td class="px-2 py-1">ม.${s.Stu_major||''}/${s.Stu_room||''}</td>
                 <td class="px-2 py-1">
-                    <button class="selectStudent bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" data-id="${s.Stu_id}">เลือก</button>
+                    ${
+                        rfidRegistered
+                        ? '<span class="bg-green-100 text-green-700 px-3 py-1 rounded font-semibold">ถูกเลือกไปแล้ว</span>'
+                        : `<button class="selectStudent bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" data-id="${s.Stu_id}">เลือก</button>`
+                    }
                 </td>
             </tr>`);
         });
@@ -410,6 +421,7 @@ $(document).ready(function() {
     // --- ตาราง RFID ที่ลงทะเบียนแล้ว ---
     function loadRfidTable() {
         $.getJSON('../controllers/StudentRfidController.php?action=list', function(data) {
+            window.rfidList = data || []; // เก็บไว้ใช้เช็คใน fillStudentTable
             const $tbody = $('#rfidTable tbody');
             // Destroy DataTable ก่อน (ถ้ามี)
             if ($.fn.DataTable.isDataTable('#rfidTable')) {
@@ -417,7 +429,7 @@ $(document).ready(function() {
             }
             $tbody.empty();
             if (!data || data.length === 0) {
-                $tbody.append('<tr><td colspan="7" class="text-center text-gray-400">ไม่มีข้อมูล</td></tr>');
+                $tbody.append('<tr><td colspan="8" class="text-center text-gray-400">ไม่มีข้อมูล</td></tr>');
                 return;
             }
             data.forEach(row => {
@@ -432,6 +444,17 @@ $(document).ready(function() {
                     </td>
                     <td class="px-2 py-1">
                         <button class="deleteRfid bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded" data-id="${row.id}">ลบ</button>
+                    </td>
+                    <td class="px-2 py-1">
+                        <button class="printCard bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded" 
+                            data-id="${row.id}" 
+                            data-stu_id="${row.stu_id||''}" 
+                            data-stu_name="${row.stu_name||''}" 
+                            data-stu_major="${row.stu_major||''}" 
+                            data-stu_room="${row.stu_room||''}" 
+                            data-rfid="${row.rfid_code||''}">
+                            🖨️ พิมพ์บัตร
+                        </button>
                     </td>
                 </tr>`);
             });
@@ -451,6 +474,8 @@ $(document).ready(function() {
                     zeroRecords: "ไม่พบข้อมูล"
                 }
             });
+            // อัปเดตตารางนักเรียนให้ปุ่ม "เลือก" เปลี่ยนเป็น "ถูกเลือกไปแล้ว"
+            filterStudents();
         });
     }
 
@@ -506,6 +531,24 @@ $(document).ready(function() {
                 }, 'json');
             }
         });
+    });
+
+    // --- ปุ่มพิมพ์บัตร ---
+    $('#rfidTable').on('click', '.printCard', function() {
+        const stu_id = $(this).data('stu_id');
+        const stu_name = $(this).data('stu_name');
+        const stu_major = $(this).data('stu_major');
+        const stu_room = $(this).data('stu_room');
+        const rfid = $(this).data('rfid');
+        // ตัวอย่าง: เปิดหน้าพิมพ์บัตรใหม่ (คุณต้องสร้าง print_card.php เอง)
+        window.open(
+            'print_card.php?stu_id=' + encodeURIComponent(stu_id) +
+            '&stu_name=' + encodeURIComponent(stu_name) +
+            '&stu_major=' + encodeURIComponent(stu_major) +
+            '&stu_room=' + encodeURIComponent(stu_room) +
+            '&rfid=' + encodeURIComponent(rfid),
+            '_blank'
+        );
     });
 
     // --- Autofocus RFID input เมื่อโหลดหน้า ---

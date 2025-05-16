@@ -1,0 +1,72 @@
+[
+    {
+        "user_id": "1052",
+        "role": "Admin",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-15T11:10:14+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 401,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_attempt",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Incorrect password"
+    },
+    {
+        "user_id": "1052",
+        "role": "Teacher",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-15T11:10:28+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "Admin",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-15T11:10:41+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Login successful"
+    },
+    {
+        "user_id": "1052",
+        "role": "Officer",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-15T11:11:15+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 401,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_attempt",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Incorrect password"
+    },
+    {
+        "user_id": "1052",
+        "role": "Officer",
+        "ip_address": "::1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
+        "access_time": "2025-05-15T11:11:29+02:00",
+        "url": "\/stdcare\/login.php",
+        "method": "POST",
+        "status_code": 200,
+        "referrer": "http:\/\/localhost\/stdcare\/login.php",
+        "action_type": "login_success",
+        "session_id": "7tso7fbk1bq55mjem5n0sn01np",
+        "message": "Login successful"
+    }
+]

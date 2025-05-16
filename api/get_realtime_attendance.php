@@ -1,29 +1,30 @@
 <?php
-require_once('../config/Database.php');
-require_once('../class/Student.php');
+require_once dirname(__DIR__) . '/config/Database.php';
 
-// Instantiate database and student object
-$database = new Database("phichaia_student");
-$db = $database->getConnection();
-$student = new Student($db);
+header('Content-Type: application/json; charset=utf-8');
 
-// Implement caching to reduce redundant queries
-$cacheKey = 'realtime_attendance_' . (isset($_GET['device']) ? $_GET['device'] : 'all');
-$cacheFile = '../cache/' . $cacheKey . '.json';
-$cacheTime = 30; // Cache duration in seconds
+date_default_timezone_set('Asia/Bangkok');
 
-if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
-    $data = json_decode(file_get_contents($cacheFile), true);
+$db = (new Database("phichaia_student"))->getConnection();
+$today = date('Y-m-d');
+$date_parts = explode('-', $today);
+if (count($date_parts) === 3) {
+    $date_parts[0] = (string)(((int)$date_parts[0]) + 543);
+    $today_thai = implode('-', $date_parts);
 } else {
-    // Get real-time student information filtered by device if provided
-    $device = isset($_GET['device']) ? $_GET['device'] : '';
-    $data = $student->getRealTimeStudentInfo($device);
-
-    // Save to cache
-    file_put_contents($cacheFile, json_encode($data));
+    $today_thai = $today;
 }
+$sql = "SELECT a.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_no, r.rfid_code, s.Stu_picture
+        FROM student_attendance a
+        INNER JOIN student s ON a.student_id = s.Stu_id
+        LEFT JOIN student_rfid r ON r.stu_id = s.Stu_id
+        WHERE a.attendance_date = :today
+        ORDER BY a.attendance_time DESC";
+$stmt = $db->prepare($sql);
+$stmt->bindParam(':today', $today_thai);
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Return data as JSON
-header('Content-Type: application/json');
-echo json_encode($data);
+// Output format: { "data": [ ...rows... ] }
+echo json_encode(['data' => $rows]);
 ?>

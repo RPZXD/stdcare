@@ -186,6 +186,14 @@ class Student {
         }
     }
 
+    // ดึงข้อมูลนักเรียนจาก Stu_id (คืนค่าแถวเดียวแบบ associative array)
+    public function getStudentDataByStuId($stu_id) {
+        $query = "SELECT * FROM {$this->table_student} WHERE Stu_id = :stu_id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':stu_id', $stu_id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function updateStudentInfo() {
         $sql = "UPDATE {$this->table_student}
