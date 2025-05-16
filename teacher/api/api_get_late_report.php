@@ -43,7 +43,7 @@ $students = $attendance->getStudentsWithAttendance($date, $class, $room);
 $result = [];
 foreach ($students as $stu) {
     // 2 = ขาด, 3 = สาย (สมมติฐาน, ปรับตามระบบจริง)
-    if (isset($stu['attendance_status']) && in_array($stu['attendance_status'], ['2', '3'])) {
+    if (isset($stu['attendance_status']) && in_array($stu['attendance_status'], ['1', '2', '3', '4', '5', '6'])) {
         // ดึงเบอร์ผู้ปกครอง
         $parent_tel = $studentObj->getParentTel($stu['Stu_id']);
         $stu['parent_tel'] = $parent_tel;
