@@ -28,7 +28,7 @@ function redirectUser() {
 
 redirectUser(); // Ensure this is called before any HTML output
 ?>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed bg-gradient-to-br from-blue-100 via-white to-blue-200 min-h-screen">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
@@ -51,7 +51,7 @@ redirectUser(); // Ensure this is called before any HTML output
 
         <div class="container-fluid">
 
-            <div class="row flex items-center justify-center bg-gray-100">
+            <div class="row flex items-center justify-center min-h-[70vh] bg-transparent">
 
               <?php 
 
@@ -285,21 +285,20 @@ redirectUser(); // Ensure this is called before any HTML output
 
 
                           
-                    <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-                        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">เข้าสู่ระบบ</h2>
-
-                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST" class="space-y-4">
-                            
+                    <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-8 border border-blue-200 animate-fade-in">
+                        <h2 class="text-3xl font-extrabold text-center text-blue-700 mb-6 flex items-center justify-center gap-2 animate-fade-in-down">
+                            <span class="text-4xl">🔐</span> เข้าสู่ระบบ
+                        </h2>
+                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST" class="space-y-5">
                             <div>
-                                <label class="block text-gray-600 mb-1">ชื่อผู้ใช้งาน</label>
-                                <input type="text" name="txt_username_email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="กรุณากรอกชื่อผู้ใช้งาน...">
+                                <label class="block text-gray-600 mb-1 font-semibold flex items-center gap-1">👤 ชื่อผู้ใช้งาน</label>
+                                <input type="text" name="txt_username_email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 shadow-sm" placeholder="กรุณากรอกชื่อผู้ใช้งาน...">
                             </div>
-
                             <div>
-                                <label class="block text-gray-600 mb-1">รหัสผ่าน</label>
+                                <label class="block text-gray-600 mb-1 font-semibold flex items-center gap-1">🔑 รหัสผ่าน</label>
                                 <div class="relative">
-                                    <input type="password" id="password" name="txt_password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="กรุณากรอกรหัสผ่าน...">
-                                    <button type="button" id="togglePassword" class="absolute inset-y-0 right-3 flex items-center text-gray-500">
+                                    <input type="password" id="password" name="txt_password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 shadow-sm" placeholder="กรุณากรอกรหัสผ่าน...">
+                                    <button type="button" id="togglePassword" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 transition-colors">
                                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.837-.68 1.613-1.196 2.296M15.536 15.536A9.953 9.953 0 0112 17c-4.477 0-8.268-2.943-9.542-7a9.953 9.953 0 011.196-2.296M9.88 9.88a3 3 0 014.24 4.24" />
@@ -307,23 +306,24 @@ redirectUser(); // Ensure this is called before any HTML output
                                     </button>
                                 </div>
                             </div>
-
                             <div>
-                                <label class="block text-gray-600 mb-1">ประเภทผู้ใช้</label>
-                                <select name="txt_role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-center">
-                                    <option value="Teacher" selected>ครู</option>
-                                    <option value="Student">นักเรียน</option>
-                                    <!-- <option value="Parent">ผู้ปกครอง</option> -->
-                                    <option value="Officer">เจ้าหน้าที่</option>
-                                    <option value="Director">ผู้อำนวยการ</option>
-                                    <option value="Admin">Admin</option>
+                                <label class="block text-gray-600 mb-1 font-semibold flex items-center gap-1">🧑‍💼 ประเภทผู้ใช้</label>
+                                <select name="txt_role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-center transition-all duration-200 shadow-sm">
+                                    <option value="Teacher" selected>👨‍🏫 ครู</option>
+                                    <option value="Student">🎓 นักเรียน</option>
+                                    <!-- <option value="Parent">👪 ผู้ปกครอง</option> -->
+                                    <option value="Officer">🧑‍💻 เจ้าหน้าที่</option>
+                                    <option value="Director">👔 ผู้อำนวยการ</option>
+                                    <option value="Admin">🛡️ Admin</option>
                                 </select>
                             </div>
-
-                            <button type="submit" name="signin" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition duration-300">
-                                เข้าสู่ระบบ
+                            <button type="submit" name="signin" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg hover:from-blue-600 hover:to-blue-700 shadow-lg font-bold text-lg flex items-center justify-center gap-2 transition-all duration-200 animate-bounce-in">
+                                🚀 เข้าสู่ระบบ
                             </button>
                         </form>
+                        <div class="mt-6 text-center text-gray-400 text-xs animate-fade-in">
+                            © <?= date('Y') ?> โรงเรียนพิชัย | ระบบดูแลช่วยเหลือนักเรียน
+                        </div>
                     </div>
       
             </div>
@@ -349,12 +349,33 @@ redirectUser(); // Ensure this is called before any HTML output
     togglePasswordButton.addEventListener('click', () => {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
-        eyeIcon.setAttribute('d', isPassword
-            ? 'M12 4.5c-4.477 0-8.268 2.943-9.542 7 .274.837.68 1.613 1.196 2.296M15.536 15.536A9.953 9.953 0 0112 17c-4.477 0 8.268-2.943 9.542-7a9.953 9.953 0 01-1.196-2.296M9.88 9.88a3 3 0 014.24 4.24' // Eye open path
-            : 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.837-.68 1.613-1.196 2.296M15.536 15.536A9.953 9.953 0 0112 17c-4.477 0-8.268-2.943-9.542-7a9.953 9.953 0 011.196-2.296M9.88 9.88a3 3 0 014.24 4.24' // Eye closed path
-        );
+        // Optional: animate icon
+        eyeIcon.classList.add('animate-pulse');
+        setTimeout(() => eyeIcon.classList.remove('animate-pulse'), 300);
     });
 </script>
+<style>
+@layer utilities {
+    .animate-fade-in { animation: fadeIn 0.7s; }
+    .animate-fade-in-down { animation: fadeInDown 0.7s; }
+    .animate-bounce-in { animation: bounceIn 0.8s; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+@keyframes bounceIn {
+    0% { transform: scale(0.9); opacity: 0.7;}
+    60% { transform: scale(1.05);}
+    80% { transform: scale(0.98);}
+    100% { transform: scale(1); opacity: 1;}
+}
+}
+</style>
 <?php require_once('script.php'); ?>
 <?php ob_end_flush(); // Flush the output buffer ?>
 </body>
