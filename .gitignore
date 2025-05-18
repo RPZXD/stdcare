@@ -5,3 +5,5 @@ logs/login.json
 logs/logout.json
 vendor/
 test.php
+logs/login.json
+logs/logout.json
