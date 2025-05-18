@@ -503,6 +503,76 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // ฟังก์ชันใหม่สำหรับอัปเดตข้อมูลนักเรียนทุกฟิลด์
+    public function updateStudentInfoFull() {
+        $sql = "UPDATE {$this->table_student} SET
+            Stu_id = :Stu_id,
+            Stu_pre = :Stu_pre,
+            Stu_name = :Stu_name,
+            Stu_sur = :Stu_sur,
+            Stu_no = :Stu_no,
+            Stu_password = :Stu_password,
+            Stu_sex = :Stu_sex,
+            Stu_major = :Stu_major,
+            Stu_room = :Stu_room,
+            Stu_nick = :Stu_nick,
+            Stu_birth = :Stu_birth,
+            Stu_religion = :Stu_religion,
+            Stu_blood = :Stu_blood,
+            Stu_addr = :Stu_addr,
+            Stu_phone = :Stu_phone,
+            Par_phone = :Par_phone,
+            Stu_citizenid = :Stu_citizenid,
+            Father_name = :Father_name,
+            Father_occu = :Father_occu,
+            Father_income = :Father_income,
+            Mother_name = :Mother_name,
+            Mother_occu = :Mother_occu,
+            Mother_income = :Mother_income,
+            Par_name = :Par_name,
+            Par_relate = :Par_relate,
+            Par_occu = :Par_occu,
+            Par_income = :Par_income,
+            Par_addr = :Par_addr,
+            Stu_status = :Stu_status
+        WHERE Stu_id = :OldStu_id";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindParam(':Stu_id', $this->Stu_id);
+        $stmt->bindParam(':Stu_pre', $this->Stu_pre);
+        $stmt->bindParam(':Stu_name', $this->Stu_name);
+        $stmt->bindParam(':Stu_sur', $this->Stu_sur);
+        $stmt->bindParam(':Stu_no', $this->Stu_no);
+        $stmt->bindParam(':Stu_password', $this->Stu_password);
+        $stmt->bindParam(':Stu_sex', $this->Stu_sex);
+        $stmt->bindParam(':Stu_major', $this->Stu_major);
+        $stmt->bindParam(':Stu_room', $this->Stu_room);
+        $stmt->bindParam(':Stu_nick', $this->Stu_nick);
+        $stmt->bindParam(':Stu_birth', $this->Stu_birth);
+        $stmt->bindParam(':Stu_religion', $this->Stu_religion);
+        $stmt->bindParam(':Stu_blood', $this->Stu_blood);
+        $stmt->bindParam(':Stu_addr', $this->Stu_addr);
+        $stmt->bindParam(':Stu_phone', $this->Stu_phone);
+        $stmt->bindParam(':Par_phone', $this->Par_phone);
+        $stmt->bindParam(':Stu_citizenid', $this->Stu_citizenid);
+        $stmt->bindParam(':Father_name', $this->Father_name);
+        $stmt->bindParam(':Father_occu', $this->Father_occu);
+        $stmt->bindParam(':Father_income', $this->Father_income);
+        $stmt->bindParam(':Mother_name', $this->Mother_name);
+        $stmt->bindParam(':Mother_occu', $this->Mother_occu);
+        $stmt->bindParam(':Mother_income', $this->Mother_income);
+        $stmt->bindParam(':Par_name', $this->Par_name);
+        $stmt->bindParam(':Par_relate', $this->Par_relate);
+        $stmt->bindParam(':Par_occu', $this->Par_occu);
+        $stmt->bindParam(':Par_income', $this->Par_income);
+        $stmt->bindParam(':Par_addr', $this->Par_addr);
+        $stmt->bindParam(':Stu_status', $this->Stu_status);
+        $stmt->bindParam(':OldStu_id', $this->OldStu_id);
+
+        return $stmt->execute();
+    }
+
 }
 
 ?>

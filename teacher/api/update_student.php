@@ -41,8 +41,8 @@ $student->Par_addr = $_POST['Par_addr'];
 $student->Stu_status = $_POST['Stu_status'];
 $student->OldStu_id = $_POST['Stu_id']; // Assuming OldStu_id is the same as Stu_id for update
 
-// Update student information
-if ($student->updateStudentInfo()) {
+// Update student information using the new function
+if ($student->updateStudentInfoFull()) {
     echo json_encode(["success" => true]);
 } else {
     echo json_encode(["success" => false]);
