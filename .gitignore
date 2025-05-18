@@ -7,3 +7,4 @@ vendor/
 test.php
 logs/login.json
 logs/logout.json
+classes/DatabaseUsers.php
