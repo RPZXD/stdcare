@@ -141,6 +141,12 @@ function thai_date($strDate) {
                         <?php
                         // เตรียมข้อมูลสรุปรายเดือนใหม่ (นับแต่ละ status)
                         $currentMonth = date('Y-m');
+                        // ปรับ $currentMonth ให้เป็นปี พ.ศ.
+                        $parts = explode('-', $currentMonth);
+                        if (count($parts) === 2) {
+                            $parts[0] = (string)((int)$parts[0] + 543);
+                            $currentMonth = implode('-', $parts);
+                        }
                         $monthStats = [
                             '1'=>0, // มาเรียน
                             '2'=>0, // ขาด
