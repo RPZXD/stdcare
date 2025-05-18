@@ -1,5 +1,7 @@
-config/
-classes/
-logs/
+config/Database.php
+config/Config.php
+classes/DatabaseUser.php
+logs/login.json
+logs/logout.json
 vendor/
 test.php
