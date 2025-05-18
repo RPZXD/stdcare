@@ -3,6 +3,28 @@
 require_once('header.php');
 require_once('config/Setting.php');
 require_once('class/Utils.php');
+require_once('config/Database.php');
+require_once('class/Student.php');
+
+$connectDB = new Database("phichaia_student");
+$db = $connectDB->getConnection();
+$student = new Student($db);
+
+// นับยอดนักเรียน
+$stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1");
+$stmt->execute();
+$total_all = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+$stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1 AND Stu_major IN (1,2,3)");
+$stmt->execute();
+$total_lower = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+$stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1 AND Stu_major IN (4,5,6)");
+$stmt->execute();
+$total_upper = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+date_default_timezone_set('Asia/Bangkok');
+$date = date('Y-m-d');
 ?>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
@@ -24,102 +46,120 @@ require_once('class/Utils.php');
     <!-- /.content-header -->
 
     <section class="content">
-
       <div class="container-fluid">
-        <h3 class="text-dark">ยอดนักเรียนแต่ละระดับชั้น</h3>
-      <div class="row">
-
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-success">
-              <div class="inner">
-                <h3>1365</h3>
-
-                <p>นักเรียนมัธยมศึกษาตอนต้น</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-              
+        <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card: นักเรียนทั้งหมด -->
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-blue-400 to-blue-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+                <div class="text-5xl font-bold mb-2"><?= number_format($total_all) ?></div>
+                <div class="text-lg font-semibold tracking-wide">นักเรียนทั้งหมด</div>
+                <div class="mt-2 text-sm opacity-80">รวมทุกระดับชั้น</div>
             </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-info">
-              <div class="inner">
-                <h3>781<sup style="font-size: 20px"></sup></h3>
-
-                <p>นักเรียนมัธยมศึกษาตอนปลาย</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
+            <!-- Card: นักเรียน ม.ต้น -->
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-green-400 to-green-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+                <div class="text-5xl font-bold mb-2"><?= number_format($total_lower) ?></div>
+                <div class="text-lg font-semibold tracking-wide">นักเรียนมัธยมต้น</div>
+                <div class="mt-2 text-sm opacity-80">ชั้น ม.1 - ม.3</div>
             </div>
-          </div>
-
-          <div class="col-lg-4 col-sm-12 col-md-12">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3>2146<sup style="font-size: 20px"></sup></h3>
-
-                <p>นักเรียนทั้งหมด</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-            </div>
-          </div>
-          <!-- ./col -->
-          
-          <!-- ./col -->
-          
-        </div>
-        <h4>สรุปการมาเรียนของนักเรียนประจำวันที่ <?=Utils::convertToThaiDatePlus(date("Y-m-d"));?> </h4>
-        <div class="row">
-            <div class="col-lg-12 col-sm-12 col-md-12">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">มัธยมศึกษาตอนต้น</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="barChart1" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
-            </div>
-            <div class="col-lg-12 col-sm-12 col-md-12">
-            <div class="card card-primary">
-                <div class="card-header">
-                    <h3 class="card-title">มัธยมศึกษาตอนปลาย</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="barChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-            </div>
+            <!-- Card: นักเรียน ม.ปลาย -->
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-yellow-400 to-yellow-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+                <div class="text-5xl font-bold mb-2"><?= number_format($total_upper) ?></div>
+                <div class="text-lg font-semibold tracking-wide">นักเรียนมัธยมปลาย</div>
+                <div class="mt-2 text-sm opacity-80">ชั้น ม.4 - ม.6</div>
             </div>
         </div>
 
-
-        
-        <!-- /.row -->
-
+        <h4 class="text-xl font-bold text-blue-700 mb-4">สรุปการมาเรียนของนักเรียนประจำวันที่ <?=Utils::convertToThaiDatePlus($date);?> </h4>
+        <div class="flex flex-col md:flex-row gap-8 mb-8">
+            <!-- ซ้าย: Bar Chart ม.ต้น -->
+            <div class="w-full md:w-1/2 flex flex-col items-center">
+                <div class="card card-primary w-full mb-4">
+                    <div class="card-header bg-green-500 text-white rounded-t">
+                        <h3 class="card-title">มัธยมศึกษาตอนต้น</h3>
+                    </div>
+                    <div class="card-body bg-white rounded-b">
+                        <canvas id="barChart1" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- ขวา: Bar Chart ม.ปลาย -->
+            <div class="w-full md:w-1/2 flex flex-col items-center">
+                <div class="card card-primary w-full mb-4">
+                    <div class="card-header bg-yellow-500 text-white rounded-t">
+                        <h3 class="card-title">มัธยมศึกษาตอนปลาย</h3>
+                    </div>
+                    <div class="card-body bg-white rounded-b">
+                        <canvas id="barChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- เพิ่ม: สถิติรวมการเข้าเรียนวันนี้ -->
+        <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="rounded-xl shadow-lg bg-white p-6">
+            <div class="text-lg font-semibold mb-2 text-blue-700">สถิติการเข้าเรียนวันนี้ (มัธยมต้น)</div>
+            <ul class="space-y-1">
+              <?php
+              // สถิติการเข้าเรียนวันนี้ ม.ต้น
+              $stmt = $db->prepare("
+                SELECT 
+                  CASE 
+                    WHEN sa.attendance_status = 1 THEN 'มาเรียน'
+                    WHEN sa.attendance_status = 2 THEN 'ขาดเรียน'
+                    WHEN sa.attendance_status = 3 THEN 'มาสาย'
+                    WHEN sa.attendance_status = 4 THEN 'ลาป่วย'
+                    WHEN sa.attendance_status = 5 THEN 'ลากิจ'
+                    WHEN sa.attendance_status = 6 THEN 'กิจกรรม'
+                    ELSE 'ไม่ระบุ'
+                  END AS status_name,
+                  COUNT(*) as total
+                FROM student_attendance sa
+                INNER JOIN student s ON sa.student_id = s.Stu_id
+                WHERE s.Stu_status=1 AND s.Stu_major IN (1,2,3) AND sa.attendance_date = ?
+                GROUP BY sa.attendance_status
+              ");
+              $stmt->execute([$date]);
+              $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              foreach ($stats as $row): ?>
+                <li class="flex justify-between border-b pb-1">
+                  <span><?= htmlspecialchars($row['status_name']) ?></span>
+                  <span class="font-bold"><?= number_format($row['total']) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+          <div class="rounded-xl shadow-lg bg-white p-6">
+            <div class="text-lg font-semibold mb-2 text-yellow-700">สถิติการเข้าเรียนวันนี้ (มัธยมปลาย)</div>
+            <ul class="space-y-1">
+              <?php
+              // สถิติการเข้าเรียนวันนี้ ม.ปลาย
+              $stmt = $db->prepare("
+                SELECT 
+                  CASE 
+                    WHEN sa.attendance_status = 1 THEN 'มาเรียน'
+                    WHEN sa.attendance_status = 2 THEN 'ขาดเรียน'
+                    WHEN sa.attendance_status = 3 THEN 'มาสาย'
+                    WHEN sa.attendance_status = 4 THEN 'ลาป่วย'
+                    WHEN sa.attendance_status = 5 THEN 'ลากิจ'
+                    WHEN sa.attendance_status = 6 THEN 'กิจกรรม'
+                    ELSE 'ไม่ระบุ'
+                  END AS status_name,
+                  COUNT(*) as total
+                FROM student_attendance sa
+                INNER JOIN student s ON sa.student_id = s.Stu_id
+                WHERE s.Stu_status=1 AND s.Stu_major IN (4,5,6) AND sa.attendance_date = ?
+                GROUP BY sa.attendance_status
+              ");
+              $stmt->execute([$date]);
+              $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              foreach ($stats as $row): ?>
+                <li class="flex justify-between border-b pb-1">
+                  <span><?= htmlspecialchars($row['status_name']) ?></span>
+                  <span class="font-bold"><?= number_format($row['total']) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+        </div>
       </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
@@ -131,8 +171,6 @@ require_once('class/Utils.php');
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-$.widget.bridge('uibutton', $.ui.button)
-
 function fetchChartData(chartId, apiUrl) {
     fetch(apiUrl)
         .then(response => response.json())
@@ -143,6 +181,9 @@ function fetchChartData(chartId, apiUrl) {
                 data: data,
                 options: {
                     responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'bottom' }
+                    },
                     scales: {
                         x: { stacked: true },
                         y: { stacked: true }
