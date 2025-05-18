@@ -13,7 +13,7 @@ function redirectUser() {
         'Teacher_login' => 'teacher/index.php',
         'Director_login' => 'director/index.php',
         'Group_leader_login' => 'groupleader/index.php',
-        'Officer_login' => 'Officer/index.php',
+        'Officer_login' => 'officer/index.php',
         'Admin_login' => 'admin/index.php',
         'Student_login' => 'student/index.php'
     ];
