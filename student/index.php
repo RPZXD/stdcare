@@ -94,35 +94,57 @@ if ($term && $pee) {
             <div class="bg-blue-50 rounded-xl shadow p-6 flex flex-col items-center border border-blue-200">
                 <h4 class="text-lg font-semibold mb-2 flex items-center gap-2">📅 การมาเรียน</h4>
                 <div class="flex flex-wrap gap-3 justify-center">
+                    <?php
+                    // ดึงสถิติการมาเรียนจริง
+                    $attendance_stats = [
+                        '1' => 0, // มาเรียน
+                        '2' => 0, // ขาดเรียน
+                        '3' => 0, // มาสาย
+                        '4' => 0, // ลาป่วย
+                        '5' => 0, // ลากิจ
+                        '6' => 0, // กิจกรรม
+                    ];
+                    $stmt = $studentConn->prepare("
+                        SELECT attendance_status, COUNT(*) as total
+                        FROM student_attendance
+                        WHERE student_id = :stu_id
+                        GROUP BY attendance_status
+                    ");
+                    $stmt->bindParam(':stu_id', $student_id);
+                    $stmt->execute();
+                    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                        $attendance_stats[$row['attendance_status']] = $row['total'];
+                    }
+                    ?>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">✅</span>
                         <span class="text-sm text-gray-600">มาเรียน</span>
-                        <span class="font-bold text-blue-700">0</span>
+                        <span class="font-bold text-blue-700"><?= $attendance_stats['1'] ?></span>
                     </div>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">❌</span>
                         <span class="text-sm text-gray-600">ขาดเรียน</span>
-                        <span class="font-bold text-red-600">0</span>
+                        <span class="font-bold text-red-600"><?= $attendance_stats['2'] ?></span>
                     </div>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">⏰</span>
                         <span class="text-sm text-gray-600">มาสาย</span>
-                        <span class="font-bold text-yellow-600">0</span>
+                        <span class="font-bold text-yellow-600"><?= $attendance_stats['3'] ?></span>
                     </div>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">🤒</span>
                         <span class="text-sm text-gray-600">ลาป่วย</span>
-                        <span class="font-bold text-green-600">0</span>
+                        <span class="font-bold text-green-600"><?= $attendance_stats['4'] ?></span>
                     </div>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">📝</span>
                         <span class="text-sm text-gray-600">ลากิจ</span>
-                        <span class="font-bold text-green-600">0</span>
+                        <span class="font-bold text-green-600"><?= $attendance_stats['5'] ?></span>
                     </div>
                     <div class="flex flex-col items-center">
                         <span class="text-2xl">🎉</span>
                         <span class="text-sm text-gray-600">เข้าร่วมกิจกรรม</span>
-                        <span class="font-bold text-purple-600">0</span>
+                        <span class="font-bold text-purple-600"><?= $attendance_stats['6'] ?></span>
                     </div>
                 </div>
             </div>
