@@ -108,9 +108,13 @@ if ($term && $pee) {
                         SELECT attendance_status, COUNT(*) as total
                         FROM student_attendance
                         WHERE student_id = :stu_id
+                        AND term = :term
+                        AND year = :year
                         GROUP BY attendance_status
                     ");
                     $stmt->bindParam(':stu_id', $student_id);
+                    $stmt->bindParam(':term', $term);
+                    $stmt->bindParam(':year', $pee);
                     $stmt->execute();
                     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                         $attendance_stats[$row['attendance_status']] = $row['total'];
