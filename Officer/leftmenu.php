@@ -41,7 +41,6 @@ $menuItems = [
     ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
 ];
 
-
 foreach ($menuItems as $item) {
     echo createNavItem($item['href'], $item['icon'], $item['text']);
 }
