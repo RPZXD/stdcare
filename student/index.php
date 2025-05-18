@@ -91,7 +91,7 @@ if ($term && $pee) {
         <!-- Score Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Attendance Score Card -->
-            <div class="bg-blue-50 rounded-xl shadow p-6 flex flex-col items-center border border-blue-200">
+            <div class="bg-blue-50 rounded-xl shadow-lg p-6 flex flex-col items-center border border-blue-200 transition-shadow duration-300 hover:shadow-blue-300 hover:scale-105 animate-fade-in">
                 <h4 class="text-lg font-semibold mb-2 flex items-center gap-2">📅 การมาเรียน</h4>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <?php
@@ -120,40 +120,40 @@ if ($term && $pee) {
                         $attendance_stats[$row['attendance_status']] = $row['total'];
                     }
                     ?>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">✅</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">✅</span>
                         <span class="text-sm text-gray-600">มาเรียน</span>
                         <span class="font-bold text-blue-700"><?= $attendance_stats['1'] ?></span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">❌</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">❌</span>
                         <span class="text-sm text-gray-600">ขาดเรียน</span>
                         <span class="font-bold text-red-600"><?= $attendance_stats['2'] ?></span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">⏰</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">⏰</span>
                         <span class="text-sm text-gray-600">มาสาย</span>
                         <span class="font-bold text-yellow-600"><?= $attendance_stats['3'] ?></span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">🤒</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">🤒</span>
                         <span class="text-sm text-gray-600">ลาป่วย</span>
                         <span class="font-bold text-green-600"><?= $attendance_stats['4'] ?></span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">📝</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">📝</span>
                         <span class="text-sm text-gray-600">ลากิจ</span>
                         <span class="font-bold text-green-600"><?= $attendance_stats['5'] ?></span>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-2xl">🎉</span>
+                    <div class="flex flex-col items-center group transition-transform duration-200 hover:scale-110">
+                        <span class="text-2xl animate-pulse">🎉</span>
                         <span class="text-sm text-gray-600">เข้าร่วมกิจกรรม</span>
                         <span class="font-bold text-purple-600"><?= $attendance_stats['6'] ?></span>
                     </div>
                 </div>
             </div>
             <!-- Behavior Score Card -->
-            <div class="bg-green-50 rounded-xl shadow p-6 flex flex-col items-center border border-green-200 md:col-span-2">
+            <div class="bg-green-50 rounded-xl shadow-lg p-6 flex flex-col items-center border border-green-200 md:col-span-2 transition-shadow duration-300 hover:shadow-green-300 hover:scale-105 animate-fade-in">
                 <h4 class="text-lg font-semibold mb-2 flex items-center gap-2">🌟 คะแนนพฤติกรรม</h4>
                 <div class="flex flex-col items-center">
                     <?php
@@ -168,7 +168,7 @@ if ($term && $pee) {
                         $score_class = "text-green-700";
                     }
                     ?>
-                    <span class="text-5xl font-bold <?php echo $score_class; ?>"><?php echo $behavior_score; ?></span>
+                    <span class="text-5xl font-bold <?php echo $score_class; ?> animate-pulse"><?php echo $behavior_score; ?></span>
                     <span class="text-gray-600 mt-2">คะแนนสะสม</span>
                     <?php
                     // แสดงกลุ่มและสี
@@ -195,5 +195,18 @@ if ($term && $pee) {
     <?php require_once('../footer.php'); ?>
 </div>
 <?php require_once('script.php'); ?>
+<!-- Tailwind custom animation utilities -->
+<style>
+@layer utilities {
+    .animate-fade-in {
+        animation: fadeIn 0.7s;
+    }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+}
+</style>
 </body>
 </html>
