@@ -301,5 +301,66 @@ class SDQ {
         return ['answers' => [], 'memo' => ''];
     }
 
+    // สรุปผล SDQ รายห้อง/รายชั้น (self)
+    public function getSDQResultSummary($class, $room, $pee, $term, $type = 'self') {
+        // $type: self, par, teach
+        $table = $type === 'par' ? 'sdq_par' : ($type === 'teach' ? 'sdq_teach' : 'sdq_self');
+        $params = [];
+        $where = "s.Stu_major = :class AND s.Stu_status = 1";
+        $params[':class'] = $class;
+        if ($room !== '' && $room !== null) {
+            $where .= " AND s.Stu_room = :room";
+            $params[':room'] = $room;
+        }
+
+        // นับจำนวนนักเรียนทั้งหมดในห้อง/ชั้น
+        $sqlTotal = "SELECT COUNT(*) AS total FROM student s WHERE $where";
+        $stmtTotal = $this->db->prepare($sqlTotal);
+        $stmtTotal->execute($params);
+        $total = (int)($stmtTotal->fetchColumn());
+
+        // นับจำนวนนักเรียนที่ส่ง SDQ
+        $sqlHave = "SELECT COUNT(DISTINCT s.Stu_id) AS have
+            FROM student s
+            INNER JOIN $table sdq ON sdq.Stu_id = s.Stu_id AND sdq.Pee = :pee AND sdq.Term = :term
+            WHERE $where";
+        $paramsHave = $params + [':pee' => $pee, ':term' => $term];
+        $stmtHave = $this->db->prepare($sqlHave);
+        $stmtHave->execute($paramsHave);
+        $have = (int)($stmtHave->fetchColumn());
+
+        // นับแต่ละกลุ่ม (ปกติ, เสี่ยง, มีปัญหา) จากคะแนนรวม
+        $normal = $risk = $problem = 0;
+        $sqlScore = "SELECT 
+                (COALESCE(sdq.Sdq3,0)+COALESCE(sdq.Sdq8,0)+COALESCE(sdq.Sdq13,0)+COALESCE(sdq.Sdq16,0)+COALESCE(sdq.Sdq24,0)+
+                 COALESCE(sdq.Sdq5,0)+COALESCE(sdq.Sdq12,0)+COALESCE(sdq.Sdq18,0)+COALESCE(sdq.Sdq22,0)+
+                 COALESCE(sdq.Sdq2,0)+COALESCE(sdq.Sdq10,0)+COALESCE(sdq.Sdq15,0)+COALESCE(sdq.Sdq21,0)+
+                 COALESCE(sdq.Sdq6,0)+COALESCE(sdq.Sdq11,0)+COALESCE(sdq.Sdq14,0)+COALESCE(sdq.Sdq19,0)+COALESCE(sdq.Sdq23,0)
+                ) AS total_score
+            FROM student s
+            INNER JOIN $table sdq ON sdq.Stu_id = s.Stu_id AND sdq.Pee = :pee AND sdq.Term = :term
+            WHERE $where";
+        $stmtScore = $this->db->prepare($sqlScore);
+        $stmtScore->execute($paramsHave);
+        while ($row = $stmtScore->fetch(PDO::FETCH_ASSOC)) {
+            $score = (int)$row['total_score'];
+            if ($score >= 20) {
+                $problem++;
+            } elseif ($score >= 14) {
+                $risk++;
+            } else {
+                $normal++;
+            }
+        }
+
+        return [
+            'total' => $total,
+            'have' => $have,
+            'normal' => $normal,
+            'risk' => $risk,
+            'problem' => $problem
+        ];
+    }
+
 }
 ?>

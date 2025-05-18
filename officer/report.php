@@ -59,28 +59,63 @@ require_once('header.php');
                     'homevisit' => 'report_homevisit.php',
                     'deduct-room' => 'report_deduct_room.php',
                     'deduct-group' => 'report_deduct_group.php',
-                    'parent-leader' => 'report_parent_leader.php' // เพิ่มบรรทัดนี้
+                    'parent-leader' => 'report_parent_leader.php',
+                    'sdq_room' => 'report_sdq_room.php',
+                    'sdq_class' => 'report_sdq_class.php',
+                    'sdq_school' => 'report_sdq_school.php',
+                    'eq' => 'report_eq.php',
+                    'screen11' => 'report_screen11.php',
+                    'whiteclass' => 'report_whiteclass.php'
+                ];
+                // กำหนดกลุ่ม tab หลัก/เพิ่มเติม
+                $mainTabs = [
+                    ['late', '⏰ ข้อมูลมาสาย', 'blue'],
+                    ['homevisit', '🏠 การเยี่ยมบ้าน', 'green'],
+                    ['deduct-room', '🏫 การหักคะแนน(รายห้อง)', 'yellow'],
+                    ['deduct-group', '📊 การหักคะแนน(แบ่งตามกลุ่ม)', 'pink'],
+                    
+                ];
+                $moreTabs = [
+                    ['parent-leader', '👨‍👩‍👧‍👦 รายชื่อประธานเครือข่ายผู้ปกครอง', 'purple'],
+                    ['sdq_room', '🧠 ข้อมูล SDQ (รายห้อง)', 'red'],
+                    ['sdq_class', '🧠 ข้อมูล SDQ (รายชั้น)', 'indigo'],
+                    ['sdq_school', '🧠 ข้อมูล SDQ (โรงเรียน)', 'cyan'],
+                    ['eq', '💡 ข้อมูล EQ', 'orange'],
+                    ['screen11', '🔬 คัดกรอง 11 ด้าน', 'teal'],
+                    ['whiteclass', '⚪ ห้องเรียนสีขาว', 'gray'],
                 ];
                 ?>
                 <!-- Tabs -->
-                <div class="flex border-b mb-6">
-                    <a href="?tab=late" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'late' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600' ?>">
-                        ⏰ ข้อมูลมาสาย
-                    </a>
-                    <a href="?tab=homevisit" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'homevisit' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-green-600' ?>">
-                        🏠 การเยี่ยมบ้านนักเรียน
-                    </a>
-                    <a href="?tab=deduct-room" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'deduct-room' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-yellow-600' ?>">
-                        🏫 การหักคะแนน (รายห้อง)
-                    </a>
-                    <a href="?tab=deduct-group" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'deduct-group' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-pink-600' ?>">
-                        📊 การหักคะแนน (แบ่งตามกลุ่ม)
-                    </a>
-                    <a href="?tab=parent-leader" class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all <?= $tab === 'parent-leader' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-purple-600' ?>">
-                        👨‍👩‍👧‍👦 รายชื่อประธานเครือข่ายผู้ปกครอง
-                    </a>
+                <div class="flex flex-wrap border-b mb-6 gap-2 animate-fade-in-down">
+                    <?php foreach ($mainTabs as [$key, $label, $color]): ?>
+                        <a href="?tab=<?= $key ?>"
+                           class="px-4 py-2 -mb-px font-semibold border-b-2 transition-all duration-200 rounded-t-lg
+                           <?= $tab === $key ? "border-{$color}-500 text-{$color}-700 bg-{$color}-50 shadow animate-bounce-in" : "border-transparent text-gray-500 hover:text-{$color}-600 hover:bg-{$color}-50 hover:shadow" ?>">
+                            <?= $label ?>
+                        </a>
+                    <?php endforeach; ?>
+                    <!-- Dropdown สำหรับ tab เพิ่มเติม -->
+                    <div class="relative group" tabindex="0">
+                        <button class="px-4 py-2 -mb-px font-semibold border-b-2 border-transparent text-gray-500 hover:text-indigo-600 flex items-center gap-1 focus:outline-none transition-all duration-200 rounded-t-lg hover:bg-indigo-50 hover:shadow">
+                            <span class="animate-pulse">เพิ่มเติม</span>
+                            <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-56 bg-white rounded shadow-lg z-10 invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-150
+                            border border-indigo-100 animate-fade-in"
+                             onmouseover="this.classList.add('visible','opacity-100')" onmouseout="this.classList.remove('visible','opacity-100')">
+                            <?php foreach ($moreTabs as [$key, $label, $color]): ?>
+                                <a href="?tab=<?= $key ?>"
+                                   class="block px-4 py-2 text-sm font-semibold transition-all duration-150 rounded hover:scale-105
+                                   <?= $tab === $key ? "text-{$color}-700 bg-{$color}-50 font-bold animate-bounce-in" : "text-gray-600 hover:text-{$color}-600 hover:bg-{$color}-50" ?>">
+                                    <?= $label ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 mt-4">
+                <div class="bg-white rounded-lg shadow p-6 mt-4 animate-fade-in">
                     <?php
                     // include ไฟล์ตาม tab ที่เลือก
                     if (isset($tabFiles[$tab]) && file_exists($tabFiles[$tab])) {
@@ -90,6 +125,46 @@ require_once('header.php');
                     }
                     ?>
                 </div>
+                <style>
+                @layer utilities {
+                    .animate-fade-in { animation: fadeIn 0.7s; }
+                    .animate-fade-in-down { animation: fadeInDown 0.7s; }
+                    .animate-bounce-in { animation: bounceIn 0.7s; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes fadeInDown {
+                    from { opacity: 0; transform: translateY(-20px);}
+                    to { opacity: 1; transform: translateY(0);}
+                }
+                @keyframes bounceIn {
+                    0% { transform: scale(0.9); opacity: 0.7;}
+                    60% { transform: scale(1.05);}
+                    80% { transform: scale(0.98);}
+                    100% { transform: scale(1); opacity: 1;}
+                }
+                }
+                /* Responsive dropdown for mobile */
+                @media (max-width: 640px) {
+                    .group:hover .group-hover\:block,
+                    .group:focus-within .group-focus\:block {
+                        display: block;
+                    }
+                }
+                /* Fix dropdown hover/focus for desktop */
+                .group:focus-within > div,
+                .group:hover > div {
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                .group > div {
+                    visibility: hidden;
+                    opacity: 0;
+                    transition: opacity 0.15s;
+                }
+                </style>
             </div>
         </section>
     </div>
