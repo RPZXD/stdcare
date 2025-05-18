@@ -87,7 +87,7 @@ function thai_date($strDate) {
                         <nav class="flex space-x-4" id="attendanceTabs">
                             <button class="tab-btn px-4 py-2 text-blue-700 border-b-2 border-blue-700 font-semibold focus:outline-none" data-tab="tab1">การมาเรียน</button>
                             <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab2">สรุปรายเดือน</button>
-                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab3">สรุปรายภาคเรียนที่</button>
+                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab3">สรุปรายภาคเรียน</button>
                         </nav>
                     </div>
                     <!-- Tab Contents -->
@@ -138,36 +138,55 @@ function thai_date($strDate) {
                     </div>
                     <div id="tab2" class="tab-content hidden">
                         <!-- สรุปรายเดือน: กราฟ + Card -->
+                        <?php
+                        // เตรียมข้อมูลสรุปรายเดือนใหม่ (นับแต่ละ status)
+                        $currentMonth = date('Y-m');
+                        $monthStats = [
+                            '1'=>0, // มาเรียน
+                            '2'=>0, // ขาด
+                            '3'=>0, // สาย
+                            '4'=>0, // ป่วย
+                            '5'=>0, // กิจ
+                            '6'=>0, // กิจกรรม
+                        ];
+                        $monthRows = [];
+                        foreach ($attendanceRows as $row) {
+                            if (strpos($row['attendance_date'], $currentMonth) === 0) {
+                                $monthStats[$row['attendance_status']]++;
+                                $monthRows[] = $row;
+                            }
+                        }
+                        ?>
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                             <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟢</span>
                                 <span class="font-bold text-green-700 text-xl">มาเรียน</span>
-                                <span id="month-present" class="text-2xl font-bold">0</span>
+                                <span id="month-present" class="text-2xl font-bold"><?= $monthStats['1'] ?></span>
                             </div>
                             <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🔴</span>
                                 <span class="font-bold text-red-700 text-xl">ขาด</span>
-                                <span id="month-absent" class="text-2xl font-bold">0</span>
+                                <span id="month-absent" class="text-2xl font-bold"><?= $monthStats['2'] ?></span>
                             </div>
                             <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟡</span>
                                 <span class="font-bold text-yellow-700 text-xl">สาย</span>
-                                <span id="month-late" class="text-2xl font-bold">0</span>
+                                <span id="month-late" class="text-2xl font-bold"><?= $monthStats['3'] ?></span>
                             </div>
                             <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🔵</span>
                                 <span class="font-bold text-blue-700 text-xl">ป่วย</span>
-                                <span id="month-sick" class="text-2xl font-bold">0</span>
+                                <span id="month-sick" class="text-2xl font-bold"><?= $monthStats['4'] ?></span>
                             </div>
                             <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟣</span>
                                 <span class="font-bold text-purple-700 text-xl">กิจ</span>
-                                <span id="month-activity" class="text-2xl font-bold">0</span>
+                                <span id="month-activity" class="text-2xl font-bold"><?= $monthStats['5'] ?></span>
                             </div>
                             <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟣</span>
                                 <span class="font-bold text-pink-700 text-xl">กิจกรรม</span>
-                                <span id="month-event" class="text-2xl font-bold">0</span>
+                                <span id="month-event" class="text-2xl font-bold"><?= $monthStats['6'] ?></span>
                             </div>
                         </div>
                         <div class="bg-white rounded-lg shadow p-4 mb-6">
@@ -184,28 +203,22 @@ function thai_date($strDate) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php
-                                    $currentMonth = date('Y-m');
-                                    $hasMonthData = false;
-                                    foreach ($attendanceRows as $row):
-                                        if (strpos($row['attendance_date'], $currentMonth) === 0):
-                                            $hasMonthData = true;
+                                    <?php if (count($monthRows) > 0): ?>
+                                        <?php foreach ($monthRows as $row):
                                             $status = attendance_status_text($row['attendance_status']);
-                                    ?>
-                                    <tr>
-                                        <td class="px-3 py-2 text-center"><?= thai_date($row['attendance_date']) ?></td>
-                                        <td class="px-3 py-2 text-center">
-                                            <span class="<?= $status['color'] ?> font-bold"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
-                                        </td>
-                                        <td class="px-3 py-2 text-center"><?= htmlspecialchars($row['reason'] ?? '-') ?></td>
-                                    </tr>
-                                    <?php
-                                        endif;
-                                    endforeach;
-                                    if (!$hasMonthData): ?>
-                                    <tr>
-                                        <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในเดือนนี้</td>
-                                    </tr>
+                                        ?>
+                                        <tr>
+                                            <td class="px-3 py-2 text-center"><?= thai_date($row['attendance_date']) ?></td>
+                                            <td class="px-3 py-2 text-center">
+                                                <span class="<?= $status['color'] ?> font-bold"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
+                                            </td>
+                                            <td class="px-3 py-2 text-center"><?= htmlspecialchars($row['reason'] ?? '-') ?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในเดือนนี้</td>
+                                        </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
@@ -213,36 +226,45 @@ function thai_date($strDate) {
                     </div>
                     <div id="tab3" class="tab-content hidden">
                         <!-- สรุปรายภาคเรียนที่: กราฟ + Card -->
+                        <?php
+                        // เตรียมข้อมูลสรุปรายภาคเรียนใหม่ (นับแต่ละ status)
+                        $termStats = [
+                            '1'=>0, '2'=>0, '3'=>0, '4'=>0, '5'=>0, '6'=>0
+                        ];
+                        foreach ($attendanceRows as $row) {
+                            $termStats[$row['attendance_status']]++;
+                        }
+                        ?>
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                             <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟢</span>
                                 <span class="font-bold text-green-700 text-xl">มาเรียน</span>
-                                <span id="term-present" class="text-2xl font-bold">0</span>
+                                <span id="term-present" class="text-2xl font-bold"><?= $termStats['1'] ?></span>
                             </div>
                             <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🔴</span>
                                 <span class="font-bold text-red-700 text-xl">ขาด</span>
-                                <span id="term-absent" class="text-2xl font-bold">0</span>
+                                <span id="term-absent" class="text-2xl font-bold"><?= $termStats['2'] ?></span>
                             </div>
                             <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟡</span>
                                 <span class="font-bold text-yellow-700 text-xl">สาย</span>
-                                <span id="term-late" class="text-2xl font-bold">0</span>
+                                <span id="term-late" class="text-2xl font-bold"><?= $termStats['3'] ?></span>
                             </div>
                             <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🔵</span>
                                 <span class="font-bold text-blue-700 text-xl">ป่วย</span>
-                                <span id="term-sick" class="text-2xl font-bold">0</span>
+                                <span id="term-sick" class="text-2xl font-bold"><?= $termStats['4'] ?></span>
                             </div>
                             <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟣</span>
                                 <span class="font-bold text-purple-700 text-xl">กิจ</span>
-                                <span id="term-activity" class="text-2xl font-bold">0</span>
+                                <span id="term-activity" class="text-2xl font-bold"><?= $termStats['5'] ?></span>
                             </div>
                             <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center">
                                 <span class="text-3xl">🟣</span>
                                 <span class="font-bold text-pink-700 text-xl">กิจกรรม</span>
-                                <span id="term-event" class="text-2xl font-bold">0</span>
+                                <span id="term-event" class="text-2xl font-bold"><?= $termStats['6'] ?></span>
                             </div>
                         </div>
                         <div class="bg-white rounded-lg shadow p-4 mb-6">
