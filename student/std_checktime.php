@@ -141,7 +141,7 @@ function thai_date($strDate) {
                         <?php
                         // เตรียมข้อมูลสรุปรายเดือนใหม่ (นับแต่ละ status)
                         $currentMonth = date('Y-m');
-                        // ปรับ $currentMonth ให้เป็นปี พ.ศ.
+                        // ปรับ $currentMonth ให้เป็นปี พ.ศ. (ถ้าข้อมูลในฐานข้อมูลเป็น พ.ศ.)
                         $parts = explode('-', $currentMonth);
                         if (count($parts) === 2) {
                             $parts[0] = (string)((int)$parts[0] + 543);
@@ -157,7 +157,6 @@ function thai_date($strDate) {
                         ];
                         $monthRows = [];
                         foreach ($attendanceRows as $row) {
-                            // ตรวจสอบว่า attendance_date มีค่าและอยู่ในเดือนปัจจุบัน
                             if (!empty($row['attendance_date']) && strpos($row['attendance_date'], $currentMonth) === 0) {
                                 $status = $row['attendance_status'];
                                 if (isset($monthStats[$status])) {
@@ -166,6 +165,7 @@ function thai_date($strDate) {
                                 $monthRows[] = $row;
                             }
                         }
+                        // สำหรับ JS: ส่งค่า monthStats ไปฝั่ง JS ด้วย
                         ?>
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                             <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
@@ -397,20 +397,29 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('term-activity').textContent = <?= $termStats['activity'] ?>;
     document.getElementById('term-event').textContent = <?= $termStats['event'] ?>;
 
-    // Chart.js - Monthly
+    // Chart.js - Monthly (ใช้ค่าจาก PHP โดยตรง)
+    var monthChartData = [
+        <?= $monthStats['1'] ?>,
+        <?= $monthStats['2'] ?>,
+        <?= $monthStats['3'] ?>,
+        <?= $monthStats['4'] ?>,
+        <?= $monthStats['5'] ?>,
+        <?= $monthStats['6'] ?>
+    ];
+    // อัปเดต card ด้วย JS (กันกรณี JS รันหลัง PHP)
+    document.getElementById('month-present').textContent = monthChartData[0];
+    document.getElementById('month-absent').textContent = monthChartData[1];
+    document.getElementById('month-late').textContent = monthChartData[2];
+    document.getElementById('month-sick').textContent = monthChartData[3];
+    document.getElementById('month-activity').textContent = monthChartData[4];
+    document.getElementById('month-event').textContent = monthChartData[5];
+
     new Chart(document.getElementById('monthChart'), {
         type: 'doughnut',
         data: {
             labels: ['มาเรียน', 'ขาด', 'สาย', 'ป่วย', 'กิจ', 'กิจกรรม'],
             datasets: [{
-                data: [
-                    <?= $monthStats['1'] ?>,
-                    <?= $monthStats['2'] ?>,
-                    <?= $monthStats['3'] ?>,
-                    <?= $monthStats['4'] ?>,
-                    <?= $monthStats['5'] ?>,
-                    <?= $monthStats['6'] ?>
-                ],
+                data: monthChartData,
                 backgroundColor: [
                     '#22c55e', // green
                     '#ef4444', // red
@@ -427,6 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
     // Chart.js - Term
     new Chart(document.getElementById('termChart'), {
         type: 'doughnut',
