@@ -78,24 +78,24 @@ function thai_date($strDate) {
         </div>
         <section class="content">
             <div class="container mx-auto px-4 py-6">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+                <div class="bg-white rounded-lg shadow-2xl p-6 transition-shadow duration-300 hover:shadow-purple-300">
+                    <h2 class="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2 animate-fade-in-down">
                         ⏰ ตารางเวลาการมาเรียนของฉัน ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?>
                     </h2>
                     <!-- Tabs -->
                     <div class="mb-6 border-b border-gray-200">
                         <nav class="flex space-x-4" id="attendanceTabs">
-                            <button class="tab-btn px-4 py-2 text-blue-700 border-b-2 border-blue-700 font-semibold focus:outline-none" data-tab="tab1">การมาเรียน</button>
-                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab2">สรุปรายเดือน</button>
-                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none" data-tab="tab3">สรุปรายภาคเรียน</button>
+                            <button class="tab-btn px-4 py-2 text-blue-700 border-b-2 border-blue-700 font-semibold focus:outline-none transition-all duration-200 hover:scale-110" data-tab="tab1">การมาเรียน</button>
+                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none transition-all duration-200 hover:scale-110" data-tab="tab2">สรุปรายเดือน</button>
+                            <button class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-700 border-b-2 border-transparent font-semibold focus:outline-none transition-all duration-200 hover:scale-110" data-tab="tab3">สรุปรายภาคเรียน</button>
                         </nav>
                     </div>
                     <!-- Tab Contents -->
-                    <div id="tab1" class="tab-content">
+                    <div id="tab1" class="tab-content animate-fade-in">
                         <div class="overflow-x-auto">
-                            <table id="attendanceTable" class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+                            <table id="attendanceTable" class="min-w-full bg-white border border-gray-200 rounded-lg shadow transition-shadow duration-300 hover:shadow-lg">
                                 <thead>
-                                    <tr class="bg-purple-100 text-gray-700">
+                                    <tr class="bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100 text-gray-700">
                                         <th class="py-2 px-3 border-b text-center">ลำดับ</th>
                                         <th class="py-2 px-3 border-b text-center">วันที่เช็คชื่อ</th>
                                         <th class="py-2 px-3 border-b text-center">เวลาเข้าเรียน</th>
@@ -110,17 +110,17 @@ function thai_date($strDate) {
                                             $status = attendance_status_text($row['attendance_status']);
                                             $rowBg = $i % 2 === 0 ? 'bg-white' : 'bg-blue-50';
                                         ?>
-                                            <tr class="<?= $rowBg ?> hover:bg-blue-100 transition-colors duration-150 text-[15px]">
-                                                <td class="px-5 py-2"><?= $i+1 ?></td>
+                                            <tr class="<?= $rowBg ?> hover:bg-purple-50 transition-colors duration-200 text-[15px] group">
+                                                <td class="px-5 py-2 group-hover:scale-110 transition-transform"><?= $i+1 ?></td>
                                                 <td class="px-5 py-2"><?= thai_date($row['attendance_date']) ?></td>
                                                 <td class="px-5 py-2">
-                                                    <?= $row['attendance_time'] ? '<span class="inline-flex items-center gap-1">' . htmlspecialchars($row['attendance_time']) . ' <span>' . $status['icon'] . '</span></span>' : '-' ?>
+                                                    <?= $row['attendance_time'] ? '<span class="inline-flex items-center gap-1 animate-pulse">' . htmlspecialchars($row['attendance_time']) . ' <span>' . $status['icon'] . '</span></span>' : '-' ?>
                                                 </td>
                                                 <td class="px-5 py-2">
                                                     <?= $row['leave_time'] ? htmlspecialchars($row['leave_time']) . " 🏁" : '-' ?>
                                                 </td>
                                                 <td class="px-5 py-2">
-                                                    <span class="inline-flex items-center gap-1 <?= $status['color'] ?> font-bold">
+                                                    <span class="inline-flex items-center gap-1 <?= $status['color'] ?> font-bold animate-fade-in">
                                                         <?= $status['emoji'] ?> <?= $status['text'] ?>
                                                     </span>
                                                 </td>
@@ -129,14 +129,14 @@ function thai_date($strDate) {
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="6" class="text-center text-gray-400 py-6 bg-white rounded-b-xl">ไม่พบข้อมูลการมาเรียน</td>
+                                            <td colspan="6" class="text-center text-gray-400 py-6 bg-white rounded-b-xl animate-fade-in">ไม่พบข้อมูลการมาเรียน</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div id="tab2" class="tab-content hidden">
+                    <div id="tab2" class="tab-content hidden animate-fade-in">
                         <!-- สรุปรายเดือน: กราฟ + Card -->
                         <?php
                         // เตรียมข้อมูลสรุปรายเดือนใหม่ (นับแต่ละ status)
@@ -168,45 +168,45 @@ function thai_date($strDate) {
                         }
                         ?>
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-                            <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟢</span>
+                            <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟢</span>
                                 <span class="font-bold text-green-700 text-xl">มาเรียน</span>
-                                <span id="month-present" class="text-2xl font-bold"><?= $monthStats['1'] ?></span>
+                                <span id="month-present" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🔴</span>
+                            <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🔴</span>
                                 <span class="font-bold text-red-700 text-xl">ขาด</span>
-                                <span id="month-absent" class="text-2xl font-bold"><?= $monthStats['2'] ?></span>
+                                <span id="month-absent" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟡</span>
+                            <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟡</span>
                                 <span class="font-bold text-yellow-700 text-xl">สาย</span>
-                                <span id="month-late" class="text-2xl font-bold"><?= $monthStats['3'] ?></span>
+                                <span id="month-late" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🔵</span>
+                            <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🔵</span>
                                 <span class="font-bold text-blue-700 text-xl">ป่วย</span>
-                                <span id="month-sick" class="text-2xl font-bold"><?= $monthStats['4'] ?></span>
+                                <span id="month-sick" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟣</span>
+                            <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-purple-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟣</span>
                                 <span class="font-bold text-purple-700 text-xl">กิจ</span>
-                                <span id="month-activity" class="text-2xl font-bold"><?= $monthStats['5'] ?></span>
+                                <span id="month-activity" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟣</span>
+                            <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-pink-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟣</span>
                                 <span class="font-bold text-pink-700 text-xl">กิจกรรม</span>
-                                <span id="month-event" class="text-2xl font-bold"><?= $monthStats['6'] ?></span>
+                                <span id="month-event" class="text-2xl font-bold">0</span>
                             </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="bg-white rounded-lg shadow-lg p-4 mb-6 transition-shadow duration-300 hover:shadow-purple-200">
                             <canvas id="monthChart" height="100"></canvas>
                         </div>
                         <!-- ตารางสรุปรายเดือน -->
                         <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm transition-shadow duration-300 hover:shadow-lg">
                                 <thead>
-                                    <tr class="bg-purple-50 text-gray-700">
+                                    <tr class="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 text-gray-700">
                                         <th class="py-2 px-3 border-b text-center">วันที่</th>
                                         <th class="py-2 px-3 border-b text-center">สถานะ</th>
                                         <th class="py-2 px-3 border-b text-center">หมายเหตุ</th>
@@ -217,24 +217,24 @@ function thai_date($strDate) {
                                         <?php foreach ($monthRows as $row):
                                             $status = attendance_status_text($row['attendance_status']);
                                         ?>
-                                        <tr>
+                                        <tr class="hover:bg-purple-50 transition-colors duration-200">
                                             <td class="px-3 py-2 text-center"><?= thai_date($row['attendance_date']) ?></td>
                                             <td class="px-3 py-2 text-center">
-                                                <span class="<?= $status['color'] ?> font-bold"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
+                                                <span class="<?= $status['color'] ?> font-bold animate-fade-in"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
                                             </td>
                                             <td class="px-3 py-2 text-center"><?= htmlspecialchars($row['reason'] ?? '-') ?></td>
                                         </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในเดือนนี้</td>
+                                            <td colspan="3" class="text-center text-gray-400 py-4 animate-fade-in">ไม่มีข้อมูลในเดือนนี้</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div id="tab3" class="tab-content hidden">
+                    <div id="tab3" class="tab-content hidden animate-fade-in">
                         <!-- สรุปรายภาคเรียนที่: กราฟ + Card -->
                         <?php
                         // เตรียมข้อมูลสรุปรายภาคเรียนใหม่ (นับแต่ละ status)
@@ -246,45 +246,45 @@ function thai_date($strDate) {
                         }
                         ?>
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-                            <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟢</span>
+                            <div class="bg-green-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-green-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟢</span>
                                 <span class="font-bold text-green-700 text-xl">มาเรียน</span>
-                                <span id="term-present" class="text-2xl font-bold"><?= $termStats['1'] ?></span>
+                                <span id="term-present" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🔴</span>
+                            <div class="bg-red-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-red-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🔴</span>
                                 <span class="font-bold text-red-700 text-xl">ขาด</span>
-                                <span id="term-absent" class="text-2xl font-bold"><?= $termStats['2'] ?></span>
+                                <span id="term-absent" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟡</span>
+                            <div class="bg-yellow-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-yellow-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟡</span>
                                 <span class="font-bold text-yellow-700 text-xl">สาย</span>
-                                <span id="term-late" class="text-2xl font-bold"><?= $termStats['3'] ?></span>
+                                <span id="term-late" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🔵</span>
+                            <div class="bg-blue-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-blue-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🔵</span>
                                 <span class="font-bold text-blue-700 text-xl">ป่วย</span>
-                                <span id="term-sick" class="text-2xl font-bold"><?= $termStats['4'] ?></span>
+                                <span id="term-sick" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟣</span>
+                            <div class="bg-purple-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-purple-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟣</span>
                                 <span class="font-bold text-purple-700 text-xl">กิจ</span>
-                                <span id="term-activity" class="text-2xl font-bold"><?= $termStats['5'] ?></span>
+                                <span id="term-activity" class="text-2xl font-bold">0</span>
                             </div>
-                            <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center">
-                                <span class="text-3xl">🟣</span>
+                            <div class="bg-pink-100 rounded-lg p-4 flex flex-col items-center shadow-md hover:shadow-pink-300 transition-all duration-200 hover:scale-105 animate-bounce-in">
+                                <span class="text-3xl animate-pulse">🟣</span>
                                 <span class="font-bold text-pink-700 text-xl">กิจกรรม</span>
-                                <span id="term-event" class="text-2xl font-bold"><?= $termStats['6'] ?></span>
+                                <span id="term-event" class="text-2xl font-bold">0</span>
                             </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="bg-white rounded-lg shadow-lg p-4 mb-6 transition-shadow duration-300 hover:shadow-purple-200">
                             <canvas id="termChart" height="100"></canvas>
                         </div>
                         <!-- ตารางสรุปรายภาคเรียนที่ -->
                         <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm transition-shadow duration-300 hover:shadow-lg">
                                 <thead>
-                                    <tr class="bg-purple-50 text-gray-700">
+                                    <tr class="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 text-gray-700">
                                         <th class="py-2 px-3 border-b text-center">วันที่</th>
                                         <th class="py-2 px-3 border-b text-center">สถานะ</th>
                                         <th class="py-2 px-3 border-b text-center">หมายเหตุ</th>
@@ -295,16 +295,16 @@ function thai_date($strDate) {
                                         foreach ($attendanceRows as $row):
                                             $status = attendance_status_text($row['attendance_status']);
                                     ?>
-                                    <tr>
+                                    <tr class="hover:bg-purple-50 transition-colors duration-200">
                                         <td class="px-3 py-2 text-center"><?= thai_date($row['attendance_date']) ?></td>
                                         <td class="px-3 py-2 text-center">
-                                            <span class="<?= $status['color'] ?> font-bold"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
+                                            <span class="<?= $status['color'] ?> font-bold animate-fade-in"><?= $status['emoji'] ?> <?= $status['text'] ?></span>
                                         </td>
                                         <td class="px-3 py-2 text-center"><?= htmlspecialchars($row['reason'] ?? '-') ?></td>
                                     </tr>
                                     <?php endforeach; else: ?>
                                     <tr>
-                                        <td colspan="3" class="text-center text-gray-400 py-4">ไม่มีข้อมูลในภาคเรียนที่นี้</td>
+                                        <td colspan="3" class="text-center text-gray-400 py-4 animate-fade-in">ไม่มีข้อมูลในภาคเรียนที่นี้</td>
                                     </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -328,11 +328,11 @@ document.addEventListener('DOMContentLoaded', function() {
     tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             tabBtns.forEach(b => {
-                b.classList.remove('text-blue-700', 'border-blue-700');
+                b.classList.remove('text-blue-700', 'border-blue-700', 'scale-110');
                 b.classList.add('text-gray-600', 'border-transparent');
             });
             tabContents.forEach(tc => tc.classList.add('hidden'));
-            this.classList.add('text-blue-700', 'border-blue-700');
+            this.classList.add('text-blue-700', 'border-blue-700', 'scale-110');
             this.classList.remove('text-gray-600', 'border-transparent');
             document.getElementById(this.dataset.tab).classList.remove('hidden');
         });
@@ -464,5 +464,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<style>
+/* Tailwind custom animation utilities */
+@layer utilities {
+    .animate-fade-in {
+        animation: fadeIn 0.7s;
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s;
+    }
+    .animate-bounce-in {
+        animation: bounceIn 0.8s;
+    }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+@keyframes bounceIn {
+    0% { transform: scale(0.9); opacity: 0.7;}
+    60% { transform: scale(1.05);}
+    80% { transform: scale(0.98);}
+    100% { transform: scale(1); opacity: 1;}
+}
+</style>
 </body>
 </html>
