@@ -151,8 +151,12 @@ function thai_date($strDate) {
                         ];
                         $monthRows = [];
                         foreach ($attendanceRows as $row) {
-                            if (strpos($row['attendance_date'], $currentMonth) === 0) {
-                                $monthStats[$row['attendance_status']]++;
+                            // ตรวจสอบว่า attendance_date มีค่าและอยู่ในเดือนปัจจุบัน
+                            if (!empty($row['attendance_date']) && strpos($row['attendance_date'], $currentMonth) === 0) {
+                                $status = $row['attendance_status'];
+                                if (isset($monthStats[$status])) {
+                                    $monthStats[$status]++;
+                                }
                                 $monthRows[] = $row;
                             }
                         }
