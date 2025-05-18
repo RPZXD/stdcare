@@ -404,12 +404,12 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: ['มาเรียน', 'ขาด', 'สาย', 'ป่วย', 'กิจ', 'กิจกรรม'],
             datasets: [{
                 data: [
-                    <?= $monthStats['present'] ?>,
-                    <?= $monthStats['absent'] ?>,
-                    <?= $monthStats['late'] ?>,
-                    <?= $monthStats['sick'] ?>,
-                    <?= $monthStats['activity'] ?>,
-                    <?= $monthStats['event'] ?>
+                    <?= $monthStats['1'] ?>,
+                    <?= $monthStats['2'] ?>,
+                    <?= $monthStats['3'] ?>,
+                    <?= $monthStats['4'] ?>,
+                    <?= $monthStats['5'] ?>,
+                    <?= $monthStats['6'] ?>
                 ],
                 backgroundColor: [
                     '#22c55e', // green
