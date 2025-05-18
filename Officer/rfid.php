@@ -603,6 +603,7 @@ $(document).ready(function() {
     // --- โหลดข้อมูลเมื่อเริ่มต้น ---
     loadStudents();
     loadRfidTable();
+
 });
 </script>
 <?php require_once('script.php'); ?>
