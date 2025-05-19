@@ -115,14 +115,15 @@ $pee = $user->getPee();
         <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-        <table id="attendance-table" class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+        <div class="overflow-x-auto">
+        <table id="attendance-table" class="min-w-[1900px] border border-gray-200 rounded-lg shadow-sm">
             <thead class="bg-blue-100">
                 <tr>
                     <th class="px-3 py-2 border text-center">เลขที่</th>
                     <th class="px-3 py-2 border text-center">รหัสนักเรียน</th>
                     <th class="px-3 py-2 border text-center">ชื่อ-สกุล</th>
                     <th class="px-3 py-2 border text-center">สถานะ</th>
-                    <th class="px-3 py-2 border text-center">การเช็คชื่อ</th>
+                    <th class="px-3 py-2 border text-center whitespace-nowrap">การเช็คชื่อ</th>
                     <th class="px-3 py-2 border text-center">สาเหตุ</th>
                     <th class="px-3 py-2 border text-center">เช็คจาก</th>
                 </tr>
@@ -165,11 +166,12 @@ $pee = $user->getPee();
                                 ?>
                             </td>
                             <td class="px-3 py-2 border text-center">
+                                <div class="flex flex-wrap flex-row gap-1 justify-center items-center whitespace-nowrap">
                                 <?php
                                 if (!empty($std['attendance_status'])) {
                                     // --- เพิ่มปุ่มแก้ไข ---
                                     ?>
-                                    <div>
+                                    <div class="inline-block">
                                         <?= !empty($std['attendance_date']) ? htmlspecialchars($std['attendance_date']) : '-' ?>
                                         <button type="button" class="btn bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 ml-2 text-white  text-sm edit-attendance-btn" data-stu-id="<?= htmlspecialchars($std['Stu_id']) ?>">แก้ไข</button>
                                     </div>
@@ -219,7 +221,7 @@ $pee = $user->getPee();
                                 } else {
                                     // radio group: name="attendance_status[Stu_id]"
                                     ?>
-                                    <div class="flex flex-wrap gap-2 mb-1 justify-center attendance-radio">
+                                    <div class="flex flex-row flex-wrap gap-1 justify-center items-center whitespace-nowrap">
                                     <input type="hidden" name="Stu_id[]" value="<?= htmlspecialchars($std['Stu_id']) ?>">
                                     <!-- สำหรับบันทึก behavior กรณีมาสาย -->
                                     <input type="hidden" name="behavior_type[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
@@ -333,6 +335,7 @@ $pee = $user->getPee();
                 <?php endif; ?>
             </tbody>
         </table>
+    </div>
         <?php if (!empty($students)): ?>
             <div class="flex justify-end mt-4">
                 <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">บันทึกการเช็คชื่อทั้งห้อง</button>
@@ -345,22 +348,28 @@ $pee = $user->getPee();
 document.addEventListener('DOMContentLoaded', function() {
     // DataTables initialization
     $('#attendance-table').DataTable({
-        responsive: true,
-        autoWidth: false,
+        responsive: false,
+        autoWidth: true,
         lengthChange: false,
         pageLength: 50,
         paging: true,
         searching: true,
         ordering: true,
         info: true,
-        // Do not set scrollY, so table height is not fixed
-        language: {
-            url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json"
-        },
         columnDefs: [
-            { orderable: false, targets: [3, 4, 5] } // Disable sorting on specific columns
+            { className: "text-center", targets: [0] , width: "3%" },
+            { className: "text-center", targets: [1] , width: "5%" },
+            { className: "text-left", targets: [2] , width: "15%" },
+            { className: "text-center", targets: [3] , width: "5%" },
+            { 
+                className: "text-center whitespace-nowrap", // เพิ่ม whitespace-nowrap
+                targets: [4], 
+                width: "25%" 
+            },
+            { className: "text-center", targets: [5] , width: "5%" },
+            { className: "text-center", targets: [6] , width: "5%" },
         ],
-        scrollY: false,
+        scrollY: true,
         scrollX: true,
     });
 
