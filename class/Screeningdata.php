@@ -23,14 +23,16 @@ class ScreeningData {
                 st.Stu_picture,
 
                 CASE
-                    WHEN ss.student_id IS NOT NULL AND ss.pee = :pee THEN 1
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM student_screening ss
+                        WHERE ss.student_id = st.Stu_id AND ss.pee = :pee
+                    )
+                    THEN 1
                     ELSE 0
                 END AS screen_ishave
 
-            FROM
-                student AS st
-
-            LEFT JOIN student_screening AS ss ON ss.student_id = st.Stu_id AND ss.pee = :pee
+            FROM student AS st
 
             WHERE
                 st.Stu_major = :class
@@ -248,5 +250,54 @@ class ScreeningData {
                 return ['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'];
             }
         }
+    }
+
+    /**
+     * สรุปผลการคัดกรอง 11 ด้าน รายห้อง/ชั้น
+     * คืนค่า array: [
+     *   'study' => ['normal'=>..., 'risk'=>..., 'problem'=>...],
+     *   ...
+     * ]
+     */
+    public function getScreeningSummaryByClassRoom($class, $room, $pee) {
+        $fields = [
+            'study', 'health', 'economic', 'welfare', 'drug', 'violence',
+            'sex', 'game', 'special_need', 'it', 'special_ability'
+        ];
+        $summary = [];
+        foreach ($fields as $f) {
+            $summary[$f] = ['normal' => 0, 'risk' => 0, 'problem' => 0];
+        }
+
+        $params = [':class' => $class, ':pee' => $pee];
+        $where = "s.Stu_major = :class AND s.Stu_status = 1";
+        if ($room !== '' && $room !== null) {
+            $where .= " AND s.Stu_room = :room";
+            $params[':room'] = $room;
+        }
+
+        $sql = "SELECT s.Stu_id, sc.*
+                FROM student s
+                LEFT JOIN student_screening sc ON sc.student_id = s.Stu_id AND sc.pee = :pee
+                WHERE $where
+                AND s.Stu_status = 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            foreach ($fields as $f) {
+                $status = $row[$f . '_status'] ?? null;
+                $risk = $row[$f . '_risk'] ?? null;
+                $problem = $row[$f . '_problem'] ?? null;
+                if ($status == 1 || $status === '1' || $status === 'ปกติ') {
+                    $summary[$f]['normal']++;
+                } elseif ($risk == 1 || $risk === '1' || $status === 'เสี่ยง') {
+                    $summary[$f]['risk']++;
+                } elseif ($problem == 1 || $problem === '1' || $status === 'มีปัญหา') {
+                    $summary[$f]['problem']++;
+                }
+            }
+        }
+        return $summary;
     }
 }

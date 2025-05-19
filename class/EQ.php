@@ -141,5 +141,58 @@ class EQ {
         $stmt->execute($params);
     }
 
+    // สรุปผล EQ รายห้อง/รายชั้น
+    public function getEQClassRoomSummary($class, $room, $pee, $term) {
+        $params = [];
+        $where = "s.Stu_major = :class AND s.Stu_status = 1";
+        $params[':class'] = $class;
+        if ($room !== '' && $room !== null) {
+            $where .= " AND s.Stu_room = :room";
+            $params[':room'] = $room;
+        }
+
+        // นับจำนวนนักเรียนทั้งหมดในห้อง/ชั้น
+        $sqlTotal = "SELECT COUNT(*) AS total FROM student s WHERE $where";
+        $stmtTotal = $this->db->prepare($sqlTotal);
+        $stmtTotal->execute($params);
+        $total = (int)($stmtTotal->fetchColumn());
+
+        // นับจำนวนนักเรียนที่ส่ง EQ
+        $sqlHave = "SELECT COUNT(DISTINCT s.Stu_id) AS have
+            FROM student s
+            INNER JOIN eq eq ON eq.Stu_id = s.Stu_id AND eq.Pee = :pee AND eq.Term = :term
+            WHERE $where";
+        $paramsHave = $params + [':pee' => $pee, ':term' => $term];
+        $stmtHave = $this->db->prepare($sqlHave);
+        $stmtHave->execute($paramsHave);
+        $have = (int)($stmtHave->fetchColumn());
+
+        // นับแต่ละกลุ่ม (ดีมาก, ดี, ปานกลาง, ต้องปรับปรุง) จากคะแนนรวม
+        $verygood = $good = $mid = $low = 0;
+        $sqlScore = "SELECT 
+                (" . implode('+', array_map(fn($i) => "COALESCE(eq.EQ$i,0)", range(1,52))) . ") AS total_score
+            FROM student s
+            INNER JOIN eq eq ON eq.Stu_id = s.Stu_id AND eq.Pee = :pee AND eq.Term = :term
+            WHERE $where";
+        $stmtScore = $this->db->prepare($sqlScore);
+        $stmtScore->execute($paramsHave);
+        while ($row = $stmtScore->fetch(PDO::FETCH_ASSOC)) {
+            $score = (int)$row['total_score'];
+            if ($score >= 170) $verygood++;
+            elseif ($score >= 140) $good++;
+            elseif ($score >= 100) $mid++;
+            else $low++;
+        }
+
+        return [
+            'total' => $total,
+            'have' => $have,
+            'verygood' => $verygood,
+            'good' => $good,
+            'mid' => $mid,
+            'low' => $low
+        ];
+    }
+
 }
 ?>
