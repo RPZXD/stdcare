@@ -116,7 +116,7 @@ $pee = $user->getPee();
         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
         <div class="overflow-x-auto">
-        <table id="attendance-table" class="min-w-[1900px] border border-gray-200 rounded-lg shadow-sm">
+        <table id="attendance-table" class="min-w-[1000px] border border-gray-200 rounded-lg shadow-sm">
             <thead class="bg-blue-100">
                 <tr>
                     <th class="px-3 py-2 border text-center">เลขที่</th>
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // DataTables initialization
     $('#attendance-table').DataTable({
         responsive: false,
-        autoWidth: true,
+        autoWidth: false,
         lengthChange: false,
         pageLength: 50,
         paging: true,
@@ -357,9 +357,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ordering: true,
         info: true,
         columnDefs: [
-            { className: "text-center", targets: [0] , width: "3%" },
-            { className: "text-center", targets: [1] , width: "5%" },
-            { className: "text-left", targets: [2] , width: "15%" },
+            { className: "text-center", targets: [0] , width: "2%" },
+            { className: "text-center", targets: [1] , width: "4%" },
+            { className: "text-left", targets: [2] , width: "25%" },
             { className: "text-center", targets: [3] , width: "5%" },
             { 
                 className: "text-center whitespace-nowrap", // เพิ่ม whitespace-nowrap
