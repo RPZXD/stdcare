@@ -65,6 +65,7 @@ $stmt = $db->prepare("
         AND a.term = :term
         AND a.year = :pee
     WHERE s.Stu_status=1
+    ORDER BY s.Stu_major, s.Stu_room
 ");
 $stmt->execute([
     ':dateC' => $dateC,
