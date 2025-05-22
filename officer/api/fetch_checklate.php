@@ -54,7 +54,7 @@ if(isset($_GET['start_date']) && isset($_GET['end_date']) ) {
                         s.Stu_room, 
                         s.Par_phone
                     HAVING 
-                        count_late >= 1
+                        count_late >= 3
                     ORDER BY 
                         s.Stu_major, 
                         s.Stu_room, 
