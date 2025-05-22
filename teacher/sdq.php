@@ -288,7 +288,7 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -314,6 +314,7 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
                     url: 'api/save_sdq_self.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             Swal.fire({
@@ -344,8 +345,6 @@ window.addSDQstd = function(studentId, studentName, studentNo, studentClass, stu
                     }
                 });
             });
-
-
 
             // Remove modal from DOM after hiding
             $('#sdqModal').on('hidden.bs.modal', function() {
@@ -381,7 +380,7 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -392,9 +391,8 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
 
             // Handle update button click
             $('#updateSDQ').on('click', function() {
-                const formData = $('#sdqEditForm').serialize(); // Assuming the form has id="sdqEditForm"
+                const formData = $('#sdqEditForm').serialize();
 
-                // Show loading alert
                 Swal.fire({
                     title: 'กำลังบันทึกข้อมูล...',
                     text: 'กรุณารอสักครู่',
@@ -408,18 +406,27 @@ window.editSDQstd = function(studentId, studentName, studentNo, studentClass, st
                     url: 'api/update_sdq_self.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(updateResponse) {
-                        Swal.fire({
-                            title: 'สำเร็จ',
-                            text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            $('#editSdqModal').modal('hide');
-                            $('#editSdqModal').remove();
-                            window.location.reload(); // Reload the page
-                        });
+                        if (updateResponse.success) {
+                            Swal.fire({
+                                title: 'สำเร็จ',
+                                text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $('#editSdqModal').modal('hide');
+                                $('#editSdqModal').remove();
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาด',
+                                text: updateResponse.message,
+                                icon: 'error'
+                            });
+                        }
                     },
                     error: function() {
                         Swal.fire({
@@ -464,7 +471,7 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -490,6 +497,7 @@ window.addSDQteach = function(studentId, studentName, studentNo, studentClass, s
                     url: 'api/save_sdq_teach.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             Swal.fire({
@@ -556,7 +564,7 @@ window.editSDQteach = function(studentId, studentName, studentNo, studentClass, 
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -583,6 +591,7 @@ window.editSDQteach = function(studentId, studentName, studentNo, studentClass, 
                     url: 'api/update_sdq_teach.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(updateResponse) {
                         Swal.fire({
                             title: 'สำเร็จ',
@@ -639,7 +648,7 @@ window.addSDQpar = function(studentId, studentName, studentNo, studentClass, stu
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="saveSDQ">บันทึก</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="saveSDQ">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -665,6 +674,7 @@ window.addSDQpar = function(studentId, studentName, studentNo, studentClass, stu
                     url: 'api/save_sdq_par.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             Swal.fire({
@@ -731,7 +741,7 @@ window.editSDQpar = function(studentId, studentName, studentNo, studentClass, st
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600" data-dismiss="modal">ปิด</button>
-                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="printResultModal" id="updateSDQ">บันทึกการแก้ไข</button>
+                            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600" id="updateSDQ">บันทึกการแก้ไข</button>
                             </div>
                         </div>
                     </div>
@@ -758,6 +768,7 @@ window.editSDQpar = function(studentId, studentName, studentNo, studentClass, st
                     url: 'api/update_sdq_par.php',
                     method: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(updateResponse) {
                         Swal.fire({
                             title: 'สำเร็จ',
