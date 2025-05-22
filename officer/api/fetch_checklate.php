@@ -34,15 +34,15 @@ if(isset($_GET['start_date']) && isset($_GET['end_date']) ) {
                         s.Stu_sur, 
                         s.Stu_major, 
                         s.Stu_room, 
-                        COUNT(st.Study_date) AS count_late, 
+                        COUNT(st.attendance_date) AS count_late, 
                         s.Par_phone
                     FROM 
                         student AS s
                     INNER JOIN 
-                        study AS st ON s.Stu_id = st.Stu_id
+                        student_attendance AS st ON s.Stu_id = st.student_id
                     WHERE 
-                        (DATE(st.Study_date) BETWEEN :startdate AND :enddate) 
-                        AND st.Study_status = 3 
+                        (DATE(st.attendance_date) BETWEEN :startdate AND :enddate) 
+                        AND st.attendance_status = 3 
                         AND s.Stu_status = 1
                     GROUP BY 
                         s.Stu_id, 
@@ -54,7 +54,7 @@ if(isset($_GET['start_date']) && isset($_GET['end_date']) ) {
                         s.Stu_room, 
                         s.Par_phone
                     HAVING 
-                        count_late >= 3
+                        count_late >= 1
                     ORDER BY 
                         s.Stu_major, 
                         s.Stu_room, 
