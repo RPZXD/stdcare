@@ -80,127 +80,154 @@ require_once('wrapper.php');
             <div class="container-fluid flex flex-col items-center">
                 <div class="card col-md-11 mx-auto mt-6 shadow-lg rounded-xl" >
                     <div class="card-body p-8" id="printCard">
-                        <div class="text-base font-bold text-center">
-                            🏠 ผังโครงสร้างองค์กรห้องเรียนสีขาว ปีการศึกษา <?= htmlspecialchars($pee) ?>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-6 text-center tracking-wide drop-shadow">👥 โครงสร้างห้องเรียนสีขาว</h2>
+                        <div class="mb-6 text-center">
+                            <span class="inline-block px-4 py-2 bg-indigo-50 rounded-full text-indigo-700 font-semibold shadow-sm">
+                                ห้อง ม.<?= htmlspecialchars($class) ?>/<?= htmlspecialchars($room) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?>
+                            </span>
                         </div>
-                        <div class="text-center text-base">
-                            ระดับชั้นมัธยมศึกษาปีที่ <?= htmlspecialchars($class)."/".htmlspecialchars($room) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?>
+                        <div class="mb-4 text-center">
+                            <span class="font-semibold text-gray-700">ครูที่ปรึกษา:</span>
+                            <span class="text-indigo-700 font-medium">
+                                <?php if ($advisors && count($advisors)): ?>
+                                    <?php foreach ($advisors as $a): ?>
+                                        <div class="inline-block mx-2 align-top text-center">
+                                            <?php if (!empty($a['Teach_photo'])): ?>
+                                                <a href="<?= 'https://std.phichai.ac.th/teacher/uploads/phototeach/' . htmlspecialchars($a['Teach_photo']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                    <img src="<?= 'https://std.phichai.ac.th/teacher/uploads/phototeach/' . htmlspecialchars($a['Teach_photo']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                </a><br>
+                                            <?php endif; ?>
+                                            <span><?= htmlspecialchars($a['Teach_name']) ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </span>
                         </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <!-- Advisors -->
-                                        <thead class="bg-indigo-500 text-white">
-                                            <tr>
-                                                <th colspan="4" class="text-center">ครูที่ปรึกษา</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <?php if(count($advisors) == 1): ?>
-                                                    <td class="text-center">
-                                                        <a href="<?= !empty($advisors[0]['Teach_photo']) ? $setting->getImgProfile().$advisors[0]['Teach_photo'] : '' ?>" target="_blank">
-                                                            <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($advisors[0]['Teach_photo']) ? $setting->getImgProfile().$advisors[0]['Teach_photo'] : '' ?>" alt="<?= htmlspecialchars($advisors[0]['Teach_photo']) ?>" style="height:70px;width:auto;">
-                                                        </a>
-                                                        <p class="text-center"><?= htmlspecialchars($advisors[0]['Teach_name']) ?></p>
-                                                    </td>
-                                                <?php else: ?>
-                                                    <?php foreach($advisors as $row): ?>
-                                                        <td colspan="<?= ceil(4/count($advisors)) ?>" class="text-center">
-                                                            <a href="<?= !empty($row['Teach_photo']) ? $setting->getImgProfile().$row['Teach_photo'] : '' ?>" target="_blank">
-                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($row['Teach_photo']) ? $setting->getImgProfile().$row['Teach_photo'] : '' ?>" alt="<?= htmlspecialchars($row['Teach_photo']) ?>" style="height:70px;width:auto;">
-                                                            </a>
-                                                            <p class="text-center"><?= htmlspecialchars($row['Teach_name']) ?></p>
-                                                        </td>
-                                                    <?php endforeach; ?>
-                                                <?php endif; ?>
-                                            </tr>
-                                        </tbody>
-                                        <!-- Head -->
-                                        <thead class="bg-indigo-500 text-white">
-                                            <tr>
-                                                <th colspan="4" class="text-center"><?= $positions['1']['label'] ?></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td colspan="4" class="text-center">
-                                                    <?php foreach($grouped['1'] ?? [] as $stu): ?>
-                                                        <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" target="_blank">
-                                                            <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '' ?>" style="height:70px;width:auto;">
-                                                        </a>
-                                                        <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
-                                                    <?php endforeach; ?>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                        <!-- Deputy Heads -->
-                                        <thead class="bg-indigo-500 text-white">
-                                            <tr>
-                                                <th class="text-center"><?= $positions['5']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['2']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['3']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['4']['label'] ?></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <?php foreach(['5','2','3','4'] as $key): ?>
-                                                    <td class="text-center">
-                                                        <?php foreach($grouped[$key] ?? [] as $stu): ?>
-                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
-                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
-                                                            </a>
-                                                            <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
-                                                        <?php endforeach; ?>
-                                                    </td>
+                        <div class="overflow-x-auto flex justify-center">
+                            <table class="min-w-full mx-auto border border-indigo-200 bg-white rounded-xl shadow-lg">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" class="bg-indigo-100 text-center font-bold py-3 border-b border-indigo-200 text-lg tracking-wide shadow-inner">
+                                            👤 หัวหน้าห้อง
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3">
+                                            <?php if (!empty($grouped['1'])): ?>
+                                                <?php foreach ($grouped['1'] as $s): ?>
+                                                    <?php if (!empty($s['Stu_picture'])): ?>
+                                                        <a href="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                            <img src="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                        </a><br>
+                                                    <?php endif; ?>
+                                                    <span class="font-semibold text-gray-800"><?= htmlspecialchars($s['Stu_pre'] . $s['Stu_name'] . ' ' . $s['Stu_sur']) ?></span>
                                                 <?php endforeach; ?>
-                                            </tr>
-                                        </tbody>
-                                        <!-- Leaders -->
-                                        <thead class="bg-indigo-500 text-white">
-                                            <tr>
-                                                <th class="text-center"><?= $positions['6']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['7']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['8']['label'] ?></th>
-                                                <th class="text-center"><?= $positions['9']['label'] ?></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            // หาจำนวนแถวสูงสุดของกลุ่มแกนนำ
-                                            $maxRows = max(
-                                                count($grouped['6'] ?? []),
-                                                count($grouped['7'] ?? []),
-                                                count($grouped['8'] ?? []),
-                                                count($grouped['9'] ?? [])
-                                            );
-                                            for($i=0; $i<$maxRows; $i++): ?>
-                                            <tr>
-                                                <?php foreach(['6','7','8','9'] as $key): ?>
-                                                    <td class="text-center">
-                                                        <?php if(!empty($grouped[$key][$i])): $stu = $grouped[$key][$i]; ?>
-                                                            <a href="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" target="_blank">
-                                                                <img class="img-fluid img-rounded zoomable-img" src="<?= !empty($stu['Stu_picture']) ? 'https://std.phichai.ac.th/photo/'.htmlspecialchars($stu['Stu_picture']) : '../dist/img/student.png' ?>" style="height:70px;width:auto;">
-                                                            </a>
-                                                            <p class="text-center"><?= htmlspecialchars($stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur']) ?></p>
+                                            <?php else: ?>
+                                                <span class="text-gray-400">- ไม่มี -</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🚨 รองฯฝ่ายสารวัตร</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">📘 รองฯฝ่ายการเรียน</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🛠️ รองฯฝ่ายการงาน</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🎉 รองฯฝ่ายกิจกรรม</td>
+                                    </tr>
+                                    <tr>
+                                        <?php foreach(['5','2','3','4'] as $key): ?>
+                                            <td class="text-center py-2">
+                                                <?php if (!empty($grouped[$key])): ?>
+                                                    <?php foreach ($grouped[$key] as $s): ?>
+                                                        <?php if (!empty($s['Stu_picture'])): ?>
+                                                            <a href="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                                <img src="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                            </a><br>
                                                         <?php endif; ?>
-                                                    </td>
+                                                        <span class="font-xs"><?= htmlspecialchars($s['Stu_pre'] . $s['Stu_name'] . ' ' . $s['Stu_sur']) ?></span>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <span class="text-gray-400">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🛡️ กรรมการฝ่ายสารวัตร</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">📚 กรรมการฝ่ายการเรียน</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🔧 กรรมการฝ่ายการงาน</td>
+                                        <td class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🎭 กรรมการฝ่ายกิจกรรม</td>
+                                    </tr>
+                                    <tr>
+                                        <?php foreach(['9','6','7','8'] as $key): ?>
+                                            <td class="text-center">
+                                                <?php if (!empty($grouped[$key])): ?>
+                                                    <?php foreach ($grouped[$key] as $s): ?>
+                                                        <div class="flex flex-col items-center">
+                                                            <?php if (!empty($s['Stu_picture'])): ?>
+                                                                <a href="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                                    <img src="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                                </a>
+                                                            <?php endif; ?>
+                                                            <span class="font-xs block"><?= htmlspecialchars($s['Stu_pre'] . $s['Stu_name'] . ' ' . $s['Stu_sur']) ?></span>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <span class="text-gray-400">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">📝 เลขานุการ</td>
+                                        <td colspan="2" class="bg-indigo-50 text-center font-semibold py-2 border-b border-indigo-100">🗂️ ผู้ช่วยเลขานุการ</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-center py-2">
+                                            <?php if (!empty($grouped['10'])): ?>
+                                                <?php foreach ($grouped['10'] as $s): ?>
+                                                    <?php if (!empty($s['Stu_picture'])): ?>
+                                                        <a href="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                            <img src="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                        </a><br>
+                                                    <?php endif; ?>
+                                                    <span class="font-medium"><?= htmlspecialchars($s['Stu_pre'] . $s['Stu_name'] . ' ' . $s['Stu_sur']) ?></span>
                                                 <?php endforeach; ?>
-                                            </tr>
-                                            <?php endfor; ?>
-                                        </tbody>
-                                        <!-- Maxim -->
-                                        <tbody>
-                                            <tr class="bg-indigo-500">
-                                                <td colspan="4" class="bg-indigo-500 text-center">
-                                                    <p class="text-white">
-                                                        คติพจน์ห้องเรียนสีขาว : <?= nl2br(htmlspecialchars($maxim)) ?: '<span class="text-gray-400 italic">- ยังไม่ได้กรอก -</span>' ?>
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            <?php else: ?>
+                                                <span class="text-gray-400">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td colspan="2" class="text-center py-2">
+                                            <?php if (!empty($grouped['11'])): ?>
+                                                <?php foreach ($grouped['11'] as $s): ?>
+                                                    <?php if (!empty($s['Stu_picture'])): ?>
+                                                        <a href="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" target="_blank" class="group inline-block transition-transform hover:scale-125 duration-200">
+                                                            <img src="<?= 'https://std.phichai.ac.th/photo/' . htmlspecialchars($s['Stu_picture']) ?>" class="inline-block rounded-full shadow-lg ring-2 ring-indigo-200 mx-auto mb-1 transition-all duration-200 group-hover:ring-indigo-400" style="height:54px;width:54px;object-fit:cover;">
+                                                        </a><br>
+                                                    <?php endif; ?>
+                                                    <span class="font-medium"><?= htmlspecialchars($s['Stu_pre'] . $s['Stu_name'] . ' ' . $s['Stu_sur']) ?></span>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <span class="text-gray-400">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="bg-indigo-100 text-center font-semibold py-3 border-t border-indigo-200 text-lg">✍️ คติพจน์ห้องเรียนสีขาว</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <?php if ($maxim): ?>
+                                                <span class="text-indigo-700 font-bold text-lg"><?= htmlspecialchars($maxim) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-gray-400 italic">- ยังไม่ได้กรอก -</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row gap-4 justify-center mt-6 no-print mb-4">
@@ -320,7 +347,6 @@ $(document).ready(function() {
     };
 });
 </script>
-<!-- ปรับรูปให้อยู่กึ่งกลางทุกตำแหน่ง -->
 <style>
     .table td.text-center, .table th.text-center {
         vertical-align: middle !important;
