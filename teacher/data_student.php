@@ -584,7 +584,7 @@ function initImageCropper(file) {
             }
             
             cropper = new Cropper(cropImage, {
-                aspectRatio: 1,
+                aspectRatio: 3 / 4,
                 viewMode: 2,
                 dragMode: 'move',
                 autoCropArea: 0.8,
