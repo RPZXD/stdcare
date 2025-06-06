@@ -226,8 +226,7 @@ require_once('header.php');
             </div>
         </div>
         <script>
-        // ใส่ token key ที่นี่ (ต้องตรงกับใน api_student.php)
-        const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
+
         let studentTable;
         $(document).ready(function() {
             studentTable = $('#studentTable').DataTable({
