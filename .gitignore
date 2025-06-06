@@ -1,10 +1,4 @@
-config/Database.php
-config/Config.php
-classes/DatabaseUser.php
-logs/login.json
-logs/logout.json
-vendor/
-test.php
-logs/login.json
-logs/logout.json
-classes/DatabaseUsers.php
+/logs
+/config
+/photo
+/logs
