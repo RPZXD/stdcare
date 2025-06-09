@@ -55,24 +55,49 @@ $status_labels = [
     '6' => ['label' => 'กิจกรรม', 'emoji' => '🎉', 'color' => 'pink', 'bg' => 'bg-pink-100', 'text' => 'text-pink-700'],
 ];
 
+// ตรวจสอบว่าตาราง student_attendance มีอยู่หรือไม่
+function tableExists($db, $tableName) {
+    try {
+        $stmt = $db->prepare("SHOW TABLES LIKE :tableName");
+        $stmt->execute([':tableName' => $tableName]);
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+$attendanceTableExists = tableExists($db, 'student_attendance');
+
 // ดึงข้อมูล attendance ของทุกห้องในวันที่เลือกในครั้งเดียว
-$stmt = $db->prepare("
-    SELECT s.Stu_major, s.Stu_room, a.attendance_status
-    FROM student s
-    LEFT JOIN student_attendance a
-        ON s.Stu_id = a.student_id
-        AND a.attendance_date = :dateC
-        AND a.term = :term
-        AND a.year = :pee
-    WHERE s.Stu_status=1
-    ORDER BY s.Stu_major, s.Stu_room
-");
-$stmt->execute([
-    ':dateC' => $dateC,
-    ':term' => $term,
-    ':pee' => $pee
-]);
-$all_attendance = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($attendanceTableExists) {
+    $stmt = $db->prepare("
+        SELECT s.Stu_major, s.Stu_room, a.attendance_status
+        FROM student s
+        LEFT JOIN student_attendance a
+            ON s.Stu_id = a.student_id
+            AND a.attendance_date = :dateC
+            AND a.term = :term
+            AND a.year = :pee
+        WHERE s.Stu_status=1
+        ORDER BY s.Stu_major, s.Stu_room
+    ");
+    $stmt->execute([
+        ':dateC' => $dateC,
+        ':term' => $term,
+        ':pee' => $pee
+    ]);
+    $all_attendance = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // ถ้าไม่มีตาราง attendance ให้ดึงข้อมูลนักเรียนอย่างเดียว
+    $stmt = $db->prepare("
+        SELECT Stu_major, Stu_room, NULL as attendance_status
+        FROM student
+        WHERE Stu_status=1
+        ORDER BY Stu_major, Stu_room
+    ");
+    $stmt->execute();
+    $all_attendance = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // จัดกลุ่มข้อมูล
 $class_map = [];

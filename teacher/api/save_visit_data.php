@@ -5,6 +5,103 @@ require_once "../../class/StudentVisit.php";
 $db = (new Database("phichaia_student"))->getConnection();
 $visitHome = new StudentVisit($db);
 
+// Image utility functions
+function convertImageToJpeg($sourcePath, $targetPath, $quality = 85) {
+    $imageInfo = getimagesize($sourcePath);
+    if (!$imageInfo) return false;
+    
+    $sourceImage = null;
+    switch ($imageInfo['mime']) {
+        case 'image/png':
+            $sourceImage = imagecreatefrompng($sourcePath);
+            break;
+        case 'image/gif':
+            $sourceImage = imagecreatefromgif($sourcePath);
+            break;
+        case 'image/webp':
+            $sourceImage = imagecreatefromwebp($sourcePath);
+            break;
+        case 'image/bmp':
+            $sourceImage = imagecreatefrombmp($sourcePath);
+            break;
+        case 'image/jpeg':
+        case 'image/jpg':
+            $sourceImage = imagecreatefromjpeg($sourcePath);
+            break;
+        default:
+            return false;
+    }
+    
+    if (!$sourceImage) return false;
+    
+    // Enable transparency for PNG/GIF conversion
+    $targetImage = imagecreatetruecolor(imagesx($sourceImage), imagesy($sourceImage));
+    $white = imagecolorallocate($targetImage, 255, 255, 255);
+    imagefill($targetImage, 0, 0, $white);
+    imagecopy($targetImage, $sourceImage, 0, 0, 0, 0, imagesx($sourceImage), imagesy($sourceImage));
+    
+    $result = imagejpeg($targetImage, $targetPath, $quality);
+    
+    imagedestroy($sourceImage);
+    imagedestroy($targetImage);
+    
+    return $result;
+}
+
+function resizeImage($sourcePath, $targetPath, $maxWidth = 800, $maxHeight = 600, $quality = 85) {
+    $imageInfo = getimagesize($sourcePath);
+    if (!$imageInfo) return false;
+    
+    $sourceWidth = $imageInfo[0];
+    $sourceHeight = $imageInfo[1];
+    
+    // Calculate new dimensions
+    $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
+    $newWidth = round($sourceWidth * $ratio);
+    $newHeight = round($sourceHeight * $ratio);
+    
+    // Create source image
+    $sourceImage = null;
+    switch ($imageInfo['mime']) {
+        case 'image/jpeg':
+        case 'image/jpg':
+            $sourceImage = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $sourceImage = imagecreatefrompng($sourcePath);
+            break;
+        case 'image/gif':
+            $sourceImage = imagecreatefromgif($sourcePath);
+            break;
+        case 'image/webp':
+            $sourceImage = imagecreatefromwebp($sourcePath);
+            break;
+        case 'image/bmp':
+            $sourceImage = imagecreatefrombmp($sourcePath);
+            break;
+        default:
+            return false;
+    }
+    
+    if (!$sourceImage) return false;
+    
+    // Create target image
+    $targetImage = imagecreatetruecolor($newWidth, $newHeight);
+    $white = imagecolorallocate($targetImage, 255, 255, 255);
+    imagefill($targetImage, 0, 0, $white);
+    
+    // Resize and copy
+    imagecopyresampled($targetImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
+    
+    // Save as JPEG
+    $result = imagejpeg($targetImage, $targetPath, $quality);
+    
+    imagedestroy($sourceImage);
+    imagedestroy($targetImage);
+    
+    return $result;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'stuId' => $_POST['stuId'] ?? null,
@@ -50,9 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => "ไฟล์ที่ $i ไม่สามารถเว้นว่างได้"]);
             exit;
         }
-    }
-
-    // Handle file uploads
+    }    // Handle file uploads with enhanced image processing
     $uploadDir = "../uploads/visithome". $_POST['pee'] - 543 ."/";
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
@@ -61,14 +156,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     for ($i = 1; $i <= 5; $i++) {
         $fileKey = "image$i";
         if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
-            $fileExtension = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
-            $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . ".{$fileExtension}";
+            $tempPath = $_FILES[$fileKey]['tmp_name'];
+            $originalName = $_FILES[$fileKey]['name'];
+            $fileSize = $_FILES[$fileKey]['size'];
+            
+            // Validate file size (5MB max)
+            if ($fileSize > 5 * 1024 * 1024) {
+                echo json_encode(['success' => false, 'message' => "ไฟล์ $fileKey มีขนาดใหญ่เกินไป (สูงสุด 5MB)"]);
+                exit;
+            }
+            
+            // Validate file type
+            $imageInfo = getimagesize($tempPath);
+            if (!$imageInfo) {
+                echo json_encode(['success' => false, 'message' => "ไฟล์ $fileKey ไม่ใช่รูปภาพที่ถูกต้อง"]);
+                exit;
+            }
+            
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+            if (!in_array($imageInfo['mime'], $allowedTypes)) {
+                echo json_encode(['success' => false, 'message' => "รูปแบบไฟล์ $fileKey ไม่ถูกต้อง"]);
+                exit;
+            }
+            
+            // Generate filename
+            $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . ".jpg";
             $filePath = $uploadDir . $fileName;
-
-            if (move_uploaded_file($_FILES[$fileKey]['tmp_name'], $filePath)) {
+            
+            // Process image: resize and convert to JPEG
+            $processed = false;
+            
+            // First try to resize and convert
+            if (resizeImage($tempPath, $filePath, 800, 600, 85)) {
+                $processed = true;
+            } 
+            // If resize fails, try direct conversion
+            elseif (convertImageToJpeg($tempPath, $filePath, 85)) {
+                $processed = true;
+            }
+            // Fallback: direct copy for JPEG files
+            elseif ($imageInfo['mime'] === 'image/jpeg' && move_uploaded_file($tempPath, $filePath)) {
+                $processed = true;
+            }
+            
+            if ($processed) {
                 $data["picture$i"] = $fileName;
             } else {
-                echo json_encode(['success' => false, 'message' => "ไม่สามารถอัปโหลดไฟล์ $fileKey ได้"]);
+                echo json_encode(['success' => false, 'message' => "ไม่สามารถประมวลผลไฟล์ $fileKey ได้"]);
                 exit;
             }
         }
