@@ -91,7 +91,7 @@ require_once('header.php');
                             <div class="toggle-switch" id="allowEditSwitch">
                                 <span class="toggle-emoji">🔒</span>
                             </div>
-                            <span class="text-lg font-medium" id="editStatusText">ปิดให้นักเรียนแก้ไขข้อมูล</span>
+                            <span class="text-lg font-medium text-gray-900" id="editStatusText">ปิดให้นักเรียนแก้ไขข้อมูล</span>
                         </div>
                         <span class="text-2xl">🙆‍♀️</span>
                     </div>
@@ -122,7 +122,7 @@ require_once('header.php');
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title text-xl font-bold" id="studentModalLabel">📋 ข้อมูลนักเรียน</h5>
-        <button type="button" class="close text-white hover:text-gray-200" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close text-gray-900 hover:text-gray-200" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -142,7 +142,7 @@ require_once('header.php');
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title text-lg font-bold" id="editStudentModalLabel">✏️ แก้ไขข้อมูลนักเรียน</h5>
-        <button type="button" class="close text-white hover:text-gray-200" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close text-gray-900 hover:text-gray-200" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -163,7 +163,7 @@ require_once('header.php');
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title font-bold" id="imageCropModalLabel">🖼️ ตัดแต่งรูปภาพ</h5>
-                <button type="button" class="close text-white hover:text-gray-200" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-gray-900 hover:text-gray-200" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -199,7 +199,7 @@ require_once('header.php');
 
 <!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <div class="text-center text-white">
+    <div class="text-center text-gray-900">
         <div class="loading-spinner"></div>
         <p class="mt-3">กำลังประมวลผล...</p>
     </div>
@@ -231,7 +231,7 @@ function updateSwitchUI(isAllowed, by, timestamp) {
     
     if (by && timestamp) {
         statusText.append(
-            `<br><small class="text-white">โดย ${by} (${timestamp})</small>`
+            `<br><small class="text-gray-900">โดย ${by} (${timestamp})</small>`
         );
     }
 }
@@ -323,7 +323,7 @@ async function loadStudentData() {
             showDataStudent.html(`
                 <div class="col-span-full text-center py-12">
                     <div class="text-6xl mb-4">📚</div>
-                    <p class="text-xl font-semibold text-white">ไม่พบข้อมูลนักเรียน</p>
+                    <p class="text-xl font-semibold text-gray-900">ไม่พบข้อมูลนักเรียน</p>
                 </div>
             `);
         } else {
@@ -348,28 +348,28 @@ async function loadStudentData() {
                         
                         <div class="card-body">
                             <div class="text-center mb-4">
-                                <h5 class="text-lg font-bold text-lime-300 mb-2">
+                                <h5 class="text-lg font-bold text-purple-500 mb-2">
                                     ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}
                                 </h5>
-                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-gray-900 px-3 py-1 rounded-full text-sm font-semibold">
                                     รหัส: ${item.Stu_id}
                                 </div>
                             </div>
                             
                             <div class="space-y-2 text-sm">
                                 ${item.Stu_nick ? `<div class="flex justify-between">
-                                    <span class="text-white">ชื่อเล่น:</span>
+                                    <span class="text-gray-900">ชื่อเล่น:</span>
                                     <span class="font-semibold text-purple-600">${item.Stu_nick}</span>
                                 </div>` : ''}
                                 ${item.Stu_phone ? `<div class="flex justify-between">
-                                    <span class="text-white">เบอร์:</span>
-                                    <a href="tel:${item.Stu_phone}" class="text-white hover:underline flex items-center">
+                                    <span class="text-gray-900">เบอร์:</span>
+                                    <a href="tel:${item.Stu_phone}" class="text-gray-900 hover:underline flex items-center">
                                         📞 ${item.Stu_phone}
                                     </a>
                                 </div>` : ''}
                                 ${item.Par_phone ? `<div class="flex justify-between">
-                                    <span class="text-white">ผู้ปกครอง:</span>
-                                    <a href="tel:${item.Par_phone}" class="text-white hover:underline flex items-center">
+                                    <span class="text-gray-900">ผู้ปกครอง:</span>
+                                    <a href="tel:${item.Par_phone}" class="text-gray-900 hover:underline flex items-center">
                                         👨‍👩‍👧‍👦 ${item.Par_phone}
                                     </a>
                                 </div>` : ''}
@@ -468,7 +468,7 @@ $(document).on('click', '.btn-photo', function() {
         title: `📷 เปลี่ยนรูปภาพ`,
         html: `
             <div class="text-center mb-4">
-                <p class="text-white">นักเรียน: <strong>${studentName}</strong></p>
+                <p class="text-gray-900">นักเรียน: <strong>${studentName}</strong></p>
             </div>
             <div class="drop-zone" style="border: 2px dashed #cbd5e0; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease;" 
                  onclick="document.getElementById('photoInput').click()">
@@ -478,7 +478,7 @@ $(document).on('click', '.btn-photo', function() {
             </div>
             <input type="file" id="photoInput" accept="image/*" style="display: none;">
             <div class="mt-3">
-                <small class="text-white">
+                <small class="text-gray-900">
                     รองรับไฟล์: JPG, PNG, GIF, WebP<br>
                     ขนาดไม่เกิน 5MB • จะมีเครื่องมือตัดแต่งรูปภาพ
                 </small>
