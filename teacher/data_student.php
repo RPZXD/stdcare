@@ -351,7 +351,7 @@ async function loadStudentData() {
                                 <h5 class="text-lg font-bold text-purple-500 mb-2">
                                     ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}
                                 </h5>
-                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-gray-900 px-3 py-1 rounded-full text-sm font-semibold">
+                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                                     รหัส: ${item.Stu_id}
                                 </div>
                             </div>
