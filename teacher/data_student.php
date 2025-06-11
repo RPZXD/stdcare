@@ -47,6 +47,61 @@ require_once('header.php');
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 <link rel="stylesheet" href="assets/css/student-management.css">
 
+<style>
+    /* เพิ่มใน assets/css/student-management.css หรือในส่วน <style> */
+.cropper-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.cropper-canvas {
+    cursor: grab;
+    transition: transform 0.2s ease-out;
+}
+
+.cropper-canvas:active {
+    cursor: grabbing;
+}
+
+/* ลดความไวในการลาก crop box */
+.cropper-crop-box {
+    cursor: move;
+    transition: all 0.1s ease-out;
+}
+
+.cropper-drag-box {
+    cursor: move;
+    opacity: 0.1;
+}
+
+/* ปรับแต่ง handles ให้ใหญ่ขึ้นและง่ายต่อการจับ */
+.cropper-point {
+    width: 12px !important;
+    height: 12px !important;
+    background-color: #007bff;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    opacity: 0.8;
+}
+
+.cropper-point:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* ลดความไวในการลากขอบ crop box */
+.cropper-line {
+    background-color: #007bff;
+    opacity: 0.6;
+}
+
+.cropper-line:hover {
+    opacity: 1;
+}
+</style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
@@ -460,28 +515,59 @@ $(document).on('click', '.btn-edit', function() {
 $(document).on('click', '.btn-photo', function() {
     currentStudentId = $(this).data('id');
     
-    // Get student name for better UX
+    // Get student name and current photo for better UX
     const studentCard = $(this).closest('.student-card');
     const studentName = studentCard.attr('data-name');
+    const currentPhoto = studentCard.find('.student-photo').attr('src');
     
     Swal.fire({
-        title: `📷 เปลี่ยนรูปภาพ`,
+        title: `📷 จัดการรูปภาพ`,
         html: `
             <div class="text-center mb-4">
                 <p class="text-gray-900">นักเรียน: <strong>${studentName}</strong></p>
             </div>
-            <div class="drop-zone" style="border: 2px dashed #cbd5e0; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease;" 
-                 onclick="document.getElementById('photoInput').click()">
-                <div style="font-size: 3rem; margin-bottom: 10px;">📁</div>
-                <p>คลิกเพื่อเลือกรูปภาพ</p>
-                <p style="font-size: 0.8rem; color: #666;">หรือลากและวางรูปภาพที่นี่</p>
+            
+            <!-- Photo Management Options -->
+            <div class="photo-options mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="option-card" id="useExistingPhoto" style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px;">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">🖼️</div>
+                            <h6 style="margin-bottom: 8px; font-weight: bold;">ใช้ภาพเดิม</h6>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 0;">ตัดแต่งภาพปัจจุบันใหม่</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="option-card" id="uploadNewPhoto" style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px;">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">📁</div>
+                            <h6 style="margin-bottom: 8px; font-weight: bold;">อัปโหลดภาพใหม่</h6>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 0;">เลือกไฟล์ภาพใหม่</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <input type="file" id="photoInput" accept="image/*" style="display: none;">
-            <div class="mt-3">
-                <small class="text-gray-900">
-                    รองรับไฟล์: JPG, PNG, GIF, WebP<br>
-                    ขนาดไม่เกิน 5MB • จะมีเครื่องมือตัดแต่งรูปภาพ
-                </small>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="uploadSection" style="display: none;">
+                <div class="drop-zone" style="border: 2px dashed #cbd5e0; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease;" 
+                     onclick="document.getElementById('photoInput').click()">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📁</div>
+                    <p>คลิกเพื่อเลือกรูปภาพ</p>
+                    <p style="font-size: 0.8rem; color: #666;">หรือลากและวางรูปภาพที่นี่</p>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                <div class="mt-3">
+                    <small class="text-gray-900">
+                        รองรับไฟล์: JPG, PNG, GIF, WebP<br>
+                        ขนาดไม่เกิน 5MB • จะมีเครื่องมือตัดแต่งรูปภาพ
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Current Photo Preview -->
+            <div id="currentPhotoPreview" style="display: none; text-align: center; margin-top: 15px;">
+                <img src="${currentPhoto}" style="max-width: 200px; max-height: 200px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" alt="ภาพปัจจุบัน">
+                <p style="margin-top: 8px; font-size: 0.9rem; color: #666;">ภาพปัจจุบันของนักเรียน</p>
             </div>
         `,
         showCancelButton: true,
@@ -489,136 +575,296 @@ $(document).on('click', '.btn-photo', function() {
         cancelButtonText: '❌ ยกเลิก',
         confirmButtonColor: '#4facfe',
         cancelButtonColor: '#6c757d',
-        width: '500px',
-        preConfirm: () => {
+        width: '600px',
+        didOpen: () => {
+            let selectedOption = null;
+            
+            // Option selection handlers
+            $('#useExistingPhoto').on('click', function() {
+                selectedOption = 'existing';
+                $('.option-card').css({
+                    'border-color': '#e2e8f0',
+                    'background-color': 'transparent'
+                });
+                $(this).css({
+                    'border-color': '#4facfe',
+                    'background-color': 'rgba(79, 172, 254, 0.1)'
+                });
+                $('#uploadSection').hide();
+                $('#currentPhotoPreview').show();
+                
+                // Enable confirm button
+                Swal.getConfirmButton().disabled = false;
+                Swal.getConfirmButton().style.opacity = '1';
+            });
+            
+            $('#uploadNewPhoto').on('click', function() {
+                selectedOption = 'new';
+                $('.option-card').css({
+                    'border-color': '#e2e8f0',
+                    'background-color': 'transparent'
+                });
+                $(this).css({
+                    'border-color': '#4facfe',
+                    'background-color': 'rgba(79, 172, 254, 0.1)'
+                });
+                $('#currentPhotoPreview').hide();
+                $('#uploadSection').show();
+                
+                // Reset confirm button state
+                Swal.getConfirmButton().disabled = true;
+                Swal.getConfirmButton().style.opacity = '0.5';
+            });
+            
+            // File input setup (same as before)
             const fileInput = document.getElementById('photoInput');
-            const file = fileInput.files[0];
+            const dropZone = document.querySelector('.drop-zone');
             
-            if (!file) {
-                Swal.showValidationMessage('กรุณาเลือกรูปภาพ');
+            if (fileInput && dropZone) {
+                fileInput.onchange = function() {
+                    if (this.files.length > 0) {
+                        const file = this.files[0];
+                        dropZone.innerHTML = `
+                            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                            <p style="color: green;">เลือกไฟล์แล้ว: ${file.name}</p>
+                            <p style="font-size: 0.8rem; color: #666;">คลิก "ต่อไป" เพื่อตัดแต่งรูปภาพ</p>
+                        `;
+                        
+                        // Enable confirm button
+                        Swal.getConfirmButton().disabled = false;
+                        Swal.getConfirmButton().style.opacity = '1';
+                    }
+                };
+                
+                // Enhanced drag and drop functionality
+                dropZone.ondragover = dropZone.ondragenter = function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#4facfe';
+                    this.style.backgroundColor = 'rgba(79, 172, 254, 0.1)';
+                };
+
+                dropZone.ondragleave = function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#cbd5e0';
+                    this.style.backgroundColor = 'transparent';
+                };
+
+                dropZone.ondrop = function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#cbd5e0';
+                    this.style.backgroundColor = 'transparent';
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        fileInput.onchange();
+                    }
+                };
+            }
+            
+            // Initially disable confirm button
+            Swal.getConfirmButton().disabled = true;
+            Swal.getConfirmButton().style.opacity = '0.5';
+            
+            // Store selected option for preConfirm
+            window.selectedPhotoOption = () => selectedOption;
+        },
+        preConfirm: () => {
+            const option = window.selectedPhotoOption();
+            
+            if (!option) {
+                Swal.showValidationMessage('กรุณาเลือกตัวเลือก');
                 return false;
             }
             
-            // Validate file size (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                Swal.showValidationMessage('ขนาดไฟล์ใหญ่เกินไป (ไม่เกิน 5MB)');
-                return false;
+            if (option === 'new') {
+                const fileInput = document.getElementById('photoInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    Swal.showValidationMessage('กรุณาเลือกรูปภาพ');
+                    return false;
+                }
+                
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.showValidationMessage('ขนาดไฟล์ใหญ่เกินไป (ไม่เกิน 5MB)');
+                    return false;
+                }
+                
+                // Validate file type
+                if (!file.type.match('image.*')) {
+                    Swal.showValidationMessage('กรุณาเลือกไฟล์รูปภาพ');
+                    return false;
+                }
+                
+                return { type: 'new', file: file };
+            } else {
+                return { type: 'existing', src: currentPhoto };
             }
-            
-            // Validate file type
-            if (!file.type.match('image.*')) {
-                Swal.showValidationMessage('กรุณาเลือกไฟล์รูปภาพ');
-                return false;
-            }
-            
-            return file;
         }
     }).then((result) => {
         if (result.isConfirmed && result.value) {
-            initImageCropper(result.value);
-        }
-    });
-
-    // Enhanced drag and drop functionality
-    $(document).off('click', '.drop-zone').on('click', '.drop-zone', function() {
-        document.getElementById('photoInput').click();
-    });
-
-    $(document).off('dragover dragenter', '.drop-zone').on('dragover dragenter', '.drop-zone', function(e) {
-        e.preventDefault();
-        $(this).css({
-            'border-color': '#4facfe',
-            'background-color': 'rgba(79, 172, 254, 0.1)'
-        });
-    });
-
-    $(document).off('dragleave', '.drop-zone').on('dragleave', '.drop-zone', function(e) {
-        e.preventDefault();
-        $(this).css({
-            'border-color': '#cbd5e0',
-            'background-color': 'transparent'
-        });
-    });
-
-    $(document).off('drop', '.drop-zone').on('drop', '.drop-zone', function(e) {
-        e.preventDefault();
-        $(this).css({
-            'border-color': '#cbd5e0',
-            'background-color': 'transparent'
-        });
-        
-        const files = e.originalEvent.dataTransfer.files;
-        if (files.length > 0) {
-            document.getElementById('photoInput').files = files;
-            Swal.clickConfirm();
-        }
-    });
-
-    // File input change handler
-    $(document).off('change', '#photoInput').on('change', '#photoInput', function() {
-        if (this.files.length > 0) {
-            $('.drop-zone').html(`
-                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-                <p style="color: green;">เลือกไฟล์แล้ว: ${this.files[0].name}</p>
-                <p style="font-size: 0.8rem; color: #666;">คลิก "ต่อไป" เพื่อตัดแต่งรูปภาพ</p>
-            `);
+            if (result.value.type === 'new') {
+                initImageCropper(result.value.file);
+            } else {
+                initImageCropperFromURL(result.value.src);
+            }
         }
     });
 });
 
-// Enhanced image cropper with better preview
+// Enhanced image cropper with better preview.
 function initImageCropper(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
-        const cropImage = document.getElementById('cropImage');
-        cropImage.src = e.target.result;
-        
-        // Show modal with loading state
-        $('#imageCropModal').modal('show');
-        $('#cropAndUpload').prop('disabled', true).text('กำลังโหลด...');
-        
-        // Initialize cropper after modal is shown
-        $('#imageCropModal').on('shown.bs.modal', function() {
-            if (cropper) {
-                cropper.destroy();
-            }
-            
-            cropper = new Cropper(cropImage, {
-                aspectRatio: 3 / 4,
-                viewMode: 2,
-                dragMode: 'move',
-                autoCropArea: 0.8,
-                restore: false,
-                guides: true,
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-                preview: '#cropPreview',
-                ready: function() {
-                    $('#cropAndUpload').prop('disabled', false).text('✅ ตัดแต่งและอัปโหลด');
-                },
-                crop: function(event) {
-                    // Update preview info
-                    const canvas = cropper.getCroppedCanvas({
-                        width: 150,
-                        height: 150
-                    });
-                    
-                    if (canvas) {
-                        const preview = document.getElementById('cropPreview');
-                        preview.innerHTML = '';
-                        preview.appendChild(canvas);
-                        canvas.style.width = '100%';
-                        canvas.style.height = '100%';
-                        canvas.style.borderRadius = '50%';
-                    }
-                }
-            });
-        });
+        setupCropper(e.target.result);
     };
     reader.readAsDataURL(file);
+}
+
+// New function to initialize cropper from existing image URL
+function initImageCropperFromURL(imageUrl) {
+    // Handle relative URLs
+    let fullImageUrl = imageUrl;
+    if (imageUrl.startsWith('../')) {
+        // Convert relative URL to absolute URL
+        const baseUrl = window.location.origin + window.location.pathname.replace('/teacher/data_student.php', '');
+        fullImageUrl = baseUrl + imageUrl.substring(2); // Remove '../'
+    }
+    
+    // Load image with CORS handling
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = function() {
+        // Convert loaded image to canvas then to blob
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = this.naturalWidth;
+        canvas.height = this.naturalHeight;
+        ctx.drawImage(this, 0, 0);
+        
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        setupCropper(dataUrl);
+    };
+    
+    img.onerror = function() {
+        // Fallback: try to load image directly
+        setupCropper(fullImageUrl);
+    };
+    
+    img.src = fullImageUrl;
+}
+
+// Refactored common cropper setup function
+function setupCropper(imageSrc) {
+    const cropImage = document.getElementById('cropImage');
+    cropImage.src = imageSrc;
+    
+    // Remove any existing event handlers to prevent conflicts
+    $('#imageCropModal').off('shown.bs.modal hidden.bs.modal');
+    
+    // Show modal
+    $('#imageCropModal').modal('show');
+    $('#cropAndUpload').prop('disabled', true).text('กำลังโหลด...');
+    
+    // Initialize cropper after a short delay to ensure modal is fully rendered
+    $('#imageCropModal').one('shown.bs.modal', function() {
+        // Destroy existing cropper if any
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        
+        // Wait for modal animation to complete
+        setTimeout(function() {
+            try {
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 3 / 4,
+                    viewMode: 2,
+                    dragMode: 'move',
+                    autoCropArea: 0.8,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    preview: '#cropPreview',
+                    movable: true,
+                    scalable: true,
+                    zoomable: true,
+                    rotatable: true,
+                    checkOrientation: false,
+                    wheelZoomRatio: 0.05,
+                    minContainerWidth: 300,
+                    minContainerHeight: 300,
+                    modal: true,
+                    background: true,
+                    responsive: true,
+                    checkCrossOrigin: false,
+                    built: function() {
+                        const canvas = this.cropper.getCanvasData();
+                        this.cropper.setCanvasData({
+                            ...canvas,
+                            naturalWidth: canvas.naturalWidth,
+                            naturalHeight: canvas.naturalHeight
+                        });
+                    },
+                    ready: function() {
+                        $('#cropAndUpload').prop('disabled', false).text('✅ ตัดแต่งและอัปโหลด');
+                        updateCropPreview();
+                    },
+                    crop: function(event) {
+                        clearTimeout(this.cropTimeout);
+                        this.cropTimeout = setTimeout(() => {
+                            updateCropPreview();
+                        }, 100); 
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing cropper:', error);
+                $('#cropAndUpload').prop('disabled', false).text('✅ ตัดแต่งและอัปโหลด');
+            }
+        }, 300);
+    });
+    
+    // Clean up when modal is hidden
+    $('#imageCropModal').one('hidden.bs.modal', function() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    });
+}
+
+// Separate function for updating crop preview
+function updateCropPreview() {
+    if (!cropper) return;
+    
+    try {
+        const canvas = cropper.getCroppedCanvas({
+            width: 150,
+            height: 200,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        
+        if (canvas) {
+            const preview = document.getElementById('cropPreview');
+            preview.innerHTML = '';
+            preview.appendChild(canvas);
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.borderRadius = '8px';
+            canvas.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        }
+    } catch (error) {
+        console.error('Error updating preview:', error);
+    }
 }
 
 // Crop and upload handler
@@ -679,6 +925,9 @@ $('#imageCropModal').on('hidden.bs.modal', function() {
         cropper.destroy();
         cropper = null;
     }
+    // Clear the image src to free memory
+    $('#cropImage').attr('src', '');
+    $('#cropPreview').empty();
 });
 
 // Enhanced save changes handler
