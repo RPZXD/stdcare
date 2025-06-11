@@ -56,3 +56,10 @@
     </div>
     <!-- /.sidebar -->
   </aside>
+
+<script>
+  $(function() {
+    // สำหรับ AdminLTE v3 ให้แน่ใจว่า treeview ทำงาน
+    $('[data-widget="treeview"]').Treeview && $('[data-widget="treeview"]').Treeview('init');
+  });
+</script>
