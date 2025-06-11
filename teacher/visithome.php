@@ -290,8 +290,10 @@ function generateVisitForm($data, $isEdit = false, $term = null, $pee = null) {
                                 echo '</div>';
                                 echo '</div>';
                                 
-                                // Hidden file input
-                                echo '<input type="file" class="hidden" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*" ' . $isRequired . ' onchange="handleImageUpload(this, \'' . $image['id'] . '\')">';
+                                // Hidden file input - ลบ onchange attribute ออก
+                                echo '<input type="file" class="hidden" name="' . $image['id'] . '" id="' . $image['id'] . '" accept="image/*" ' . $isRequired . '>';
+                                // เพิ่ม hidden input สำหรับ remove flag
+                                echo '<input type="hidden" name="remove_' . $image['id'] . '" id="remove_' . $image['id'] . '" value="0">';
                                 echo '</label>';
                                 
                                 // Preview area
@@ -301,7 +303,8 @@ function generateVisitForm($data, $isEdit = false, $term = null, $pee = null) {
                                     echo '<div class="relative group">';
                                     echo '<img src="' . $imagePath . '" alt="Uploaded Image" class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm">';
                                     echo '<div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">';
-                                    echo '<button type="button" onclick="removeImage(\'' . $image['id'] . '\')" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600">';
+                                    // ปรับปุ่มลบให้เรียก removeImage พร้อมตั้ง remove flag
+                                    echo '<button type="button" onclick="removeImage(\'' . $image['id'] . '\', true)" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600">';
                                     echo '<i class="fas fa-trash mr-1"></i>ลบ';
                                     echo '</button>';
                                     echo '</div>';
@@ -421,14 +424,22 @@ function generateVisitForm($data, $isEdit = false, $term = null, $pee = null) {
                 `;
             };
             reader.readAsDataURL(file);
+            
+            // เมื่ออัพโหลดใหม่ ให้ clear remove flag
+            const removeInput = document.getElementById('remove_' + imageId);
+            if (removeInput) removeInput.value = "0";
         }
         
-        function removeImage(imageId) {
+        function removeImage(imageId, isEdit = false) {
             const input = document.getElementById(imageId);
             const previewContainer = document.getElementById('preview-' + imageId);
-            
             input.value = '';
             previewContainer.innerHTML = `<p class="text-xs text-gray-400 mt-2" id="status-${imageId}">ยังไม่ได้อัพโหลดรูปภาพ</p>`;
+            // set remove flag ถ้าเป็นโหมดแก้ไข
+            if (isEdit) {
+                const removeInput = document.getElementById('remove_' + imageId);
+                if (removeInput) removeInput.value = "1";
+            }
         }
         
         // Drag and drop functionality
@@ -484,20 +495,20 @@ if (isset($_GET['action'])) {
             $possibleTables = ['visithome', 'visit_home', 'home_visit'];
             $data = null;
             
-            foreach ($possibleTables as $tableName) {
-                try {
-                    $sql = "SELECT v.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_addr, s.Stu_phone 
-                            FROM {$tableName} v 
-                            JOIN student s ON v.Stu_id = s.Stu_id 
-                            WHERE v.Term = ? AND v.Pee = ? AND v.Stu_id = ?";
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute([$term, $pee, $stuId]);
-                    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($data) break;
-                } catch (PDOException $e) {
-                    continue; // Try next table name
-                }
+        foreach ($possibleTables as $tableName) {
+            try {
+                $sql = "SELECT v.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_addr, s.Stu_phone 
+                        FROM {$tableName} v 
+                        JOIN student s ON v.Stu_id = s.Stu_id 
+                        WHERE v.Term = ? AND v.Pee = ? AND v.Stu_id = ?";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$term, $pee, $stuId]);
+                $data = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($data) break; // แก้ไขจาก "if $data) break;"
+            } catch (PDOException $e) {
+                continue; // Try next table name
             }
+        }
             
             if ($data) {
                 echo generateVisitForm($data, true);
@@ -812,16 +823,32 @@ $(document).ready(function() {
             }
         });
 
-        // Validate required images
+        // Validate required images (เฉพาะกรณี add หรือ edit ที่ไม่มีรูปเดิม หรือกดลบรูปเดิม)
         const requiredImages = form.querySelectorAll('input[type="file"][required]');
         requiredImages.forEach(imageInput => {
-            if (!imageInput.files.length) {
+            const imageId = imageInput.id;
+            const removeInput = form.querySelector(`#remove_${imageId}`);
+            let hasOldImage = false;
+            // ตรวจสอบว่ามีรูปเดิมหรือไม่ (ดูจาก hidden input ที่มีชื่อ pictureX)
+            // หรือดูจาก previewContainer มี <img> และ removeInput ไม่ถูกลบ
+            const previewContainer = document.getElementById('preview-' + imageId);
+            if (previewContainer && previewContainer.querySelector('img')) {
+                if (removeInput && removeInput.value === "1") {
+                    hasOldImage = false;
+                } else {
+                    hasOldImage = true;
+                }
+            }
+            // ถ้าไม่มีไฟล์ใหม่ และ (ไม่มีรูปเดิม)
+            if (
+                !imageInput.files.length &&
+                !hasOldImage
+            ) {
                 isValid = false;
                 const uploadArea = imageInput.closest('.upload-area');
                 if (uploadArea) {
                     uploadArea.classList.add('border-red-500');
-                    
-                    // Add error message for image
+                    // ลบ error ซ้ำ
                     let errorDiv = uploadArea.querySelector('.error-message');
                     if (!errorDiv) {
                         errorDiv = document.createElement('div');
@@ -830,7 +857,6 @@ $(document).ready(function() {
                         uploadArea.appendChild(errorDiv);
                     }
                 }
-                
                 if (!firstInvalidField) {
                     firstInvalidField = imageInput;
                 }
@@ -839,7 +865,10 @@ $(document).ready(function() {
 
         // Scroll to first invalid field
         if (firstInvalidField) {
-            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // ป้องกัน scroll ซ้ำซ้อนใน modal
+            setTimeout(() => {
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
 
         return isValid;
@@ -1004,7 +1033,7 @@ $(document).ready(function() {
         });
     };
 
-    // Initialize drag and drop functionality
+    // Initialize drag and drop functionality - ปรับปรุงให้ไม่ซ้ำ
     function initializeDragAndDrop(formId) {
         const form = document.getElementById(formId);
         if (!form) return;
@@ -1017,65 +1046,69 @@ $(document).ready(function() {
             
             if (!input) return;
 
-            // Remove existing event listeners
-            area.removeEventListener('dragover', handleDragOver);
-            area.removeEventListener('dragleave', handleDragLeave);
-            area.removeEventListener('drop', handleDrop);
-            area.removeEventListener('click', handleClick);
+            // ลบ event listeners เก่าทั้งหมดก่อน
+            const newArea = area.cloneNode(true);
+            area.parentNode.replaceChild(newArea, area);
             
-            // Add new event listeners
-            area.addEventListener('dragover', handleDragOver);
-            area.addEventListener('dragleave', handleDragLeave);
-            area.addEventListener('drop', function(e) { handleDrop(e, input, imageId); });
-            area.addEventListener('click', function() { input.click(); });
+            const newInput = form.querySelector('#' + imageId);
             
-            // File input change event
-            input.addEventListener('change', function() {
+            // เพิ่ม event listeners ใหม่
+            newArea.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                newInput.click();
+            });
+            
+            newInput.addEventListener('change', function(e) {
+                e.stopPropagation();
                 if (this.files.length > 0) {
                     handleImageUpload(this, imageId);
+                }
+            });
+            
+            // Drag and drop events
+            newArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            newArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            newArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    newInput.files = dt.files;
+                    handleImageUpload(newInput, imageId);
                 }
             });
         });
     }
 
-    function handleDragOver(e) {
-        e.preventDefault();
-        this.classList.add('dragover');
-    }
-
-    function handleDragLeave(e) {
-        e.preventDefault();
-        this.classList.remove('dragover');
-    }
-
-    function handleDrop(e, input, imageId) {
-        e.preventDefault();
-        this.classList.remove('dragover');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            // Create a new FileList and assign to input
-            const dt = new DataTransfer();
-            dt.items.add(files[0]);
-            input.files = dt.files;
-            handleImageUpload(input, imageId);
-        }
-    }
-
-    function handleClick() {
-        // Handled by individual event listeners
-    }
-
-    // Enhanced handleImageUpload function
+    // ปรับปรุง handleImageUpload ให้ป้องกันการทำงานซ้ำ
     window.handleImageUpload = function(input, imageId) {
         const file = input.files[0];
         if (!file) return;
+        
+        // ป้องกันการทำงานซ้ำ
+        if (input.dataset.processing === 'true') {
+            return;
+        }
+        input.dataset.processing = 'true';
         
         // Validate file
         const validation = validateImageFile(file);
         if (!validation.valid) {
             Swal.fire('ข้อผิดพลาด', validation.message, 'error');
             input.value = '';
+            input.dataset.processing = 'false';
             return;
         }
         
@@ -1087,7 +1120,7 @@ $(document).ready(function() {
             if (errorMsg) errorMsg.remove();
         }
         
-        // Show preview with enhanced UI
+        // Show preview
         const reader = new FileReader();
         reader.onload = function(e) {
             const previewContainer = document.getElementById('preview-' + imageId);
@@ -1107,6 +1140,9 @@ $(document).ready(function() {
                     <p class="text-xs text-gray-400">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
             `;
+            
+            // Reset processing flag
+            input.dataset.processing = 'false';
         };
         reader.readAsDataURL(file);
     };
@@ -1130,10 +1166,10 @@ $(document).ready(function() {
 
     // Enhanced save functions with validation and loading
     $('#saveEditVisit').on('click', function () {
-        if (!validateForm('editVisitForm')) {
-            Swal.fire('ข้อผิดพลาด', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            return;
-        }
+        // if (!validateForm('editVisitForm')) {
+        //     Swal.fire('ข้อผิดพลาด', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        //     return;
+        // }
 
         const formData = new FormData($('#editVisitForm')[0]);
         

@@ -140,13 +140,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
     }
 
+    // ดึงข้อมูลภาพเดิมจากฐานข้อมูล (ต้องมีฟังก์ชัน getVisitDataByKey ใน StudentVisit)
+    // --- เพิ่ม fallback ถ้าไม่มีเมธอด getVisitDataByKey ---
+    $oldData = [];
+    if (method_exists($visitHome, 'getVisitDataByKey')) {
+        $oldData = $visitHome->getVisitDataByKey($data['stuId'], $data['term'], $data['pee']);
+    } else {
+        // ดึงข้อมูลภาพเดิมแบบ manual
+        $tableNames = ['visithome', 'visit_home', 'home_visit'];
+        foreach ($tableNames as $table) {
+            $sql = "SELECT * FROM $table WHERE Stu_id = ? AND Term = ? AND Pee = ?";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$data['stuId'], $data['term'], $data['pee']]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $oldData = $row;
+                break;
+            }
+        }
+    }
+
     for ($i = 1; $i <= 5; $i++) {
         $fileKey = "image$i";
+        $removeKey = "remove_image$i";
+        $pictureKey = "picture$i";
+
+        // ตรวจสอบ remove flag
+        if (isset($_POST[$removeKey]) && $_POST[$removeKey] == "1") {
+            // ลบไฟล์เดิมถ้ามี
+            if (!empty($oldData[$pictureKey])) {
+                $oldFile = $uploadDir . $oldData[$pictureKey];
+                if (file_exists($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+            $data[$pictureKey] = ""; // ตั้งค่าในฐานข้อมูลให้ว่าง
+            continue;
+        }
+
+        // ถ้ามีไฟล์ใหม่ ให้อัปโหลดและแทนที่
         if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
             $tempPath = $_FILES[$fileKey]['tmp_name'];
             $originalName = $_FILES[$fileKey]['name'];
             $fileSize = $_FILES[$fileKey]['size'];
-            
+
             // Validate file size (5MB max)
             if ($fileSize > 5 * 1024 * 1024) {
                 echo json_encode(['success' => false, 'message' => "ไฟล์ $fileKey มีขนาดใหญ่เกินไป (สูงสุด 5MB)"]);
@@ -169,31 +206,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate filename
             $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . ".jpg";
             $filePath = $uploadDir . $fileName;
-            
+
             // Process image: resize and convert to JPEG
             $processed = false;
-            
-            // First try to resize and convert
             if (resizeImage($tempPath, $filePath, 800, 600, 85)) {
                 $processed = true;
-            } 
-            // If resize fails, try direct conversion
-            elseif (convertImageToJpeg($tempPath, $filePath, 85)) {
+            } elseif (convertImageToJpeg($tempPath, $filePath, 85)) {
+                $processed = true;
+            } elseif ($imageInfo['mime'] === 'image/jpeg' && move_uploaded_file($tempPath, $filePath)) {
                 $processed = true;
             }
-            // Fallback: direct copy for JPEG files
-            elseif ($imageInfo['mime'] === 'image/jpeg' && move_uploaded_file($tempPath, $filePath)) {
-                $processed = true;
-            }
-            
+
             if ($processed) {
-                $data["picture$i"] = $fileName; // Add only successfully uploaded files to the data array
+                // ลบไฟล์เดิมถ้ามี
+                if (!empty($oldData[$pictureKey])) {
+                    $oldFile = $uploadDir . $oldData[$pictureKey];
+                    if (file_exists($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+                $data[$pictureKey] = $fileName;
             } else {
                 echo json_encode(['success' => false, 'message' => "ไม่สามารถประมวลผลไฟล์ $fileKey ได้"]);
                 exit;
             }
         } else {
-            unset($data["picture$i"]); // Remove picture key if no file is uploaded
+            // ไม่มีการอัปโหลดใหม่และไม่ได้ลบ ให้คงค่าเดิม
+            $data[$pictureKey] = $oldData[$pictureKey] ?? "";
         }
     }
 
