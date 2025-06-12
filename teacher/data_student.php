@@ -152,6 +152,13 @@ require_once('header.php');
                     </div>
                 </div>
 
+                <!-- Print Button -->
+                <div class="print-container mt-4">
+                    <button id="printStudentList" class="btn btn-success btn-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; border-radius: 25px; padding: 12px 30px; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;">
+                        <i class="fas fa-print mr-2"></i>🖨️ พิมพ์รายชื่อนักเรียน
+                    </button>
+                </div>
+
                 <!-- Enhanced Grid Container -->
                 <div id="showDataStudent" class="student-grid">
                     <!-- Student cards will be injected here -->
@@ -1119,7 +1126,279 @@ loadStudentData();
 window.handleImageError = handleImageError;
 window.showNotification = showNotification;
 
+// Print functionality
+$('#printStudentList').on('click', function() {
+    showLoading();
+    
+    const classValue = <?=$class?>;
+    const roomValue = <?=$room?>;
+    
+    $.ajax({
+        url: 'api/print_student_list.php',
+        method: 'GET',
+        data: { 
+            class: classValue, 
+            room: roomValue,
+            format: 'table'
+        },
+        success: function(response) {
+            hideLoading();
+            
+            // Create print window
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>รายชื่อนักเรียน ม.${classValue}/${roomValue}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 0.5in;
+                        }
+                        
+                        body {
+                            font-family: 'Sarabun', Arial, sans-serif;
+                            font-size: 12px;
+                            line-height: 1.4;
+                            color: #000;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 25px;
+                            border-bottom: 2px solid #000;
+                            padding-bottom: 15px;
+                        }
+                        
+                        .print-header h1 {
+                            margin: 0;
+                            font-size: 18px;
+                            font-weight: bold;
+                        }
+                        
+                        .print-header h2 {
+                            margin: 5px 0;
+                            font-size: 16px;
+                            font-weight: 600;
+                        }
+                        
+                        .print-header p {
+                            margin: 5px 0;
+                            font-size: 14px;
+                        }
+                        
+                        .print-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 15px;
+                            font-size: 11px;
+                        }
+                        
+                        .print-table th,
+                        .print-table td {
+                            border: 1px solid #000;
+                            padding: 6px 4px;
+                            text-align: left;
+                            vertical-align: middle;
+                        }
+                        
+                        .print-table th {
+                            background-color: #f0f0f0;
+                            font-weight: bold;
+                            text-align: center;
+                            font-size: 11px;
+                        }
+                        
+                        .print-table tbody tr:nth-child(even) {
+                            background-color: #f9f9f9;
+                        }
+                        
+                        .print-table .col-no {
+                            width: 8%;
+                            text-align: center;
+                        }
+                        
+                        .print-table .col-id {
+                            width: 12%;
+                            text-align: center;
+                        }
+                        
+                        .print-table .col-name {
+                            width: 25%;
+                        }
+                        
+                        .print-table .col-nick {
+                            width: 12%;
+                            text-align: center;
+                        }
+                        
+                        .print-table .col-phone {
+                            width: 15%;
+                            text-align: center;
+                        }
+                        
+                        .print-table .col-parent {
+                            width: 15%;
+                            text-align: center;
+                        }
+                        
+                        .print-table .col-note {
+                            width: 13%;
+                        }
+                        
+                        .print-photo {
+                            width: 35px;
+                            height: 45px;
+                            object-fit: cover;
+                            border: 1px solid #ccc;
+                            border-radius: 2px;
+                        }
+                        
+                        .print-footer {
+                            margin-top: 30px;
+                            font-size: 11px;
+                        }
+                        
+                        .signature-section {
+                            margin-top: 40px;
+                            display: flex;
+                            justify-content: space-between;
+                            page-break-inside: avoid;
+                        }
+                        
+                        .signature-box {
+                            text-align: center;
+                            width: 200px;
+                        }
+                        
+                        .signature-line {
+                            border-bottom: 1px solid #000;
+                            margin-bottom: 5px;
+                            height: 60px;
+                        }
+                        
+                        .page-break {
+                            page-break-before: always;
+                        }
+                        
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${response}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            // Wait for content to load then print
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            };
+        },
+        error: function() {
+            hideLoading();
+            Swal.fire('❌ ข้อผิดพลาด', 'ไม่สามารถสร้างรายการพิมพ์ได้', 'error');
+        }
+    });
+});
+
 });
 </script>
-</body>
-</html>
+
+<!-- Print Styles -->
+<style media="print">
+    @page {
+        size: A4;
+        margin: 0.5in;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        font-family: 'Sarabun', Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.3;
+        color: #000;
+    }
+    
+    .print-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+    
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .print-table th,
+    .print-table td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .print-table th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+    .print-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    .print-photo {
+        width: 40px;
+        height: 50px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+    }
+    
+    .print-footer {
+        margin-top: 30px;
+        text-align: right;
+        font-size: 11px;
+    }
+    
+    .signature-section {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .signature-box {
+        text-align: center;
+        width: 200px;
+    }
+    
+    .signature-line {
+        border-bottom: 1px solid #000;
+        margin-bottom: 5px;
+        height: 50px;
+    }
+</style>

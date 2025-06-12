@@ -23,8 +23,8 @@ if (!$stu_id) {
 $stmt = $db->prepare("SELECT attendance_date, attendance_status, reason 
                       FROM student_attendance 
                       WHERE student_id = :stu_id 
-                      AND attendance_term = :term
-                        AND attendance_year = :year
+                      AND term = :term
+                        AND year = :year
                       ORDER BY attendance_date DESC");
 $stmt->execute([':stu_id' => $stu_id, ':term' => $term, ':year' => $pee]);
 $records = [];

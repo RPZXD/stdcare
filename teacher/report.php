@@ -89,8 +89,9 @@ require_once('header.php');
               <div class="mt-4">
                 <ul class="space-y-2">
                   <!-- <li><a href="#" class="text-blue-500 hover:underline">🏠 รายงานโฮมรูมรายห้อง</a></li> -->
-
+                  
                   <li><a href="report_study_late.php" class="text-blue-500 hover:underline">⏳ รายงานการมาสาย-ขาดเรียนรายห้อง</a></li>
+                  <li><a href="report_class_visithome.php" class="text-blue-500 hover:underline">🏠 รายงานการเยี่ยมบ้านรายห้อง</a></li>
                   <!-- <li><a href="report_study_day.php" class="text-blue-500 hover:underline">📅 เวลาเรียนประจำวัน</a></li> -->
                   <!-- <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li> -->
                   <!-- <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li> -->
