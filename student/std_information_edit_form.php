@@ -53,13 +53,13 @@ if (!$student) {
             <label class="block text-sm font-medium text-gray-700">🏫 ชั้น</label>
             <input type="number" name="Stu_major" value="<?= htmlspecialchars($student['Stu_major']) ?>"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 text-base"
-                min="1" max="6" required>
+                min="1" max="6" readonly>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">🏫 ห้อง</label>
             <input type="number" name="Stu_room" value="<?= htmlspecialchars($student['Stu_room']) ?>"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 text-base"
-                min="1" max="12" required>
+                min="1" max="12" readonly>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">👶 ชื่อเล่น</label>
