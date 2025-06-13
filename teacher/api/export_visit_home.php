@@ -57,33 +57,29 @@ try {
     $exportData = [];
     
     foreach ($students as $student) {
-        // Get visit data for both rounds - check if picture3 exists
+        // Get visit data for both rounds
         $round1Data = null;
         $round2Data = null;
         
-        // Round 1 (Term = 1) - check for picture3
-        $visitSql = "SELECT * FROM visithome 
-                     WHERE Stu_id = :stu_id AND Term = '1' AND Pee = :pee 
-                     AND picture3 IS NOT NULL AND picture3 != ''";
+        // Round 1 (Term = 1)
+        $visitSql = "SELECT * FROM visithome WHERE Stu_id = :stu_id AND Term = '1' AND Pee = :pee";
         $visitStmt = $db->prepare($visitSql);
         $visitStmt->bindParam(':stu_id', $student['Stu_id']);
         $visitStmt->bindParam(':pee', $pee);
         $visitStmt->execute();
         $round1Data = $visitStmt->fetch(PDO::FETCH_ASSOC);
         
-        // Round 2 (Term = 2) - check for picture3
-        $visitSql = "SELECT * FROM visithome 
-                     WHERE Stu_id = :stu_id AND Term = '2' AND Pee = :pee 
-                     AND picture3 IS NOT NULL AND picture3 != ''";
+        // Round 2 (Term = 2)
+        $visitSql = "SELECT * FROM visithome WHERE Stu_id = :stu_id AND Term = '2' AND Pee = :pee";
         $visitStmt = $db->prepare($visitSql);
         $visitStmt->bindParam(':stu_id', $student['Stu_id']);
         $visitStmt->bindParam(':pee', $pee);
         $visitStmt->execute();
         $round2Data = $visitStmt->fetch(PDO::FETCH_ASSOC);
         
-        // Check completion status based on picture3
-        $round1Complete = $round1Data ? 'เสร็จสิ้น' : 'ยังไม่เสร็จ';
-        $round2Complete = $round2Data ? 'เสร็จสิ้น' : 'ยังไม่เสร็จ';
+        // Check completion status
+        $round1Complete = $round1Data && !empty($round1Data['picture3']) ? 'เสร็จสิ้น' : 'ยังไม่เสร็จ';
+        $round2Complete = $round2Data && !empty($round2Data['picture3']) ? 'เสร็จสิ้น' : 'ยังไม่เสร็จ';
         
         // Overall status
         $overallStatus = 'ยังไม่เริ่ม';

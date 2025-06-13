@@ -636,11 +636,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Helper functions for status display
     function getVisitStatus(visitData) {
-        if (!visitData) {
+        if (!visitData || !visitData.visit_date) {
             return '<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">ยังไม่เยี่ยม</span>';
         }
         
-        const visitDate = new Date(visitData.vh1);
+        const visitDate = new Date(visitData.visit_date);
         const formattedDate = visitDate.toLocaleDateString('th-TH');
         
         return `<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
@@ -649,8 +649,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function getOverallStatus(round1, round2) {
-        const hasRound1 = round1 && round1.picture3;
-        const hasRound2 = round2 && round2.picture3;
+        const hasRound1 = round1 && round1.visit_date;
+        const hasRound2 = round2 && round2.visit_date;
         
         if (hasRound1 && hasRound2) {
             return '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold"><i class="fas fa-check-double mr-1"></i>เสร็จสิ้น</span>';

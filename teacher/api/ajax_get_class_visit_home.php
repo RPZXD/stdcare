@@ -54,78 +54,78 @@ try {
         'round2_completed' => 0
     ];
     
-    $studentsData = [];
+    // Process each student's visit data
+    $studentsWithVisits = [];
     
     foreach ($students as $student) {
-        // Get visit data for round 1 (term = 1) - check if picture3 exists
-        $visitSql1 = "SELECT * FROM visithome 
-                      WHERE Stu_id = :stu_id AND Term = '1' AND Pee = :pee 
-                      AND picture3 IS NOT NULL AND picture3 != ''";
-        $visitStmt1 = $db->prepare($visitSql1);
-        $visitStmt1->bindParam(':stu_id', $student['Stu_id']);
-        $visitStmt1->bindParam(':pee', $pee);
-        $visitStmt1->execute();
-        $round1Visit = $visitStmt1->fetch(PDO::FETCH_ASSOC);
+        // Get visit home records for Round 1 (Term = 1)
+        $round1Sql = "SELECT vh.visit_id, vh.Stu_id, 
+                            vh.vh1, vh.vh2, vh.vh3, vh.vh4, vh.vh5, vh.vh6, 
+                            vh.vh7, vh.vh8, vh.vh9, vh.vh10, vh.vh11, vh.vh12,
+                            vh.vh13, vh.vh14, vh.vh15, vh.vh16, vh.vh17, vh.vh18,
+                            vh.picture1, vh.picture2, vh.picture3, vh.picture4, vh.picture5,
+                            vh.vh20, vh.Term, vh.Pee
+                     FROM visithome vh 
+                     WHERE vh.Stu_id = :stu_id 
+                     AND vh.Term = '1'
+                     AND vh.Pee = :pee";
         
-        // Get visit data for round 2 (term = 2) - check if picture3 exists
-        $visitSql2 = "SELECT * FROM visithome 
-                      WHERE Stu_id = :stu_id AND Term = '2' AND Pee = :pee 
-                      AND picture3 IS NOT NULL AND picture3 != ''";
-        $visitStmt2 = $db->prepare($visitSql2);
-        $visitStmt2->bindParam(':stu_id', $student['Stu_id']);
-        $visitStmt2->bindParam(':pee', $pee);
-        $visitStmt2->execute();
-        $round2Visit = $visitStmt2->fetch(PDO::FETCH_ASSOC);
+        $round1Stmt = $db->prepare($round1Sql);
+        $round1Stmt->bindParam(':stu_id', $student['Stu_id']);
+        $round1Stmt->bindParam(':pee', $pee);
+        $round1Stmt->execute();
         
-        // Count completion based on picture3 existence
-        $round1Complete = $round1Visit ? true : false;
-        $round2Complete = $round2Visit ? true : false;
+        $round1Data = $round1Stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($round1Complete) {
+        // Get visit home records for Round 2 (Term = 2)
+        $round2Sql = "SELECT vh.visit_id, vh.Stu_id, 
+                            vh.vh1, vh.vh2, vh.vh3, vh.vh4, vh.vh5, vh.vh6, 
+                            vh.vh7, vh.vh8, vh.vh9, vh.vh10, vh.vh11, vh.vh12,
+                            vh.vh13, vh.vh14, vh.vh15, vh.vh16, vh.vh17, vh.vh18,
+                            vh.picture1, vh.picture2, vh.picture3, vh.picture4, vh.picture5,
+                            vh.vh20, vh.Term, vh.Pee
+                     FROM visithome vh 
+                     WHERE vh.Stu_id = :stu_id 
+                     AND vh.Term = '2'
+                     AND vh.Pee = :pee";
+        
+        $round2Stmt = $db->prepare($round2Sql);
+        $round2Stmt->bindParam(':stu_id', $student['Stu_id']);
+        $round2Stmt->bindParam(':pee', $pee);
+        $round2Stmt->execute();
+        
+        $round2Data = $round2Stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Process visit data to determine rounds completion
+        $round1_visit = null;
+        $round2_visit = null;
+        
+        // Check Round 1 completion - เช็คจาก picture3 เพราะครูเป็นคนเพิ่มรูปภาพเมื่อเยี่ยมเสร็จ
+        if ($round1Data && !empty($round1Data['picture3'])) {
+            // Count filled fields for completion rate
+            $all_fields = ['vh1', 'vh2', 'vh3', 'vh4', 'vh5', 'vh6', 'vh7', 'vh8', 'vh9', 
+                          'vh10', 'vh11', 'vh12', 'vh13', 'vh14', 'vh15', 'vh16', 'vh17', 'vh18'];
+            $round1_completed = 0;
+            foreach ($all_fields as $field) {
+                if (!empty($round1Data[$field])) {
+                    $round1_completed++;
+                }
+            }
+            
+            $round1_visit = [
+                'visit_date' => date('Y-m-d'), // Use current date as placeholder
+                'completed_fields' => $round1_completed,
+                'total_fields' => count($all_fields),
+                'completion_rate' => round(($round1_completed / count($all_fields)) * 100, 2),
+                'term' => '1',
+                'visit_data' => $round1Data,
+                'picture3' => $round1Data['picture3'] // เก็บรูปภาพที่ยืนยันการเยี่ยม
+            ];
             $summary['round1_completed']++;
         }
         
-        if ($round2Complete) {
-            $summary['round2_completed']++;
-        }
-        
-        // Overall status based on picture3 completion
-        if ($round1Complete && $round2Complete) {
-            $summary['visited']++;
-        } elseif ($round1Complete || $round2Complete) {
-            $summary['pending']++;
-        } else {
-            $summary['overdue']++;
-        }
-        
-        $studentsData[] = [
-            'Stu_id' => $student['Stu_id'],
-            'Stu_no' => $student['Stu_no'],
-            'Stu_pre' => $student['Stu_pre'],
-            'Stu_name' => $student['Stu_name'],
-            'Stu_sur' => $student['Stu_sur'],
-            'round1_visit' => $round1Visit,
-            'round2_visit' => $round2Visit,
-            'round1_complete' => $round1Complete,
-            'round2_complete' => $round2Complete
-        ];
-    }
-    
-    // Return response
-    echo json_encode([
-        'success' => true,
-        'summary' => $summary,
-        'students' => $studentsData
-    ], JSON_UNESCAPED_UNICODE);
-
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Database error: ' . $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
-}
-?>
+        // Check Round 2 completion - เช็คจาก picture3 เพราะครูเป็นคนเพิ่มรูปภาพเมื่อเยี่ยมเสร็จ
+        if ($round2Data && !empty($round2Data['picture3'])) {
             // Count filled fields for completion rate
             $all_fields = ['vh1', 'vh2', 'vh3', 'vh4', 'vh5', 'vh6', 'vh7', 'vh8', 'vh9', 
                           'vh10', 'vh11', 'vh12', 'vh13', 'vh14', 'vh15', 'vh16', 'vh17', 'vh18'];
@@ -152,16 +152,16 @@ try {
         $hasRound1 = $round1_visit !== null;
         $hasRound2 = $round2_visit !== null;
         
-        if ($hasRound1 && $hasRound2) {
+        if ($hasRound1) {
             $summary['visited']++;
             $status = 'completed';
-        } elseif ($hasRound1 || $hasRound2) {
+        } elseif ($hasRound1) {
             $summary['pending']++;
             $status = 'partial';
         } else {
             // Check if overdue (assuming visits should be completed within academic year)
             $currentDate = new DateTime();
-            $academicStartDate = new DateTime($pee . '-05-16'); // Assume academic year starts May 16
+            $academicStartDate = new DateTime($pee-543 . '-06-31'); // Assume academic year starts May 16
             $monthsPassed = $currentDate->diff($academicStartDate)->m + ($currentDate->diff($academicStartDate)->y * 12);
             
             if ($monthsPassed > 6) { // Consider overdue after 6 months
