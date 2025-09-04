@@ -43,7 +43,6 @@ if ($type === 'all') {
     $allStudents = [];
     for ($g = 1; $g <= 3; $g++) {
         $students = $behavior->getScoreBehaviorsGroup($g, $term, $pee);
-
         if ($students && is_array($students)) {
             $allStudents = array_merge($allStudents, $students);
         }
@@ -54,9 +53,10 @@ if ($type === 'all') {
         if ($a['Stu_room'] != $b['Stu_room']) return $a['Stu_room'] - $b['Stu_room'];
         return $a['Stu_no'] - $b['Stu_no'];
     });
-
     if (empty($allStudents)) {
         $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+    } else {
+        $html = buildTableRows($allStudents);
     }
 } elseif ($type === 'level') {
     $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
@@ -95,9 +95,10 @@ if ($type === 'all') {
     if (!$students) $students = [];
     if ($class) {
         $classStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($class));
-
         if (empty($classStudents)) {
             $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        } else {
+            $html = buildTableRows($classStudents);
         }
     } else {
         // เดิม: แสดงทุกชั้น
