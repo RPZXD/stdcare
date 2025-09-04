@@ -5,9 +5,9 @@
     <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
         📊 รายงานการหักคะแนน (แบ่งตามกลุ่ม)
     </h2>
-    <div class="flex items-center gap-4 mb-6">
+    <div class="flex flex-wrap items-center gap-4 mb-6">
         <!-- Tabs -->
-        <div class="flex gap-1" id="tab-group">
+    <div class="flex flex-wrap gap-1" id="tab-group">
             <button data-type="all" class="tab-btn bg-blue-100 text-blue-700 px-3 py-1 rounded border border-blue-300 font-medium">รวมทั้งหมด</button>
             <button data-type="level" class="tab-btn bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 font-medium">แยกช่วงชั้น</button>
             <button data-type="class" class="tab-btn bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 font-medium">แยกตามระดับชั้น</button>
@@ -137,7 +137,7 @@ function updateSelectVisibility() {
 }
 
 // เปลี่ยน tab
-tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
+        tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         tabGroup.querySelectorAll('.tab-btn').forEach(b => {
             b.classList.remove('bg-blue-100','text-blue-700','border-blue-300');
@@ -148,7 +148,6 @@ tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
         this.classList.add('bg-blue-100','text-blue-700','border-blue-300');
         currentTab = this.getAttribute('data-type');
         updateSelectVisibility();
-        groupSelect.value = "";
         fetchAndRender();
     });
 });
@@ -189,11 +188,15 @@ function fetchAndRender() {
     fetch(url)
         .then(res => res.json())
         .then(data => {
-            if (data.success) {
+            if (data.success && data.html && data.html.trim() !== '') {
                 groupTableBody.innerHTML = data.html;
             } else {
                 groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
             }
+        })
+        .catch(err => {
+            console.error('fetch error', err);
+            groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
         });
 }
 
@@ -207,6 +210,7 @@ printBtn.addEventListener('click', function() {
         typeText = "แยกช่วงชั้น (" + (levelSelect.value === "lower" ? "ม.ต้น" : levelSelect.value === "upper" ? "ม.ปลาย" : "-") + ")";
     }
     else if (currentTab === "class") typeText = "แยกตามระดับชั้น (" + (classSelect.value ? "ม." + classSelect.value : "-") + ")";
+    else if (currentTab === "room") typeText = "แยกตามชั้น/ห้อง (" + (majorSelect.value ? "ม."+majorSelect.value : "-") + " / " + (roomSelect.value ? roomSelect.value : "-") + ")";
     let printContent = `
         <div style="text-align:center; font-family:Tahoma;">
             <h2 style="font-size:1.5em; margin-bottom:0.5em;">รายงานสถิติการหักคะแนนนักเรียนจำแนกตามกลุ่ม</h2>
