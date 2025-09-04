@@ -105,7 +105,9 @@ if ($type === 'all') {
         $found = false;
         for ($m = 1; $m <= 6; $m++) {
             $classArr = array_filter($students, fn($s) => intval($s['Stu_major']) === $m);
-            $html .= '<tr><td colspan="7" class="bg-green-50 font-bold text-green-700 text-center">ระดับชั้น ม.'.$m.'</td></tr>';
+            // เพิ่ม page-break เฉพาะห้องที่ไม่ใช่ห้องแรก
+            $trStyle = $m > 1 ? ' style="page-break-before: always;"' : '';
+            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-green-50 font-bold text-green-700 text-center">ระดับชั้น ม.'.$m.'</td></tr>';
             $html .= buildTableRows($classArr);
             if (!empty($classArr)) $found = true;
         }
