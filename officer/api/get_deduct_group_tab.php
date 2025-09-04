@@ -1,3 +1,56 @@
+// เพิ่มรองรับ type=major (แยกตามชั้น) และ type=room (แยกตามห้อง)
+$major = $_GET['major'] ?? '';
+$room = $_GET['room'] ?? '';
+} elseif ($type === 'major') {
+    // แยกตามชั้น (Stu_major)
+    $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
+    if (!$students) $students = [];
+    if ($major) {
+        $majorStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major));
+        if (empty($majorStudents)) {
+            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        } else {
+            $html = buildTableRows($majorStudents);
+        }
+    } else {
+        // แสดงทุกชั้น
+        $found = false;
+        for ($m = 1; $m <= 6; $m++) {
+            $classArr = array_filter($students, fn($s) => intval($s['Stu_major']) === $m);
+            $trStyle = $m > 1 ? ' style="page-break-before: always;"' : '';
+            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-blue-50 font-bold text-blue-700 text-center">ชั้น ม.'.$m.'</td></tr>';
+            $html .= buildTableRows($classArr);
+            if (!empty($classArr)) $found = true;
+        }
+        if (!$found) {
+            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        }
+    }
+} elseif ($type === 'room') {
+    // แยกตามห้อง (Stu_room)
+    $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
+    if (!$students) $students = [];
+    if ($room) {
+        $roomStudents = array_filter($students, fn($s) => strval($s['Stu_room']) === strval($room));
+        if (empty($roomStudents)) {
+            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        } else {
+            $html = buildTableRows($roomStudents);
+        }
+    } else {
+        // แสดงทุกห้อง (1-15 สมมติสูงสุด 15 ห้อง)
+        $found = false;
+        for ($r = 1; $r <= 15; $r++) {
+            $roomArr = array_filter($students, fn($s) => intval($s['Stu_room']) === $r);
+            $trStyle = $r > 1 ? ' style="page-break-before: always;"' : '';
+            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-orange-50 font-bold text-orange-700 text-center">ห้อง '.$r.'</td></tr>';
+            $html .= buildTableRows($roomArr);
+            if (!empty($roomArr)) $found = true;
+        }
+        if (!$found) {
+            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        }
+    }
 <?php
 // เปลี่ยน path ให้ถูกต้อง (จาก ../../ เป็น ../)
 include_once("../../config/Database.php");
