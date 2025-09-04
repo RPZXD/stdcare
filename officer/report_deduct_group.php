@@ -105,6 +105,7 @@ tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
         this.classList.add('bg-blue-100','text-blue-700','border-blue-300');
         currentTab = this.getAttribute('data-type');
         updateSelectVisibility();
+        groupSelect.value = "";
         fetchAndRender();
     });
 });
