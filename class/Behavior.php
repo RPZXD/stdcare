@@ -307,14 +307,18 @@ class Behavior {
     public function getScoreBehaviorsGroup($GroupValue, $term, $pee) {
         // กำหนดเงื่อนไขตาม GroupValue
         switch ($GroupValue) {
+            // ปรับให้ตรงกับตัวเลือกใน UI:
+            // 1 = คะแนนพฤติกรรมต่ำกว่า 50
+            // 2 = คะแนนพฤติกรรมระหว่าง 50 - 70
+            // 3 = คะแนนพฤติกรรมระหว่าง 71 - 99
             case 1:
-                $keysearch = "> 50";
+                $keysearch = "< 50";
                 break;
             case 2:
-                $keysearch = "BETWEEN 30 AND 50";
+                $keysearch = "BETWEEN 50 AND 70";
                 break;
             case 3:
-                $keysearch = "BETWEEN 1 AND 29";
+                $keysearch = "BETWEEN 71 AND 99";
                 break;
             default:
                 $keysearch = "";

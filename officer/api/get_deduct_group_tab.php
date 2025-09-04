@@ -10,6 +10,8 @@ $term = $_GET['term'] ?? '1';
 $pee = $_GET['pee'] ?? '2567';
 $level = $_GET['level'] ?? '';
 $class = $_GET['class'] ?? '';
+$major = $_GET['major'] ?? '';
+$room = $_GET['room'] ?? '';
 
 
 $connectDB = new Database("phichaia_student");
@@ -115,6 +117,39 @@ if ($type === 'all') {
         if (!$found) {
             $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
         }
+    }
+} elseif ($type === 'room') {
+    // แยกตามห้อง: ต้องการ major และ room หรือ ถ้าไม่มี จะโชว์ทั้ง major/room ตามที่เลือก
+    $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
+    if (!$students) $students = [];
+    // ถ้ามีทั้ง major และ room ให้กรองตามทั้งสองค่า
+    if ($major && $room) {
+        $roomStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major) && intval($s['Stu_room']) === intval($room));
+        if (empty($roomStudents)) {
+            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+        } else {
+            $html = buildTableRows($roomStudents);
+        }
+    } elseif ($major) {
+        // แสดงทุกห้องใน major นั้น ๆ (แยกห้องเป็นกลุ่มและขึ้นหน้าใหม่เมื่อพิมพ์)
+        $found = false;
+        // หา list ของห้องจากข้อมูล
+        $rooms = [];
+        foreach ($students as $s) {
+            if (intval($s['Stu_major']) === intval($major)) $rooms[intval($s['Stu_room'])] = true;
+        }
+        ksort($rooms);
+        foreach (array_keys($rooms) as $r) {
+            $roomArr = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major) && intval($s['Stu_room']) === $r);
+            $trStyle = $r > 0 ? ' style="page-break-before: always;"' : '';
+            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-orange-50 font-bold text-orange-700 text-center">ชั้น ม.'.intval($major).' ห้อง '.intval($r).'</td></tr>';
+            $html .= buildTableRows($roomArr);
+            if (!empty($roomArr)) $found = true;
+        }
+        if (!$found) $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+    } else {
+        // ไม่มี major/room ระบุ -> แจ้งให้เลือก
+        $html = '';
     }
 }
 echo json_encode(['success'=>true, 'html'=>$html]);
