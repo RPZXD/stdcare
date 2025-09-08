@@ -47,12 +47,11 @@ $pee = $user->getPee();
                     <th class="py-3 px-4 text-center">ชั้น</th>
                     <th class="py-3 px-4 text-center">✂️ คะแนนที่ถูกหัก</th>
                     <th class="py-3 px-4 text-center">กลุ่ม</th>
-                    <th class="py-3 px-4 text-center rounded-tr-lg">📋 สรุป</th>
                 </tr>
             </thead>
             <tbody id="deduct-table-body">
                 <tr>
-                    <td colspan="8" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td>
+                    <td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td>
                 </tr>
             </tbody>
         </table>
@@ -88,7 +87,7 @@ fetch('api/get_classes.php')
 selectClass.addEventListener('change', function() {
     selectRoom.innerHTML = '<option value="">-- เลือกห้อง --</option>';
     selectRoom.disabled = true;
-    tableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
     if (this.value) {
         fetch('api/get_rooms.php?class=' + encodeURIComponent(this.value))
             .then(res => res.json())
@@ -109,7 +108,7 @@ selectClass.addEventListener('change', function() {
 // เมื่อเลือกห้อง ให้โหลดข้อมูลตาราง
 selectRoom.addEventListener('change', function() {
     if (selectClass.value && this.value) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>';
         fetch(`api/get_deduct_room.php?class=${encodeURIComponent(selectClass.value)}&room=${encodeURIComponent(this.value)}&term=${term}&pee=${pee}`)
             .then(res => res.json())
             .then(data => {
@@ -122,27 +121,22 @@ selectRoom.addEventListener('change', function() {
                         let groupEmoji = '';
                         const score = 100 - parseInt(stu.behavior_count, 10);
 
-                        let summaryText = '';
                         if (score < 50) {
                             groupText = 'ต่ำกว่า 50 คะแนน';
                             groupClass = 'text-red-600 font-bold';
                             groupEmoji = '🚨';
-                            summaryText = 'เข้าค่ายปรับพฤติกรรม (โดยกลุ่มบริหารงานกิจการนักเรียน)';
                         } else if (score >= 50 && score <= 70) {
                             groupText = 'อยู่ระหว่าง 50 - 70 คะแนน';
                             groupClass = 'text-yellow-500 font-semibold';
                             groupEmoji = '⚠️';
-                            summaryText = 'บำเพ็ญประโยชน์ 20 ชั่วโมง (โดยหัวหน้าระดับ)';
                         } else if (score >= 71 && score <= 99) {
                             groupText = 'อยู่ระหว่าง 71 - 99 คะแนน';
                             groupClass = 'text-green-600 font-semibold';
                             groupEmoji = '✅';
-                            summaryText = 'บำเพ็ญประโยชน์ 10 ชั่วโมง (โดยครูที่ปรึกษา)';
                         } else {
                             groupText = '';
                             groupClass = '';
                             groupEmoji = '';
-                            summaryText = '';
                         }
 
                         tableBody.innerHTML += `
@@ -153,7 +147,6 @@ selectRoom.addEventListener('change', function() {
                                 <td class="py-2 px-4 text-center">ม.${stu.Stu_major}/${stu.Stu_room}</td>
                                 <td class="py-2 px-4 text-center text-red-600 font-semibold">${stu.behavior_count} ✂️</td>
                                 <td class="py-2 px-4 text-center ${groupClass}">${groupText} ${groupEmoji}</td>
-                                <td class="py-2 px-4 text-center">${summaryText}</td>
                             </tr>
                         `;
                     });
@@ -163,12 +156,12 @@ selectRoom.addEventListener('change', function() {
                     printClassTitle.textContent = `รายงานสถิติการหักคะแนนของนักเรียน ชั้นมัธยมศึกษาปีที่ ${selectClass.value}/${selectRoom.value}`;
                     printTermTitle.textContent = `ภาคเรียนที่ ${term} ปีการศึกษา ${pee}`;
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
                     printBtn.style.display = 'none';
                 }
             });
     } else {
-        tableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
     }
 });
 
@@ -186,24 +179,21 @@ printBtn.addEventListener('click', function() {
         <head>
             <title>รายงานสถิติการหักคะแนนนักเรียนจำแนกตามห้องเรียน</title>
             <style>
-                body { font-family: Tahoma, Arial, sans-serif; margin: 20px; }
-                .text-center { text-align: center; }
-                .font-bold { font-weight: bold; }
-                .font-semibold { font-weight: 600; }
-                .text-lg { font-size: 1.125rem; }
-                .mb-1 { margin-bottom: 0.25rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .flex { display: flex; }
-                .flex-col { flex-direction: column; }
-                .items-center { align-items: center; }
-                .justify-center { justify-content: center; }
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+                @page { size: A4; margin: 10mm; }
+                body { font-family: Tahoma, Arial, sans-serif; margin: 10mm; }
+                /* reduce sizes to help fit one A4 page */
+                table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 11px; }
+                th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
                 th { background: #e0e7ff; }
                 .text-red-600 { color: #dc2626; }
                 .text-yellow-500 { color: #eab308; }
                 .text-green-600 { color: #16a34a; }
+                .no-break { page-break-inside: avoid; }
+                @media print {
+                    html, body { width:210mm; height:297mm; }
+                    body { margin: 0; }
+                    table { font-size: 10px; }
+                }
             </style>
         </head>
         <body>
