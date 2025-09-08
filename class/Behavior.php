@@ -312,7 +312,7 @@ class Behavior {
             // 2 = คะแนนพฤติกรรมระหว่าง 50 - 70
             // 3 = คะแนนพฤติกรรมระหว่าง 71 - 99
             case 1:
-                $keysearch = "< 50";
+                $keysearch = "BETWEEN 1 AND 49";
                 break;
             case 2:
                 $keysearch = "BETWEEN 50 AND 70";
