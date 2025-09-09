@@ -231,6 +231,7 @@ $(document).ready(function() {
             searching: true,
             paging: true,
             info: true,
+            pageLength: 50,
             order: [],
             language: {
                 search: "ค้นหา:",
