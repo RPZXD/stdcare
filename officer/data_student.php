@@ -38,7 +38,7 @@ $currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
 $classes = [];
 $rooms = [];
 try {
-    $sqlC = "SELECT DISTINCT Stu_class AS cls FROM student WHERE Pee = :pee ORDER BY Stu_class";
+    $sqlC = "SELECT DISTINCT Stu_major AS cls FROM student WHERE Pee = :pee ORDER BY Stu_major";
     $stmtC = $db->prepare($sqlC);
     $stmtC->bindParam(':pee', $pee);
     $stmtC->execute();
