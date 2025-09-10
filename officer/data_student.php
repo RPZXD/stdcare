@@ -35,28 +35,8 @@ $currentDate = Utils::convertToThaiDatePlusNum(date("Y-m-d"));
 $currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
 
 // Prepare class and room lists from student table
-$classes = [];
-$rooms = [];
-try {
-    // Use Stu_class (not Stu_major) and ensure we ignore NULL/empty values, order numerically when possible
-    $sqlC = "SELECT DISTINCT Stu_class AS cls FROM student WHERE Pee = :pee AND Stu_class IS NOT NULL AND Stu_class != '' ORDER BY CAST(Stu_class AS UNSIGNED), Stu_class";
-    $stmtC = $db->prepare($sqlC);
-    $stmtC->bindParam(':pee', $pee);
-    $stmtC->execute();
-    while ($row = $stmtC->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['cls'] !== null && $row['cls'] !== '') $classes[] = $row['cls'];
-    }
-
-    $sqlR = "SELECT DISTINCT Stu_room AS rm FROM student WHERE Pee = :pee AND Stu_room IS NOT NULL AND Stu_room != '' ORDER BY CAST(Stu_room AS UNSIGNED), Stu_room";
-    $stmtR = $db->prepare($sqlR);
-    $stmtR->bindParam(':pee', $pee);
-    $stmtR->execute();
-    while ($row = $stmtR->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['rm'] !== null && $row['rm'] !== '') $rooms[] = $row['rm'];
-    }
-} catch (Exception $e) {
-    // If query fails, leave arrays empty — JS will handle defaults
-}
+$classes = range(1,6);
+$rooms = range(1,12);
 
 require_once('../teacher/header.php');
 
