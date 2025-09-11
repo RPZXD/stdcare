@@ -232,7 +232,6 @@ class Behavior {
                 ORDER BY t1.behavior_date DESC, 
                          t2.Stu_major ASC, 
                          t2.Stu_room ASC
-                LIMIT 1000
                 ;
             ";
             $stmt = $this->conn->prepare($query);
