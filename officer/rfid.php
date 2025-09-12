@@ -271,7 +271,7 @@ $(document).ready(function() {
         $.getJSON('../controllers/StudentRfidController.php?action=getByStudent&stu_id=' + stu.Stu_id, function(r) {
             let html = `
                 <div class="flex gap-4 items-center">
-                    <img src="../photo/${stu.stu_photo || 'noimg.jpg'}" alt="student" class="w-24 h-24 rounded border object-cover bg-gray-100" onerror="this.src='../dist/img/logo-phicha.png'">
+                    <img src="../photo/${stu.Stu_picture || 'noimg.jpg'}" alt="student" class="w-24 h-24 rounded border object-cover bg-gray-100" onerror="this.src='../dist/img/logo-phicha.png'">
                     <div>
                         <div class="font-bold text-lg">${stu.Stu_id}</div>
                         <div class="text-md">${(stu.Stu_name||'') + ' ' + (stu.Stu_sur||'')}</div>
