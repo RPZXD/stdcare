@@ -1,5 +1,7 @@
 <?php 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 
 include_once("../config/Database.php");
@@ -92,10 +94,10 @@ require_once('header.php');
                   
                   <li><a href="report_study_late.php" class="text-blue-500 hover:underline">⏳ รายงานการมาสาย-ขาดเรียนรายห้อง</a></li>
                   <li><a href="report_class_visithome.php" class="text-blue-500 hover:underline">🏠 รายงานการเยี่ยมบ้านรายห้อง</a></li>
-                  <!-- <li><a href="report_study_day.php" class="text-blue-500 hover:underline">📅 เวลาเรียนประจำวัน</a></li> -->
-                  <!-- <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li> -->
-                  <!-- <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li> -->
-                  <!-- <li><a href="report_study_leave.php" class="text-blue-500 hover:underline">🚫 รายชื่อนักเรียนที่ไม่มาเรียน</a></li> -->
+                  <li><a href="report_study_day.php" class="text-blue-500 hover:underline">📅 เวลาเรียนประจำวัน</a></li>
+                  <li><a href="report_study_month.php" class="text-blue-500 hover:underline">📆 เวลาเรียนประจำเดือน</a></li>
+                  <li><a href="report_study_term.php" class="text-blue-500 hover:underline">📚 เวลาเรียนประจำภาคเรียน/ปีการศึกษา</a></li>
+                  <li><a href="report_study_leave.php" class="text-blue-500 hover:underline">🚫 รายชื่อนักเรียนที่ไม่มาเรียน</a></li>
                    
                   <li><a href="report_board_parent.php" class="text-blue-500 hover:underline">👨‍👩‍👧‍👦 รายงานรายชื่อประธานเครือข่ายผู้ปกครองระดับชั้น</a></li>
                   <!-- <li><a href="#" class="text-blue-500 hover:underline">📈 SDQ (นักเรียนประเมิน)</a></li> -->
