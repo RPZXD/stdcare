@@ -32,6 +32,15 @@ try {
             }
             echo json_encode($list);
             break;
+
+        // --- ADDED: Action ใหม่สำหรับ Server-Side Processing (ตาราง RFID) ---
+        case 'list_ssp':
+            requireOfficer();
+            $params = $_POST;
+            $result = $rfidModel->getRfidsForDatatable($params);
+            echo json_encode($result);
+            break;
+
         case 'get':
             requireOfficer();
             $id = $_GET['id'] ?? $_POST['id'] ?? '';

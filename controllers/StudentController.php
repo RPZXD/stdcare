@@ -15,6 +15,20 @@ try {
         case 'list':
             echo json_encode($studentModel->getAll());
             break;
+        // --- ADDED: Action ใหม่สำหรับ Server-Side Processing ---
+        case 'list_ssp':
+            // DataTables ส่งพารามิเตอร์มาเป็น POST
+            $params = $_POST;
+            $result = $studentModel->getStudentsForDatatable($params);
+            echo json_encode($result);
+            break;
+            
+        // --- ADDED: Action ใหม่สำหรับดึงข้อมูล Dropdown ---
+        case 'get_filters':
+            $filters = $studentModel->getMajorAndRoomFilters();
+            echo json_encode($filters);
+            break;
+
         case 'get':
             $id = $_GET['id'] ?? $_POST['id'] ?? '';
             echo json_encode($studentModel->getById($id));

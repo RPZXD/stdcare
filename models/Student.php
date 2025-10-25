@@ -22,12 +22,105 @@ class Student
         return $this->db->query($sql)->fetchAll();
     }
 
+    // --- ADDED: เมธอดสำหรับดึงข้อมูลฟิลเตอร์ (ระดับชั้น/ห้อง) ---
+    public function getMajorAndRoomFilters()
+    {
+        $sqlMajors = "SELECT DISTINCT Stu_major FROM student WHERE Stu_status = '1' AND Stu_major IS NOT NULL ORDER BY Stu_major";
+        $majors = $this->db->query($sqlMajors)->fetchAll(\PDO::FETCH_COLUMN, 0);
+        
+        $sqlRooms = "SELECT DISTINCT Stu_room FROM student WHERE Stu_status = '1' AND Stu_room IS NOT NULL ORDER BY Stu_room";
+        $rooms = $this->db->query($sqlRooms)->fetchAll(\PDO::FETCH_COLUMN, 0);
+
+        return ['majors' => $majors, 'rooms' => $rooms];
+    }
+
+    // --- ADDED: เมธอดสำหรับ DataTables Server-Side Processing ---
+    /**
+     * ดึงข้อมูลนักเรียนสำหรับ DataTables (Server-Side Processing)
+     * @param array $params พารามิเตอร์จาก DataTables (start, length, search, order, filter_major, filter_room)
+     * @return array
+     */
+    public function getStudentsForDatatable($params)
+    {
+        $start = intval($params['start'] ?? 0);
+        $length = intval($params['length'] ?? 10);
+        $searchValue = $params['search']['value'] ?? '';
+        $orderColumnIndex = $params['order'][0]['column'] ?? 0;
+        $orderDir = $params['order'][0]['dir'] ?? 'asc';
+        
+        $filterMajor = $params['filter_major'] ?? null;
+        $filterRoom = $params['filter_room'] ?? null;
+
+        // คอลัมน์ที่รองรับการเรียงลำดับ (ตรงกับ 'columns' ใน JavaScript)
+        // 0=Stu_id, 1=Stu_name, 2=Stu_room (คอลัมน์ปุ่ม 'rfid_id' ไม่ต้องเรียง)
+        $columns = ['s.Stu_id', 's.Stu_name', 's.Stu_room'];
+        $orderColumn = $columns[$orderColumnIndex] ?? 's.Stu_id';
+
+        // --- CHANGED: เรา LEFT JOIN กับ student_rfid เพื่อตรวจสอบว่าลงทะเบียนหรือยัง ---
+        $baseSql = "FROM student s LEFT JOIN student_rfid r ON s.Stu_id = r.stu_id WHERE s.Stu_status = '1'";
+        $bindings = [];
+
+        // --- สร้างเงื่อนไข WHERE ---
+        $where = [];
+
+        // 1. ฟิลเตอร์จาก dropdown
+        if (!empty($filterMajor)) {
+            $where[] = "s.Stu_major = :filter_major";
+            $bindings['filter_major'] = $filterMajor;
+        }
+        if (!empty($filterRoom)) {
+            $where[] = "s.Stu_room = :filter_room";
+            $bindings['filter_room'] = $filterRoom;
+        }
+
+        // 2. ฟิลเตอร์จากช่องค้นหาของ DataTables
+        if (!empty($searchValue)) {
+            // ค้นหาจาก รหัสนักเรียน, ชื่อ, นามสกุล
+            $where[] = "(s.Stu_id LIKE :search_val OR s.Stu_name LIKE :search_val OR s.Stu_sur LIKE :search_val)";
+            $bindings['search_val'] = '%' . $searchValue . '%';
+        }
+        
+        if (count($where) > 0) {
+            $baseSql .= " AND " . implode(' AND ', $where);
+        }
+
+        // --- 1. นับจำนวนข้อมูลทั้งหมด (ไม่รวมฟิลเตอร์) ---
+        // (เรานับจากตาราง student ตรงๆ จะเร็วกว่า)
+        $sqlTotal = "SELECT COUNT(Stu_id) as total FROM student WHERE Stu_status = '1'";
+        $recordsTotal = $this->db->query($sqlTotal)->fetch()['total'];
+
+        // --- 2. นับจำนวนข้อมูลที่ผ่านการกรอง (มี WHERE) ---
+        $sqlFiltered = "SELECT COUNT(s.Stu_id) as total_filtered " . $baseSql;
+        $recordsFiltered = $this->db->query($sqlFiltered, $bindings)->fetch()['total_filtered'];
+
+        // --- 3. ดึงข้อมูลจริง (มี WHERE, ORDER BY, LIMIT) ---
+        // เลือกเฉพาะฟิลด์ที่จำเป็น
+        $sqlData = "SELECT s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture, r.id as rfid_id ";
+        $sqlData .= $baseSql;
+        $sqlData .= " ORDER BY $orderColumn $orderDir ";
+        $sqlData .= " LIMIT $start, $length";
+
+        $data = $this->db->query($sqlData, $bindings)->fetchAll();
+
+        // --- 4. จัดรูปแบบผลลัพธ์ ---
+        return [
+            "draw"            => intval($params['draw'] ?? 0), // ส่งค่า draw กลับไป
+            "recordsTotal"    => intval($recordsTotal),
+            "recordsFiltered" => intval($recordsFiltered),
+            "data"            => $data
+        ];
+    }
+
     public function getById($id)
     {
         $sql = "SELECT Stu_id, Stu_no,Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status FROM student WHERE Stu_id = :id";
         $stmt = $this->db->query($sql, ['id' => $id]);
         return $stmt->fetch();
     }
+    
+    // ... (เมธอด create, update, delete, resetPassword, getStudentsByRooms, getStudentsByClassAndRooms 
+    //      ยังคงเหมือนเดิม ไม่ต้องแก้ไข) ...
+
 
     public function create($data)
     {
