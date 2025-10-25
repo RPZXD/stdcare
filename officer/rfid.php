@@ -156,7 +156,9 @@ $(document).ready(function() {
 
     // --- โหลดข้อมูลนักเรียนทั้งหมด ---
     function loadStudents() {
-        $.getJSON('../controllers/StudentController.php?action=list', function(data) {
+        // ===== ⬇️⬇️⬇️ จุดที่แก้ไข ⬇️⬇️⬇️ =====
+        $.getJSON('../controllers/StudentRfidController.php?action=listStudents', function(data) {
+        // ===== ⬆️⬆️⬆️ จุดที่แก้ไข ⬆️⬆️⬆️ =====
             // กรองเฉพาะ Stu_status == 1
             students = (data || []).filter(s => String(s.Stu_status) === '1');
             majors = [...new Set(students.map(s => s.Stu_major).filter(Boolean))];

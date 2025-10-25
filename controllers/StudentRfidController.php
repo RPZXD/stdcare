@@ -2,14 +2,19 @@
 session_start();
 header('Content-Type: application/json');
 
+// --- Original Model Includes ---
 require_once __DIR__ . '/../models/StudentRfid.php';
-require_once __DIR__ . '/../models/Student.php';
+require_once __DIR__ . '/../models/Student.php'; // ตัวที่ (อาจจะ) มีปัญหา
 
 use App\Models\StudentRfid;
-use App\Models\Student;
+use App\Models\Student as NamespacedStudent; // <-- เปลี่ยนชื่อคลาสนี้ไปก่อน
+
+// --- New/Working Model Includes (จาก rfid.php) ---
+require_once __DIR__ . '/../config/Database.php'; 
+require_once __DIR__ . '/../class/Student.php';  // <-- นี่คือคลาส Student ที่เราจะใช้ (จาก /class/)
 
 $rfidModel = new StudentRfid();
-$studentModel = new Student();
+// $studentModel = new NamespacedStudent(); // ไม่ต้องสร้างตัวแปรนี้ถ้าไม่ได้ใช้
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
@@ -23,6 +28,23 @@ function requireOfficer() {
 
 try {
     switch ($action) {
+        // --- นี่คือ ACTION ใหม่ที่เราเพิ่มเข้ามา ---
+        case 'listStudents':
+            requireOfficer();
+            
+            // ใช้คลาส Student (จาก /class/Student.php) ที่ทำงานได้
+            $connectDB = new Database("phichaia_student");
+            $db = $connectDB->getConnection();
+            
+            // นี่คือ new Student() จาก /class/Student.php
+            $workingStudentModel = new Student($db); 
+            
+            // สันนิษฐานว่าคลาสนี้มีเมธอด getAll()
+            $studentList = $workingStudentModel->getAll();
+            echo json_encode($studentList);
+            break;
+        // --- จบ Action ใหม่ ---
+
         case 'list':
             requireOfficer();
             $list = $rfidModel->getAll();
