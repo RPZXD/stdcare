@@ -11,13 +11,13 @@ $studentModel = new Student();
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
 try {
-    switch ($action) {
+switch ($action) {
         case 'list':
             echo json_encode($studentModel->getAll());
             break;
+
         // --- ADDED: Action ใหม่สำหรับ Server-Side Processing ---
         case 'list_ssp':
-            // DataTables ส่งพารามิเตอร์มาเป็น POST
             $params = $_POST;
             $result = $studentModel->getStudentsForDatatable($params);
             echo json_encode($result);
@@ -33,6 +33,7 @@ try {
             $id = $_GET['id'] ?? $_POST['id'] ?? '';
             echo json_encode($studentModel->getById($id));
             break;
+            
         case 'create':
             $data = [
                 'Stu_id' => $_POST['Stu_id'],
@@ -51,16 +52,10 @@ try {
                 'Stu_addr' => $_POST['Stu_addr'] ?? null,
                 'Stu_phone' => $_POST['Stu_phone'] ?? null,
                 'Father_name' => $_POST['Father_name'] ?? null,
-                'Father_occu' => $_POST['Father_occu'] ?? null,
-                'Father_income' => $_POST['Father_income'] ?? null,
+                'Father_phone' => $_POST['Father_phone'] ?? null,
                 'Mother_name' => $_POST['Mother_name'] ?? null,
-                'Mother_occu' => $_POST['Mother_occu'] ?? null,
-                'Mother_income' => $_POST['Mother_income'] ?? null,
+                'Mother_phone' => $_POST['Mother_phone'] ?? null,
                 'Par_name' => $_POST['Par_name'] ?? null,
-                'Par_relate' => $_POST['Par_relate'] ?? null,
-                'Par_occu' => $_POST['Par_occu'] ?? null,
-                'Par_income' => $_POST['Par_income'] ?? null,
-                'Par_addr' => $_POST['Par_addr'] ?? null,
                 'Par_phone' => $_POST['Par_phone'] ?? null,
                 'Risk_group' => $_POST['Risk_group'] ?? null,
                 'Stu_picture' => $_POST['Stu_picture'] ?? null,
@@ -75,7 +70,6 @@ try {
             $id = $_POST['Stu_id'];
             $data = [
                 'Stu_no' => $_POST['Stu_no'] ?? null,
-                'Stu_password' => $_POST['Stu_password'] ?? $id,
                 'Stu_sex' => $_POST['Stu_sex'] ?? null,
                 'Stu_pre' => $_POST['Stu_pre'] ?? null,
                 'Stu_name' => $_POST['Stu_name'],
@@ -89,16 +83,10 @@ try {
                 'Stu_addr' => $_POST['Stu_addr'] ?? null,
                 'Stu_phone' => $_POST['Stu_phone'] ?? null,
                 'Father_name' => $_POST['Father_name'] ?? null,
-                'Father_occu' => $_POST['Father_occu'] ?? null,
-                'Father_income' => $_POST['Father_income'] ?? null,
+                'Father_phone' => $_POST['Father_phone'] ?? null,
                 'Mother_name' => $_POST['Mother_name'] ?? null,
-                'Mother_occu' => $_POST['Mother_occu'] ?? null,
-                'Mother_income' => $_POST['Mother_income'] ?? null,
+                'Mother_phone' => $_POST['Mother_phone'] ?? null,
                 'Par_name' => $_POST['Par_name'] ?? null,
-                'Par_relate' => $_POST['Par_relate'] ?? null,
-                'Par_occu' => $_POST['Par_occu'] ?? null,
-                'Par_income' => $_POST['Par_income'] ?? null,
-                'Par_addr' => $_POST['Par_addr'] ?? null,
                 'Par_phone' => $_POST['Par_phone'] ?? null,
                 'Risk_group' => $_POST['Risk_group'] ?? null,
                 'Stu_picture' => $_POST['Stu_picture'] ?? null,
@@ -129,11 +117,13 @@ try {
                 echo json_encode(['error' => 'Reset password failed']);
             }
             break;
+
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);
     }
-} catch (\Throwable $e) {
+} catch (\Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Internal Server Error', 'message' => $e->getMessage()]);
+    // --- CHANGED: แสดง error message จริงๆ เพื่อ debug ---
+    echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 }

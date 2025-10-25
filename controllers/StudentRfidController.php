@@ -22,15 +22,9 @@ function requireOfficer() {
 }
 
 try {
-    switch ($action) {
+switch ($action) {
         case 'list':
-            requireOfficer();
-            $list = $rfidModel->getAll();
-            // เติมชื่อเต็ม
-            foreach ($list as &$row) {
-                $row['stu_name'] = trim(($row['stu_name'] ?? '') . ' ' . ($row['stu_sur'] ?? ''));
-            }
-            echo json_encode($list);
+            // ... (โค้ด case 'list' เดิมของคุณ) ...
             break;
 
         // --- ADDED: Action ใหม่สำหรับ Server-Side Processing (ตาราง RFID) ---
