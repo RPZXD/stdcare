@@ -32,32 +32,22 @@ if (isset($_SESSION['Officer_login'])) {
     exit;
 }
 
+
 require_once('header.php');
 ?>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-tailwind@5/tailwind.min.css">
-
 <body class="hold-transition sidebar-mini layout-fixed">
-    <div class="wrapper">
-        <?php include_once('navbar.php'); ?>
-        <?php include_once('sidebar.php'); ?>
-
-        <div class="content-wrapper">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">จัดการบัตร RFID นักเรียน</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active">RFID</li>
-                            </ol>
-                        </div>
+<div class="wrapper">
+    <?php require_once('wrapper.php'); ?>
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h5 class="m-0">จัดการ RFID</h5>
                     </div>
                 </div>
             </div>
+        </div>
             <section class="content">
                 <div class="container-fluid">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -169,14 +159,10 @@ require_once('header.php');
             </div>
         </div>
 
-        <?php include_once('footer.php'); ?>
+        <?php include_once('../footer.php'); ?>
     </div>
 
-    <script src="../assets/jquery/jquery.min.js"></script>
-    <script src="../assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/adminlte/js/adminlte.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<?php require_once('script.php'); ?>
 
     <script>
     $(document).ready(function() {
