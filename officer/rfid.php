@@ -54,7 +54,9 @@ require_once('header.php');
         <section class="content">
         <div class="container mx-auto py-8 flex flex-col gap-6 max-w-8xl">
             <div class="flex flex-col md:flex-row gap-6">
+                <!-- ซ้าย: สแกน/อ่าน RFID + รายการ RFID -->
                 <div class="flex-1 flex flex-col gap-6">
+                    <!-- 1. ช่องสำหรับสแกน/อ่านหมายเลข RFID -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
                         <div class="mb-2 font-semibold text-blue-700">สแกน/อ่านหมายเลข RFID</div>
                         <div class="flex gap-2 items-center">
@@ -63,6 +65,7 @@ require_once('header.php');
                         </div>
                         <div id="rfid_status" class="mt-2 text-sm text-gray-500"></div>
                     </div>
+                    <!-- 5. รายการ RFID ที่ลงทะเบียนแล้ว -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
                         <div class="mb-2 font-semibold text-blue-700 flex items-center gap-4">
                             รายการ RFID ที่ลงทะเบียนแล้ว
@@ -85,30 +88,25 @@ require_once('header.php');
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    </tbody>
+                                    <!-- JS fill -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+                <!-- ขวา: ค้นหานักเรียน -->
                 <div class="flex-1 flex flex-col gap-6">
+                    <!-- 2. ช่องค้นหานักเรียน -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
-                        <div class="mb-2 font-semibold text-blue-700">ค้นหานักเรียน (กรุณาระบุอย่างน้อย 1 อย่าง)</div>
-                        <div class_exists="flex flex-col gap-2 mb-2">
-                            <div class="flex gap-2">
-                                <input type="text" id="student_search" class="border border-blue-300 rounded px-3 py-2 w-72" placeholder="รหัส/ชื่อ/นามสกุล" autocomplete="off">
-                                <button id="btnSearchStudent" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold shadow">
-                                    🔍 ค้นหา
-                                </button>
-                            </div>
-                            <div class="flex gap-2 items-center">
-                                <label>หรือเลือก:</label>
-                                <select id="filter_major" class="border border-blue-200 rounded px-2 py-1">
-                                    <option value="">ทุกระดับชั้น</option>
-                                </select>
-                                <select id="filter_room" class="border border-blue-200 rounded px-2 py-1">
-                                    <option value="">ทุกห้อง</option>
-                                </select>
-                            </div>
+                        <div class="mb-2 font-semibold text-blue-700">ค้นหานักเรียน</div>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="student_search" class="border border-blue-300 rounded px-3 py-2 w-72" placeholder="รหัส/ชื่อ/ห้อง" autocomplete="off">
+                            <select id="filter_major" class="border border-blue-200 rounded px-2 py-1">
+                                <option value="">ทุกระดับชั้น</option>
+                            </select>
+                            <select id="filter_room" class="border border-blue-200 rounded px-2 py-1">
+                                <option value="">ทุกห้อง</option>
+                            </select>
                         </div>
                         <div class="overflow-x-auto">
                             <table id="studentTable" class="min-w-full text-sm">
@@ -121,13 +119,12 @@ require_once('header.php');
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td colspan="4" class="text-center text-gray-400 py-4">กรุณากดค้นหาเพื่อแสดงข้อมูลนักเรียน</td>
-                                    </tr>
+                                    <!-- JS fill -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    <!-- 3. ข้อมูลนักเรียนที่เลือก -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100" id="student_detail_box" style="display:none;">
                         <div class="mb-2 font-semibold text-blue-700">ข้อมูลนักเรียนที่เลือก</div>
                         <div class="flex gap-4 items-center">
@@ -140,6 +137,7 @@ require_once('header.php');
                             </div>
                         </div>
                     </div>
+                    <!-- 4. ปุ่มเชื่อม RFID กับนักเรียน -->
                     <div class="flex gap-4" id="rfid_action_box" style="display:none;">
                         <button id="btnLinkRfid" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded font-semibold">เชื่อม RFID กับนักเรียน</button>
                     </div>
@@ -156,82 +154,60 @@ require_once('header.php');
 <script>
 $(document).ready(function() {
     // --- ตัวแปร ---
-    // *** เราจะไม่เก็บตัวแปร students (ที่มี 1000+ แถว) ไว้แล้ว ***
+    let students = [];
+    let filteredStudents = [];
+    let majors = [];
+    let rooms = [];
     let selectedStudent = null;
     let selectedStudentData = null;
     let selectedRfid = '';
     let rfidTable = null;
-    
-    // --- โหลดตัวเลือก (Dropdown) ระดับชั้น/ห้อง ---
-    // เราจะโหลดแค่ "ตัวเลือก" ไม่ใช่ "ข้อมูลนักเรียน"
-    function loadFilterOptions() {
-        $.getJSON('../controllers/StudentRfidController.php?action=getFilterOptions', function(data) {
-            if (data && data.majors && data.rooms) {
-                fillMajorRoomFilter(data.majors, data.rooms);
-            }
+
+    // --- โหลดข้อมูลนักเรียนทั้งหมด ---
+    function loadStudents() {
+        $.getJSON('../controllers/StudentController.php?action=list', function(data) {
+            // กรองเฉพาะ Stu_status == 1
+            students = (data || []).filter(s => String(s.Stu_status) === '1');
+            majors = [...new Set(students.map(s => s.Stu_major).filter(Boolean))];
+            rooms = [...new Set(students.map(s => s.Stu_room).filter(Boolean))];
+            fillMajorRoomFilter();
+            filterStudents();
         });
     }
 
-    // --- กรองสาขา/ห้อง ---
-    function fillMajorRoomFilter(majors = [], rooms = []) {
-        const $major = $('#filter_major');
-        const $room = $('#filter_room');
-        $major.empty().append('<option value="">ทุกระดับชั้น</option>');
-        majors.forEach(m => $major.append(`<option value="${m}">${m}</option>`));
-        $room.empty().append('<option value="">ทุกห้อง</option>');
-        rooms.forEach(r => $room.append(`<option value="${r}">${r}</option>`));
-    }
-    
-    // --- [ใหม่] ฟังก์ชันค้นหานักเรียน ---
-    function runStudentSearch() {
-        const search = $('#student_search').val().trim();
+    // --- กรอง/ค้นหา/แสดงนักเรียนในตาราง ---
+    function filterStudents() {
+        const search = $('#student_search').val().trim().toLowerCase();
         const major = $('#filter_major').val();
         const room = $('#filter_room').val();
-
-        // ตรวจสอบว่าต้องกรอกอย่างน้อย 1 อย่าง
-        if (!search && !major && !room) {
-            Swal.fire('กรุณาระบุเงื่อนไข', 'กรุณากรอกคำค้นหา (รหัส/ชื่อ/นามสกุล) หรือเลือกชั้น/ห้อง เพื่อจำกัดผลลัพธ์', 'warning');
-            return;
-        }
-
-        // แสดง Loading
-        const $tbody = $('#studentTable tbody');
-        if ($.fn.DataTable.isDataTable('#studentTable')) {
-            $('#studentTable').DataTable().destroy();
-        }
-        $tbody.empty().append('<tr><td colspan="4" class="text-center text-gray-400 py-4">กำลังค้นหา...</td></tr>');
-
-        // ส่ง Request ไปค้นหาที่ Server
-        $.getJSON(`../controllers/StudentRfidController.php?action=searchStudents&search=${encodeURIComponent(search)}&major=${encodeURIComponent(major)}&room=${encodeURIComponent(room)}`, function(data) {
-            
-            const studentsFound = (data || []).filter(s => String(s.Stu_status) === '1');
-            
-            // นำผลลัพธ์ (เฉพาะที่ค้นเจอ) มาแสดงในตาราง
-            fillStudentTable(studentsFound);
-
-            if (data && data.limit_exceeded) {
-                Swal.fire('พบข้อมูลมากเกินไป', 'พบข้อมูลมากกว่า 500 รายการ กรุณาระบุการค้นหาให้เจาะจงมากขึ้น (เช่น ใส่ชื่อ หรือเลือกห้อง)', 'info');
+        filteredStudents = students.filter(s => {
+            let ok = true;
+            const stuMajor = (s.Stu_major ?? '').toString().trim();
+            const filterMajor = (major ?? '').toString().trim();
+            const stuRoom = (s.Stu_room ?? '').toString().trim();
+            const filterRoom = (room ?? '').toString().trim();
+            if (filterMajor && stuMajor !== filterMajor) ok = false;
+            if (filterRoom && stuRoom !== filterRoom) ok = false;
+            if (search) {
+                const txt = (s.Stu_id + ' ' + s.Stu_name + ' ' + (s.Stu_sur||'') + ' ' + (s.Stu_room||'')).toLowerCase();
+                if (!txt.includes(search)) ok = false;
             }
-        }).fail(function() {
-             $tbody.empty().append('<tr><td colspan="4" class="text-center text-red-500 py-4">เกิดข้อผิดพลาดในการค้นหา</td></tr>');
+            return ok;
         });
+        fillStudentTable();
     }
 
-    // --- [แก้ไข] ฟังก์ชันแสดงผลลัพธ์ในตาราง ---
-    // (ฟังก์ชันนี้จะรับข้อมูลที่ค้นเจอมาแสดง)
-    function fillStudentTable(studentsToShow) {
+    function fillStudentTable() {
         const $tbody = $('#studentTable tbody');
         if ($.fn.DataTable.isDataTable('#studentTable')) {
             $('#studentTable').DataTable().destroy();
         }
         $tbody.empty();
-        
-        if (studentsToShow.length === 0) {
-            $tbody.append('<tr><td colspan="4" class="text-center text-gray-400 py-4">ไม่พบข้อมูลนักเรียนที่ตรงกับเงื่อนไข</td></tr>');
+        if (filteredStudents.length === 0) {
+            $tbody.append('<tr><td colspan="4" class="text-center text-gray-400">ไม่พบข้อมูล</td></tr>');
             return;
         }
-
-        studentsToShow.forEach(s => {
+        filteredStudents.forEach(s => {
             // ตรวจสอบว่านักเรียนนี้มี RFID แล้วหรือยัง
             let rfidRegistered = false;
             if (window.rfidList && Array.isArray(window.rfidList)) {
@@ -250,10 +226,9 @@ $(document).ready(function() {
                 </td>
             </tr>`);
         });
-
         $('#studentTable').DataTable({
             destroy: true,
-            searching: false, // ปิดการค้นหาของ DataTables (เพราะเราค้นหาเอง)
+            searching: true,
             paging: true,
             info: true,
             pageLength: 50,
@@ -268,37 +243,29 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // --- [ใหม่] Event Handlers สำหรับการค้นหา ---
-    $('#btnSearchStudent').on('click', runStudentSearch);
-    $('#student_search').on('keypress', function(e) {
-        if (e.which == 13) { // กด Enter
-            runStudentSearch();
-        }
-    });
-    $('#filter_major, #filter_room').on('change', runStudentSearch); // ค้นหาอัตโนมัติเมื่อเลือก dropdown
 
+    // --- กรองสาขา/ห้อง ---
+    function fillMajorRoomFilter() {
+        const $major = $('#filter_major');
+        const $room = $('#filter_room');
+        $major.empty().append('<option value="">ทุกระดับชั้น</option>');
+        majors.forEach(m => $major.append(`<option value="${m}">${m}</option>`));
+        $room.empty().append('<option value="">ทุกห้อง</option>');
+        rooms.forEach(r => $room.append(`<option value="${r}">${r}</option>`));
+    }
 
-    // --- [แก้ไข] เลือกนักเรียน ---
+    $('#student_search').on('input', filterStudents);
+    $('#filter_major, #filter_room').on('change', filterStudents);
+
+    // --- เลือกนักเรียน ---
     $('#studentTable').on('click', '.selectStudent', function() {
         const id = String($(this).data('id')).trim();
-        
-        // *** [สำคัญ] เราไม่มีข้อมูลนักเรียนใน JavaScript แล้ว ***
-        // เราต้องไปดึงข้อมูลนักเรียนคนนี้มาใหม่จาก Server
-        
-        $.getJSON('../controllers/StudentRfidController.php?action=getStudentDetails&stu_id=' + id, function(stu) {
-            if (stu) {
-                selectedStudent = stu; // ตั้งค่าตัวแปร global
-                selectedStudentData = stu; // ตั้งค่าตัวแปร global
-                showStudentModal(stu); // เปิด Modal
-            } else {
-                Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลนักเรียนคนนี้', 'error');
-            }
-        });
+        selectedStudent = students.find(s => String(s.Stu_id).trim() === id);
+        selectedStudentData = selectedStudent;
+        showStudentModal(selectedStudent);
     });
 
     // --- Modal แสดงข้อมูลนักเรียนและยืนยันลงทะเบียน RFID ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     function showStudentModal(stu) {
         if (!stu) return;
         $.getJSON('../controllers/StudentRfidController.php?action=getByStudent&stu_id=' + stu.Stu_id, function(r) {
@@ -368,8 +335,6 @@ $(document).ready(function() {
                                         if (res.success) {
                                             Swal.fire('สำเร็จ', 'เชื่อม RFID เรียบร้อย', 'success');
                                             loadRfidTable();
-                                            // [ใหม่] เมื่อลงทะเบียนเสร็จ ให้ค้นหานักเรียนอีกครั้งเพื่ออัปเดตตาราง
-                                            runStudentSearch(); 
                                         } else {
                                             Swal.fire('ผิดพลาด', res.error || 'เกิดข้อผิดพลาด', 'error');
                                         }
@@ -384,12 +349,12 @@ $(document).ready(function() {
     }
 
     // --- ช่อง RFID input ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#btnClearRfid').click(function() {
         $('#rfid_input').val('').focus();
         $('#rfid_status').text('');
         selectedRfid = '';
     });
+
     $('#rfid_input').on('keydown', function(e) {
         if (e.key && /[ก-๙]/.test(e.key)) {
             e.preventDefault();
@@ -398,6 +363,7 @@ $(document).ready(function() {
             this.focus();
         }
     });
+
     $('#rfid_input').on('input', function() {
         let val = $(this).val();
         let newVal = val.replace(/[ก-๙]/gi, '');
@@ -420,7 +386,6 @@ $(document).ready(function() {
     });
 
     // --- เชื่อม RFID กับนักเรียน ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#btnLinkRfid').click(function() {
         if (!selectedStudent) {
             Swal.fire('กรุณาเลือกนักเรียน', '', 'warning');
@@ -451,7 +416,6 @@ $(document).ready(function() {
                         $('#rfid_status').text('');
                         showStudentDetail(selectedStudent);
                         loadRfidTable();
-                        runStudentSearch(); // [ใหม่] อัปเดตตารางนักเรียน
                     } else {
                         Swal.fire('ผิดพลาด', res.error || 'เกิดข้อผิดพลาด', 'error');
                     }
@@ -461,11 +425,11 @@ $(document).ready(function() {
     });
 
     // --- ตาราง RFID ที่ลงทะเบียนแล้ว ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     function loadRfidTable() {
         $.getJSON('../controllers/StudentRfidController.php?action=list', function(data) {
             window.rfidList = data || []; // เก็บไว้ใช้เช็คใน fillStudentTable
             const $tbody = $('#rfidTable tbody');
+            // Destroy DataTable ก่อน (ถ้ามี)
             if ($.fn.DataTable.isDataTable('#rfidTable')) {
                 $('#rfidTable').DataTable().destroy();
             }
@@ -500,6 +464,7 @@ $(document).ready(function() {
                     </td>
                 </tr>`);
             });
+            // สร้าง DataTable ใหม่
             $('#rfidTable').DataTable({
                 destroy: true,
                 searching: true,
@@ -516,12 +481,11 @@ $(document).ready(function() {
                 }
             });
             // อัปเดตตารางนักเรียนให้ปุ่ม "เลือก" เปลี่ยนเป็น "ถูกเลือกไปแล้ว"
-            runStudentSearch(); // [แก้ไข] ให้ค้นหาใหม่
+            filterStudents();
         });
     }
 
     // --- ลบ RFID ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#rfidTable').on('click', '.deleteRfid', function() {
         const id = $(this).data('id');
         Swal.fire({
@@ -545,7 +509,6 @@ $(document).ready(function() {
     });
 
     // --- แก้ไข RFID ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#rfidTable').on('click', '.editRfid', function() {
         const id = $(this).data('id');
         const oldRfid = $(this).data('rfid');
@@ -577,13 +540,13 @@ $(document).ready(function() {
     });
 
     // --- ปุ่มพิมพ์บัตร ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#rfidTable').on('click', '.printCard', function() {
         const stu_id = $(this).data('stu_id');
         const stu_name = $(this).data('stu_name');
         const stu_major = $(this).data('stu_major');
         const stu_room = $(this).data('stu_room');
         const rfid = $(this).data('rfid');
+        // ตัวอย่าง: เปิดหน้าพิมพ์บัตรใหม่ (คุณต้องสร้าง print_card.php เอง)
         window.open(
             'print_card.php?stu_id=' + encodeURIComponent(stu_id) +
             '&stu_name=' + encodeURIComponent(stu_name) +
@@ -595,12 +558,8 @@ $(document).ready(function() {
     });
 
     // --- ปุ่มพิมพ์บัตรทั้งห้อง ---
-    // (โค้ดส่วนนี้เหมือนเดิม ไม่ต้องแก้ไข)
     $('#btnPrintRoomCards').click(function() {
-        // [แก้ไข] เราต้องใช้ตัวเลือกจากฟังก์ชัน loadFilterOptions
-        const majors = $('#filter_major option').map(function() { if (this.value) return this.value; }).get();
-        const rooms = $('#filter_room option').map(function() { if (this.value) return this.value; }).get();
-
+        // เลือกห้องที่ต้องการพิมพ์
         Swal.fire({
             title: 'เลือกห้องที่ต้องการพิมพ์บัตร',
             html: `
@@ -643,7 +602,7 @@ $(document).ready(function() {
     setTimeout(() => { $('#rfid_input').focus(); }, 500);
 
     // --- โหลดข้อมูลเมื่อเริ่มต้น ---
-    loadFilterOptions(); // [แก้ไข] โหลดแค่ตัวเลือก Dropdown
+    loadStudents();
     loadRfidTable();
 });
 </script>
