@@ -54,9 +54,7 @@ require_once('header.php');
         <section class="content">
         <div class="container mx-auto py-8 flex flex-col gap-6 max-w-8xl">
             <div class="flex flex-col md:flex-row gap-6">
-                <!-- ซ้าย: สแกน/อ่าน RFID + รายการ RFID -->
                 <div class="flex-1 flex flex-col gap-6">
-                    <!-- 1. ช่องสำหรับสแกน/อ่านหมายเลข RFID -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
                         <div class="mb-2 font-semibold text-blue-700">สแกน/อ่านหมายเลข RFID</div>
                         <div class="flex gap-2 items-center">
@@ -65,7 +63,6 @@ require_once('header.php');
                         </div>
                         <div id="rfid_status" class="mt-2 text-sm text-gray-500"></div>
                     </div>
-                    <!-- 5. รายการ RFID ที่ลงทะเบียนแล้ว -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
                         <div class="mb-2 font-semibold text-blue-700 flex items-center gap-4">
                             รายการ RFID ที่ลงทะเบียนแล้ว
@@ -88,15 +85,12 @@ require_once('header.php');
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- JS fill -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-                <!-- ขวา: ค้นหานักเรียน -->
                 <div class="flex-1 flex flex-col gap-6">
-                    <!-- 2. ช่องค้นหานักเรียน -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100">
                         <div class="mb-2 font-semibold text-blue-700">ค้นหานักเรียน</div>
                         <div class="flex gap-2 mb-2">
@@ -119,12 +113,10 @@ require_once('header.php');
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- JS fill -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
-                    <!-- 3. ข้อมูลนักเรียนที่เลือก -->
                     <div class="bg-white rounded-xl shadow p-6 border border-blue-100" id="student_detail_box" style="display:none;">
                         <div class="mb-2 font-semibold text-blue-700">ข้อมูลนักเรียนที่เลือก</div>
                         <div class="flex gap-4 items-center">
@@ -137,7 +129,6 @@ require_once('header.php');
                             </div>
                         </div>
                     </div>
-                    <!-- 4. ปุ่มเชื่อม RFID กับนักเรียน -->
                     <div class="flex gap-4" id="rfid_action_box" style="display:none;">
                         <button id="btnLinkRfid" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded font-semibold">เชื่อม RFID กับนักเรียน</button>
                     </div>
