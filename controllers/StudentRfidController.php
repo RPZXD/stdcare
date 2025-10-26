@@ -43,9 +43,33 @@ switch ($action) {
             break;
         case 'getByRfid':
             requireOfficer();
-            $rfid_code = $_GET['rfid_code'] ?? $_POST['rfid_code'] ?? '';
-            $row = $rfidModel->getByRfid($rfid_code);
-            echo json_encode($row);
+            // --- CHANGED: ใช้อันไหนก็ได้ ระหว่าง POST (จากฟอร์ม) หรือ GET (จากที่คุณทดสอบ) ---
+            $rfid_code = $_POST['rfid_code'] ?? $_GET['rfid_code'] ?? ''; 
+            
+            if (empty($rfid_code)) {
+                echo json_encode(['error' => 'กรุณาส่งรหัส RFID']);
+                break;
+            }
+
+            // 1. หาข้อมูล RFID
+            $rfidData = $rfidModel->getByRfid($rfid_code); 
+            
+            if ($rfidData) {
+                // 2. ถ้าเจอ RFID ให้ไปหาข้อมูลนักเรียนต่อ
+                $studentData = $studentModel->getById($rfidData['stu_id']);
+                
+                if ($studentData) {
+                    // 3. ถ้าเจอนักเรียน ให้ส่งข้อมูลนักเรียนกลับไป (ใน key 'student')
+                    echo json_encode(['student' => $studentData]);
+                } else {
+                    // 4. ถ้าเจอ RFID แต่ไม่เจอนักเรียน (ข้อมูลกำพร้า)
+                    echo json_encode(['error' => 'พบ RFID แต่ไม่พบข้อมูลนักเรียน (รหัส: ' . $rfidData['stu_id'] . ')']);
+                }
+            } else {
+                // 5. ถ้าไม่เจอ RFID เลย (นี่คือเคส "ยังไม่ลงทะเบียน")
+                // ส่ง object ว่างเปล่ากลับไป เพื่อให้ JS เข้าเงื่อนไข else
+                echo json_encode(new \stdClass()); 
+            }
             break;
         case 'getByStudent':
             requireOfficer();
