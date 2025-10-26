@@ -215,5 +215,68 @@ class Student
         $stmt = $this->db->query($sql, $params);
         return $stmt->fetchAll();
     }
+    // --- ADDED: เมธอดสำหรับดึงนักเรียนตามห้องเพื่อทำ CSV Export ---
+    /**
+     * ดึงนักเรียนตามระดับชั้นและห้อง (สำหรับ CSV)
+     * @param string $major
+     * @param string $room
+     * @return array
+     */
+    public function getStudentsForCsvExport($major, $room)
+    {
+        $sql = "SELECT 
+                    s.Stu_id, 
+                    s.Stu_no, 
+                    s.Stu_pre, 
+                    s.Stu_name, 
+                    s.Stu_sur, 
+                    s.Stu_major, 
+                    s.Stu_room, 
+                    r.rfid_code 
+                FROM student s
+                LEFT JOIN student_rfid r ON s.Stu_id = r.stu_id
+                WHERE s.Stu_major = :major 
+                  AND s.Stu_room = :room 
+                  AND s.Stu_status = '1'
+                ORDER BY s.Stu_no";
+        
+        $stmt = $this->db->query($sql, ['major' => $major, 'room' => $room]);
+        return $stmt->fetchAll();
+    }
+
+    // --- ADDED: เมธอดสำหรับ Batch Update/Insert RFID ---
+    /**
+     * ลงทะเบียน RFID จาก CSV (แบบ Batch)
+     * @param array $rfid_data [['stu_id' => '...', 'rfid_code' => '...'], ...]
+     * @return array รายงานผล
+     */
+    public function batchRegisterRfid($rfid_data)
+    {
+        $report = ['success' => 0, 'failed' => 0, 'skipped' => 0, 'errors' => []];
+        $rfidModel = new \App\Models\StudentRfid(); // เรียกใช้ StudentRfid Model
+
+        foreach ($rfid_data as $data) {
+            $stu_id = trim($data['stu_id']);
+            $rfid_code = trim($data['rfid_code']);
+
+            // ถ้าไม่มี rfid_code หรือ stu_id ให้ข้าม
+            if (empty($stu_id) || empty($rfid_code)) {
+                $report['skipped']++;
+                continue;
+            }
+
+            // ใช้เมธอด register ที่มีอยู่ (ซึ่งมีการตรวจสอบซ้ำซ้อนในตัว)
+            $result = $rfidModel->register($stu_id, $rfid_code);
+
+            if ($result['success']) {
+                $report['success']++;
+            } else {
+                // ถ้าลงทะเบียนไม่สำเร็จ (เช่น ซ้ำซ้อน)
+                $report['failed']++;
+                $report['errors'][] = "Stu_id: $stu_id, RFID: $rfid_code - Error: " . $result['error'];
+            }
+        }
+        return $report;
+    }
     
 }

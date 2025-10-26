@@ -75,13 +75,20 @@ require_once('header.php');
                         <div class="md:col-span-2">
                             <div class="bg-white shadow-lg rounded-lg p-6">
                                 <h3 class="text-xl font-semibold mb-4 text-gray-800">เลือกนักเรียน</h3>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                                    <select id="filter_major" class="form-control">
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                    <select id="filter_major" class="form-control col-span-1">
                                         <option value="">ทุกระดับชั้น</option>
                                     </select>
-                                    <select id="filter_room" class="form-control">
+                                    <select id="filter_room" class="form-control col-span-1">
                                         <option value="">ทุกห้อง</option>
                                     </select>
+                                    
+                                    <div class="col-span-1 text-right">
+                                        <button id="csvToolsBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">
+                                            <i class="fas fa-file-csv"></i> นำเข้า/ส่งออก
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table id="studentTable" class="table table-bordered table-striped" style="width:100%">
@@ -126,6 +133,54 @@ require_once('header.php');
                     </div>
                 </div>
             </section>
+        </div>
+
+        <div id="csvModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-lg font-semibold">นำเข้า / ส่งออก CSV</h3>
+                        <button id="closeCsvModal" class="text-gray-400 hover:text-gray-600">&times;</button>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="font-semibold text-gray-700">1. ดาวน์โหลดเทมเพลต (Export)</h4>
+                        <p class="text-sm text-gray-600 mb-2">เลือกห้องที่ต้องการดาวน์โหลดรายชื่อ เพื่อนำไปกรอก RFID Code</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select id="csv_major" class="form-control">
+                                <option value="">เลือกระดับชั้น</option>
+                            </select>
+                            <select id="csv_room" class="form-control">
+                                <option value="">เลือกห้อง</option>
+                            </select>
+                        </div>
+                        <button id="downloadCsvBtn" class="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            <i class="fas fa-download"></i> ดาวน์โหลด CSV
+                        </button>
+                    </div>
+
+                    <hr class="my-6">
+
+                    <div class="">
+                        <h4 class="font-semibold text-gray-700">2. อัปโหลดไฟล์ (Import)</h4>
+                        <p class="text-sm text-gray-600 mb-2">อัปโหลดไฟล์ .csv ที่กรอก `rfid_code` เรียบร้อยแล้ว (ระบบจะลงทะเบียนเฉพาะแถวที่มี `stu_id` และ `rfid_code` เท่านั้น)</p>
+                        <form id="csvImportForm" enctype="multipart/form-data">
+                            <input type="file" id="csv_file_input" name="csv_file" class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-indigo-50 file:text-indigo-700
+                                hover:file:bg-indigo-100" accept=".csv" required>
+                            
+                            <button type="submit" id="uploadCsvBtn" class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                                <i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน
+                            </button>
+                        </form>
+                        <div id="csvImportResult" class="mt-2 text-sm"></div>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
         <div id="studentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
@@ -533,6 +588,95 @@ require_once('header.php');
                 }
             });
         });
+        // --- 8. CSV Tools Modal ---
+
+    // --- เปิด Modal ---
+    $('#csvToolsBtn').on('click', function() {
+        // คัดลอก options จาก dropdown หลักมาใส่ใน modal
+        $('#csv_major').html($('#filter_major').html());
+        $('#csv_room').html($('#filter_room').html());
+        $('#csvImportResult').html('');
+        $('#csv_file_input').val('');
+        $('#csvModal').fadeIn().css('display', 'flex');
+    });
+
+    // --- ปิด Modal ---
+    function closeCsvModal() {
+        $('#csvModal').fadeOut();
+    }
+    $('#closeCsvModal').on('click', closeCsvModal);
+
+    // --- 8.1. จัดการการดาวน์โหลด (Export) ---
+    $('#downloadCsvBtn').on('click', function() {
+        const major = $('#csv_major').val();
+        const room = $('#csv_room').val();
+
+        if (!major || !room) {
+            Swal.fire('ผิดพลาด!', 'กรุณาเลือกระดับชั้นและห้อง', 'error');
+            return;
+        }
+
+        // สร้าง URL สำหรับดาวน์โหลด
+        const url = `../controllers/StudentController.php?action=export_csv&major=${encodeURIComponent(major)}&room=${encodeURIComponent(room)}`;
+        
+        // สั่งดาวน์โหลด (ไม่ต้องใช้ ajax)
+        window.location.href = url;
+    });
+
+
+    // --- 8.2. จัดการการอัปโหลด (Import) ---
+    $('#csvImportForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const fileInput = $('#csv_file_input')[0];
+        if (!fileInput.files || fileInput.files.length === 0) {
+            Swal.fire('ผิดพลาด!', 'กรุณาเลือกไฟล์ CSV', 'error');
+            return;
+        }
+
+        const formData = new FormData(this);
+        const $resultDiv = $('#csvImportResult');
+        const $uploadBtn = $('#uploadCsvBtn');
+        
+        $uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล...');
+        $resultDiv.html('<p class="text-blue-600">กำลังอัปโหลดและลงทะเบียน...</p>');
+
+        $.ajax({
+            url: '../controllers/StudentController.php?action=import_csv',
+            type: 'POST',
+            data: formData,
+            processData: false, // สำคัญมาก
+            contentType: false, // สำคัญมาก
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === 'completed') {
+                    const r = res.report;
+                    const errorDetails = r.errors.length > 0 ? `<br><small class='text-red-500'>รายละเอียด: ${r.errors.join(', ')}</small>` : '';
+                    
+                    $resultDiv.html(
+                        `<p class="text-green-600 font-semibold">นำเข้าสำเร็จ!</p>` +
+                        `<ul>` +
+                        `<li>สำเร็จ: ${r.success} รายการ</li>` +
+                        `<li>ล้มเหลว (ซ้ำซ้อน/ผิดพลาด): ${r.failed} รายการ ${errorDetails}</li>` +
+                        `<li>ข้าม (ข้อมูลไม่ครบ): ${r.skipped} รายการ</li>` +
+                        `</ul>`
+                    );
+                    
+                    // รีเฟรชตารางทั้งสอง
+                    refreshTables(); 
+                } else {
+                    $resultDiv.html(`<p class="text-yellow-600">${res.message || 'ไฟล์ว่างเปล่า'}</p>`);
+                }
+                $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน');
+                $('#csv_file_input').val(''); // ล้างไฟล์ที่เลือก
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                let errorMsg = jqXHR.responseJSON ? jqXHR.responseJSON.error : 'การเชื่อมต่อล้มเหลว';
+                $resultDiv.html(`<p class="text-red-500"><strong>เกิดข้อผิดพลาด:</strong> ${errorMsg}</p>`);
+                $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน');
+            }
+        });
+    });
 
         // --- 7. โหลดข้อมูลเมื่อเริ่มต้น ---
         loadDropdownFilters(); // <-- เริ่มจากโหลดฟิลเตอร์
