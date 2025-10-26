@@ -38,17 +38,17 @@ $currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
 $classes = range(1,6);
 $rooms = range(1,12);
 
-require_once('../teacher/header.php');
+require_once('header.php');
 
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-<link rel="stylesheet" href="../teacher/assets/css/student-management.css">
+<link rel="stylesheet" href="assets/css/student-management.css">
 
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
-    <?php require_once('../teacher/wrapper.php');?>
+    <?php require_once('wrapper.php');?>
 
   <div class="content-wrapper">
 
@@ -124,7 +124,7 @@ require_once('../teacher/header.php');
 </div>
 
 <!-- Modals (reuse teacher modals) -->
-<?php require_once('../teacher/script.php'); ?>
+<?php require_once('script.php'); ?>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script>
