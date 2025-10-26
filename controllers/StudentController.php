@@ -190,9 +190,20 @@ switch ($action) {
                 $rfid_data = [];
                 
                 // --- อ่าน Header ---
-                $header = fgetcsv($handle);
+                $header = fgetcsv($handle); 
+                
+                // --- ADDED: แก้ปัญหา BOM (ที่ทำให้ Excel อ่านไทยได้) ---
+               if (isset($header[0])) {
+                    // ใช้ strpos และ substr แทน preg_replace
+                    // เพื่อตรวจจับและลบ UTF-8 BOM (\xEF\xBB\xBF) ที่เราเพิ่มตอน export
+                    if (strpos($header[0], "\xEF\xBB\xBF") === 0) {
+                        $header[0] = substr($header[0], 3);
+                    }
+                }
+                // --- END: แก้ปัญหา BOM ---
+
                 // ตรวจสอบ Header ที่จำเป็น (stu_id, rfid_code)
-                if ($header === false || !in_array('stu_id', $header) || !in_array('rfid_code', $header)) {
+                if ($header === false || !in_array('stu_id', $header) || !in_array('rfid_code', $header)) { // <-- ไม่พังแล้ว
                     fclose($handle);
                     http_response_code(400);
                     echo json_encode(['error' => 'ไฟล์ CSV ต้องมีคอลัมน์ stu_id และ rfid_code']);

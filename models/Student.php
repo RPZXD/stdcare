@@ -2,6 +2,7 @@
 namespace App\Models;
 
 require_once __DIR__ . '/../classes/DatabaseUsers.php';
+require_once __DIR__ . '/StudentRfid.php'; // <--- เพิ่มบรรทัดนี้
 
 class Student
 {
