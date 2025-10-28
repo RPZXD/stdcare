@@ -5,7 +5,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 include_once("class/Utils.php");
-include_once("class/Logger.php"); // Include Logger class
+// include_once("class/Logger.php"); // ปิดตัวเก่า
+require_once(__DIR__ . "/controllers/DatabaseLogger.php"); // เรียกใช้ Controller ใหม่
+require_once(__DIR__ . "/classes/DatabaseUsers.php"); // เรียกใช้ Database Class ใหม่
+use App\DatabaseUsers; // อย่าลืม use namespace
+
 $bs = new Bootstrap();
 
 function redirectUser() {
@@ -53,19 +57,23 @@ redirectUser(); // Ensure this is called before any HTML output
 
             <div class="row flex items-center justify-center min-h-[70vh] bg-transparent">
 
-              <?php 
+        <?php 
 
-                include_once("config/Database.php");
+                // include_once("config/Database.php"); // ปิดตัวเก่า
                 include_once("class/UserLogin.php");
 
-                $studentDb = new Database("phichaia_student");
-                $studentConn = $studentDb->getConnection();
+                // $studentDb = new Database("phichaia_student"); // ปิดตัวเก่า
+                $studentDb = new DatabaseUsers(); // สร้างจากคลาสใหม่
+                
+                // $studentConn = $studentDb->getConnection(); // ปิดตัวเก่า
+                $studentConn = $studentDb->getPDO(); // ใช้เมธอดใหม่ getPDO()
 
                 $user = new UserLogin($studentConn);
                 $bs = new Bootstrap();
 
                 if (isset($_POST['signin'])) {
-                    $logger = new Logger("logs/login.json"); // Initialize logger
+                    // $logger = new Logger("logs/login.json"); // ปิดตัวเก่า
+                    $logger = new DatabaseLogger($studentConn); // สร้าง Logger ใหม่โดยส่ง PDO connection เข้าไป
                     $username = filter_input(INPUT_POST, 'txt_username_email', FILTER_SANITIZE_STRING);
                     $password = filter_input(INPUT_POST, 'txt_password', FILTER_SANITIZE_STRING);
 

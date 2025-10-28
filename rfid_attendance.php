@@ -90,6 +90,8 @@ require_once('header.php');
 
 <script>
 $(document).ready(function() {
+
+    $('body').addClass('sidebar-collapse');
     function showToast(message, type = 'success') {
         const $toast = $('#toast-notification'); // Correct ID
         $toast.text(message);

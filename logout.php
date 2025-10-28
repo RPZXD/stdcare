@@ -1,8 +1,13 @@
 <?php 
 
-    include_once("config/Database.php");
+    // include_once("config/Database.php"); // ปิดตัวเก่า
     include_once("class/UserLogin.php");
-    include_once("class/Logger.php"); // Include Logger class
+    // include_once("class/Logger.php"); // ปิดตัวเก่า
+    
+    require_once(__DIR__ . "/controllers/DatabaseLogger.php"); // เรียกใช้ Controller ใหม่
+    require_once(__DIR__ . "/classes/DatabaseUsers.php"); // เรียกใช้ Database Class ใหม่
+    use App\DatabaseUsers; // อย่าลืม use namespace
+
     require_once("header.php");
     require_once("script.php");
 
@@ -11,11 +16,16 @@
         session_start();
     }
 
-    $studentDb = new Database("phichaia_student");
-    $studentConn = $studentDb->getConnection();
+    // $studentDb = new Database("phichaia_student"); // ปิดตัวเก่า
+    $studentDb = new DatabaseUsers(); // สร้างจากคลาสใหม่
+    
+    // $studentConn = $studentDb->getConnection(); // ปิดตัวเก่า
+    $studentConn = $studentDb->getPDO(); // ใช้เมธอดใหม่ getPDO()
 
     $user = new UserLogin($studentConn);
-    $logger = new Logger("logs/logout.json"); // Initialize logger
+    
+    // $logger = new Logger("logs/logout.json"); // ปิดตัวเก่า
+    $logger = new DatabaseLogger($studentConn); // สร้าง Logger ใหม่โดยส่ง PDO connection
 
     // Get role if available (เหมือน login)
     $role = null;
