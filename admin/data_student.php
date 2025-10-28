@@ -342,15 +342,18 @@ require_once('header.php');
 
         // เพิ่มเติม: โหลดค่า filter class/room
         function populateFilterSelects() {
-            fetch('api/api_student.php?action=filters')
+            fetch('../controllers/StudentController.php?action=get_filters')
                 .then(res => res.json())
                 .then(data => {
                     // เติม class
                     const classSel = document.getElementById('filterClass');
                     classSel.innerHTML = '<option value="">-- เลือกชั้น --</option>';
-                    data.classes.forEach(cls => {
+                    
+                    // !! KEV: แก้ไขบรรทัดนี้ !!
+                    data.majors.forEach(cls => { // <--- แก้จาก .classes เป็น .majors
                         if (cls) classSel.innerHTML += `<option value="${cls}">${cls}</option>`;
                     });
+
                     // เติม room
                     const roomSel = document.getElementById('filterRoom');
                     roomSel.innerHTML = '<option value="">-- เลือกห้อง --</option>';
@@ -364,7 +367,7 @@ require_once('header.php');
             const classVal = document.getElementById('filterClass').value;
             const roomVal = document.getElementById('filterRoom').value;
             const statusVal = document.getElementById('filterStatus').value;
-            let url = 'api/api_student.php?action=list';
+            let url = '../controllers/StudentController.php?action=list';
             if (classVal) url += '&class=' + encodeURIComponent(classVal);
             if (roomVal) url += '&room=' + encodeURIComponent(roomVal);
             if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
