@@ -17,6 +17,7 @@ class DatabaseLogger {
      * @param array $logData ข้อมูล log (โครงสร้างเดียวกับที่คุณใช้อยู่)
      */
     public function log($logData) {
+        date_default_timezone_set('Asia/Bangkok');
         // ตรวจสอบและตั้งค่า default เพื่อป้องกัน key ไม่ครบ
         $dataToLog = [
             'user_id' => $logData['user_id'] ?? null,
