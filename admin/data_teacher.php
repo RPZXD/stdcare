@@ -167,7 +167,6 @@ require_once('header.php');
                             </div>
                             <div class="form-group">
                                 <label>กลุ่มสาระ</label>
-                                <input type="text" class="form-control" name="editTeach_major">
                                 <select class="form-control text-center" name="editTeach_major" id="editTeach_major">
                                     <option value="">-- โปรดเลือกกลุ่มสาระ --</option>
                                     <option value="ผู้อำนวยการ">ผู้อำนวยการ</option>
