@@ -37,13 +37,13 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">จัดการข้อมูลนักเรียน</h5>
+                        <!-- <h5 class="m-0">จัดการข้อมูลนักเรียน</h5> -->
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="card container mx-auto px-4 py-6 ">
+            <div class="card card-primary card-outline px-4 py-4">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold">จัดการข้อมูลนักเรียน</h2>
                     <div>

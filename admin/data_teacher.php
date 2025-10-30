@@ -172,7 +172,7 @@ require_once('header.php');
                                     <option value="ผู้อำนวยการ">ผู้อำนวยการ</option>
                                     <option value="รองผู้อำนวยการ">รองผู้อำนวยการ</option>
                                     <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
-                                    <option value="ภาษาไทย">ภาษาไทย</option>
+                                    <option value="ภาษาไทย">ภาษาไทย</option>    
                                     <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
                                     <option value="คณิตศาสตร์">คณิตศาสตร์</option>
                                     <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
