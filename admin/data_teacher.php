@@ -1,19 +1,17 @@
 <?php
-include_once("../config/Database.php");
-include_once("../class/UserLogin.php");
-include_once("../class/Student.php");
+
+require_once(__DIR__ . "/../classes/DatabaseUsers.php");
+use App\DatabaseUsers;
+include_once("../class/UserLogin.php"); // (ยังใช้ UserLogin ตัวเก่า)
 include_once("../class/Utils.php");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Initialize database connection
-$connectDB = new Database("phichaia_student");
-$db = $connectDB->getConnection();
-
-// Initialize UserLogin class
+$connectDB = new DatabaseUsers();
+$db = $connectDB->getPDO();
 $user = new UserLogin($db);
-$student = new Student($db);
+// (สิ้นสุดการแก้ไข PHP)
+
 
 // Fetch terms and pee
 $term = $user->getTerm();
@@ -44,522 +42,358 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">จัดการข้อมูลครู</h1>
+                        <h5 class="m-0">จัดการข้อมูลครู</h5>
                     </div>
                 </div>
             </div>
         </div>
-        <section class="content">
-            <div class="card container mx-auto px-4 py-6 ">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">จัดการข้อมูลครู</h2>
-                    <button id="btnAddTeacher" class="btn btn-primary">+ เพิ่มครู</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table id="teacherTable" class="min-w-full divide-y divide-gray-200 table-auto " style="width:100%">
-                        <thead class="bg-indigo-500">
-                            <tr>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">รหัสครู</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ชื่อครู</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">กลุ่ม</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ชั้น</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ห้อง</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">Role</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">สถานะ</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teacherTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Data will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
-        </section>
-        <!-- Modal for adding/editing teacher -->
-<div class="modal fade" id="addTeacherModal" tabindex="-1" role="dialog" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addTeacherModalLabel">เพิ่มข้อมูลครู</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addTeacherModal"><i class="fas fa-user-plus"></i> เพิ่มข้อมูลครู</button>
+                        <table id="teacherTable" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>รหัสครู</th>
+                                    <th>ชื่อ-สกุล</th>
+                                    <th>กลุ่มสาระ</th>
+                                    <th>สถานะ</th>
+                                    <th>บทบาท</th>
+                                    <th>จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="addTeacherForm">
-                        <div class="form-group">
-                            <label for="addTeach_id">รหัสครู : </label>
-                            <input type="text" class="form-control text-center" id="addTeach_id" name="addTeach_id" maxlength="5" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addTeach_name">ชื่อ - นามสกุล : <span class="text-danger">ใส่คำนำหน้าด้วย</span></label>
-                            <input type="text" class="form-control text-center" id="addTeach_name" name="addTeach_name" maxlength="200" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addTeach_major">กลุ่มสาระ : </label>
-                            <select class="form-control text-center" name="addTeach_major" id="addTeach_major">
-                                <option value="">-- โปรดเลือกกลุ่มสาระ --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="addTeach_class">ครูที่ปรึกษาระดับชั้น : </label>
-                            <select class="form-control text-center" name="addTeach_class" id="addTeach_class">
-                                <option value="">-- โปรดเลือกระดับชั้น --</option>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="addTeach_room">ห้อง : </label>
-                            <select class="form-control text-center" name="addTeach_room" id="addTeach_room">
-                                <option value="">-- โปรดเลือกห้อง --</option>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="addTeach_status">สถานะ : </label>
-                            <select class="form-control text-center" name="addTeach_status" id="addTeach_status">
-                                <option value="">-- โปรดเลือกสถานะ --</option>
-                                <option value="1">ปกติ</option>
-                                <option value="2">ย้าย รร.</option>
-                                <option value="3">เกษียณอายุราชการ</option>
-                                <option value="4">ลาออก</option>
-                                <option value="9">เสียชีวิต</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="addrole_std">บทบาทในโปรแกรมรายงานการสอน : </label>
+        </section>
+
+        <div class="modal fade" id="addTeacherModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">เพิ่มข้อมูลครู</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="addTeacherForm">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>รหัสครู</label>
+                                <input type="text" class="form-control" name="addTeach_id" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ชื่อ-สกุล</label>
+                                <input type="text" class="form-control" name="addTeach_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>กลุ่มสาระ</label>
+                                <select class="form-control text-center" name="addTeach_major" id="addTeach_major">
+                                    <option value="">-- โปรดเลือกกลุ่มสาระ --</option>
+                                    <option value="ผู้อำนวยการ">ผู้อำนวยการ</option>
+                                    <option value="รองผู้อำนวยการ">รองผู้อำนวยการ</option>
+                                    <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
+                                    <option value="ภาษาไทย">ภาษาไทย</option>
+                                    <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
+                                    <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                                    <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+                                    <option value="การงานอาชีพ">การงานอาชีพ</option>
+                                    <option value="ศิลปะ">ศิลปะ</option>
+                                    <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+                                    <option value="สังคมศึกษา ศาสนา และวัฒนธรรม">สังคมศึกษา ศาสนา และวัฒนธรรม</option>
+                                    <option value="กิจกรรมพัฒนาผู้เรียน">กิจกรรมพัฒนาผู้เรียน</option>
+                                    <option value="เจ้าหน้าที่ธุรการ">เจ้าหน้าที่ธุรการ</option>
+                                    <option value="เจ้าหน้าที่งานการเงิน">เจ้าหน้าที่งานการเงิน</option>
+                                    <option value="เจ้าหน้าที่ห้องพยาบาล">เจ้าหน้าที่ห้องพยาบาล</option>
+                                    <option value="เจ้าหน้าที่โสตทัศนศึกษา">เจ้าหน้าที่โสตทัศนศึกษา</option>
+                                    <option value="เจ้าหน้าที่บริหารงานทั่วไป">เจ้าหน้าที่บริหารงานทั่วไป</option>
+                                    <option value="นักการภารโรง">นักการภารโรง</option>
+                                    <option value="แม่บ้าน">แม่บ้าน</option>
+                                    <option value="พนักงานขับรถ">พนักงานขับรถ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>สถานะ</label>
+                                <select class="form-control text-center" name="addTeach_status">
+                                    <option value="1">ปกติ</option>
+                                    <option value="0">ไม่ใช้งาน</option>
+                                </select>
+                            </div>
+                             <div class="form-group">
+                                <label>บทบาท</label>
                             <select class="form-control text-center" name="addrole_std" id="addrole_std">
                                 <option value="">-- โปรดเลือกบทบาท --</option>
                                 <option value="T">ครู</option>
-                                <option value="HOD">หัวหน้าแผนก/กลุ่มสาระ</option>
+                                <option value="OF">เจ้าหน้าที่</option>
                                 <option value="VP">รองผู้อำนวยการ</option>
                                 <option value="DIR">ผู้อำนวยการ</option>
                                 <option value="ADM">Admin</option>
                             </select>
+                            </div>
                         </div>
-                        </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                <button type="button" id="submitAddForm" class="btn btn-primary">บันทึก</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal fade" id="editTeacherModal" tabindex="-1" role="dialog" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editTeacherModalLabel">แก้ไขข้อมูลครู</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editTeacherForm">
-                    <div class="form-group">
-                        <input type="hidden" id="editTeach_id_old" name="editTeach_id_old" required>
-                        <label for="editTeach_id">username : </label>
-                        <input type="text" class="form-control text-center" id="editTeach_id" name="editTeach_id" maxlength="5" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTeach_name">ชื่อ - นามสกุล : <span class="text-danger">ใส่คำนำหน้าด้วย</span></label>
-                        <input type="text" class="form-control text-center" id="editTeach_name" name="editTeach_name" maxlength="200" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTeach_major">กลุ่มสาระ : </label>
-                        <select class="form-control text-center" name="editTeach_major" id="editTeach_major">
-                            <option value="">-- โปรดเลือกกลุ่มสาระ --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTeach_class">ครูที่ปรึกษาระดับชั้น : </label>
-                        <select class="form-control text-center" name="editTeach_class" id="editTeach_class">
-                            <option value="">-- โปรดเลือกระดับชั้น --</option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTeach_room">ห้อง : </label>
-                        <select class="form-control text-center" name="editTeach_room" id="editTeach_room">
-                            <option value="">-- โปรดเลือกห้อง --</option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTeach_status">สถานะ : </label>
-                        <select class="form-control text-center" name="editTeach_status" id="editTeach_status">
-                            <option value="">-- โปรดเลือกสถานะ --</option>
-                            <option value="1">ปกติ</option>
-                            <option value="2">ย้าย รร.</option>
-                            <option value="3">เกษียณอายุราชการ</option>
-                            <option value="4">ลาออก</option>
-                            <option value="9">เสียชีวิต</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editrole_std">บทบาทในโปรแกรมรายงานการสอน : </label>
-                        <select class="form-control text-center" name="editrole_std" id="editrole_std">
-                            <option value="">-- โปรดเลือกบทบาท --</option>
-                            <option value="T">ครู</option>
-                            <option value="OF">เจ้าหน้าที่</option>
-                            <option value="VP">รองผู้อำนวยการ</option>
-                            <option value="DIR">ผู้อำนวยการ</option>
-                            <option value="ADM">Admin</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                <button type="button" id="submitEditForm" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <button type="submit" class="btn btn-primary">บันทึก</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
+        
+        <div class="modal fade" id="editTeacherModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">แก้ไขข้อมูลครู</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="editTeacherForm">
+                        <div class="modal-body">
+                            <input type="hidden" name="editTeach_id_old">
+                            <div class="form-group">
+                                <label>รหัสครู</label>
+                                <input type="text" class="form-control" name="editTeach_id" required readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>ชื่อ-สกุล</label>
+                                <input type="text" class="form-control" name="editTeach_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>กลุ่มสาระ</label>
+                                <input type="text" class="form-control" name="editTeach_major">
+                                <select class="form-control text-center" name="editTeach_major" id="editTeach_major">
+                                    <option value="">-- โปรดเลือกกลุ่มสาระ --</option>
+                                    <option value="ผู้อำนวยการ">ผู้อำนวยการ</option>
+                                    <option value="รองผู้อำนวยการ">รองผู้อำนวยการ</option>
+                                    <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
+                                    <option value="ภาษาไทย">ภาษาไทย</option>
+                                    <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
+                                    <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                                    <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+                                    <option value="การงานอาชีพ">การงานอาชีพ</option>
+                                    <option value="ศิลปะ">ศิลปะ</option>
+                                    <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+                                    <option value="สังคมศึกษา ศาสนา และวัฒนธรรม">สังคมศึกษา ศาสนา และวัฒนธรรม</option>
+                                    <option value="กิจกรรมพัฒนาผู้เรียน">กิจกรรมพัฒนาผู้เรียน</option>
+                                    <option value="เจ้าหน้าที่ธุรการ">เจ้าหน้าที่ธุรการ</option>
+                                    <option value="เจ้าหน้าที่งานการเงิน">เจ้าหน้าที่งานการเงิน</option>
+                                    <option value="เจ้าหน้าที่ห้องพยาบาล">เจ้าหน้าที่ห้องพยาบาล</option>
+                                    <option value="เจ้าหน้าที่โสตทัศนศึกษา">เจ้าหน้าที่โสตทัศนศึกษา</option>
+                                    <option value="เจ้าหน้าที่บริหารงานทั่วไป">เจ้าหน้าที่บริหารงานทั่วไป</option>
+                                    <option value="นักการภารโรง">นักการภารโรง</option>
+                                    <option value="แม่บ้าน">แม่บ้าน</option>
+                                    <option value="พนักงานขับรถ">พนักงานขับรถ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>สถานะ</label>
+                                <select class="form-control text-center" name="editTeach_status">
+                                    <option value="1">ปกติ</option>
+                                    <option value="0">ไม่ใช้งาน</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>บทบาท</label>
+                                <select class="form-control text-center" name="editrole_std" id="editrole_std">
+                                    <option value="">-- โปรดเลือกบทบาท --</option>
+                                    <option value="T">ครู</option>
+                                    <option value="OF">เจ้าหน้าที่</option>
+                                    <option value="VP">รองผู้อำนวยการ</option>
+                                    <option value="DIR">ผู้อำนวยการ</option>
+                                    <option value="ADM">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
 <script>
         let teacherTable;
-        // Initial load
-        $(document).ready(function() {
-            // สร้าง DataTable ครั้งเดียว
+        // (URL ใหม่ ชี้ไปที่ Controller)
+        const API_URL = '../controllers/TeacherController.php'; 
+
+        document.addEventListener('DOMContentLoaded', function() {
             teacherTable = $('#teacherTable').DataTable({
-                columnDefs: [
-                    { className: 'text-center', width: '8%', targets: 0 },  // ✅ ถูกต้อง
-                    { className: 'text-left', width: '20%', targets: 1 },
-                    { className: 'text-left', width: '20%', targets: 2 },
-                    { className: 'text-center', targets: 3 },
-                    { className: 'text-center', targets: 4 },
-                    { className: 'text-center', targets: 5 },
-                    { className: 'text-center', targets: 6 },
-                    { className: 'text-center', targets: 7 }
+                "processing": true,
+                "serverSide": false, // (เราจะใช้ Client-side สำหรับ list (ตามโค้ดเดิม))
+                "ajax": {
+                    "url": API_URL + "?action=list", // (เรียก list)
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "data": "Teach_id" },
+                    { "data": "Teach_name" },
+                    { "data": "Teach_major" },
+                    { 
+                        "data": "Teach_status",
+                        "render": function(data) {
+                            return data == '1' ? '<span class="badge badge-success">ปกติ</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>';
+                        }
+                    },
+                    { "data": "role_std",
+                        "render": function(data) {
+                            let roleText = '';
+                            switch(data) {
+                                case 'T': roleText = 'ครู'; break;
+                                case 'OF': roleText = 'เจ้าหน้าที่'; break;
+                                case 'VP': roleText = 'รองผู้อำนวยการ'; break;
+                                case 'DIR': roleText = 'ผู้อำนวยการ'; break;
+                                case 'ADM': roleText = 'Admin'; break;
+                                default: roleText = data; 
+                            }
+                            return roleText;
+                        }
+                    },
+                    { 
+                        "data": "Teach_id",
+                        "render": function(data) {
+                            return `
+                                <button class="btn btn-warning btn-sm editTeacherBtn" data-id="${data}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm deleteTeacherBtn" data-id="${data}"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-secondary btn-sm resetTeacherPwdBtn" data-id="${data}"><i class="fas fa-key"></i></button>
+                            `;
+                        },
+                        "orderable": false
+                    }
                 ],
-                autoWidth: false,
-                order: [[0, 'asc']], // Default sort by first column (รหัสครู)
-                pageLength: 10, // Default number of rows per page
-                lengthMenu: [10, 25, 50, 100], // Options for number of rows per page
-                pagingType: 'full_numbers', // Full pagination controls
-                searching: true, // Enable search box
-                
-            });
-            loadTeachers();
-
-            // ปุ่มเพิ่มครู
-            $('#btnAddTeacher').on('click', function() {
-                $('#addTeacherForm')[0].reset();
-                $('#addTeacherModalLabel').text('เพิ่มข้อมูลครู');
-                $('#addTeacherModal').modal('show');
-            });
-
-            // ปุ่มบันทึกใน modal เพิ่ม
-            $('#submitAddForm').on('click', async function() {
-                const form = document.getElementById('addTeacherForm');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
+                "language": {
+                    "zeroRecords": "ไม่พบข้อมูล",
+                    "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+                    // ... (ภาษาไทยอื่นๆ) ...
                 }
-                const formData = new FormData(form);
-                const res = await fetch('api/api_teacher.php?action=create', {
+            });
+
+            // (ฟังก์ชันโหลดข้อมูลใหม่)
+            window.loadTeachers = function() {
+                teacherTable.ajax.reload(null, false); // โหลดใหม่แบบไม่รีเซ็ตหน้า
+            }
+
+            // (Event: Add Teacher)
+            document.getElementById('addTeacherForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const res = await fetch(API_URL + "?action=create", {
                     method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin'
+                    body: formData
                 });
                 const result = await res.json();
                 if (result.success) {
                     $('#addTeacherModal').modal('hide');
                     loadTeachers();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกข้อมูลสำเร็จ',
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
+                    Swal.fire('สำเร็จ', 'เพิ่มข้อมูลครูเรียบร้อย', 'success');
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: result.message || 'ไม่สามารถบันทึกข้อมูลได้'
-                    });
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถเพิ่มข้อมูลได้', 'error');
                 }
             });
 
-            // ปุ่มบันทึกใน modal แก้ไข
-            $('#submitEditForm').on('click', async function() {
-                const form = document.getElementById('editTeacherForm');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
+            // (Event: Show Edit Modal)
+            $('#teacherTable').on('click', '.editTeacherBtn', async function() {
+                const id = $(this).data('id');
+                const res = await fetch(API_URL + "?action=get&id=" + id);
+                const data = await res.json();
+                
+                if (data && data.Teach_id) {
+                    $('[name="editTeach_id_old"]').val(data.Teach_id);
+                    $('[name="editTeach_id"]').val(data.Teach_id);
+                    $('[name="editTeach_name"]').val(data.Teach_name);
+                    $('[name="editTeach_major"]').val(data.Teach_major);
+                    $('[name="editTeach_status"]').val(data.Teach_status);
+                    $('[name="editrole_std"]').val(data.role_std);
+                    $('#editTeacherModal').modal('show');
                 }
-                const formData = new FormData(form);
-                const res = await fetch('api/api_teacher.php?action=update', {
+            });
+
+            // (Event: Edit Teacher)
+            document.getElementById('editTeacherForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                // (Controller ใหม่รับ Teach_id ใน body ไม่ใช่ใน URL)
+                const res = await fetch(API_URL + "?action=update", {
                     method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin'
+                    body: formData
                 });
                 const result = await res.json();
                 if (result.success) {
                     $('#editTeacherModal').modal('hide');
                     loadTeachers();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกข้อมูลสำเร็จ',
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
+                    Swal.fire('สำเร็จ', 'แก้ไขข้อมูลเรียบร้อย', 'success');
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: result.message || 'ไม่สามารถบันทึกข้อมูลได้'
-                    });
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถแก้ไขข้อมูลได้', 'error');
+                }
+            });
+
+            // (Event: Delete Teacher)
+            $('#teacherTable').on('click', '.deleteTeacherBtn', async function() {
+                const id = $(this).data('id');
+                const result = await Swal.fire({
+                    title: 'ยืนยันการลบข้อมูลครูนี้?',
+                    text: "ข้อมูลจะถูกตั้งค่าเป็น 'ไม่ใช้งาน'",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ใช่, ลบเลย',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+                
+                const res = await fetch(API_URL + "?action=delete", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + encodeURIComponent(id)
+                });
+                const response = await res.json();
+                if (response.success) {
+                    loadTeachers();
+                    Swal.fire('สำเร็จ', 'ลบข้อมูลสำเร็จ', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+                }
+            });
+
+            // (Event: Reset Password)
+             $('#teacherTable').on('click', '.resetTeacherPwdBtn', async function() {
+                const id = $(this).data('id');
+                const result = await Swal.fire({
+                    title: 'รีเซ็ตรหัสผ่าน?',
+                    text: `รหัสผ่านของ ${id} จะถูกตั้งค่าเป็น ${id}`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, รีเซ็ต',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+                
+                const res = await fetch(API_URL + "?action=resetpwd", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + encodeURIComponent(id)
+                });
+                const response = await res.json();
+                if (response.success) {
+                    Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อย', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถรีเซ็ตรหัสผ่านได้', 'error');
                 }
             });
         });
-
-        // เพิ่มฟังก์ชันนี้ก่อน fetch('api/fet_major.php')
-function populateSelectElement(selectId, data) {
-    const select = document.getElementById(selectId);
-    if (!select) return;
-    // ลบ option เดิม ยกเว้นตัวแรก
-    while (select.options.length > 1) {
-        select.remove(1);
-    }
-    data.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.Teach_major || '';
-        option.text = item.Teach_major || '';
-        select.appendChild(option);
-    });
-}
-
-// Fetch majors and populate the selects
-fetch('api/fet_major.php')
-    .then(response => response.json())
-    .then(data => {
-        populateSelectElement('addTeach_major', data);
-        populateSelectElement('editTeach_major', data);
-    })
-    .catch(error => {
-        console.error('Error fetching data:', error);
-});
-
-        // Fetch and render teacher data
-        async function loadTeachers() {
-            const res = await fetch('api/api_teacher.php?action=list');
-            const data = await res.json();
-            teacherTable.clear();
-            data.forEach(teacher => {
-                // Map role_std code to Thai description
-                let roleDisplay = '';
-                switch (teacher.role_std) {
-                    case 'T':
-                        roleDisplay = 'ครู';
-                        break;
-                    case 'DIR':
-                        roleDisplay = 'ผู้อำนวยการ';
-                        break;
-                    case 'VP':
-                        roleDisplay = 'รองผู้อำนวยการ';
-                        break;
-                    case 'OF':
-                        roleDisplay = 'เจ้าหน้าที่';
-                        break;
-                    case 'ADM':
-                        roleDisplay = 'Administrator';
-                        break;
-                    default:
-                        roleDisplay = teacher.role_std || '';
-                }
-                teacherTable.row.add([
-                    teacher.Teach_id,
-                    teacher.Teach_name,
-                    teacher.Teach_major || '',
-                    teacher.Teach_class || '',
-                    teacher.Teach_room || '',
-                    roleDisplay,
-                    teacher.Teach_status == 1 ? 'ใช้งาน' : 'ไม่ใช้งาน',
-                    `<button class="btn btn-warning btn-sm editBtn" data-id="${teacher.Teach_id}">แก้ไข</button>
-                     <button class="btn btn-danger btn-sm deleteBtn" data-id="${teacher.Teach_id}">ลบ</button>
-                     <button class="btn btn-secondary btn-sm resetPwdBtn" data-id="${teacher.Teach_id}">รีเซ็ตรหัสผ่าน</button>`
-                ]);
-            });
-            teacherTable.draw();
-            // Attach event listeners
-            // เปลี่ยนจาก document.querySelectorAll เป็น event delegation
-            // document.querySelectorAll('.editBtn').forEach(btn => {
-            //     btn.onclick = () => openEditModal(btn.dataset.id);
-            // });
-            // document.querySelectorAll('.deleteBtn').forEach(btn => {
-            //     btn.onclick = () => deleteTeacher(btn.dataset.id);
-            // });
-        }
-
-        // ใช้ event delegation สำหรับปุ่ม edit และ delete
-        $(document).on('click', '.editBtn', function() {
-            const id = $(this).data('id');
-            openEditModal(id);
-        });
-        $(document).on('click', '.deleteBtn', function() {
-            const id = $(this).data('id');
-            deleteTeacher(id);
-        });
-        // เพิ่ม event delegation สำหรับปุ่ม reset password
-        $(document).on('click', '.resetPwdBtn', async function() {
-            const id = $(this).data('id');
-            const result = await Swal.fire({
-                title: 'รีเซ็ตรหัสผ่าน?',
-                text: "ต้องการรีเซ็ตรหัสผ่านเป็นรหัสครูหรือไม่?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ใช่, รีเซ็ต',
-                cancelButtonText: 'ยกเลิก'
-            });
-            if (!result.isConfirmed) return;
-            const res = await fetch('api/api_teacher.php?action=resetpwd', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id)
-            });
-            const response = await res.json();
-            if (response.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'รีเซ็ตรหัสผ่านสำเร็จ',
-                    text: 'รหัสผ่านใหม่คือรหัสครู',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: response.message || 'ไม่สามารถรีเซ็ตรหัสผ่านได้'
-                });
-            }
-        });
-
-        // เปิด modal แก้ไข
-        async function openEditModal(id) {
-            const res = await fetch('api/api_teacher.php?action=get&id=' + id);
-            const data = await res.json();
-            // console.log(data); // debug ดูข้อมูลที่ได้
-            // ตรวจสอบข้อมูลก่อนแสดง modal
-            if (data.error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ไม่พบข้อมูล',
-                    text: data.message || 'ไม่สามารถโหลดข้อมูลครูได้ หรือข้อมูลไม่สมบูรณ์'
-                });
-                return;
-            }
-            if (!data || !data.Teach_id) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ไม่พบข้อมูล',
-                    text: 'ไม่สามารถโหลดข้อมูลครูได้ หรือข้อมูลไม่สมบูรณ์'
-                });
-                return;
-            }
-            const form = document.getElementById('editTeacherForm');
-            form.reset();
-            document.getElementById('editTeach_id_old').value = data.Teach_id;
-            document.getElementById('editTeach_id').value = data.Teach_id;
-            document.getElementById('editTeach_name').value = data.Teach_name;
-            document.getElementById('editTeach_major').value = data.Teach_major || '';
-            document.getElementById('editTeach_class').value = data.Teach_class || '';
-            document.getElementById('editTeach_room').value = data.Teach_room || '';
-            document.getElementById('editTeach_status').value = data.Teach_status;
-            document.getElementById('editrole_std').value = data.role_std || '';
-            $('#editTeacherModalLabel').text('แก้ไขข้อมูลครู');
-            $('#editTeacherModal').modal('show');
-        }
-
-        async function deleteTeacher(id) {
-            // เปลี่ยนจาก confirm เป็น SweetAlert2
-            const result = await Swal.fire({
-                title: 'ยืนยันการลบข้อมูลครูนี้?',
-                text: "คุณต้องการลบข้อมูลนี้หรือไม่",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ใช่, ลบเลย',
-                cancelButtonText: 'ยกเลิก'
-            });
-            if (!result.isConfirmed) return;
-            const res = await fetch('api/api_teacher.php?action=delete', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id),
-                credentials: 'same-origin'
-            });
-            const response = await res.json();
-            if (response.success) {
-                loadTeachers();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'ลบข้อมูลสำเร็จ',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: response.message || 'ไม่สามารถลบข้อมูลได้'
-                });
-            }
-        }
 </script>
 
     </div>
     <?php require_once('../footer.php'); ?>
 </div>
 <?php require_once('script.php'); ?>
-        <!-- Bootstrap 5, jQuery, DataTables scripts -->
-
 </body>
 </html>

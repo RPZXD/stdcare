@@ -1,7 +1,7 @@
 <?php
 include_once("../../config/Database.php");
 include_once("../../class/Teacher.php");
-
+date_default_timezone_set('Asia/Bangkok');
 header('Content-Type: application/json; charset=utf-8');
 $allowed_referers = [
     'http://localhost/stdcare/admin/',

@@ -10,7 +10,7 @@ use App\Models\Student; // (Model ใหม่)
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
-
+date_default_timezone_set('Asia/Bangkok');
 // (2) ตรวจสอบ Referer (โค้ดเดิมของคุณ)
 $allowed_referers = [
     'http://localhost/stdcare/admin/',

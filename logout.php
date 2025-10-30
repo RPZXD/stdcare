@@ -1,5 +1,5 @@
 <?php 
-
+date_default_timezone_set('Asia/Bangkok');
     // include_once("config/Database.php"); // ปิดตัวเก่า
     include_once("class/UserLogin.php");
     // include_once("class/Logger.php"); // ปิดตัวเก่า

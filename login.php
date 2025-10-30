@@ -1,5 +1,6 @@
 <?php
 ob_start(); // Start output buffering
+date_default_timezone_set('Asia/Bangkok');
 require_once('header.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

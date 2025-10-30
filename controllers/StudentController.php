@@ -1,7 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-
+date_default_timezone_set('Asia/Bangkok');
 // --- (1) เรียกใช้คลาสที่จำเป็น ---
 require_once __DIR__ . '/../classes/DatabaseUsers.php'; 
 require_once __DIR__ . '/../controllers/DatabaseLogger.php'; 

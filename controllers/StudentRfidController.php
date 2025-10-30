@@ -1,7 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-
+date_default_timezone_set('Asia/Bangkok');
 require_once __DIR__ . '/../models/StudentRfid.php';
 require_once __DIR__ . '/../models/Student.php';
 
