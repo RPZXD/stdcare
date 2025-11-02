@@ -1,40 +1,59 @@
 <?php
-include_once("../config/Database.php");
+// (1) !! KEV: แก้ไขส่วน PHP ด้านบน !!
+require_once(__DIR__ . "/../classes/DatabaseUsers.php");
+use App\DatabaseUsers;
 include_once("../class/UserLogin.php");
-include_once("../class/Behavior.php");
 include_once("../class/Utils.php");
 include_once("../config/Setting.php");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+date_default_timezone_set('Asia/Bangkok'); // (เพิ่ม)
 
-$connectDB = new Database("phichaia_student");
-$db = $connectDB->getConnection();
-
+$connectDB = new DatabaseUsers();
+$db = $connectDB->getPDO();
 $user = new UserLogin($db);
-$behavior = new Behavior($db);
+// (สิ้นสุดการแก้ไข PHP)
+
 
 if (isset($_SESSION['Admin_login'])) {
     $userid = $_SESSION['Admin_login'];
     $userData = $user->userData($userid);
 } else {
-    $sw2 = new SweetAlert2(
-        'คุณยังไม่ได้เข้าสู่ระบบ',
-        'error',
-        '../login.php'
-    );
-    $sw2->renderAlert();
-    exit;
+    if (isset($_SESSION['Teacher_login'])) {
+         $userid = $_SESSION['Teacher_login'];
+         $userData = $user->userData($userid);
+    } else {
+        $sw2 = new SweetAlert2(
+            'คุณยังไม่ได้เข้าสู่ระบบ',
+            'error',
+            '../login.php'
+        );
+        $sw2->renderAlert();
+        exit;
+    }
 }
 
 $term = $user->getTerm() ?: ((date('n') >= 5 && date('n') <= 10) ? 1 : 2);
 $pee = $user->getPee() ?: (date('Y') + 543);
-
 $setting = new Setting();
 
-
-
 require_once('header.php');
+
+// (เพิ่ม) รายการพฤติกรรม
+$behavior_options = [
+    "ความดี" => [
+        "จิตอาสา", "ช่วยเหลือครู", "เก็บของได้ส่งคืน", "ช่วยเหลือเพื่อน", "อื่นๆ (ความดี)"
+    ],
+    "ความผิด" => [
+        "หนีเรียนหรือออกนอกสถานศึกษา", "เล่นการพนัน", "มาโรงเรียนสาย", 
+        "แต่งกาย/ทรงผมผิดระเบียบ", "พกพาอาวุธหรือวัตถุระเบิด", 
+        "เสพสุรา/เครื่องดื่มที่มีแอลกอฮอล์", "สูบบุหรี่", "เสพยาเสพติด", 
+        "ลักทรัพย์ กรรโชกทรัพย์", "ก่อเหตุทะเลาะวิวาท", "แสดงพฤติกรรมทางชู้สาว", 
+        "จอดรถในที่ห้ามจอด", "แสดงพฤติกรรมก้าวร้าว", "มีพฤติกรรมที่ไม่พึงประสงค์อื่นๆ"
+    ]
+];
+
 ?>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -45,67 +64,61 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">จัดการข้อมูลพฤติกรรมนักเรียน</h5>
+                        <h5 class="m-0">จัดการข้อมูลพฤติกรรม (เทอม <?php echo "$term/$pee"; ?>)</h5>
                     </div>
                 </div>
             </div>
         </div>
+
         <section class="content">
-            <div class="card container mx-auto px-4 py-6 ">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">จัดการข้อมูลพฤติกรรมนักเรียน</h2>
-                    <button id="btnAddBehavior" class="btn btn-primary ml-2">+ เพิ่มพฤติกรรม</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table id="behaviorTable" class="min-w-full divide-y divide-gray-200 table-auto" style="width:100%">
-                        <thead class="bg-indigo-500">
-                            <tr>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">วันที่</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">รหัสนักเรียน</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">ชื่อ-นามสกุล</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">ชั้น/ห้อง</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">ประเภท</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">รายละเอียด</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">คะแนน</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">ครูผู้บันทึก</th>
-                                <th class="px-4 py-2 text-center font-medium text-white uppercase tracking-wider border-b">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="behaviorTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Data will be injected here -->
-                        </tbody>
-                    </table>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline shadow-sm">
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addBehaviorModal"><i class="fas fa-plus"></i> เพิ่มข้อมูลพฤติกรรม</button>
+                        <table id="behaviorTable" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>รหัสนักเรียน</th>
+                                    <th>ชื่อ-สกุล</th>
+                                    <th>ชั้น/ห้อง</th>
+                                    <th>ประเภท</th>
+                                    <th>รายการ</th>
+                                    <th>คะแนน</th>
+                                    <th>จัดการ</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
-        <!-- Modal for adding/editing behavior -->
-        <div class="modal fade" id="addBehaviorModal" tabindex="-1" role="dialog" aria-labelledby="addBehaviorModalLabel" aria-hidden="true">
+
+        <div class="modal fade" id="addBehaviorModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addBehaviorModalLabel">เพิ่มข้อมูลพฤติกรรม</h5>
+                        <h5 class="modal-title">เพิ่มข้อมูลพฤติกรรม</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <form id="addBehaviorForm">
-                            <!-- Student Selection -->
+                    <form id="addBehaviorForm">
+                        <div class="modal-body">
+                            <div id="addStudentPreview" class="text-center mb-3" style="min-height: 100px;"></div>
+                            
                             <div class="form-group">
-                                <div id="searchResults" class="text-center"></div>
+                                <label>รหัสนักเรียน</label>
+                                <input type="text" class="form-control" name="addStu_id" id="addStu_id" required>
                             </div>
                             <div class="form-group">
-                                <label for="addStu_id">รหัสนักเรียน : </label>
-                                <input type="text" class="form-control text-center" id="addStu_id" name="addStu_id" maxlength="5" required>
+                                <label>วันที่</label>
+                                <input type="date" class="form-control" name="addBehavior_date" value="<?php echo date('Y-m-d'); ?>" required>
                             </div>
                             <div class="form-group">
-                                <label for="addBehavior_date">วันที่ : </label>
-                                <input type="date" class="form-control text-center" id="addBehavior_date" name="addBehavior_date" value="<?= date('Y-m-d')?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="addBehavior_type">ประเภท : </label>
-                                <select name="addBehavior_type" id="addBehavior_type" class="form-control text-center" required>
-                                    <option value="">-- เลือกประเภทพฤติกรรม --</option>
+                                <label>ประเภท</label>
+                                <select class="form-control behavior-type-select" name="addBehavior_type" data-target="addBehavior_name">
+                                <option value="">-- เลือกประเภทพฤติกรรม --</option>
                                     <option value="หนีเรียนหรือออกนอกสถานศึกษา">หนีเรียนหรือออกนอกสถานศึกษา</option>
                                     <option value="เล่นการพนัน">เล่นการพนัน</option>
                                     <option value="มาโรงเรียนสาย">มาโรงเรียนสาย</option>
@@ -123,54 +136,49 @@ require_once('header.php');
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="addBehavior_name">รายละเอียด : </label>
-                                <input type="text" class="form-control text-center" id="addBehavior_name" name="addBehavior_name" maxlength="255" required>
+                                <label>รายการพฤติกรรม</label>
+                                <input type="text" class="form-control" name="addBehavior_name" id="addBehavior_name" required>
                             </div>
                             <div class="form-group">
-                                <label for="addBehavior_score">คะแนน : </label>
-                                <input type="number" class="form-control text-center" id="addBehavior_score" name="addBehavior_score" required>
+                                <label>คะแนน (เช่น 10)</label>
+                                <input type="number" class="form-control" name="addBehavior_score" required>
                             </div>
-                            <input type="hidden" id="addTeach_id" name="addTeach_id" value="<?= $userData['Teach_id'] ?>" required>
-                            <input type="hidden" id="addBehavior_term" name="addBehavior_term" value="<?= $term ?>" required>
-                            <input type="hidden" id="addBehavior_pee" name="addBehavior_pee" value="<?= $pee ?>" required>
-                        </form>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                        <button type="button" id="submitAddBehaviorForm" class="btn btn-primary">บันทึก</button>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <button type="submit" class="btn btn-primary">บันทึก</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <!-- Edit Modal -->
-        <div class="modal fade" id="editBehaviorModal" tabindex="-1" role="dialog" aria-labelledby="editBehaviorModalLabel" aria-hidden="true">
+
+        <div class="modal fade" id="editBehaviorModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editBehaviorModalLabel">แก้ไขข้อมูลพฤติกรรม</h5>
+                        <h5 class="modal-title">แก้ไขข้อมูลพฤติกรรม</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <form id="editBehaviorForm">
-                            <input type="hidden" id="editBehavior_id" name="editBehavior_id" required>
-                            <!-- Student Selection -->
+                    <form id="editBehaviorForm">
+                        <input type="hidden" name="editId" id="editId">
+                        <div class="modal-body">
+                            <div id="editStudentPreview" class="text-center mb-3" style="min-height: 100px;"></div>
+                            
                             <div class="form-group">
-                                <div id="searchResultsEdit" class="text-center"></div>
+                                <label>รหัสนักเรียน</label>
+                                <input type="text" class="form-control" name="editStu_id" id="editStu_id" required>
                             </div>
                             <div class="form-group">
-                                <label for="editStu_id">รหัสนักเรียน : </label>
-                                <input type="text" class="form-control text-center" id="editStu_id" name="editStu_id" maxlength="5" required>
+                                <label>วันที่</label>
+                                <input type="date" class="form-control" name="editBehavior_date" id="editBehavior_date" required>
                             </div>
                             <div class="form-group">
-                                <label for="editBehavior_date">วันที่ : </label>
-                                <input type="date" class="form-control text-center" id="editBehavior_date" name="editBehavior_date" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editBehavior_type">ประเภท : </label>
-                                <select name="editBehavior_type" id="editBehavior_type" class="form-control text-center" required>
-                                    <option value="">-- เลือกประเภทพฤติกรรม --</option>
+                                <label>ประเภท</label>
+                                <select class="form-control behavior-type-select" name="editBehavior_type" id="editBehavior_type" data-target="editBehavior_name">
+                                <option value="">-- เลือกประเภทพฤติกรรม --</option>
                                     <option value="หนีเรียนหรือออกนอกสถานศึกษา">หนีเรียนหรือออกนอกสถานศึกษา</option>
                                     <option value="เล่นการพนัน">เล่นการพนัน</option>
                                     <option value="มาโรงเรียนสาย">มาโรงเรียนสาย</option>
@@ -188,240 +196,202 @@ require_once('header.php');
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="editBehavior_name">รายละเอียด : </label>
-                                <input type="text" class="form-control text-center" id="editBehavior_name" name="editBehavior_name" maxlength="255" required>
+                                <label>รายการพฤติกรรม</label>
+                                <input type="text" class="form-control" name="editBehavior_name" id="editBehavior_name" required>
                             </div>
                             <div class="form-group">
-                                <label for="editBehavior_score">คะแนน : </label>
-                                <input type="number" class="form-control text-center" id="editBehavior_score" name="editBehavior_score" required>
+                                <label>คะแนน (เช่น 10)</label>
+                                <input type="number" class="form-control" name="editBehavior_score" id="editBehavior_score" required>
                             </div>
-                            <div class="form-group">
-                                <label for="editTeach_id">รหัสครูผู้บันทึก : </label>
-                                <input type="text" class="form-control text-center" id="editTeach_id" name="editTeach_id" maxlength="10" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editBehavior_term">ภาคเรียน : </label>
-                                <input type="number" class="form-control text-center" id="editBehavior_term" name="editBehavior_term" min="1" max="2" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editBehavior_pee">ปีการศึกษา : </label>
-                                <input type="number" class="form-control text-center" id="editBehavior_pee" name="editBehavior_pee" min="2560" max="2700" required>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
-                        <button type="button" id="submitEditBehaviorForm" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+
         <script>
-        // ใส่ token key ที่นี่ (ต้องตรงกับใน api_behavior.php)
-        const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
+        const API_URL = '../controllers/BehaviorController.php'; // (URL ใหม่)
         let behaviorTable;
-        $(document).ready(function() {
+        
+        // (เพิ่ม) เก็บรายการพฤติกรรมใน JS
+        const behaviorOptions = <?php echo json_encode($behavior_options); ?>;
+
+        // (เพิ่ม) ฟังก์ชันอัปเดต Dropdown รายการพฤติกรรม
+        function updateBehaviorNameSelect(selectElement, behaviorType) {
+            const options = behaviorOptions[behaviorType] || [];
+            selectElement.innerHTML = ''; // เคลียร์ตัวเลือกเก่า
+            
+            if (options.length === 0) {
+                 selectElement.innerHTML = '<option value="">กรุณาระบุ</option>'; // (กรณีไม่มีในลิสต์)
+            }
+            
+            options.forEach(option => {
+                selectElement.innerHTML += `<option value="${option}">${option}</option>`;
+            });
+        }
+        
+        // (เพิ่ม) ฟังก์ชันค้นหานักเรียน
+        // -- เพิ่ม debounce --
+        function debounce(func, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        async function searchStudent(stuId, previewElementId) {
+            const previewEl = document.getElementById(previewElementId);
+            if (!stuId) {
+                previewEl.innerHTML = '';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}?action=search_student&id=${encodeURIComponent(stuId)}`);
+                const data = await res.json();
+                if (data && data.Stu_id) {
+                    let imgPath = data.Stu_picture ? `https://std.phichai.ac.th/photo/${data.Stu_picture}` : 'https://std.phichai.ac.th/dist/img/logo-phicha.png';
+                    previewEl.innerHTML = `
+                        <div class="card shadow student-preview-card mx-auto p-3" style="max-width:350px;border-radius:16px;">
+                            <div class="student-img-zoom-wrap position-relative mx-auto mb-2">
+                                <img src="${imgPath}" alt="รูปนักเรียน" class="img-thumbnail rounded-circle shadow student-img-zoom" width="110" height="110" style="object-fit: cover; border:4px solid #fff; background:#fafbfc; cursor: zoom-in;" onerror="this.src='../student/uploads/default.png';" />
+                                <span class="zoom-icon"><i class='fas fa-search-plus'></i></span>
+                            </div>
+                            <div class="card-body p-2">
+                                <h6 class="font-weight-bold text-primary mb-1 mt-2" style="font-size:1.1em;">${data.Stu_name} ${data.Stu_sur}</h6>
+                                <span class="badge badge-info mb-1">รหัส: ${data.Stu_id}</span>
+                                <div class="small text-muted mt-2">ม.${data.Stu_major}/${data.Stu_room}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    previewEl.innerHTML = '<div class="alert alert-danger">ไม่พบข้อมูลนักเรียน</div>';
+                }
+            } catch (err) {
+                previewEl.innerHTML = '<div class="alert alert-warning">กำลังค้นหา...</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
             behaviorTable = $('#behaviorTable').DataTable({
-                columnDefs: [
-                    { className: 'text-center', width: '10%', targets: 0 },
-                    { className: 'text-center', width: '10%', targets: 1 },
-                    { className: 'text-left', width: '20%', targets: 2 },
-                    { className: 'text-center', width: '10%', targets: 3 },
-                    { className: 'text-center', width: '10%', targets: 4 },
-                    { className: 'text-left', width: '15%', targets: 5 },
-                    { className: 'text-center', width: '5%', targets: 6 },
-                    { className: 'text-center', width: '10%', targets: 7 },
-                    { className: 'text-center', width: '10%', targets: 8 }
+                "processing": true,
+                "serverSide": false,
+                "ajax": {
+                    "url": API_URL + "?action=list", // (เรียก Controller)
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "data": "behavior_date",  
+                      "orderable": false ,
+                      "className": "text-center" ,
+                      "width": "10%"
+                    },
+                    { "data": "stu_id" },
+                    { "data": null, "render": (data, type, row) => `${row.Stu_name || ''} ${row.Stu_sur || ''}` },
+                    { "data": null, "render": (data, type, row) => `ม.${row.Stu_major || ''}/${row.Stu_room || ''}` },
+                    { "data": "behavior_type", "render": (data) => 
+                        data === 'ความดี' ? `<span class="badge badge-success">${data}</span>` : `<span class="badge badge-danger">${data}</span>`
+                    },
+                    { "data": "behavior_name" },
+                    { 
+                        "data": "behavior_score" ,
+                        "className": "text-center" ,
+                        "width": "5%"
+                    },
+                    { 
+                        "data": "id",
+                        "render": function(data) {
+                            return `
+                                <button class="btn btn-warning btn-sm editBehaviorBtn" data-id="${data}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm deleteBehaviorBtn" data-id="${data}"><i class="fas fa-trash"></i></button>
+                            `;
+                        },
+                        "orderable": false ,
+                        "className": "text-center" ,
+                        "width": "10%"
+                    }
                 ],
-                autoWidth: false,
-                order: [[0, 'desc']],
-                pageLength: 10,
-                lengthMenu: [10, 25, 50, 100],
-                pagingType: 'full_numbers',
-                searching: true,
-            });
-            loadBehaviors();
-
-            $('#btnAddBehavior').on('click', function() {
-                $('#addBehaviorForm')[0].reset();
-                $('#searchResults').html('');
-                $('#addBehaviorModalLabel').text('เพิ่มข้อมูลพฤติกรรม');
-                $('#addBehaviorModal').modal('show');
+                "language": { "zeroRecords": "ไม่พบข้อมูล", "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ", "processing": "กำลังโหลด..." }
             });
 
-            // --- เพิ่ม event สำหรับค้นหานักเรียน ---
-            $('#addStu_id').on('input', function() {
-                const stuId = $(this).val().trim();
-                if (stuId.length === 0) {
-                    $('#searchResults').html('');
-                    return;
-                }
-                fetch('api/api_student_search.php?stu_id=' + encodeURIComponent(stuId) + '&token=' + encodeURIComponent(API_TOKEN_KEY))
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.Stu_id) {
-                            $('#searchResults').html(`
-                                <div class="flex items-center justify-center gap-4 my-2">
-                                    <img src="${data.Stu_picture ? '<?=$setting->getImgProfileStudent()?>' + data.Stu_picture : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.Stu_name + ' ' + data.Stu_sur)}" alt="student" class="w-25 h-25 rounded-full border border-gray-300 object-cover">
-                                    <div class="text-left">
-                                        <div class="font-bold text-lg">${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}</div>
-                                        <div class="text-sm text-gray-600">เลขที่ <span class="font-semibold">${data.Stu_no}</span> | ชั้น <span class="font-semibold">ม.${data.Stu_major}/${data.Stu_room}</span></div>
-                                    </div>
-                                </div>
-                            `);
-                        } else {
-                            $('#searchResults').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>');
-                        }
-                    })
-                    .catch(() => $('#searchResults').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>'));
-            });
+            // (ฟังก์ชันโหลดข้อมูลใหม่)
+            window.loadBehaviors = function() {
+                behaviorTable.ajax.reload(null, false);
+            }
 
-            // สำหรับ modal edit
-            $('#editStu_id').on('input', function() {
-                const stuId = $(this).val().trim();
-                if (stuId.length === 0) {
-                    $('#searchResultsEdit').html('');
-                    return;
-                }
-                fetch('api/api_student_search.php?stu_id=' + encodeURIComponent(stuId) + '&token=' + encodeURIComponent(API_TOKEN_KEY))
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.Stu_id) {
-                            $('#searchResultsEdit').html(`
-                                <div class="flex items-center justify-center gap-4 my-2">
-                                    <img src="${data.Stu_picture ? '<?=$setting->getImgProfileStudent()?>' + data.Stu_picture : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.Stu_name + ' ' + data.Stu_sur)}" alt="student" class="w-25 h-25 rounded-full border border-gray-300 object-cover">
-                                    <div class="text-left">
-                                        <div class="font-bold text-lg">${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}</div>
-                                        <div class="text-sm text-gray-600">เลขที่ <span class="font-semibold">${data.Stu_no}</span> | ชั้น <span class="font-semibold">ม.${data.Stu_major}/${data.Stu_room}</span></div>
-                                    </div>
-                                </div>
-                            `);
-                        } else {
-                            $('#searchResultsEdit').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>');
-                        }
-                    })
-                    .catch(() => $('#searchResultsEdit').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>'));
+            // --- (เพิ่ม) Event Listeners สำหรับฟีเจอร์ใหม่ ---
+            
+            // (1. ค้นหานักเรียน ตอนกรอก ID) -- ใช้ input + debounce
+            $('#addStu_id').on('input', debounce(function() { searchStudent(this.value, 'addStudentPreview'); }, 350));
+            $('#editStu_id').on('input', debounce(function() { searchStudent(this.value, 'editStudentPreview'); }, 350));
+            
+            // (2. เปลี่ยน Dropdown รายการพฤติกรรม)
+            $('.behavior-type-select').on('change', function() {
+                const targetId = $(this).data('target');
+                const targetSelect = document.getElementById(targetId);
+                updateBehaviorNameSelect(targetSelect, this.value);
             });
+            // (ตั้งค่าเริ่มต้นให้ "Add Modal" ที่เลือก "ความผิด" ไว้)
+            updateBehaviorNameSelect(document.getElementById('addBehavior_name'), 'ความผิด');
 
-            // แสดงข้อมูลทันทีเมื่อเปิด modal edit
-            $(document).on('shown.bs.modal', '#editBehaviorModal', function () {
-                const stuId = $('#editStu_id').val().trim();
-                if (stuId.length === 0) {
-                    $('#searchResultsEdit').html('');
-                    return;
-                }
-                fetch('api/api_student_search.php?stu_id=' + encodeURIComponent(stuId) + '&token=' + encodeURIComponent(API_TOKEN_KEY))
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.Stu_id) {
-                            $('#searchResultsEdit').html(`
-                                <div class="flex items-center justify-center gap-4 my-2">
-                                    <img src="${data.Stu_picture ? '<?=$setting->getImgProfileStudent()?>' + data.Stu_picture : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.Stu_name + ' ' + data.Stu_sur)}" alt="student" class="w-25 h-25 rounded-full border border-gray-300 object-cover">
-                                    <div class="text-left">
-                                        <div class="font-bold text-lg">${data.Stu_pre}${data.Stu_name} ${data.Stu_sur}</div>
-                                        <div class="text-sm text-gray-600">เลขที่ <span class="font-semibold">${data.Stu_no}</span> | ชั้น <span class="font-semibold">ม.${data.Stu_major}/${data.Stu_room}</span></div>
-                                    </div>
-                                </div>
-                            `);
-                        } else {
-                            $('#searchResultsEdit').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>');
-                        }
-                    })
-                    .catch(() => $('#searchResultsEdit').html('<div class="text-red-500 text-sm">ไม่พบนักเรียน</div>'));
-            });
-            // ตั้งค่าคะแนนอัตโนมัติตามประเภทพฤติกรรม
-            $('#addBehavior_type').on('change', function() {
-                const type = $(this).val();
-                let results = '';
-                switch (type) {
-                    case "หนีเรียนหรือออกนอกสถานศึกษา":
-                        results = 10;
-                        break;
-                    case "เล่นการพนัน":
-                        results = 20;
-                        break;
-                    case "มาโรงเรียนสาย":
-                        results = 5;
-                        break;
-                    case "แต่งกาย/ทรงผมผิดระเบียบ":
-                        results = 5;
-                        break;
-                    case "พกพาอาวุธหรือวัตถุระเบิด":
-                        results = 20;
-                        break;
-                    case "เสพสุรา/เครื่องดื่มที่มีแอลกอฮอล์":
-                        results = 20;
-                        break;
-                    case "สูบบุหรี่":
-                        results = 30;
-                        break;
-                    case "เสพยาเสพติด":
-                        results = 30;
-                        break;
-                    case "ลักทรัพย์ กรรโชกทรัพย์":
-                        results = 30;
-                        break;
-                    case "ก่อเหตุทะเลาะวิวาท":
-                        results = 20;
-                        break;
-                    case "แสดงพฤติกรรมทางชู้สาว":
-                        results = 20;
-                        break;
-                    case "จอดรถในที่ห้ามจอด":
-                        results = 10;
-                        break;
-                    case "แสดงพฤติกรรมก้าวร้าว":
-                        results = 10;
-                        break;
-                    case "มีพฤติกรรมที่ไม่พึงประสงค์อื่นๆ":
-                        results = 5;
-                        break;
-                    default:
-                        results = '';
-                }
-                $('#addBehavior_score').val(results);
-            });
-
-            $('#submitAddBehaviorForm').on('click', async function() {
-                const form = document.getElementById('addBehaviorForm');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
-                const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_behavior.php?action=create&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            // --- (Event: Add Behavior - แก้ไข) ---
+            document.getElementById('addBehaviorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                // (ลบ token)
+                
+                const res = await fetch(API_URL + "?action=create", {
                     method: 'POST',
                     body: formData
                 });
                 const result = await res.json();
                 if (result.success) {
                     $('#addBehaviorModal').modal('hide');
+                    this.reset();
+                    $('#addStudentPreview').html(''); // (ล้าง Preview)
                     loadBehaviors();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกข้อมูลสำเร็จ',
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
+                    Swal.fire('สำเร็จ', 'เพิ่มข้อมูลพฤติกรรมเรียบร้อย', 'success');
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: result.message || 'ไม่สามารถบันทึกข้อมูลได้'
-                    });
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถเพิ่มข้อมูลได้', 'error');
                 }
             });
 
-            $('#submitEditBehaviorForm').on('click', async function() {
-                const form = document.getElementById('editBehaviorForm');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
+            // --- (Event: Show Edit Modal - แก้ไข) ---
+            $('#behaviorTable').on('click', '.editBehaviorBtn', async function() {
+                const id = $(this).data('id');
+                const res = await fetch(API_URL + "?action=get&id=" + id);
+                const data = await res.json();
+                
+                if (data && data.id) {
+                    $('#editId').val(data.id);
+                    $('#editStu_id').val(data.stu_id);
+                    $('#editBehavior_date').val(data.behavior_date);
+                    $('#editBehavior_type').val(data.behavior_type);
+                    
+                    // (อัปเดต Dropdown รายการพฤติกรรมก่อน)
+                    const nameSelect = document.getElementById('editBehavior_name');
+                    updateBehaviorNameSelect(nameSelect, data.behavior_type);
+                    // (แล้วค่อยเลือกค่าที่ถูก)
+                    $(nameSelect).val(data.behavior_name); 
+                    
+                    $('#editBehavior_score').val(data.behavior_score);
+                    
+                    // (ค้นหาข้อมูลนักเรียนมาแสดง)
+                    searchStudent(data.stu_id, 'editStudentPreview'); 
+                    
+                    $('#editBehaviorModal').modal('show');
                 }
-                const formData = new FormData(form);
-                formData.append('token', API_TOKEN_KEY);
-                const res = await fetch('api/api_behavior.php?action=update&token=' + encodeURIComponent(API_TOKEN_KEY), {
+            });
+
+            // --- (Event: Edit Behavior - ไม่ต้องแก้) ---
+            document.getElementById('editBehaviorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const res = await fetch(API_URL + "?action=update", {
                     method: 'POST',
                     body: formData
                 });
@@ -429,120 +399,98 @@ require_once('header.php');
                 if (result.success) {
                     $('#editBehaviorModal').modal('hide');
                     loadBehaviors();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกข้อมูลสำเร็จ',
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
+                    Swal.fire('สำเร็จ', 'แก้ไขข้อมูลเรียบร้อย', 'success');
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: result.message || 'ไม่สามารถบันทึกข้อมูลได้'
-                    });
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถแก้ไขข้อมูลได้', 'error');
+                }
+            });
+
+            // --- (Event: Delete Behavior - ไม่ต้องแก้) ---
+            $('#behaviorTable').on('click', '.deleteBehaviorBtn', async function() {
+                const id = $(this).data('id');
+                const result = await Swal.fire({
+                    title: 'ยืนยันการลบข้อมูลนี้?',
+                    text: "การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ใช่, ลบเลย',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+                
+                const res = await fetch(API_URL + "?action=delete", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + encodeURIComponent(id)
+                });
+                const response = await res.json();
+                if (response.success) {
+                    loadBehaviors();
+                    Swal.fire('สำเร็จ', 'ลบข้อมูลสำเร็จ', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถลบข้อมูลได้', 'error');
                 }
             });
         });
-
-        async function loadBehaviors() {
-            const res = await fetch('api/api_behavior.php?action=list&token=' + encodeURIComponent(API_TOKEN_KEY));
-            const data = await res.json();
-            behaviorTable.clear();
-            data.forEach(behavior => {
-                behaviorTable.row.add([
-                    behavior.behavior_date,
-                    behavior.Stu_id,
-                    behavior.Stu_pre + behavior.Stu_name + ' ' + behavior.Stu_sur,
-                    'ม.' + behavior.Stu_major + '/' + behavior.Stu_room,
-                    behavior.behavior_type,
-                    behavior.behavior_name,
-                    behavior.behavior_score,
-                    behavior.teacher_behavior,
-                    `<button class="btn btn-warning btn-sm editBehaviorBtn" data-id="${behavior.id}">แก้ไข</button>
-                     <button class="btn btn-danger btn-sm deleteBehaviorBtn" data-id="${behavior.id}">ลบ</button>`
-                ]);
-            });
-            behaviorTable.draw();
-        }
-
-        $(document).on('click', '.editBehaviorBtn', function() {
-            const id = $(this).data('id');
-            openEditBehaviorModal(id);
-        });
-        $(document).on('click', '.deleteBehaviorBtn', function() {
-            const id = $(this).data('id');
-            deleteBehavior(id);
-        });
-
-        async function openEditBehaviorModal(id) {
-            const res = await fetch('api/api_behavior.php?action=get&id=' + id + '&token=' + encodeURIComponent(API_TOKEN_KEY));
-            const data = await res.json();
-            if (data.error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ไม่พบข้อมูล',
-                    text: data.message || 'ไม่สามารถโหลดข้อมูลได้'
-                });
-                return;
-            }
-            const form = document.getElementById('editBehaviorForm');
-            form.reset();
-            const dateParts = data.behavior_date.split('-'); // แยกปี-เดือน-วัน
-            const year = parseInt(dateParts[0], 10) - 543; // แปลงปี พ.ศ. เป็น ค.ศ.
-            const month = dateParts[1];
-            const day = dateParts[2];
-            const newDate = `${year}-${month}-${day}`; // เอาปีที่ลบ 543 แล้วมาประกอบใหม่
-            
-
-            document.getElementById('editBehavior_id').value = data.id;
-            document.getElementById('editStu_id').value = data.stu_id;
-            document.getElementById('editBehavior_date').value = newDate;
-            document.getElementById('editBehavior_type').value = data.behavior_type;
-            document.getElementById('editBehavior_name').value = data.behavior_name;
-            document.getElementById('editBehavior_score').value = data.behavior_score;
-            document.getElementById('editTeach_id').value = data.teach_id;
-            document.getElementById('editBehavior_term').value = data.behavior_term;
-            document.getElementById('editBehavior_pee').value = data.behavior_pee;
-            $('#editBehaviorModalLabel').text('แก้ไขข้อมูลพฤติกรรม');
-            $('#editBehaviorModal').modal('show');
-        }
-
-        async function deleteBehavior(id) {
-            const result = await Swal.fire({
-                title: 'ยืนยันการลบข้อมูลพฤติกรรมนี้?',
-                text: "คุณต้องการลบข้อมูลนี้หรือไม่",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ใช่, ลบเลย',
-                cancelButtonText: 'ยกเลิก'
-            });
-            if (!result.isConfirmed) return;
-            const res = await fetch('api/api_behavior.php?action=delete&token=' + encodeURIComponent(API_TOKEN_KEY), {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(API_TOKEN_KEY)
-            });
-            const response = await res.json();
-            if (response.success) {
-                loadBehaviors();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'ลบข้อมูลสำเร็จ',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: response.message || 'ไม่สามารถลบข้อมูลได้'
-                });
-            }
-        }
         </script>
+
+<!-- Modal for zoomed image (แทรกก่อน </body>) -->
+<div class="modal fade" id="studentImgZoomModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content bg-transparent border-0">
+      <div class="modal-body text-center p-0">
+        <img id="zoomedStudentImg" src="#" style="max-width:95vw; max-height:70vh; box-shadow:0 4px 48px #3338; background:#fff; border-radius:16px;" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.student-preview-card {
+    background: #f7fafd !important;
+    border: 0;
+    box-shadow: 0 2px 16px 0 #d1e7fa52;
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+.student-preview-card:hover {
+    box-shadow: 0 4px 24px 0 #b0c6e852;
+    background: #f0f6ff;
+}
+#addStudentPreview, #editStudentPreview {
+    min-height: 118px;
+}
+.student-img-zoom-wrap {
+    display:inline-block; position:relative;
+}
+.student-img-zoom-wrap .zoom-icon {
+    position:absolute; bottom:8px; right:10px; color:#3799e5; font-size:1.1em; opacity:0; pointer-events:none;
+    transition: opacity 0.18s;
+    text-shadow: 0 1px 5px #fff, 0 1px 12px #2684bc50;
+}
+.student-img-zoom-wrap:hover .zoom-icon {
+    opacity:1;
+}
+.student-img-zoom {
+    transition: filter .18s, box-shadow .18s;
+}
+.student-img-zoom-wrap:hover .student-img-zoom {
+    filter: brightness(1.08) drop-shadow(0 3px 9px #60b3e68a);
+    box-shadow: 0 3px 24px #90ccfd55, 0 1.5px 6px #3799e550;
+}
+</style>
+<script>
+// ฟีเจอร์ซูมรูป (สำหรับทั้ง add/edit modal)
+$(document).on('click', '.student-img-zoom', function(){
+    var imgSrc = $(this).attr('src');
+    $('#zoomedStudentImg').attr('src', imgSrc);
+    $('#studentImgZoomModal').modal('show');
+});
+$('#studentImgZoomModal').on('hidden.bs.modal', function(){
+    $('#zoomedStudentImg').attr('src', '#'); // Clean up
+});
+</script>
     </div>
     <?php require_once('../footer.php'); ?>
 </div>

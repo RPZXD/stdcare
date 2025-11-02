@@ -28,7 +28,8 @@ class Teacher
 
     public function getAll()
     {
-        $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_status, role_std FROM teacher 
+        // (KEV: เพิ่ม Teach_class และ Teach_room เพื่อให้ View แสดงผลได้ถูกต้อง)
+        $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_status, role_std FROM teacher 
                 WHERE Teach_status = '1' 
                 ORDER BY Teach_major, Teach_name";
         return $this->db->query($sql)->fetchAll();
@@ -112,5 +113,33 @@ class Teacher
         return true; // <--- แก้ไขจุดนี้
         // คืนค่า true เสมอ ถ้าคำสั่ง UPDATE รันผ่าน (ไม่มี Error)
     }
+
+    /**
+     * ดึงรายชื่อครูที่ปรึกษาจากระดับชั้นและห้อง
+     * (สำหรับใช้ในฟอร์มเช็คชื่อ หรือหน้าแสดงข้อมูลห้องเรียน)
+     *
+     * @param int $class_level  (เช่น 1, 2, 3... สำหรับ ม.1, ม.2, ม.3)
+     * @param int $room_number  (เช่น 1, 2, 3... สำหรับ ห้อง 1, 2, 3)
+     * @return array รายชื่อครูที่ยังปฏิบัติงาน (status = 1)
+     */
+    public function getByClassAndRoom($class_level, $room_number)
+    {
+        // เราจะดึงเฉพาะครูที่ Teach_status = '1' (ปกติ)
+        $sql = "SELECT Teach_id, Teach_name 
+                FROM teacher 
+                WHERE Teach_class = :class_level 
+                  AND Teach_room = :room_number
+                  AND Teach_status = '1'
+                ORDER BY Teach_name"; // จัดเรียงตามชื่อ
+        
+        $params = [
+            'class_level' => $class_level,
+            'room_number' => $room_number
+        ];
+        
+        // ใช้ fetchAll() เพราะห้องหนึ่งอาจมีครูที่ปรึกษา 2 คน
+        return $this->db->query($sql, $params)->fetchAll();
+    }
+    
 }
 ?>

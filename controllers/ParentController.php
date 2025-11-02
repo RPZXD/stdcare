@@ -24,9 +24,13 @@ try {
     $logger = new DatabaseLogger($pdo);
     $parentModel = new ParentModel($db);
 
-    // (3) ดึงข้อมูล Admin สำหรับ Log
-    $admin_id = $_SESSION['Admin_login'] ?? 'system';
-    $admin_role = $_SESSION['role'] ?? 'Admin';
+    // (3) ดึงข้อมูล Admin/User/Officer สำหรับ Log
+    if (!isset($_SESSION['Admin_login']) && !isset($_SESSION['Teacher_login']) && !isset($_SESSION['Officer_login'])) {
+        throw new Exception('ไม่ได้รับอนุญาต', 403);
+    }
+    $admin_id = $_SESSION['Admin_login'] ?? $_SESSION['Officer_login'] ?? 'system';
+    $admin_role = $_SESSION['role'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
+    $teach_id = $_SESSION['Teacher_login'] ?? $_SESSION['Officer_login'] ?? $admin_id;
 
     $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 

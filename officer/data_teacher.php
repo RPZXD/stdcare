@@ -1,23 +1,22 @@
 <?php
-include_once("../config/Database.php");
-include_once("../class/UserLogin.php");
-include_once("../class/Student.php");
+
+require_once(__DIR__ . "/../classes/DatabaseUsers.php");
+use App\DatabaseUsers;
+include_once("../class/UserLogin.php"); // (ยังใช้ UserLogin ตัวเก่า)
 include_once("../class/Utils.php");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Initialize database connection
-$connectDB = new Database("phichaia_student");
-$db = $connectDB->getConnection();
-
-// Initialize UserLogin class
+$connectDB = new DatabaseUsers();
+$db = $connectDB->getPDO();
 $user = new UserLogin($db);
-$student = new Student($db);
+// (สิ้นสุดการแก้ไข PHP)
+
 
 // Fetch terms and pee
 $term = $user->getTerm();
 $pee = $user->getPee();
+
 
 if (isset($_SESSION['Officer_login'])) {
     $userid = $_SESSION['Officer_login'];
@@ -44,148 +43,197 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">ข้อมูลครู</h1>
+                        <h5 class="m-0">ข้อมูลครู</h5>
                     </div>
                 </div>
             </div>
         </div>
+
         <section class="content">
-            <div class="card container mx-auto px-4 py-6 ">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">ข้อมูลครู</h2>
-                    <!-- <button id="btnAddTeacher" class="btn btn-primary">+ เพิ่มครู</button> -->
-                </div>
-                <div class="overflow-x-auto">
-                    <table id="teacherTable" class="min-w-full divide-y divide-gray-200 table-auto " style="width:100%">
-                        <thead class="bg-indigo-500">
-                            <tr>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">รหัสครู</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ชื่อครู</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">กลุ่ม</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ชั้น</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">ห้อง</th>
-                                <th class="px-4 py-2 text-center  font-medium text-white uppercase tracking-wider border-b">Role</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teacherTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Data will be injected here -->
-                        </tbody>
-                    </table>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-body">
+                        <table id="teacherTable" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อ-สกุล</th>
+                                    <th>กลุ่มสาระ</th>
+                                    <th>ครูที่ปรึกษา</th>
+                                    <th>สถานะ</th>
+                                    <th>บทบาท</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
         </section>
-
 
 
 <script>
         let teacherTable;
-        // ใส่ token key ที่นี่ (ต้องตรงกับใน api_teacher.php)
-        const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE';
-        // Initial load
-        $(document).ready(function() {
-            // สร้าง DataTable ครั้งเดียว
+        // (URL ใหม่ ชี้ไปที่ Controller)
+        const API_URL = '../controllers/TeacherController.php'; 
+
+        document.addEventListener('DOMContentLoaded', function() {
             teacherTable = $('#teacherTable').DataTable({
-                columnDefs: [
-                    { className: 'text-center', width: '8%', targets: 0 },  // ✅ ถูกต้อง
-                    { className: 'text-left', width: '20%', targets: 1 },
-                    { className: 'text-left', width: '20%', targets: 2 },
-                    { className: 'text-center', targets: 3 },
-                    { className: 'text-center', targets: 4 },
-                    { className: 'text-center', targets: 5 }
+                "processing": true,
+                "serverSide": false, // (เราจะใช้ Client-side สำหรับ list (ตามโค้ดเดิม))
+                "ajax": {
+                    "url": API_URL + "?action=list", // (เรียก list)
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "data": "Teach_name" },
+                    { "data": "Teach_major" },
+                    { 
+                        "data": null,
+                        "render": function(data, type, row) {
+                            return row.Teach_class && row.Teach_room ? `ม.${row.Teach_class}/${row.Teach_room}` : '-';
+                        }
+                    },
+                    { 
+                        "data": "Teach_status",
+                        "render": function(data) {
+                            return data == '1' ? '<span class="badge badge-success">ปกติ</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>';
+                        }
+                    },
+                    { "data": "role_std",
+                        "render": function(data) {
+                            let roleText = '';
+                            switch(data) {
+                                case 'T': roleText = 'ครู'; break;
+                                case 'OF': roleText = 'เจ้าหน้าที่'; break;
+                                case 'VP': roleText = 'รองผู้อำนวยการ'; break;
+                                case 'DIR': roleText = 'ผู้อำนวยการ'; break;
+                                case 'ADM': roleText = 'Admin'; break;
+                                default: roleText = data; 
+                            }
+                            return roleText;
+                        }
+                    }
                 ],
-                autoWidth: false,
-                order: [[0, 'asc']], // Default sort by first column (รหัสครู)
-                pageLength: 10, // Default number of rows per page
-                lengthMenu: [10, 25, 50, 100], // Options for number of rows per page
-                pagingType: 'full_numbers', // Full pagination controls
-                searching: true, // Enable search box
-                
-            });
-            loadTeachers();
-
-
-            
-        });
-
-        // เพิ่มฟังก์ชันนี้ก่อน fetch('api/fet_major.php')
-function populateSelectElement(selectId, data) {
-    const select = document.getElementById(selectId);
-    if (!select) return;
-    // ลบ option เดิม ยกเว้นตัวแรก
-    while (select.options.length > 1) {
-        select.remove(1);
-    }
-    data.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.Teach_major || '';
-        option.text = item.Teach_major || '';
-        select.appendChild(option);
-    });
-}
-
-// Fetch majors and populate the selects
-fetch('api/fet_major.php')
-    .then(response => response.json())
-    .then(data => {
-        populateSelectElement('addTeach_major', data);
-        populateSelectElement('editTeach_major', data);
-    })
-    .catch(error => {
-        console.error('Error fetching data:', error);
-});
-
-        // Fetch and render teacher data
-        async function loadTeachers() {
-            const res = await fetch('api/api_teacher.php?action=list&token=' + encodeURIComponent(API_TOKEN_KEY));
-            const data = await res.json();
-            teacherTable.clear();
-            data.forEach(teacher => {
-                // Map role_std code to Thai description
-                let roleDisplay = '';
-                switch (teacher.role_std) {
-                    case 'T':
-                        roleDisplay = 'ครู';
-                        break;
-                    case 'DIR':
-                        roleDisplay = 'ผู้อำนวยการ';
-                        break;
-                    case 'VP':
-                        roleDisplay = 'รองผู้อำนวยการ';
-                        break;
-                    case 'OF':
-                        roleDisplay = 'เจ้าหน้าที่';
-                        break;
-                    case 'ADM':
-                        roleDisplay = 'Administrator';
-                        break;
-                    default:
-                        roleDisplay = teacher.role_std || '';
+                "language": {
+                    "zeroRecords": "ไม่พบข้อมูล",
+                    "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+                    // ... (ภาษาไทยอื่นๆ) ...
                 }
-                teacherTable.row.add([
-                    teacher.Teach_id,
-                    teacher.Teach_name,
-                    teacher.Teach_major || '',
-                    teacher.Teach_class || '',
-                    teacher.Teach_room || '',
-                    roleDisplay
-                ]);
             });
-            teacherTable.draw();
-            // Attach event listeners
-            // เปลี่ยนจาก document.querySelectorAll เป็น event delegation
-            // document.querySelectorAll('.editBtn').forEach(btn => {
-            //     btn.onclick = () => openEditModal(btn.dataset.id);
-            // });
-            // document.querySelectorAll('.deleteBtn').forEach(btn => {
-            //     btn.onclick = () => deleteTeacher(btn.dataset.id);
-            // });
-        }
 
-        // ใช้ event delegation สำหรับปุ่ม edit
-        $(document).on('click', '.editBtn', function() {
-            const id = $(this).data('id');
-            openEditModal(id);
+            // (ฟังก์ชันโหลดข้อมูลใหม่)
+            window.loadTeachers = function() {
+                teacherTable.ajax.reload(null, false); // โหลดใหม่แบบไม่รีเซ็ตหน้า
+            }
+
+            // (Event: Add Teacher)
+            document.getElementById('addTeacherForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const res = await fetch(API_URL + "?action=create", {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                if (result.success) {
+                    $('#addTeacherModal').modal('hide');
+                    loadTeachers();
+                    Swal.fire('สำเร็จ', 'เพิ่มข้อมูลครูเรียบร้อย', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถเพิ่มข้อมูลได้', 'error');
+                }
+            });
+
+            // (Event: Show Edit Modal)
+            $('#teacherTable').on('click', '.editTeacherBtn', async function() {
+                const id = $(this).data('id');
+                const res = await fetch(API_URL + "?action=get&id=" + id);
+                const data = await res.json();
+                
+                if (data && data.Teach_id) {
+                    $('[name="editTeach_id_old"]').val(data.Teach_id);
+                    $('[name="editTeach_id"]').val(data.Teach_id);
+                    $('[name="editTeach_name"]').val(data.Teach_name);
+                    $('[name="editTeach_major"]').val(data.Teach_major);
+                    $('[name="editTeach_status"]').val(data.Teach_status);
+                    $('[name="editrole_std"]').val(data.role_std);
+                    $('#editTeacherModal').modal('show');
+                }
+            });
+
+            // (Event: Edit Teacher)
+            document.getElementById('editTeacherForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                // (Controller ใหม่รับ Teach_id ใน body ไม่ใช่ใน URL)
+                const res = await fetch(API_URL + "?action=update", {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                if (result.success) {
+                    $('#editTeacherModal').modal('hide');
+                    loadTeachers();
+                    Swal.fire('สำเร็จ', 'แก้ไขข้อมูลเรียบร้อย', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถแก้ไขข้อมูลได้', 'error');
+                }
+            });
+
+            // (Event: Delete Teacher)
+            $('#teacherTable').on('click', '.deleteTeacherBtn', async function() {
+                const id = $(this).data('id');
+                const result = await Swal.fire({
+                    title: 'ยืนยันการลบข้อมูลครูนี้?',
+                    text: "ข้อมูลจะถูกตั้งค่าเป็น 'ไม่ใช้งาน'",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ใช่, ลบเลย',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+                
+                const res = await fetch(API_URL + "?action=delete", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + encodeURIComponent(id)
+                });
+                const response = await res.json();
+                if (response.success) {
+                    loadTeachers();
+                    Swal.fire('สำเร็จ', 'ลบข้อมูลสำเร็จ', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+                }
+            });
+
+            // (Event: Reset Password)
+             $('#teacherTable').on('click', '.resetTeacherPwdBtn', async function() {
+                const id = $(this).data('id');
+                const result = await Swal.fire({
+                    title: 'รีเซ็ตรหัสผ่าน?',
+                    text: `รหัสผ่านของ ${id} จะถูกตั้งค่าเป็น ${id}`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, รีเซ็ต',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+                
+                const res = await fetch(API_URL + "?action=resetpwd", {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + encodeURIComponent(id)
+                });
+                const response = await res.json();
+                if (response.success) {
+                    Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อย', 'success');
+                } else {
+                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถรีเซ็ตรหัสผ่านได้', 'error');
+                }
+            });
         });
 </script>
 
@@ -193,7 +241,5 @@ fetch('api/fet_major.php')
     <?php require_once('../footer.php'); ?>
 </div>
 <?php require_once('script.php'); ?>
-        <!-- Bootstrap 5, jQuery, DataTables scripts -->
-
 </body>
 </html>

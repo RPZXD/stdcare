@@ -16,8 +16,9 @@ try {
     $pdo = $db->getPDO();
     $logger = new DatabaseLogger($pdo);
     
-    $admin_id = $_SESSION['Admin_login'] ?? 'system';
-    $admin_role = $_SESSION['role'] ?? 'Admin';
+    $admin_id = $_SESSION['Admin_login'] ?? $_SESSION['Officer_login'] ?? 'system';
+    $admin_role = $_SESSION['role'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
+    $teach_id = $_SESSION['Teacher_login'] ?? $_SESSION['Officer_login'] ?? $admin_id;
 
     // --- (3) ส่ง $db object เข้า Model ---
     $studentModel = new Student($db);
@@ -44,6 +45,24 @@ try {
         // !! KEV: สิ้นสุดการแก้ไข !!
         //
 
+        // ▼▼▼ เพิ่ม Case ใหม่สำหรับหน้านี้โดยเฉพาะ ▼▼▼
+        case 'list_for_officer':
+            // (1) ดึงค่า Filter จาก $_GET
+            $filters = [
+                'class'  => $_GET['class'] ?? null,
+                'room'   => $_GET['room'] ?? null,
+                'status' => $_GET['status'] ?? null
+            ];
+            
+            // (2) ดึงข้อมูลนักเรียน
+            $studentData = $studentModel->getAll($filters);
+            
+            // (3) ส่งข้อมูลกลับใน Format ที่ JavaScript (data_student.php) ต้องการ
+            // คือมี success: true และ data: [...] ห่อหุ้มอยู่
+            echo json_encode(['success' => true, 'data' => $studentData]);
+            break;
+        // ▲▲▲ สิ้นสุด Case ใหม่ ▲▲▲
+
         case 'list_ssp':
             // (อันนี้สำหรับ Server-side Datatables ซึ่งคุณไม่ได้ใช้ในฟังก์ชัน loadStudents())
             $params = $_POST;
@@ -56,10 +75,164 @@ try {
             echo json_encode($filters);
             break;
 
+        case 'search_student':
+            // (Action นี้ถูกเรียกโดย rfid.php (ตารางนักเรียนที่ยังไม่มีบัตร))
+            // (มันรับค่า POST จาก DataTables SSP)
+            $params = $_POST;
+            $result = $studentModel->getStudentsWithoutRfid($params);
+            echo json_encode($result);
+            break;
+
         case 'get':
             $id = $_GET['id'] ?? $_POST['id'] ?? '';
             echo json_encode($studentModel->getById($id));
             break;
+
+        // ... (case อื่นๆ) ...
+
+        case 'get_modal_student_data':
+            // [1] สั่งให้ Browser รู้ว่านี่คือ HTML (เหมือนเดิม)
+            header('Content-Type: text/html; charset=utf-8'); 
+
+            $stu_id = $_GET['stu_id'];
+            
+            // [2] ดึงข้อมูลนักเรียน (ต้องมั่นใจว่า getById ดึง SELECT * นะครับ)
+            $student_data = $studentModel->getById($stu_id); 
+            
+            // --- [3] สร้างตัวแปรช่วยแสดงผล (จาก Schema ที่คุณให้มา) ---
+            
+            // จัดการ Stu_status
+            $status_map = [
+                1 => 'ปกติ',
+                2 => 'จบ',
+                3 => 'ย้ายรร.',
+                4 => 'ออกกลางคัน',
+                9 => 'เสียชีวิต'
+            ];
+            $display_status = $status_map[$student_data['Stu_status']] ?? 'ไม่ระบุ (' . $student_data['Stu_status'] . ')';
+
+            // จัดการ vehicle
+            $vehicle_map = [
+                0 => 'ไม่มี',
+                1 => 'มี'
+            ];
+            $display_vehicle = $vehicle_map[$student_data['vehicle']] ?? 'ไม่ระบุ';
+
+            // จัดการ Stu_sex (เดาว่า 1=ชาย, 2=หญิง)
+            $sex_map = [
+                1 => 'ชาย',
+                2 => 'หญิง'
+            ];
+            $display_sex = $sex_map[$student_data['Stu_sex']] ?? 'ไม่ระบุ';
+
+            // ฟังก์ชันช่วยแสดงผล (ป้องกันค่า NULL และ XSS)
+            $val = function($key) use ($student_data) {
+                // ถ้าค่าเป็น NULL หรือ "" ให้แสดงขีดกลาง '-'
+                return htmlspecialchars($student_data[$key] ?? '-');
+            };
+
+            // --- [4] Echo HTML ของ Modal ตัวใหม่ ---
+            // (ใช้ modal-xl เพื่อขยายขนาด)
+            echo '
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-user-circle mr-2"></i>
+                                ข้อมูลนักเรียน: ' . $val('Stu_pre') . $val('Stu_name') . ' ' . $val('Stu_sur') . '
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-3 text-center">
+                                    <img src="https://std.phichai.ac.th/photo/' . $val('Stu_picture') . '" 
+                                         class="img-thumbnail rounded-circle mb-3 mx-auto d-block" 
+                                         style="width: 250px; height: 250px; object-fit: cover;"
+                                         onerror="this.src=\'../dist/img/default-avatar.svg\'">
+                                    <h5 class="font-weight-bold text-center">รหัส: ' . $val('Stu_id') . '</h5>
+                                    <p class="text-center"><strong>สถานะ:</strong> ' . htmlspecialchars($display_status) . '</p>
+                                </div>
+                                <div class="col-md-9">
+                                    <h5><i class="fas fa-user-graduate mr-2"></i>ข้อมูลการศึกษา</h5>
+                                    <hr class="mt-0">
+                                    <div class="row">
+                                        <div class="col-md-4"><p><strong>เลขที่:</strong> ' . $val('Stu_no') . '</p></div>
+                                        <div class="col-md-4"><p><strong>ระดับชั้น:</strong> ' . $val('Stu_major') . '</p></div>
+                                        <div class="col-md-4"><p><strong>ห้อง:</strong> ' . $val('Stu_room') . '</p></div>
+                                    </div>
+
+                                    <h5 class="mt-3"><i class="fas fa-id-card mr-2"></i>ข้อมูลส่วนตัว</h5>
+                                    <hr class="mt-0">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>ชื่อเล่น:</strong> ' . $val('Stu_nick') . '</p>
+                                            <p><strong>เพศ:</strong> ' . htmlspecialchars($display_sex) . '</p>
+                                            <p><strong>เลข ปชช.:</strong> ' . $val('Stu_citizenid') . '</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>วันเกิด:</strong> ' . $val('Stu_birth') . '</p>
+                                            <p><strong>ศาสนา:</strong> ' . $val('Stu_religion') . '</p>
+                                            <p><strong>กรุ๊ปเลือด:</strong> ' . $val('Stu_blood') . '</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>เบอร์โทร (นร.):</strong> ' . $val('Stu_phone') . '</p>
+                                            <p><strong>การเดินทาง:</strong> ' . htmlspecialchars($display_vehicle) . '</p>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <p><strong>ที่อยู่ (นร.):</strong> ' . $val('Stu_addr') . '</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-3"><i class="fas fa-users mr-2"></i>ข้อมูลครอบครัว</h5>
+                            <hr class="mt-0">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><strong>ข้อมูลบิดา</strong></h6>
+                                    <p><strong>ชื่อ:</strong> ' . $val('Father_name') . '</p>
+                                    <p><strong>อาชีพ:</strong> ' . $val('Father_occu') . '</p>
+                                    <p><strong>รายได้:</strong> ' . $val('Father_income') . '</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><strong>ข้อมูลมารดา</strong></h6>
+                                    <p><strong>ชื่อ:</strong> ' . $val('Mother_name') . '</p>
+                                    <p><strong>อาชีพ:</strong> ' . $val('Mother_occu') . '</p>
+                                    <p><strong>รายได้:</strong> ' . $val('Mother_income') . '</p>
+                                </div>
+                            </div>
+
+                            <h6 class="mt-3"><strong>ข้อมูลผู้ปกครอง (ที่ติดต่อได้)</strong></h6>
+                            <hr class="mt-1">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>ชื่อ:</strong> ' . $val('Par_name') . '</p>
+                                    <p><strong>ความสัมพันธ์:</strong> ' . $val('Par_relate') . '</p>
+                                    <p><strong>อาชีพ:</strong> ' . $val('Par_occu') . '</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>รายได้:</strong> ' . $val('Par_income') . '</p>
+                                    <p><strong>เบอร์โทร:</strong> ' . $val('Par_phone') . '</p>
+                                    <p><strong>ที่อยู่:</strong> ' . $val('Par_addr') . '</p>
+                                </div>
+                            </div>
+                            
+                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                        </div>
+                    </div>
+                </div>
+            ';
+
+            // [5] หยุดการทำงาน (เหมือนเดิม)
+            exit; 
+        
+        // ... (case อื่นๆ) ...
             
         case 'create':
             // (โค้ด Log 'create' ของคุณ...)
@@ -88,23 +261,73 @@ try {
             break;
             
         case 'upload_rfid_csv':
-            // (โค้ด Log 'upload_rfid_csv' ของคุณ...)
+            // (ไฟล์นี้ถูกเรียกจาก rfid.php และ settings.php)
             try {
-                // ... (โค้ด CSV) ...
-                $report = $studentModel->batchRegisterRfid($rfid_data);
-                $logMessage = sprintf(
-                    'Admin batch registered RFID: Success=%d, Failed=%d, Skipped=%d',
-                    $report['success'], $report['failed'], $report['skipped']
-                );
-                $logger->log([
-                    'user_id' => $admin_id,
-                    'role' => $admin_role,
-                    'action_type' => 'student_rfid_upload_success',
-                    'status_code' => 200,
-                    'message' => $logMessage
-                ]);
-                echo json_encode(['status' => 'completed', 'report' => $report]);
+                // (ใช้ชื่อ 'rfid_csv_file' ตามที่ฟอร์มส่งมา)
+                if (!isset($_FILES['rfid_csv_file']) || $_FILES['rfid_csv_file']['error'] !== UPLOAD_ERR_OK) {
+                    throw new Exception('ไม่พบไฟล์ หรือ ไฟล์อัปโหลดมีปัญหา');
+                }
+                $fileTmpPath = $_FILES['rfid_csv_file']['tmp_name'];
+                
+                $rfid_data = [];
+                $header = null;
+                $stuIdIndex = -1;
+                $rfidCodeIndex = -1;
+
+                if (($handle = fopen($fileTmpPath, 'r')) !== FALSE) {
+                    if (($headerData = fgetcsv($handle)) !== FALSE) {
+                        $headerData[0] = preg_replace('/^\x{FEFF}/u', '', $headerData[0]); // Remove BOM
+                        $header = array_map('trim', $headerData);
+                        
+                        // (หา index ของคอลัมน์ที่ต้องการ)
+                        $stuIdIndex = array_search(strtolower('stu_id'), array_map('strtolower', $header));
+                        $rfidCodeIndex = array_search(strtolower('rfid_code'), array_map('strtolower', $header));
+                    }
+
+                    if ($stuIdIndex === false || $rfidCodeIndex === false) {
+                        throw new Exception('ไม่พบคอลัมน์ stu_id หรือ rfid_code ในไฟล์ CSV');
+                    }
+
+                    while (($data = fgetcsv($handle)) !== FALSE) {
+                        $stu_id = $data[$stuIdIndex] ?? null;
+                        $rfid_code = $data[$rfidCodeIndex] ?? null;
+
+                        if ($stu_id && $rfid_code) {
+                             $rfid_data[] = [
+                                'stu_id' => $stu_id,
+                                'rfid_code' => $rfid_code
+                             ];
+                        }
+                    }
+                    fclose($handle);
+
+                    if (!empty($rfid_data)) {
+                        // (เรียก Model เมธอดใหม่)
+                        $report = $studentModel->batchRegisterOrUpdateRfid($rfid_data);
+                        
+                        // (อัปเดต Log)
+                        $logMessage = sprintf(
+                            'Admin batch register/update RFID: New=%d, Updated=%d, Failed=%d, Skipped=%d',
+                            $report['success'], $report['updated'], $report['failed'], $report['skipped']
+                        );
+                        $logger->log([
+                            'user_id' => $admin_id,
+                            'role' => $admin_role,
+                            'action_type' => 'student_rfid_upload_success',
+                            'status_code' => 200,
+                            'message' => $logMessage
+                        ]);
+                        
+                        echo json_encode(['status' => 'completed', 'report' => $report]);
+                    } else {
+                        echo json_encode(['status' => 'empty', 'message' => 'ไม่พบข้อมูล RFID ที่จะลงทะเบียนในไฟล์']);
+                    }
+
+                } else {
+                    throw new Exception('ไม่สามารถเปิดไฟล์ CSV ที่อัปโหลดได้');
+                }
             } catch (Exception $e) {
+                // --- (เพิ่ม Log Fail) ---
                 $logger->log([
                     'user_id' => $admin_id,
                     'role' => $admin_role,
@@ -115,7 +338,25 @@ try {
                 http_response_code(500);
                 echo json_encode(['error' => $e->getMessage()]);
             }
-            break;            
+            break;
+            
+        // ▼▼▼ เพิ่ม Case ใหม่ ▼▼▼
+        case 'print':
+            $filters = [
+                'class'  => $_GET['class'] ?? null,
+                'room'   => $_GET['room'] ?? null,
+                'status' => 1 // (บังคับสถานะ = 1 ให้ตรงกับหน้าเว็บ)
+            ];
+            
+            // เรียกใช้ฟังก์ชันสร้าง HTML จาก Model
+            $html = $studentModel->generatePrintableHtml($filters);
+            
+            // **สำคัญ** เปลี่ยน header กลับเป็น text/html เพื่อให้ browser แสดงผลถูกต้อง
+            header('Content-Type: text/html; charset=utf-8');
+            echo $html;
+            break;
+
+        
 
         default:
             http_response_code(400);

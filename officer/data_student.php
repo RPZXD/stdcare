@@ -148,24 +148,26 @@ $(document).ready(function() {
             showLoading();
             const classValue = $('#selectClass').val() || '';
             const roomValue = $('#selectRoom').val() || '';
-
+            // fetch รายชื่อจาก Controller
             const response = await $.ajax({
-                url: '../teacher/api/fetch_data_student.php',
+                url: '../controllers/StudentController.php',
                 method: 'GET',
                 dataType: 'json',
-                data: { class: classValue, room: roomValue }
+                data: { 
+                    // action: 'list', // <-- นี่คือของเดิม
+                    action: 'list_for_officer', // <-- ▼▼▼ แก้ไขเป็นชื่อ case ใหม่
+                    class: classValue, 
+                    room: roomValue, 
+                    status: 1 
+                }
             });
-
             hideLoading();
-
             if (!response.success) {
                 Swal.fire('🚨 ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
                 return;
             }
-
             const showDataStudent = $('#showDataStudent');
             showDataStudent.empty();
-
             if (response.data.length === 0) {
                 showDataStudent.html(`
                     <div class="col-span-full text-center py-12">
@@ -182,10 +184,9 @@ $(document).ready(function() {
                             data-no="${item.Stu_no}"
                             data-nick="${item.Stu_nick}"
                             style="animation-delay: ${index * 0.1}s; opacity: 0;">
-
                             <div class="student-photo-container" style="position: relative;">
-                                <img class="student-photo w-full h-128 object-cover" 
-                                     src="../photo/${item.Stu_picture}" 
+                                <img class="student-photo w-full h-128 object-cover"
+                                     src="https://std.phichai.ac.th/photo/${item.Stu_picture}"
                                      alt="Student Picture"
                                      onerror="handleImageError(this, '${item.Stu_pre}${item.Stu_name}')"
                                      onload="this.classList.add('animate-fadeInUp')">
@@ -193,7 +194,6 @@ $(document).ready(function() {
                                     #${item.Stu_no}
                                 </div>
                             </div>
-
                             <div class="card-body">
                                 <div class="text-center mb-4">
                                     <h5 class="text-lg font-bold text-purple-500 mb-2">
@@ -203,37 +203,19 @@ $(document).ready(function() {
                                         รหัส: ${item.Stu_id}
                                     </div>
                                 </div>
-                                
                                 <div class="space-y-2 text-sm">
-                                    ${item.Stu_nick ? `<div class="flex justify-between">
-                                        <span class="text-gray-900">ชื่อเล่น:</span>
-                                        <span class="font-semibold text-purple-600">${item.Stu_nick}</span>
-                                    </div>` : ''}
-                                    ${item.Stu_phone ? `<div class="flex justify-between">
-                                        <span class="text-gray-900">เบอร์:</span>
-                                        <a href="tel:${item.Stu_phone}" class="text-gray-900 hover:underline flex items-center">
-                                            📞 ${item.Stu_phone}
-                                        </a>
-                                    </div>` : ''}
-                                    ${item.Par_phone ? `<div class="flex justify-between">
-                                        <span class="text-gray-900">ผู้ปกครอง:</span>
-                                        <a href="tel:${item.Par_phone}" class="text-gray-900 hover:underline flex items-center">
-                                            👨‍👩‍👧‍👦 ${item.Par_phone}
-                                        </a>
-                                    </div>` : ''}
+                                    ${item.Stu_nick ? `<div class="flex justify-between"><span class="text-gray-900">ชื่อเล่น:</span><span class="font-semibold text-purple-600">${item.Stu_nick}</span></div>` : ''}
+                                    ${item.Stu_phone ? `<div class="flex justify-between"><span class="text-gray-900">เบอร์:</span><a href="tel:${item.Stu_phone}" class="text-gray-900 hover:underline flex items-center">📞 ${item.Stu_phone}</a></div>` : ''}
+                                    ${item.Par_phone ? `<div class="flex justify-between"><span class="text-gray-900">ผู้ปกครอง:</span><a href="tel:${item.Par_phone}" class="text-gray-900 hover:underline flex items-center">👨‍👩‍👧‍👦 ${item.Par_phone}</a></div>` : ''}
                                 </div>
-                                
                                 <div class="flex justify-center space-x-2 mt-6">
-                                    <button class="btn-modern btn-view btn-sm hover-lift" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">
-                                        <span class="text-lg">👀</span>
-                                    </button>
+                                    <button class="btn-modern btn-view btn-sm hover-lift" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด"><span class="text-lg">👀</span></button>
                                 </div>
                             </div>
                         </div>
                     `;
                     showDataStudent.append(studentCard);
                 });
-
                 // entrance animation
                 $('.student-card').each(function(index) {
                     $(this).css({
@@ -244,8 +226,7 @@ $(document).ready(function() {
                     }, 500).css('transform', 'translateY(0)');
                 });
             }
-
-        } catch (error) {
+        } catch(error) {
             hideLoading();
             Swal.fire('🚨 ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
             console.error(error);
@@ -253,18 +234,38 @@ $(document).ready(function() {
     }
 
     // view handler
+    // (นี่คือโค้ดที่แก้ไขแล้ว)
     $(document).on('click', '.btn-view', function() {
         var stuId = $(this).data('id');
         showLoading();
+
+        // (เผื่อมี Modal ค้าง ให้ลบทิ้งไปก่อน)
+        $('#officerModalPlaceholder').remove(); 
+
         $.ajax({
-            url: '../teacher/api/view_student.php',
+            url: '../controllers/StudentController.php',
             method: 'GET',
-            data: { stu_id: stuId },
+            data: { action: 'get_modal_student_data', stu_id: stuId },
             success: function(response) {
                 hideLoading();
-                // reuse modal from teacher area
-                $('body').append('<div id="officerModalPlaceholder" class="modal fade" tabindex="-1"></div>');
-                $('#officerModalPlaceholder').html(response).modal('show');
+                
+                // 1. สร้าง Modal Shell ขึ้นมาใหม่ (ยังไม่เพิ่มเข้า body)
+                var $modalShell = $('<div id="officerModalPlaceholder" class="modal fade" tabindex="-1"></div>');
+                
+                // 2. ยัด HTML (ที่ได้จาก Controller) เข้าไป
+                $modalShell.html(response);
+                
+                // 3. เพิ่ม Modal Shell นี้เข้า body
+                $modalShell.appendTo('body');
+                
+                // 4. สั่ง show
+                $modalShell.modal('show');
+
+                // 5. (สำคัญที่สุด!) ตั้ง Event ว่าเมื่อ Modal นี้ถูกปิด (hidden)
+                //    ให้ "ลบ" (remove) ตัวมันเองทิ้งจาก DOM ไปเลย
+                $modalShell.on('hidden.bs.modal', function() {
+                    $(this).remove();
+                });
             },
             error: function() {
                 hideLoading();
@@ -280,22 +281,24 @@ $(document).ready(function() {
 
     // print uses selected class/room
     $('#printStudentList').on('click', function() {
-        showLoading();
         const classValue = $('#selectClass').val() || '';
         const roomValue = $('#selectRoom').val() || '';
-        $.ajax({
-            url: '../teacher/api/print_student_list.php',
-            method: 'GET',
-            data: { class: classValue, room: roomValue, format: 'table' },
-            success: function(response) {
-                hideLoading();
-                const printWindow = window.open('', '_blank', 'width=800,height=600');
-                printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>รายชื่อนักเรียน</title></head><body>${response}</body></html>`);
-                printWindow.document.close();
-                printWindow.onload = function() { setTimeout(function(){ printWindow.print(); printWindow.close(); }, 500); };
-            },
-            error: function() { hideLoading(); Swal.fire('❌ ข้อผิดพลาด', 'ไม่สามารถสร้างรายการพิมพ์ได้', 'error'); }
-        });
+        
+        // (ดึงปีการศึกษาจาก PHP ที่อยู่ด้านบนของไฟล์)
+        const peeValue = "<?php echo $pee; ?>"; 
+
+        if (!classValue || !roomValue) {
+            Swal.fire('⚠️ โปรดทราบ', 'กรุณาเลือกระดับชั้นและห้องก่อนพิมพ์', 'warning');
+            return;
+        }
+
+        // สร้าง URL ไปยังไฟล์ใหม่ของเรา
+        const url = `print_roster.php?level=${classValue}&room=${roomValue}&year=${peeValue}`;
+
+        // เปิดในแท็บใหม่
+        // (Browser จะเปิดแท็บใหม่, โหลดหน้า print_roster.php,
+        // และไฟล์นั้นจะสั่ง print() ด้วยตัวเอง)
+        window.open(url, '_blank');
     });
 
     // utility functions

@@ -1,19 +1,20 @@
 <?php
-include_once("../config/Database.php");
+// (1) !! KEV: แก้ไขส่วน PHP ด้านบน !!
+require_once(__DIR__ . "/../classes/DatabaseUsers.php");
+use App\DatabaseUsers;
 include_once("../class/UserLogin.php");
-include_once("../class/Student.php");
 include_once("../class/Utils.php");
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+date_default_timezone_set('Asia/Bangkok'); // (เพิ่ม)
 
-// Initialize database connection
-$connectDB = new Database("phichaia_student");
-$db = $connectDB->getConnection();
-
-// Initialize UserLogin class
+$connectDB = new DatabaseUsers();
+$db = $connectDB->getPDO();
 $user = new UserLogin($db);
-$student = new Student($db);
+// (ไม่จำเป็นต้องสร้าง $student = new Student($db); ที่นี่)
+// (สิ้นสุดการแก้ไข PHP)
+
 
 // Fetch terms and pee
 $term = $user->getTerm();
@@ -23,13 +24,19 @@ if (isset($_SESSION['Officer_login'])) {
     $userid = $_SESSION['Officer_login'];
     $userData = $user->userData($userid);
 } else {
-    $sw2 = new SweetAlert2(
-        'คุณยังไม่ได้เข้าสู่ระบบ',
-        'error',
-        '../login.php' // Redirect URL
-    );
-    $sw2->renderAlert();
-    exit;
+    // (เพิ่ม) อนุญาตให้ Admin เข้าหน้านี้ได้ด้วย
+    if (isset($_SESSION['Admin_login'])) {
+        $userid = $_SESSION['Admin_login'];
+        $userData = $user->userData($userid);
+    } else {
+        $sw2 = new SweetAlert2(
+            'คุณยังไม่ได้เข้าสู่ระบบ',
+            'error',
+            '../login.php' // Redirect URL
+        );
+        $sw2->renderAlert();
+        exit;
+    }
 }
 
 
@@ -43,648 +50,374 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">จัดการ RFID</h5>
+                        <h5 class="m-0"><i class="fas fa-id-card"></i> จัดการข้อมูลบัตร RFID</h5>
                     </div>
                 </div>
             </div>
         </div>
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-1">
-                            <div class="bg-white shadow-lg rounded-lg p-6">
-                                <h3 class="text-xl font-semibold mb-4 text-gray-800">ลงทะเบียน RFID</h3>
-                                <form id="rfidFormDirect" class="space-y-4">
-                                    <div>
-                                        <label for="rfid_input" class="block text-sm font-medium text-gray-700">สแกนบัตร RFID</label>
-                                        <input type="text" id="rfid_input" name="rfid_code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
-                                    </div>
-                                    <div class="text-right">
-                                        <button type="button" id="clearBtn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
-                                            ล้าง
-                                        </button>
-                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                            ค้นหา
-                                        </button>
-                                    </div>
-                                </form>
-                                <div id="rfidCheckResult" class="mt-4"></div>
+        
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card card-primary card-outline shadow-sm">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-user-plus"></i> นักเรียนที่ยังไม่มีบัตร (<?php echo "ปี $pee/$term";?>)</h3>
                             </div>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <div class="bg-white shadow-lg rounded-lg p-6">
-                                <h3 class="text-xl font-semibold mb-4 text-gray-800">เลือกนักเรียน</h3>
-                                
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                    <select id="filter_major" class="form-control col-span-1">
-                                        <option value="">ทุกระดับชั้น</option>
-                                    </select>
-                                    <select id="filter_room" class="form-control col-span-1">
-                                        <option value="">ทุกห้อง</option>
-                                    </select>
-                                    
-                                    <div class="col-span-1 text-right">
-                                        <button id="csvToolsBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">
-                                            <i class="fas fa-file-csv"></i> นำเข้า/ส่งออก
-                                        </button>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="filterClass">ชั้น</label>
+                                        <select id="filterClass" class="form-control form-control-sm"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="filterRoom">ห้อง</label>
+                                        <select id="filterRoom" class="form-control form-control-sm"></select>
                                     </div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table id="studentTable" class="table table-bordered table-striped" style="width:100%">
-                                        <thead>
-                                            <tr>
-                                                <th>รหัสนักเรียน</th>
-                                                <th>ชื่อ-นามสกุล</th>
-                                                <th>ระดับชั้น/ห้อง</th>
-                                                <th>สถานะ</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            </tbody>
-                                    </table>
-                                </div>
+                                <table id="studentTable" class="table table-bordered table-striped table-sm" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>เลขที่</th>
+                                            <th>รหัส</th>
+                                            <th>ชื่อ-สกุล</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                </table>
                             </div>
                         </div>
                     </div>
-
-                    <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-800">นักเรียนที่ลงทะเบียนแล้ว</h3>
-                            <button id="printCardRoomBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-print"></i> พิมพ์บัตรตามห้อง
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="rfidTable" class="table table-bordered table-striped" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>รหัส RFID</th>
-                                        <th>ชื่อ-นามสกุล</th>
-                                        <th>ระดับชั้น/ห้อง</th>
-                                        <th>วันที่ลงทะเบียน</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    </tbody>
-                            </table>
+                    <div class="col-lg-6">
+                         <div class="card card-success card-outline shadow-sm">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-user-check"></i> นักเรียนที่มีบัตรแล้ว</h3>
+                            </div>
+                            <div class="card-body">
+                                <table id="rfidTable" class="table table-bordered table-striped table-sm" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>เลขที่</th>
+                                            <th>รหัส</th>
+                                            <th>ชื่อ-สกุล</th>
+                                            <th>RFID Code</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
 
-        <div id="csvModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
-                <div class="p-6">
-                    <div class="flex justify-between items-center border-b pb-3">
-                        <h3 class="text-lg font-semibold">นำเข้า / ส่งออก CSV</h3>
-                        <button id="closeCsvModal" class="text-gray-400 hover:text-gray-600">&times;</button>
+                <div class="card card-info card-outline shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-file-csv"></i> ลงทะเบียนหลายรายการด้วย CSV</h3>
                     </div>
+                    <div class="card-body">
+                        <form id="csvUploadForm" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="csvFilterClass">ชั้น (สำหรับดาวน์โหลด)</label>
+                                <select id="csvFilterClass" class="form-control"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="csvFilterRoom">ห้อง (สำหรับดาวน์โหลด)</label>
+                                <select id="csvFilterRoom" class="form-control"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="d-block">&nbsp;</label>
+                                <button type="button" id="downloadTemplateBtn" class="btn btn-secondary">
+                                    <i class="fas fa-download"></i> โหลดเทมเพลต (ตามห้อง)
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                </div>
 
-                    <div class="mt-4">
-                        <h4 class="font-semibold text-gray-700">1. ดาวน์โหลดเทมเพลต (Export)</h4>
-                        <p class="text-sm text-gray-600 mb-2">เลือกห้องที่ต้องการดาวน์โหลดรายชื่อ เพื่อนำไปกรอก RFID Code</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <select id="csv_major" class="form-control">
-                                <option value="">เลือกระดับชั้น</option>
-                            </select>
-                            <select id="csv_room" class="form-control">
-                                <option value="">เลือกห้อง</option>
-                            </select>
-                        </div>
-                        <button id="downloadCsvBtn" class="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-download"></i> ดาวน์โหลด CSV
-                        </button>
-                    </div>
-
-                    <hr class="my-6">
-
-                    <div class="">
-                        <h4 class="font-semibold text-gray-700">2. อัปโหลดไฟล์ (Import)</h4>
-                        <p class="text-sm text-gray-600 mb-2">อัปโหลดไฟล์ .csv ที่กรอก `rfid_code` เรียบร้อยแล้ว (ระบบจะลงทะเบียนเฉพาะแถวที่มี `stu_id` และ `rfid_code` เท่านั้น)</p>
-                        <form id="csvImportForm" enctype="multipart/form-data">
-                            <input type="file" id="csv_file_input" name="csv_file" class="block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-full file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-indigo-50 file:text-indigo-700
-                                hover:file:bg-indigo-100" accept=".csv" required>
+                            <hr class="w-100 my-3">
                             
-                            <button type="submit" id="uploadCsvBtn" class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน
-                            </button>
+                            <div class="col-md-6">
+                                <label class="form-label" for="csv_file_input">เลือกไฟล์ CSV (stu_id, rfid_code)</label>
+                                <input type="file" class="form-control" id="csv_file_input" name="rfid_csv_file" accept=".csv" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="d-block">&nbsp;</label>
+                                <button type="submit" id="uploadCsvBtn" class="btn btn-primary"><i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน</button>
+                            </div>
                         </form>
-                        <div id="csvImportResult" class="mt-2 text-sm"></div>
+                        <div id="uploadResult" class="mt-3"></div>
                     </div>
-
                 </div>
-            </div>
-        </div>
 
-        <div id="studentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
-                <div class="p-6">
-                    <div class="flex justify-between items-center border-b pb-3">
-                        <h3 class="text-lg font-semibold">ลงทะเบียนให้นักเรียน</h3>
-                        <button id="closeModal" class="text-gray-400 hover:text-gray-600">&times;</button>
-                    </div>
-                    <div class="mt-4 text-center">
-                        <img id="studentPhoto" src="../images/student_avatar.png" alt="Student Photo" class="w-24 h-24 rounded-full mx-auto mb-4 border border-gray-300">
-                        <h4 id="studentName" class="text-xl font-semibold"></h4>
-                        <p id="studentId" class="text-gray-600"></p>
-                        <p id="studentClass" class="text-gray-600"></p>
-                    </div>
-                    <form id="rfidModalForm" class="mt-6 space-y-4">
-                        <div>
-                            <label for="rfid_input_modal" class="block text-sm font-medium text-gray-700">สแกนบัตร RFID</label>
-                            <input type="text" id="rfid_input_modal" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="text-right">
-                            <button type="button" id="cancelModal" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
-                                ยกเลิก
-                            </button>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                                บันทึก
-                            </button>
-                        </div>
-                    </form>
-                </div>
             </div>
-        </div>
-
-        <?php include_once('../footer.php'); ?>
+        </section>
+        
     </div>
-
+    <?php require_once('../footer.php'); ?>
+</div>
 <?php require_once('script.php'); ?>
+<script>
+    const STUDENT_API_URL = '../controllers/StudentController.php';
+    const RFID_API_URL = '../controllers/StudentRfidController.php';
 
-    <script>
-    $(document).ready(function() {
-        // --- ตัวแปร ---
-        let majors = []; // ยังคงใช้สำหรับปุ่ม "พิมพ์บัตรตามห้อง"
-        let rooms = []; // ยังคงใช้สำหรับปุ่ม "พิมพ์บัตรตามห้อง"
-        let selectedStudentData = null; // เก็บข้อมูลนักเรียนที่ถูกเลือกชั่วคราว
-        let rfidTableInstance = null; // เก็บ instance ตาราง RFID
-        let studentTableInstance = null; // เก็บ instance ตารางนักเรียน
+    let studentTable;
+    let rfidTable;
 
-        // --- ภาษาไทยสำหรับ DataTables ---
-        const datatableLang = {
-            search: "ค้นหา:",
-            lengthMenu: "แสดง _MENU_ รายการ",
-            info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-            infoEmpty: "ไม่มีข้อมูล",
-            infoFiltered: "(กรองจาก _MAX_ รายการทั้งหมด)",
-            paginate: {
-                previous: "ก่อนหน้า",
-                next: "ถัดไป"
+    // --- 1. โหลด Dropdown ฟิลเตอร์ ---
+    // (!! KEV: แก้ไขฟังก์ชันนี้ !!)
+    async function loadDropdownFilters() {
+        try {
+            const res = await $.ajax({
+                url: STUDENT_API_URL + '?action=get_filters',
+                type: 'GET',
+                dataType: 'json'
+            });
+            
+            // (กำหนดเป้าหมาย Dropdown ทั้ง 4 ช่อง)
+            const $classSelTable = $('#filterClass').html('<option value="">-- เลือกชั้น --</option>');
+            const $roomSelTable = $('#filterRoom').html('<option value="">-- เลือกห้อง --</option>');
+            const $classSelCsv = $('#csvFilterClass').html('<option value="">-- เลือกชั้น --</option>');
+            const $roomSelCsv = $('#csvFilterRoom').html('<option value="">-- เลือกห้อง --</option>');
+            
+            // (วนลูปใส่ข้อมูล)
+            res.majors.forEach(cls => {
+                $classSelTable.append(`<option value="${cls}">${cls}</option>`);
+                $classSelCsv.append(`<option value="${cls}">${cls}</option>`);
+            });
+            res.rooms.forEach(room => {
+                $roomSelTable.append(`<option value="${room}">${room}</option>`);
+                $roomSelCsv.append(`<option value="${room}">${room}</option>`);
+            });
+            
+            setupStudentDataTable();
+
+        } catch (e) {
+            console.error("Failed to load filters", e);
+        }
+    }
+
+    // --- 2. ตั้งค่าตารางนักเรียน (ยังไม่มีบัตร) ---
+    function setupStudentDataTable() {
+        studentTable = $('#studentTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": STUDENT_API_URL + '?action=search_student', // (เรียก StudentController)
+                "type": "POST",
+                "data": function(d) {
+                    d.major = $('#filterClass').val();
+                    d.room = $('#filterRoom').val();
+                }
             },
-            zeroRecords: "ไม่พบข้อมูลที่ตรงกัน",
-            processing: "กำลังประมวลผล..."
-        };
-
-        // --- 1. โหลดฟิลเตอร์ Dropdown (ระดับชั้น/ห้อง) ---
-        function loadDropdownFilters() {
-            // ใช้ action ใหม่ที่สร้างใน StudentController.php
-            $.getJSON('../controllers/StudentController.php?action=get_filters', function(data) {
-                majors = data.majors || [];
-                rooms = data.rooms || [];
-
-                const $major = $('#filter_major');
-                const $room = $('#filter_room');
-                $major.empty().append('<option value="">ทุกระดับชั้น</option>');
-                majors.forEach(m => $major.append(`<option value="${m}">${m}</option>`));
-                $room.empty().append('<option value="">ทุกห้อง</option>');
-                rooms.forEach(r => $room.append(`<option value="${r}">${r}</option>`));
-
-                // --- 2. หลังจากโหลดฟิลเตอร์เสร็จ ค่อยเริ่มโหลดตารางนักเรียน ---
-                setupStudentDataTable();
-            }).fail(function() {
-                console.error("Failed to load filters");
-                // แม้ว่าจะล้มเหลว ก็ยังต้องโหลดตาราง
-                setupStudentDataTable();
-            });
-        }
-
-        // --- 3. ตั้งค่าตารางนักเรียน (Server-Side) ---
-        function setupStudentDataTable() {
-            if (studentTableInstance) {
-                studentTableInstance.destroy();
-            }
-
-            studentTableInstance = $('#studentTable').DataTable({
-                processing: true,
-                serverSide: true,
-                searching: true, // เปิดการค้นหาของ DataTables (จะส่งไปให้ Server)
-                paging: true,
-                info: true,
-                pageLength: 25, // แสดงทีละ 25 แถว
-                order: [
-                    [2, 'asc'],
-                    [1, 'asc']
-                ], // เรียงตาม ห้อง -> ชื่อ
-                ajax: {
-                    url: '../controllers/StudentController.php?action=list_ssp',
-                    type: 'POST',
-                    data: function(d) {
-                        // ส่งค่าจากฟิลเตอร์ที่เราสร้างเอง (ห้อง, ระดับชั้น) ไปด้วย
-                        d.filter_major = $('#filter_major').val();
-                        d.filter_room = $('#filter_room').val();
-                    }
-                },
-                columns: [{
-                    data: 'Stu_id'
-                }, {
-                    data: 'Stu_name', // ใช้ Stu_name แค่เป็นตัวแทน
-                    render: function(data, type, row) {
-                        return (row.Stu_pre || '') + (row.Stu_name || '') + ' ' + (row.Stu_sur || '');
-                    }
-                }, {
-                    data: 'Stu_room', // ใช้ Stu_room แค่เป็นตัวแทน
-                    render: function(data, type, row) {
-                        return 'ม.' + (row.Stu_major || '') + '/' + (row.Stu_room || '');
-                    }
-                }, {
-                    data: 'rfid_id', // คอลัมน์นี้มาจาก JOIN ใน Model
-                    orderable: false,
-                    render: function(data, type, row) {
-                        // data คือค่าของ rfid_id (ถ้ามีค่า = ลงทะเบียนแล้ว)
-                        if (data) {
-                            return '<span class="bg-green-100 text-green-700 px-3 py-1 rounded font-semibold">ถูกเลือกไปแล้ว</span>';
-                        } else {
-                            // ส่งข้อมูลนักเรียน (row) ทั้งหมดไปในปุ่ม
-                            const studentJson = encodeURIComponent(JSON.stringify(row));
-                            return `<button class="selectStudent bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" data-student-json="${studentJson}">เลือก</button>`;
-                        }
-                    }
-                }],
-                language: datatableLang
-            });
-
-            // --- 4. เมื่อมีการเปลี่ยนแปลงฟิลเตอร์ ให้โหลดตารางใหม่ ---
-            $('#filter_major, #filter_room').on('change', function() {
-                studentTableInstance.draw(); // สั่งให้ DataTables โหลดข้อมูลใหม่ (มันจะเรียก ajax)
-            });
-        }
-
-        // --- 5. ตั้งค่าตาราง RFID (Server-Side) ---
-        function setupRfidDataTable() {
-            if (rfidTableInstance) {
-                rfidTableInstance.destroy();
-            }
-
-            rfidTableInstance = $('#rfidTable').DataTable({
-                processing: true,
-                serverSide: true,
-                searching: true,
-                paging: true,
-                pageLength: 25,
-                order: [
-                    [3, 'desc']
-                ], // เรียงตามวันที่ลงทะเบียนล่าสุด
-                ajax: {
-                    url: '../controllers/StudentRfidController.php?action=list_ssp',
-                    type: 'POST'
-                },
-                columns: [{
-                    data: 'rfid_code'
-                }, {
-                    data: 'stu_name_full' // ใช้คอลัมน์ที่ Model สร้างให้
-                }, {
-                    data: 'stu_major',
-                    render: function(data, type, row) {
-                        return 'ม.' + (row.stu_major || '') + '/' + (row.stu_room || '');
-                    }
-                }, {
-                    data: 'registered_at',
-                    render: function(data, type, row) {
-                        return data ? new Date(data).toLocaleString('th-TH') : '';
-                    }
-                }, {
-                    data: 'id',
-                    orderable: false,
-                    render: function(data, type, row) {
-                        return `<button class="editRfid bg-yellow-500 text-white px-2 py-1 rounded" data-id="${data}" data-rfid="${row.rfid_code}" data-name="${row.stu_name_full}">แก้ไข</button>
-                                <button class="deleteRfid bg-red-500 text-white px-2 py-1 rounded" data-id="${data}" data-name="${row.stu_name_full}">ลบ</button>`;
-                    }
-                }],
-                language: datatableLang
-            });
-        }
-
-        // --- 6. Event Listeners ---
-
-        // --- ฟังก์ชันสำหรับ Refresh ตาราง ---
-        function refreshTables() {
-            if (studentTableInstance) studentTableInstance.draw(false); // false = ไม่กลับไปหน้าแรก
-            if (rfidTableInstance) rfidTableInstance.draw(false);
-        }
-
-        // --- เลือกนักเรียนจากตาราง ---
-        $('#studentTable').on('click', '.selectStudent', function() {
-            const studentJson = decodeURIComponent($(this).data('student-json'));
-            const stu = JSON.parse(studentJson);
-
-            selectedStudentData = stu; // เก็บข้อมูลนักเรียนที่เลือก
-            showStudentModal(stu);
-        });
-
-        // --- แสดง Modal ---
-        function showStudentModal(stu) {
-            selectedStudentData = stu; // เก็บข้อมูลไว้เผื่อ submit
-            $('#studentName').text((stu.Stu_pre || '') + (stu.Stu_name || '') + ' ' + (stu.Stu_sur || ''));
-            $('#studentId').text(stu.Stu_id || '');
-            $('#studentClass').text('ม.' + (stu.Stu_major || '') + '/' + (stu.Stu_room || ''));
-            $('#studentPhoto').attr('src', stu.Stu_picture ? `../${stu.Stu_picture}` : '../images/student_avatar.png');
-            $('#studentModal').fadeIn().css('display', 'flex'); // ใช้ flex เพื่อจัดกลาง
-            // โฟกัสที่ input RFID
-            setTimeout(() => $('#rfid_input_modal').val('').focus(), 100);
-        }
-
-        // --- ปิด Modal ---
-        function closeModal() {
-            $('#studentModal').fadeOut();
-            selectedStudentData = null;
-            $('#rfid_input_modal').val('');
-        }
-        $('#closeModal, #cancelModal').on('click', closeModal);
-
-        // --- Submit Form ใน Modal ---
-        $('#rfidModalForm').submit(function(e) {
-            e.preventDefault();
-            if (!selectedStudentData) return;
-
-            const stu_id = selectedStudentData.Stu_id;
-            const rfid_code = $('#rfid_input_modal').val();
-
-            if (!stu_id || !rfid_code) {
-                Swal.fire('ผิดพลาด!', 'ข้อมูลไม่ครบถ้วน', 'error');
-                return;
-            }
-
-            $.post('../controllers/StudentRfidController.php?action=register', {
-                stu_id,
-                rfid_code
-            }, function(res) {
-                if (res.success) {
-                    Swal.fire('สำเร็จ!', 'ลงทะเบียน RFID เรียบร้อยแล้ว', 'success');
-                    closeModal();
-                    refreshTables(); // โหลดตารางใหม่
-                } else {
-                    Swal.fire('ผิดพลาด!', res.error || 'ไม่สามารถลงทะเบียนได้', 'error');
+            "columns": [
+                { "data": "Stu_no", "width": "10%" },
+                { "data": "Stu_id", "width": "20%" },
+                { "data": null, "render": (data, type, row) => `${row.Stu_name} ${row.Stu_sur}` },
+                { 
+                    "data": "Stu_id",
+                    "render": (data) => `<button class="btn btn-primary btn-sm registerBtn" data-id="${data}">ลงทะเบียน</button>`,
+                    "orderable": false, "width": "20%"
                 }
-            }, 'json').fail(function() {
-                Swal.fire('ผิดพลาด!', 'การเชื่อมต่อล้มเหลว', 'error');
-            });
+            ],
+            "language": { "zeroRecords": "ไม่พบนักเรียนที่ยังไม่มีบัตร", "processing": "กำลังโหลด..." }
         });
 
-        // --- ปุ่ม "ล้าง" ในฟอร์มหลัก ---
-        $('#clearBtn').on('click', function() {
-            $('#rfid_input').val('').focus();
-            $('#rfidCheckResult').html('');
-        });
+        // (Event: เมื่อเปลี่ยนฟิลเตอร์)
+        $('#filterClass, #filterRoom').on('change', () => studentTable.ajax.reload());
+    }
 
-        // --- Submit ฟอร์มหลัก (ค้นหา RFID) ---
-        $('#rfidFormDirect').submit(function(e) {
-            e.preventDefault();
-            const rfid_code = $('#rfid_input').val();
-            $('#rfidCheckResult').html('<p class="text-blue-500">กำลังตรวจสอบ...</p>');
-
-            $.post('../controllers/StudentRfidController.php?action=getByRfid', {
-                rfid_code
-            }, function(res) {
-                if (res.student) {
-                    const stu = res.student;
-                    $('#rfidCheckResult').html(`
-                        <div class="bg-green-100 border border-green-300 text-green-800 p-3 rounded">
-                            <p class="font-semibold">RFID นี้ลงทะเบียนแล้ว:</p>
-                            <p>${stu.Stu_id} - ${stu.Stu_pre || ''}${stu.Stu_name} ${stu.Stu_sur}</p>
-                            <p>ม.${stu.Stu_major}/${stu.Stu_room}</p>
-                        </div>
-                    `);
-                } else if (res.error) {
-                    $('#rfidCheckResult').html(`<p class="text-red-500">${res.error}</p>`);
-                } else {
-                    $('#rfidCheckResult').html(`
-                        <p class="text-yellow-600 font-semibold">RFID นี้ยังไม่ถูกลงทะเบียน</p>
-                        <p>กรุณาเลือกนักเรียนจากตารางด้านล่างเพื่อลงทะเบียน</p>
-                    `);
+    // --- 3. ตั้งค่าตาราง RFID (มีบัตรแล้ว) ---
+    function setupRfidDataTable() {
+        rfidTable = $('#rfidTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": RFID_API_URL + '?action=list_ssp', // (เรียก StudentRfidController)
+                "type": "POST"
+            },
+            "columns": [
+                { "data": "stu_no", "width": "10%" },
+                { "data": "stu_id", "width": "20%" },
+                { "data": null, "render": (data, type, row) => `${row.stu_name} ${row.stu_sur}` },
+                { "data": "rfid_code" },
+                { 
+                    "data": "id",
+                    "render": (data, type, row) => `
+                        <button class="btn btn-warning btn-sm editBtn" data-id="${data}" data-rfid="${row.rfid_code}" data-name="${row.stu_name}">แก้ไข</button>
+                        <button class="btn btn-danger btn-sm deleteBtn" data-id="${data}" data-name="${row.stu_name}">ลบ</button>
+                    `,
+                    "orderable": false, "width": "20%"
                 }
-            }, 'json').fail(function() {
-                $('#rfidCheckResult').html('<p class="text-red-500">ไม่สามารถเชื่อมต่อได้</p>');
-            });
+            ],
+             "order": [[ 0, "asc" ]], // (เรียงตามเลขที่)
+             "language": { "zeroRecords": "ไม่พบนักเรียนที่มีบัตร", "processing": "กำลังโหลด..." }
         });
+    }
 
-        // --- แก้ไข RFID (จากตาราง RFID) ---
-        $('#rfidTable').on('click', '.editRfid', async function() {
-            const id = $(this).data('id');
-            const oldRfid = $(this).data('rfid');
-            const name = $(this).data('name');
+    // --- 4. ฟังก์ชันรีเฟรชตาราง ---
+    function refreshTables() {
+        studentTable.ajax.reload(null, false);
+        rfidTable.ajax.reload(null, false);
+    }
 
-            const {
-                value: newRfid
-            } = await Swal.fire({
-                title: `แก้ไข RFID ของ ${name}`,
+    // --- 5. จัดการ Event การลงทะเบียน, แก้ไข, ลบ ---
+    $(document).ready(function() {
+        
+        // (Event: ลงทะเบียน)
+        $('#studentTable').on('click', '.registerBtn', async function() {
+            const stuId = $(this).data('id');
+            const { value: rfidCode } = await Swal.fire({
+                title: 'ลงทะเบียน RFID',
+                text: `ป้อนรหัส RFID สำหรับนักเรียน ID: ${stuId}`,
                 input: 'text',
-                inputValue: oldRfid,
-                inputLabel: 'รหัส RFID ใหม่',
+                inputPlaceholder: 'แตะบัตร หรือ ป้อนรหัส',
                 showCancelButton: true,
                 confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'กรุณากรอกรหัส RFID!'
-                    }
-                }
+                cancelButtonText: 'ยกเลิก'
             });
 
-            if (newRfid && newRfid !== oldRfid) {
-                $.post('../controllers/StudentRfidController.php?action=update', {
-                    id: id,
-                    rfid_code: newRfid
-                }, function(res) {
+            if (rfidCode) {
+                $.post(RFID_API_URL + '?action=register', { stu_id: stuId, rfid_code: rfidCode }, (res) => {
                     if (res.success) {
-                        Swal.fire('สำเร็จ!', 'อัปเดต RFID เรียบร้อยแล้ว', 'success');
+                        Swal.fire('สำเร็จ', 'ลงทะเบียน RFID เรียบร้อย', 'success');
                         refreshTables();
                     } else {
-                        Swal.fire('ผิดพลาด!', res.error || 'ไม่สามารถอัปเดตได้', 'error');
+                        Swal.fire('ล้มเหลว', res.error, 'error');
                     }
                 }, 'json');
             }
         });
 
-        // --- ลบ RFID (จากตาราง RFID) ---
-        $('#rfidTable').on('click', '.deleteRfid', function() {
+        // (Event: แก้ไข)
+        $('#rfidTable').on('click', '.editBtn', async function() {
+            const id = $(this).data('id');
+            const oldRfid = $(this).data('rfid');
+            const name = $(this).data('name');
+            
+             const { value: newRfidCode } = await Swal.fire({
+                title: `แก้ไข RFID ของ ${name}`,
+                input: 'text',
+                inputValue: oldRfid,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก'
+            });
+            
+            if (newRfidCode && newRfidCode !== oldRfid) {
+                 $.post(RFID_API_URL + '?action=update', { id: id, rfid_code: newRfidCode }, (res) => {
+                    if (res.success) {
+                        Swal.fire('สำเร็จ', 'แก้ไข RFID เรียบร้อย', 'success');
+                        refreshTables();
+                    } else {
+                        Swal.fire('ล้มเหลว', res.error, 'error');
+                    }
+                }, 'json');
+            }
+        });
+
+        // (Event: ลบ)
+        $('#rfidTable').on('click', '.deleteBtn', async function() {
             const id = $(this).data('id');
             const name = $(this).data('name');
 
-            Swal.fire({
+            const result = await Swal.fire({
                 title: `ลบ RFID ของ ${name}?`,
-                text: "คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้!",
+                text: 'ยืนยันการลบข้อมูลนี้',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ใช่, ลบเลย!',
+                confirmButtonText: 'ใช่, ลบเลย',
                 cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('../controllers/StudentRfidController.php?action=delete', {
-                        id
-                    }, function(res) {
-                        if (res.success) {
-                            Swal.fire('ลบแล้ว!', 'ข้อมูล RFID ถูกลบแล้ว', 'success');
-                            refreshTables();
-                        } else {
-                            Swal.fire('ผิดพลาด!', 'ไม่สามารถลบได้', 'error');
-                        }
-                    }, 'json');
-                }
             });
-        });
 
-        // --- พิมพ์บัตรตามห้อง ---
-        $('#printCardRoomBtn').on('click', function() {
-            Swal.fire({
-                title: 'เลือกห้องสำหรับพิมพ์บัตร',
-                html: `
-                    <div class="grid grid-cols-2 gap-4 p-4">
-                        <select id="swal_major" class="border border-blue-200 rounded px-2 py-1">
-                            <option value="">เลือกระดับชั้น</option>
-                            ${majors.map(m => `<option value="${m}">${m}</option>`).join('')}
-                        </select>
-                        <select id="swal_room" class="border border-blue-200 rounded px-2 py-1">
-                            <option value="">เลือกห้อง</option>
-                            ${rooms.map(r => `<option value="${r}">${r}</option>`).join('')}
-                        </select>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'พิมพ์บัตร',
-                cancelButtonText: 'ยกเลิก',
-                preConfirm: () => {
-                    const major = $('#swal_major').val();
-                    const room = $('#swal_room').val();
-                    if (!major || !room) {
-                        Swal.showValidationMessage('กรุณาเลือกระดับชั้นและห้อง');
-                        return false;
+            if (result.isConfirmed) {
+                $.post(RFID_API_URL + '?action=delete', { id: id }, (res) => {
+                    if (res.success) {
+                        Swal.fire('สำเร็จ', 'ลบข้อมูลเรียบร้อย', 'success');
+                        refreshTables();
+                    } else {
+                        Swal.fire('ล้มเหลว', res.error || 'ไม่สามารถลบได้', 'error');
                     }
-                    return {
-                        major,
-                        room
-                    };
-                }
-            }).then(result => {
-                if (result.isConfirmed && result.value) {
-                    const {
-                        major,
-                        room
-                    } = result.value;
-                    window.open(
-                        'print_card_room.php?major=' + encodeURIComponent(major) +
-                        '&room=' + encodeURIComponent(room),
-                        '_blank'
-                    );
-                }
-            });
-        });
-        // --- 8. CSV Tools Modal ---
-
-    // --- เปิด Modal ---
-    $('#csvToolsBtn').on('click', function() {
-        // คัดลอก options จาก dropdown หลักมาใส่ใน modal
-        $('#csv_major').html($('#filter_major').html());
-        $('#csv_room').html($('#filter_room').html());
-        $('#csvImportResult').html('');
-        $('#csv_file_input').val('');
-        $('#csvModal').fadeIn().css('display', 'flex');
-    });
-
-    // --- ปิด Modal ---
-    function closeCsvModal() {
-        $('#csvModal').fadeOut();
-    }
-    $('#closeCsvModal').on('click', closeCsvModal);
-
-    // --- 8.1. จัดการการดาวน์โหลด (Export) ---
-    $('#downloadCsvBtn').on('click', function() {
-        const major = $('#csv_major').val();
-        const room = $('#csv_room').val();
-
-        if (!major || !room) {
-            Swal.fire('ผิดพลาด!', 'กรุณาเลือกระดับชั้นและห้อง', 'error');
-            return;
-        }
-
-        // สร้าง URL สำหรับดาวน์โหลด
-        const url = `../controllers/StudentController.php?action=export_csv&major=${encodeURIComponent(major)}&room=${encodeURIComponent(room)}`;
-        
-        // สั่งดาวน์โหลด (ไม่ต้องใช้ ajax)
-        window.location.href = url;
-    });
-
-
-    // --- 8.2. จัดการการอัปโหลด (Import) ---
-    $('#csvImportForm').on('submit', function(e) {
-        e.preventDefault();
-
-        const fileInput = $('#csv_file_input')[0];
-        if (!fileInput.files || fileInput.files.length === 0) {
-            Swal.fire('ผิดพลาด!', 'กรุณาเลือกไฟล์ CSV', 'error');
-            return;
-        }
-
-        const formData = new FormData(this);
-        const $resultDiv = $('#csvImportResult');
-        const $uploadBtn = $('#uploadCsvBtn');
-        
-        $uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล...');
-        $resultDiv.html('<p class="text-blue-600">กำลังอัปโหลดและลงทะเบียน...</p>');
-
-        $.ajax({
-            url: '../controllers/StudentController.php?action=import_csv',
-            type: 'POST',
-            data: formData,
-            processData: false, // สำคัญมาก
-            contentType: false, // สำคัญมาก
-            dataType: 'json',
-            success: function(res) {
-                if (res.status === 'completed') {
-                    const r = res.report;
-                    const errorDetails = r.errors.length > 0 ? `<br><small class='text-red-500'>รายละเอียด: ${r.errors.join(', ')}</small>` : '';
-                    
-                    $resultDiv.html(
-                        `<p class="text-green-600 font-semibold">นำเข้าสำเร็จ!</p>` +
-                        `<ul>` +
-                        `<li>สำเร็จ: ${r.success} รายการ</li>` +
-                        `<li>ล้มเหลว (ซ้ำซ้อน/ผิดพลาด): ${r.failed} รายการ ${errorDetails}</li>` +
-                        `<li>ข้าม (ข้อมูลไม่ครบ): ${r.skipped} รายการ</li>` +
-                        `</ul>`
-                    );
-                    
-                    // รีเฟรชตารางทั้งสอง
-                    refreshTables(); 
-                } else {
-                    $resultDiv.html(`<p class="text-yellow-600">${res.message || 'ไฟล์ว่างเปล่า'}</p>`);
-                }
-                $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน');
-                $('#csv_file_input').val(''); // ล้างไฟล์ที่เลือก
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                let errorMsg = jqXHR.responseJSON ? jqXHR.responseJSON.error : 'การเชื่อมต่อล้มเหลว';
-                $resultDiv.html(`<p class="text-red-500"><strong>เกิดข้อผิดพลาด:</strong> ${errorMsg}</p>`);
-                $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลดและลงทะเบียน');
+                }, 'json');
             }
         });
-    });
+
+        // --- 6. (Event: อัปโหลด CSV) ---
+         $('#csvUploadForm').on('submit', function(e) {
+            e.preventDefault();
+            const $form = $(this);
+            const $uploadBtn = $('#uploadCsvBtn');
+            const $resultDiv = $('#uploadResult');
+            const formData = new FormData(this);
+
+            $uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> กำลังอัปโหลด...');
+            $resultDiv.html('');
+
+            $.ajax({
+                url: STUDENT_API_URL + '?action=upload_rfid_csv', // (เรียก StudentController)
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'completed') {
+                        const r = res.report;
+                        let errorDetails = '';
+                        if (r.errors && r.errors.length > 0) {
+                            errorDetails = ` (${r.errors.slice(0, 5).join(', ')}...)`;
+                        }
+                        
+                        // (!! KEV: อัปเดตข้อความรายงาน !!)
+                        $resultDiv.html(
+                            `<p class="text-green-600 font-bold">อัปโหลดสำเร็จ!</p>` +
+                            `<ul>` +
+                            `<li><i class="fas fa-plus text-green-500"></i> ลงทะเบียนใหม่: ${r.success} รายการ</li>` +
+                            `<li><i class="fas fa-check text-blue-500"></i> อัปเดต (เขียนทับ): ${r.updated} รายการ</li>` +
+                            `<li><i class="fas fa-times text-red-500"></i> ล้มเหลว (ซ้ำ/ผิดพลาด): ${r.failed} รายการ ${errorDetails}</li>` +
+                            `<li><i class="fas fa-minus text-gray-400"></i> ข้าม (ข้อมูลไม่ครบ): ${r.skipped} รายการ</li>` +
+                            `</ul>`
+                        );
+                        
+                        refreshTables(); 
+                    } else {
+                        $resultDiv.html(`<p class="text-yellow-600">${res.message || 'ไฟล์ว่างเปล่า'}</p>`);
+                    }
+                    $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลด');
+                    $('#csv_file_input').val(''); 
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    let errorMsg = jqXHR.responseJSON ? jqXHR.responseJSON.error : 'การเชื่อมต่อล้มเหลว';
+                    $resultDiv.html(`<p class="text-red-500"><strong>เกิดข้อผิดพลาด:</strong> ${errorMsg}</p>`);
+                    $uploadBtn.prop('disabled', false).html('<i class="fas fa-upload"></i> อัปโหลด');
+                }
+            });
+        });
+
+        //
+        // !! KEV: แก้ไข Event Listener นี้ !!
+        // (Event: ดาวน์โหลดเทมเพลตตามห้อง)
+        //
+        $('#downloadTemplateBtn').on('click', function() {
+            // (1. ดึงค่าจากฟิลเตอร์ "CSV" ใหม่)
+            const major = $('#csvFilterClass').val();
+            const room = $('#csvFilterRoom').val();
+
+            if (!major || !room) {
+                Swal.fire('โปรดเลือก', 'กรุณาเลือก "ชั้น" และ "ห้อง" (สำหรับดาวน์โหลด)', 'info');
+                return;
+            }
+
+            // (2. สร้าง URL ไปยัง StudentRfidController)
+            const url = `${RFID_API_URL}?action=download_unregistered_csv&major=${encodeURIComponent(major)}&room=${encodeURIComponent(room)}`;
+            
+            // (3. สั่งดาวน์โหลด)
+            window.location.href = url;
+        });
 
         // --- 7. โหลดข้อมูลเมื่อเริ่มต้น ---
-        loadDropdownFilters(); // <-- เริ่มจากโหลดฟิลเตอร์
-        setupRfidDataTable(); // <-- โหลดตาราง RFID
-        
-        // --- Autofocus (เหมือนเดิม) ---
-        setTimeout(() => { $('#rfid_input').focus(); }, 500);
+        loadDropdownFilters(); 
+        setupRfidDataTable(); 
     });
-    </script>
+</script>
 </body>
 </html>

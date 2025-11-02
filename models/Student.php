@@ -23,7 +23,7 @@ class Student
     public function getAll($filters = []) 
     {
         $sql = "SELECT 
-            Stu_id, Stu_no, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status, Stu_pre 
+            * 
             FROM student";
         
         $whereClause = " WHERE 1=1";
@@ -84,40 +84,63 @@ class Student
         ];
     }
     
-    public function getById($id)
-    {
-        $sql = "SELECT * FROM student WHERE Stu_id = :id";
-        $stmt = $this->db->query($sql, ['id' => $id]);
-        return $stmt->fetch(); // (แก้จาก fetchAll เป็น fetch เพราะ ID ควรได้แค่ 1 แถว)
-    }
+    // In a method like getById($id)
+        public function getById($id) 
+        {
+            $sql = "SELECT * FROM student WHERE Stu_id = :id";
+            // Change to use your query() method and pass params as the 2nd argument
+            $stmt = $this->db->query($sql, ['id' => $id]); // <-- THIS IS THE FIX
+            return $stmt->fetch();
+        }
 
-    public function batchRegisterRfid($rfid_data)
+   /**
+     * ลงทะเบียน หรือ อัปเดต RFID จาก CSV (แบบ Batch)
+     * @param array $rfid_data [['stu_id' => '...', 'rfid_code' => '...'], ...]
+     * @return array รายงานผล
+     */
+    public function batchRegisterOrUpdateRfid($rfid_data)
     {
-        $report = ['success' => 0, 'failed' => 0, 'skipped' => 0, 'errors' => []];
-        $rfidModel = new \App\Models\StudentRfid($this->pdo); 
+        // (เพิ่ม 'updated' เข้าไปใน report)
+        $report = ['success' => 0, 'updated' => 0, 'failed' => 0, 'skipped' => 0, 'errors' => []];
+        
+        // (ส่ง $this->db (DatabaseUsers object) เข้าไป)
+        $rfidModel = new \App\Models\StudentRfid($this->db); 
 
         foreach ($rfid_data as $data) {
             $stu_id = trim($data['stu_id']);
-            $rfid_code = trim($data['rfid_code']);
+            $rfid_code = trim($data['rfid_code'] ?? ''); // (รองรับ rfid_code ว่าง)
 
+            // ถ้าไม่มี rfid_code หรือ stu_id ให้ข้าม
             if (empty($stu_id) || empty($rfid_code)) {
                 $report['skipped']++;
                 continue;
             }
-            $result = $rfidModel->register($stu_id, $rfid_code);
 
-            if ($result['status'] === 'success' || $result['status'] === 'updated') {
-                $report['success']++;
-            } else if ($result['status'] === 'skipped') {
-                 $report['skipped']++;
+            // (ตรรกะใหม่) ตรวจสอบว่ามีนักเรียนนี้ในตาราง rfid หรือยัง
+            $existingRfidRecord = $rfidModel->getByStudent($stu_id);
+
+            if ($existingRfidRecord) {
+                // (ถ้ามี) -> ให้อัปเดต
+                $result = $rfidModel->updateByStudentId($stu_id, $rfid_code);
+                if ($result['status'] === 'updated') {
+                    $report['updated']++;
+                } else {
+                    $report['failed']++;
+                    $report['errors'][] = "Stu_id $stu_id: " . ($result['message'] ?? 'Update failed');
+                }
             } else {
-                $report['failed']++;
-                $report['errors'][] = $result['message'];
+                // (ถ้าไม่มี) -> ให้ลงทะเบียนใหม่
+                $result = $rfidModel->register($stu_id, $rfid_code);
+                 if ($result['status'] === 'success') {
+                    $report['success']++;
+                } else {
+                    $report['failed']++;
+                    $report['errors'][] = "Stu_id $stu_id: " . ($result['message'] ?? 'Register failed');
+                }
             }
         }
         return $report;
     }
-
     //
     // !! KEV: นี่คือเมธอดที่ขาดไป !!
     //
@@ -273,5 +296,136 @@ class Student
         $this->db->query($sql, ['password' => $id, 'id' => $id]);
         return true;
     }
+    
+    /**
+     * ดึงรายชื่อนักเรียนจากระดับชั้นและห้อง (สำหรับหน้าพิมพ์)
+     *
+     * @param int $class_level  (เช่น 1, 2, 3...)
+     * @param int $room_number  (เช่น 1, 2, 3...)
+     * @return array รายชื่อนักเรียนที่ยังเรียนอยู่ (status = 1)
+     */
+    public function getByClassAndRoom($class_level, $room_number)
+    {
+        // เลือกฟิลด์ที่จำเป็นสำหรับหน้าพิมพ์
+        // และรวมชื่อ-สกุล (CONCAT)
+        $sql = "SELECT 
+                    Stu_no, 
+                    Stu_id, 
+                    Stu_pre,
+                    CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) AS Stu_name 
+                FROM student 
+                WHERE Stu_major = :class_level 
+                  AND Stu_room = :room_number
+                  AND Stu_status = '1'
+                ORDER BY Stu_no ASC"; // (สำคัญมาก: ต้องเรียงตามเลขที่)
+        
+        $params = [
+            'class_level' => $class_level,
+            'room_number' => $room_number
+        ];
+        
+        // ใช้ fetchAll() เพื่อดึงนักเรียนทั้งหมดในห้อง
+        return $this->db->query($sql, $params)->fetchAll();
+    }
+
+    /**
+     * (เพิ่มใหม่) ดึงข้อมูลนักเรียนที่ยังไม่มี RFID (สำหรับ DataTables SSP ใน rfid.php)
+     * @param array $params (ค่าที่ส่งมาจาก DataTables: draw, start, length, search, major, room)
+     * @return array
+     */
+    public function getStudentsWithoutRfid($params)
+    {
+        $draw = intval($params['draw'] ?? 0);
+        $start = intval($params['start'] ?? 0);
+        $length = intval($params['length'] ?? 10);
+        $searchValue = $params['search']['value'] ?? '';
+        
+        // (ฟิลเตอร์ที่ส่งมาจาก rfid.php)
+        $major = $params['major'] ?? '';
+        $room = $params['room'] ?? '';
+
+        $baseQuery = "FROM student s LEFT JOIN student_rfid r ON s.Stu_id = r.stu_id";
+        // (เงื่อนไขหลัก: สถานะ 1 (ปกติ) และยังไม่มีในตาราง rfid)
+        $baseWhere = " WHERE s.Stu_status = '1' AND r.id IS NULL"; 
+        
+        $filterWhere = "";
+        $queryParams = [];
+
+        if (!empty($major)) {
+            $filterWhere .= " AND s.Stu_major = :major";
+            $queryParams[':major'] = $major;
+        }
+        if (!empty($room)) {
+            $filterWhere .= " AND s.Stu_room = :room";
+            $queryParams[':room'] = $room;
+        }
+        if (!empty($searchValue)) {
+            $filterWhere .= " AND (s.Stu_id LIKE :search OR s.Stu_name LIKE :search OR s.Stu_sur LIKE :search)";
+            $queryParams[':search'] = "%$searchValue%";
+        }
+
+        // (นับจำนวนทั้งหมดที่ "ยังไม่มีบัตร" ก่อนการกรองใดๆ)
+        $totalRecordsStmt = $this->pdo->query("SELECT COUNT(s.Stu_id) as total $baseQuery $baseWhere");
+        $totalRecords = $totalRecordsStmt->fetch()['total'];
+
+        // (นับจำนวนหลังการกรอง (ชั้น/ห้อง/ค้นหา))
+        $filteredRecordsStmt = $this->pdo->prepare("SELECT COUNT(s.Stu_id) as total $baseQuery $baseWhere $filterWhere");
+        $filteredRecordsStmt->execute($queryParams);
+        $filteredRecords = $filteredRecordsStmt->fetch()['total'];
+
+        // (ดึงข้อมูลสำหรับแสดงผล)
+        $sql = "SELECT s.Stu_id, s.Stu_no, s.Stu_name, s.Stu_sur
+                $baseQuery $baseWhere $filterWhere
+                ORDER BY s.Stu_no ASC, s.Stu_id ASC
+                LIMIT :limit OFFSET :offset";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':limit', $length, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $start, \PDO::PARAM_INT);
+        foreach ($queryParams as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        $stmt->execute();
+        $data = $stmt->fetchAll();
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ];
+    }
+
+    /**
+     * (ใหม่) ดึงข้อมูลนักเรียนทั้งหมดในห้อง (พร้อม RFID ถ้ามี)
+     * สำหรับดาวน์โหลด CSV ใน rfid.php
+     * @param string $major ชั้น
+     * @param string $room ห้อง
+     * @return array
+     */
+    public function getStudentsWithRfidForCsv($major, $room)
+    {
+        // (ใช้ LEFT JOIN เพื่อดึงนักเรียนทุกคน แม้จะไม่มี RFID)
+        $sql = "SELECT s.Stu_id, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room,
+                       r.rfid_code 
+                FROM student s 
+                LEFT JOIN student_rfid r ON s.Stu_id = r.stu_id
+                WHERE s.Stu_status = '1'";
+        
+        $params = [];
+        if (!empty($major)) {
+            $sql .= " AND s.Stu_major = :major";
+            $params[':major'] = $major;
+        }
+        if (!empty($room)) {
+            $sql .= " AND s.Stu_room = :room";
+            $params[':room'] = $room;
+        }
+        $sql .= " ORDER BY s.Stu_major, s.Stu_room, s.Stu_no, s.Stu_id";
+        
+        // (ใช้ $params ที่ถูกต้อง)
+        return $this->db->query($sql, $params)->fetchAll();
+    }
+    
 }
 ?>
