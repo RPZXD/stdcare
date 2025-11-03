@@ -4,9 +4,17 @@ require_once(__DIR__ . "/../classes/DatabaseUsers.php");
 use App\DatabaseUsers;
 include_once("../class/UserLogin.php");
 include_once("../class/Utils.php");
+
+// --- (เพิ่ม) ---
+// (เพิ่ม Model สำหรับดึงค่า Setting เวลา)
+require_once(__DIR__ . "/../models/SettingModel.php");
+use App\Models\SettingModel;
+// --- (สิ้นสุดส่วนที่เพิ่ม) ---
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 $connectDB = new DatabaseUsers();
 $db = $connectDB->getPDO();
 $user = new UserLogin($db);
@@ -34,6 +42,16 @@ require_once('header.php');
 // (ดึงข้อมูล ชั้น/ห้อง สำหรับ dropdown)
 $studentClass = $db->query("SELECT DISTINCT Stu_major FROM student WHERE Stu_major IS NOT NULL AND Stu_status = '1' ORDER BY Stu_major")->fetchAll(PDO::FETCH_COLUMN);
 $studentRoom = $db->query("SELECT DISTINCT Stu_room FROM student WHERE Stu_room IS NOT NULL AND Stu_status = '1' ORDER BY Stu_room")->fetchAll(PDO::FETCH_COLUMN);
+
+// --- (เพิ่ม) ดึงค่าเวลาปัจจุบัน ---
+$settingsModel = new SettingModel($db);
+$timeSettings = $settingsModel->getAllTimeSettings();
+$arrival_late_time = $timeSettings['arrival_late_time'] ?? '08:00:00';
+$arrival_absent_time = $timeSettings['arrival_absent_time'] ?? '10:00:00';
+$leave_early_time = $timeSettings['leave_early_time'] ?? '15:40:00';
+$scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
+// --- (สิ้นสุดส่วนที่เพิ่ม) ---
+
 ?>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -76,6 +94,47 @@ $studentRoom = $db->query("SELECT DISTINCT Stu_room FROM student WHERE Stu_room 
                                 </div>
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary">บันทึก</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card card-info card-outline shadow-sm">
+                            <div class="card-header">
+                                <h3 class="card-title">ตั้งค่าเวลาสแกน (ใหม่)</h3>
+                            </div>
+                            <form id="timeSettingsForm">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="arrival_late_time">เวลาเริ่มสาย:</label>
+                                                <input type="time" class="form-control" id="arrival_late_time" name="arrival_late_time" value="<?php echo htmlspecialchars($arrival_late_time); ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="arrival_absent_time">เวลาตัดขาดเรียน:</label>
+                                                <input type="time" class="form-control" id="arrival_absent_time" name="arrival_absent_time" value="<?php echo htmlspecialchars($arrival_absent_time); ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="leave_early_time">เวลาตัดกลับก่อน:</label>
+                                                <input type="time" class="form-control" id="leave_early_time" name="leave_early_time" value="<?php echo htmlspecialchars($leave_early_time); ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="scan_crossover_time">เวลาตัดเช้า/บ่าย:</label>
+                                                <input type="time" class="form-control" id="scan_crossover_time" name="scan_crossover_time" value="<?php echo htmlspecialchars($scan_crossover_time); ?>" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-info">บันทึกการตั้งค่าเวลา</button>
                                 </div>
                             </form>
                         </div>
@@ -224,6 +283,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     handleFetch('../controllers/SettingController.php?action=promote_students', new FormData());
                 }
             });
+        });
+    }
+
+    // --- (เพิ่ม) 3. อัปเดตเวลาสแกน ---
+    const timeSettingsForm = document.getElementById('timeSettingsForm');
+    if (timeSettingsForm) {
+        timeSettingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            // (เราจะสร้าง SettingController.php เพื่อรับ action นี้)
+            handleFetch('../controllers/SettingController.php?action=update_times', formData);
         });
     }
 

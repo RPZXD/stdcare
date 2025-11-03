@@ -120,7 +120,7 @@ $(document).ready(function() {
 
     var table = $('#attendanceTable').DataTable({
         ajax: {
-            url: 'api/get_attendance.php',
+            url: 'controllers/AttendanceController.php?action=get_log',
             dataSrc: 'data'
         },
         columns: [
@@ -158,7 +158,7 @@ $(document).ready(function() {
     }
 
     function loadLastScan() {
-        $.get('api/last_scan.php', function(res) {
+        $.get('controllers/AttendanceController.php?action=get_last_scan', function(res) {
             showStudentInfo(res, false);
         }, 'json');
     }
@@ -168,7 +168,7 @@ $(document).ready(function() {
         const rfid = $(this).val().trim();
         if (rfid.length === 0) return;
 
-        $.post('api/rfid_scan.php', { rfid: rfid, device_id: getDeviceId(), direction: scanDirection }, function(res) {
+        $.post('controllers/AttendanceController.php?action=scan', { rfid: rfid, device_id: getDeviceId(), direction: scanDirection }, function(res) {
             if (res && res.student_id) {
                 if (res.is_duplicate) {
                     showStudentInfo(res, false);
@@ -183,10 +183,18 @@ $(document).ready(function() {
                 showToast('❌ ไม่พบข้อมูลบัตรนี้ในระบบ', 'error');
             }
             $('#rfid-input').val('');
-        }, 'json').fail(function() {
-            showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
-            $('#rfid-input').val('');
-        });
+        }, 'json').fail(function(jqXHR) {
+                // (jqXHR คือ object ที่เก็บข้อมูล Error ทั้งหมด)
+                let errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อ'; // ข้อความเริ่มต้น
+
+                // ตรวจสอบว่า Backend ส่ง JSON error กลับมาหรือไม่
+                if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                    errorMsg = jqXHR.responseJSON.error; // ใช้ข้อความ Error จาก Backend
+                }
+
+                showToast('❌ ' + errorMsg, 'error');
+                $('#rfid-input').val('');
+            });
     });
 
     // Initial load and periodic refresh

@@ -51,7 +51,7 @@ try {
     $db = new DatabaseUsers();
     $pdo = $db->getPDO();
     $logger = new DatabaseLogger($pdo);
-    $model = new SettingModel($db);
+    $model = new SettingModel($pdo);
 
     // (3) ดึงข้อมูล Admin สำหรับ Log
     $admin_id = $_SESSION['Admin_login'] ?? 'system';
@@ -64,6 +64,17 @@ try {
     $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
     switch ($action) {
+
+        // Action ใหม่: อัปเดตเวลา
+        case 'update_times':
+            $model->updateTimeSettings($_POST);
+            echo json_encode(['success' => true, 'message' => 'บันทึกการตั้งค่าเวลาสำเร็จ']);
+            $logger->log([
+                'user_id' => $admin_id, 'role' => $admin_role,
+                'action_type' => 'settings_update_times', 'status_code' => 200,
+                'message' => "Admin updated time settings"
+            ]);
+            break;
         
         // (แทนที่ update_pee_term.php)
         case 'update_term':
