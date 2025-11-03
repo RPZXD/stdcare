@@ -135,13 +135,18 @@ class AttendanceModel
         $class = $row['Stu_major'] . '/' . $row['Stu_room'];
         $photo = !empty($row['Stu_picture']) ? 'https://std.phichai.ac.th/photo/' . $row['Stu_picture'] : 'assets/images/profile.png';
 
-        // 2. กำหนด scan_type (เข้า/ออก) ตาม device_id
+        // 2. กำหนด scan_type (เข้า/ออก) ตามเวลา
         $now_datetime = date('Y-m-d H:i:s');
         $now_time = date('H:i:s');
         $today = date('Y-m-d');
+
+        // ดึงเวลา Crossover ที่ตั้งค่าไว้ (หรือใช้ 12:00:00 ถ้าไม่มี)
+        $crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
         
-        // Logic: device_id=1 คือเครื่องหน้าโรงเรียน (เข้า), device_id=2 คือเครื่องหลัง (ออก)
-        $scan_type = ($device_id == 1) ? 'arrival' : 'leave';
+        // Logic ใหม่:
+        // ถ้าสแกนก่อน $crossover_time (เช่น ก่อนเที่ยง) = 'arrival' (เข้า)
+        // ถ้าสแกนหลัง $crossover_time (เช่น หลังเที่ยง)  = 'leave' (ออก)
+        $scan_type = ($now_time < $crossover_time) ? 'arrival' : 'leave';
 
         // 3. ตรวจสอบสแกนซ้ำ (ต่อ scan_type)
         $check_stmt = $this->db->prepare(
