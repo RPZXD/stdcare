@@ -282,7 +282,7 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                const res = await fetch('api/api_student.php?action=create', {
+                const res = await fetch('../controllers/StudentController.php?action=create', {
                     method: 'POST',
                     body: formData
                 });
@@ -312,7 +312,7 @@ require_once('header.php');
                     return;
                 }
                 const formData = new FormData(form);
-                const res = await fetch('api/api_student.php?action=update', {
+                const res = await fetch('../controllers/StudentController.php?action=update', {
                     method: 'POST',
                     body: formData
                 });
@@ -367,25 +367,43 @@ require_once('header.php');
             const classVal = document.getElementById('filterClass').value;
             const roomVal = document.getElementById('filterRoom').value;
             const statusVal = document.getElementById('filterStatus').value;
-            let url = '../controllers/StudentController.php?action=list';
+            
+            // 1. เปลี่ยน action ที่เรียกจาก 'list' เป็น 'list_for_officer'
+            let url = '../controllers/StudentController.php?action=list_for_officer'; 
+            
             if (classVal) url += '&class=' + encodeURIComponent(classVal);
             if (roomVal) url += '&room=' + encodeURIComponent(roomVal);
             if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
+            
             const res = await fetch(url);
-            const data = await res.json();
+            
+            // 2. เปลี่ยนการประมวลผล data ให้รับ format { success: true, data: [...] }
+            const responseData = await res.json(); // เปลี่ยนชื่อตัวแปรเป็น responseData
+            
             studentTable.clear();
-            data.forEach(student => {
-                studentTable.row.add([
-                    student.Stu_no,
-                    student.Stu_id,
-                    student.Stu_pre + student.Stu_name + ' ' + student.Stu_sur,
-                    'ม.' + student.Stu_major + '/' + student.Stu_room,
-                    getStatusEmoji(student.Stu_status),
-                    `<button class="btn btn-warning btn-sm editStudentBtn" data-id="${student.Stu_id}">แก้ไข</button>
-                     <button class="btn btn-danger btn-sm deleteStudentBtn" data-id="${student.Stu_id}">ลบ</button>
-                     <button class="btn btn-secondary btn-sm resetStuPwdBtn" data-id="${student.Stu_id}">รีเซ็ตรหัสผ่าน</button>`
-                ]);
-            });
+            
+            // ตรวจสอบว่ามี data และเป็น array ก่อนวนลูป
+            if (responseData && responseData.success && Array.isArray(responseData.data)) {
+                
+                // 3. วนลูปที่ responseData.data แทน
+                responseData.data.forEach(student => { 
+                    studentTable.row.add([
+                        student.Stu_no,
+                        student.Stu_id,
+                        student.Stu_pre + student.Stu_name + ' ' + student.Stu_sur,
+                        'ม.' + student.Stu_major + '/' + student.Stu_room,
+                        getStatusEmoji(student.Stu_status),
+                        // (เพิ่ม space ท้ายปุ่มเพื่อความสวยงาม)
+                        `<button class="btn btn-warning btn-sm editStudentBtn" data-id="${student.Stu_id}">แก้ไข</button> ` +
+                        `<button class="btn btn-danger btn-sm deleteStudentBtn" data-id="${student.Stu_id}">ลบ</button> ` +
+                        `<button class="btn btn-secondary btn-sm resetStuPwdBtn" data-id="${student.Stu_id}">รีเซ็ตรหัสผ่าน</button>`
+                    ]);
+                });
+
+            } else {
+                console.error("ไม่สามารถโหลดข้อมูลนักเรียนได้ หรือ format ข้อมูลไม่ถูกต้อง:", responseData);
+            }
+            
             studentTable.draw();
             makeTableEditable(); // เรียกทุกครั้งหลังโหลดข้อมูล
         }
@@ -429,7 +447,7 @@ require_once('header.php');
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_student.php?action=resetpwd', {
+            const res = await fetch('../controllers/StudentController.php?action=resetpwd', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: 'id=' + encodeURIComponent(id)
@@ -453,7 +471,7 @@ require_once('header.php');
         });
 
         async function openEditStudentModal(id) {
-            const res = await fetch('api/api_student.php?action=get&id=' + id);
+            const res = await fetch('../controllers/StudentController.php?action=get&id=' + id);
             const data = await res.json();
             if (data.error) {
                 Swal.fire({
@@ -498,7 +516,7 @@ require_once('header.php');
                 cancelButtonText: 'ยกเลิก'
             });
             if (!result.isConfirmed) return;
-            const res = await fetch('api/api_student.php?action=delete', {
+            const res = await fetch('../controllers/StudentController.php?action=delete', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: 'id=' + encodeURIComponent(id)
@@ -586,7 +604,7 @@ require_once('header.php');
                             // ส่งข้อมูลไป API
                             let value = { pre: result.value.pre, name: result.value.name, sur: result.value.sur };
                             let body = `id=${encodeURIComponent(stu_id)}&field=Stu_pre_name_sur&value=${encodeURIComponent(JSON.stringify(value))}`;
-                            const res = await fetch('api/api_student.php?action=inline_update', {
+                            const res = await fetch('../controllers/StudentController.php?action=inline_update', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                                 body
@@ -594,7 +612,7 @@ require_once('header.php');
                             const apiResult = await res.json();
                             if (apiResult.success) {
                                 // โหลดข้อมูลใหม่เฉพาะแถวนี้
-                                const res2 = await fetch('api/api_student.php?action=get&id=' + stu_id);
+                                const res2 = await fetch('../controllers/StudentController.php?action=get&id=' + stu_id);
                                 const data = await res2.json();
                                 if (data && data.Stu_id) {
                                     cell.data(data.Stu_pre + data.Stu_name + ' ' + data.Stu_sur).draw();
@@ -655,7 +673,7 @@ require_once('header.php');
             }
             // ส่งข้อมูลไป API
             let body = `id=${encodeURIComponent(stu_id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(typeof value === 'object' ? JSON.stringify(value) : value)}`;
-            const res = await fetch('api/api_student.php?action=inline_update', {
+            const res = await fetch('../controllers/StudentController.php?action=inline_update', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body
@@ -663,7 +681,7 @@ require_once('header.php');
             const result = await res.json();
             if (result.success) {
                 // โหลดข้อมูลใหม่เฉพาะแถวนี้
-                const res2 = await fetch('api/api_student.php?action=get&id=' + stu_id);
+                const res2 = await fetch('../controllers/StudentController.php?action=get&id=' + stu_id);
                 const data = await res2.json();
                 if (data && data.Stu_id) {
                     if (colIdx === 0) cell.data(data.Stu_no).draw();

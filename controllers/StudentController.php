@@ -17,7 +17,7 @@ try {
     $logger = new DatabaseLogger($pdo);
     
     $admin_id = $_SESSION['Admin_login'] ?? $_SESSION['Officer_login'] ?? 'system';
-    $admin_role = $_SESSION['role'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
+    $admin_role = $_SESSION['Admin_login'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
     $teach_id = $_SESSION['Teacher_login'] ?? $_SESSION['Officer_login'] ?? $admin_id;
 
     // --- (3) ส่ง $db object เข้า Model ---
@@ -233,21 +233,49 @@ try {
             exit; 
         
         // ... (case อื่นๆ) ...
-            
+        
+
         case 'create':
-            // (โค้ด Log 'create' ของคุณ...)
             try {
-                $data = [ 'Stu_id' => $_POST['Stu_id'] ];
-                // ...
-                $logger->log([
-                    'user_id' => $admin_id,
-                    'role' => $admin_role,
-                    'action_type' => 'student_create_success',
-                    'status_code' => 200,
-                    'message' => 'Admin created student ID: ' . htmlspecialchars($_POST['Stu_id'])
-                ]);
-                echo json_encode(['status' => 'success', 'message' => 'สร้างนักเรียนสำเร็จ']);
+                // รับข้อมูลจาก POST
+                $data = [
+                    'Stu_id' => $_POST['addStu_id'] ?? '',
+                    'Stu_no' => $_POST['addStu_no'] ?? '',
+                    'Stu_pre' => $_POST['addStu_pre'] ?? '',
+                    'Stu_name' => $_POST['addStu_name'] ?? '',
+                    'Stu_sur' => $_POST['addStu_sur'] ?? '',
+                    'Stu_major' => $_POST['addStu_major'] ?? '',
+                    'Stu_room' => $_POST['addStu_room'] ?? ''
+                ];
+                
+                // ตรวจสอบข้อมูลที่จำเป็น
+                if (empty($data['Stu_id']) || empty($data['Stu_name']) || empty($data['Stu_sur'])) {
+                    throw new Exception('กรุณากรอกข้อมูลให้ครบถ้วน');
+                }
+                
+                // เรียกใช้ Model เพื่อสร้างนักเรียน
+                $result = $studentModel->createStudent($data);
+                
+                if ($result) {
+                    // Log success
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_create_success',
+                        'status_code' => 200,
+                        'message' => 'Admin created student ID: ' . htmlspecialchars($data['Stu_id'])
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'สร้างนักเรียนสำเร็จ'
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถสร้างนักเรียนได้');
+                }
+                
             } catch (Exception $e) {
+                // Log failure
                 $logger->log([
                     'user_id' => $admin_id,
                     'role' => $admin_role,
@@ -255,8 +283,230 @@ try {
                     'status_code' => 500,
                     'message' => 'Failed to create student. Error: ' . $e->getMessage()
                 ]);
+                
                 http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'update':
+            try {
+                // รับข้อมูลจาก POST (จาก Edit Modal)
+                $data = [
+                    'OldStu_id' => $_POST['editStu_id_old'] ?? '', // รหัสเดิมสำหรับ WHERE clause
+                    'Stu_id' => $_POST['editStu_id'] ?? '',
+                    'Stu_no' => $_POST['editStu_no'] ?? '',
+                    'Stu_pre' => $_POST['editStu_pre'] ?? '',
+                    'Stu_name' => $_POST['editStu_name'] ?? '',
+                    'Stu_sur' => $_POST['editStu_sur'] ?? '',
+                    'Stu_major' => $_POST['editStu_major'] ?? '',
+                    'Stu_room' => $_POST['editStu_room'] ?? '',
+                    'Stu_status' => $_POST['editStu_status'] ?? '1'
+                ];
+                
+                // คำนวณเพศจากคำนำหน้า (เหมือนใน createStudent)
+                $stu_pre = $data['Stu_pre'];
+                $stu_sex = '';
+                if ($stu_pre === 'เด็กชาย' || $stu_pre === 'นาย') {
+                    $stu_sex = 1;
+                } else if ($stu_pre === 'เด็กหญิง' || $stu_pre === 'นางสาว') {
+                    $stu_sex = 2;
+                }
+                $data['Stu_sex'] = $stu_sex;
+                
+                // ใช้รหัสนักเรียนเป็นรหัสผ่าน (หรือเก็บรหัสผ่านเดิมไว้)
+                $data['Stu_password'] = $data['Stu_id'];
+                
+                // ตรวจสอบข้อมูลที่จำเป็น
+                if (empty($data['OldStu_id']) || empty($data['Stu_id'])) {
+                    throw new Exception('ไม่พบรหัสนักเรียน');
+                }
+                
+                // เรียกใช้ Model เพื่ออัปเดต
+                $result = $studentModel->updateStudentInfo($data);
+                
+                if ($result) {
+                    // Log success
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_update_success',
+                        'status_code' => 200,
+                        'message' => 'Admin updated student ID: ' . htmlspecialchars($data['Stu_id'])
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'อัปเดตข้อมูลสำเร็จ'
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถอัปเดตข้อมูลได้');
+                }
+                
+            } catch (Exception $e) {
+                // Log failure
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_update_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed to update student. Error: ' . $e->getMessage()
+                ]);
+                
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'delete':
+            try {
+                // รับ ID จาก POST
+                $id = $_POST['id'] ?? '';
+                
+                if (empty($id)) {
+                    throw new Exception('ไม่พบรหัสนักเรียน');
+                }
+                
+                // เรียกใช้ Model เพื่อลบ (จริงๆ คืออัปเดต status = 0)
+                $result = $studentModel->delete($id);
+                
+                if ($result) {
+                    // Log success
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_delete_success',
+                        'status_code' => 200,
+                        'message' => 'Admin deleted student ID: ' . htmlspecialchars($id)
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'ลบข้อมูลสำเร็จ'
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถลบข้อมูลได้');
+                }
+                
+            } catch (Exception $e) {
+                // Log failure
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_delete_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed to delete student. Error: ' . $e->getMessage()
+                ]);
+                
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'resetpwd':
+            try {
+                // รับ ID จาก POST
+                $id = $_POST['id'] ?? '';
+                
+                if (empty($id)) {
+                    throw new Exception('ไม่พบรหัสนักเรียน');
+                }
+                
+                // เรียกใช้ Model เพื่อรีเซ็ตรหัสผ่าน
+                $result = $studentModel->resetPassword($id);
+                
+                if ($result) {
+                    // Log success
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_reset_password_success',
+                        'status_code' => 200,
+                        'message' => 'Admin reset password for student ID: ' . htmlspecialchars($id)
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'รีเซ็ตรหัสผ่านสำเร็จ (รหัสผ่านใหม่คือรหัสนักเรียน)'
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถรีเซ็ตรหัสผ่านได้');
+                }
+                
+            } catch (Exception $e) {
+                // Log failure
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_reset_password_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed to reset password. Error: ' . $e->getMessage()
+                ]);
+                
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'inline_update':
+            try {
+                // รับข้อมูลจาก POST
+                $id = $_POST['id'] ?? '';
+                $field = $_POST['field'] ?? '';
+                $value = $_POST['value'] ?? '';
+                
+                if (empty($id) || empty($field)) {
+                    throw new Exception('ข้อมูลไม่ครบถ้วน');
+                }
+                
+                // เรียกใช้ Model เพื่ออัปเดต inline
+                $result = $studentModel->inlineUpdate($id, $field, $value);
+                
+                if ($result) {
+                    // Log success
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_inline_update_success',
+                        'status_code' => 200,
+                        'message' => "Admin inline updated student ID: $id, field: $field"
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'อัปเดตข้อมูลสำเร็จ'
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถอัปเดตข้อมูลได้');
+                }
+                
+            } catch (Exception $e) {
+                // Log failure
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_inline_update_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed inline update. Error: ' . $e->getMessage()
+                ]);
+                
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
             }
             break;
             
