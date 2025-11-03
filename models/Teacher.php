@@ -106,8 +106,8 @@ class Teacher
     public function resetPassword($id)
     {
         // รีเซ็ตรหัสผ่านเป็น Teach_id
-        $sql = "UPDATE teacher SET password = '' WHERE Teach_id = :id";
-        $stmt = $this->db->query($sql, ['password' => $id, 'id' => $id]);
+        $sql = "UPDATE teacher SET password = :password WHERE Teach_id = :id";
+        $stmt = $this->db->query($sql, ['password' => '', 'id' => $id]);
         
         // (เปลี่ยนจาก rowCount() > 0)
         return true; // <--- แก้ไขจุดนี้
