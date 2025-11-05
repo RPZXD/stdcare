@@ -60,7 +60,8 @@ if (!empty($students)) {
         ':class' => $report_class,
         ':room' => $report_room,
         ':term' => $report_term,
-        ':year' => $report_year // B.E. year
+        // Database stores years in Gregorian (A.D.). Convert selected B.E. year to A.D. for the query
+        ':year' => ($report_year) // convert B.E. to A.D.
     ]);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

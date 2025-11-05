@@ -1,0 +1,529 @@
+﻿<?php
+namespace App\Models;
+
+use PDO;
+
+class AttendanceModel
+{
+    private $db;
+
+    public function __construct(PDO $db)
+    {
+        $this->db = $db;
+    }
+
+    /**
+     * à¸”à¸¶à¸‡à¸›à¸£à¸°à¸§à¸±à¸•à¸´à¸à¸²à¸£à¸ªà¹à¸à¸™à¸§à¸±à¸™à¸™à¸µà¹‰à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” (à¹à¸ªà¸”à¸‡à¸—à¸±à¹‰à¸‡à¹€à¸‚à¹‰à¸²à¹à¸¥à¸°à¸­à¸­à¸)
+     */
+    public function getTodayAttendanceLog(array $timeSettings)
+    {
+        $today = date('Y-m-d');
+        
+        $sql = "SELECT
+                    l.student_id,
+                    l.scan_type,
+                    DATE_FORMAT(l.scan_timestamp, '%H:%i:%s') AS time,
+                    s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room,
+                    CASE
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) <= :arrival_late THEN '<span class=\"inline-block px-2 py-1 bg-green-200 rounded text-green-700\">âœ… à¸¡à¸²à¹€à¸£à¸µà¸¢à¸™</span>'
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) > :arrival_late AND TIME(l.scan_timestamp) <= :arrival_absent THEN '<span class=\"inline-block px-2 py-1 bg-yellow-200 rounded text-yellow-700\">âš ï¸ à¸¡à¸²à¸ªà¸²à¸¢</span>'
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) > :arrival_absent THEN '<span class=\"inline-block px-2 py-1 bg-red-200 rounded text-red-700\">âŒ à¸‚à¸²à¸”à¹€à¸£à¸µà¸¢à¸™</span>'
+                        WHEN l.scan_type = 'leave' AND TIME(l.scan_timestamp) < :leave_early THEN '<span class=\"inline-block px-2 py-1 bg-blue-200 rounded text-blue-700\">ðŸƒ à¸à¸¥à¸±à¸šà¸à¹ˆà¸­à¸™</span>'
+                        WHEN l.scan_type = 'leave' THEN '<span class=\"inline-block px-2 py-1 bg-purple-200 rounded text-purple-700\">ðŸ  à¸à¸¥à¸±à¸šà¸›à¸à¸•à¸´</span>'
+                        ELSE 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸'
+                    END as status
+                FROM attendance_log l
+                INNER JOIN student s ON l.student_id = s.Stu_id
+                WHERE DATE(l.scan_timestamp) = :today
+                ORDER BY l.scan_timestamp DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':today' => $today,
+            ':arrival_late' => $timeSettings['arrival_late_time'] ?? '08:00:00',
+            ':arrival_absent' => $timeSettings['arrival_absent_time'] ?? '10:00:00',
+            ':leave_early' => $timeSettings['leave_early_time'] ?? '15:40:00',
+        ]);
+        
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $data = [];
+        foreach ($rows as $row) {
+            $data[] = [
+                'student_id' => $row['student_id'],
+                'fullname'   => $row['Stu_pre'].$row['Stu_name'] . '  ' . $row['Stu_sur'],
+                'class'      => $row['Stu_major'] . '/' . $row['Stu_room'],
+                'time'       => $row['time'],
+                'scan_type'  => $row['scan_type'] === 'arrival' ? 'ðŸ”µ à¹€à¸‚à¹‰à¸²' : 'ðŸ”´ à¸­à¸­à¸',
+                'status'     => $row['status'],
+            ];
+        }
+        return $data;
+    }
+
+    /**
+     * à¸”à¸¶à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸²à¸£à¸ªà¹à¸à¸™à¸¥à¹ˆà¸²à¸ªà¸¸à¸”
+     */
+    public function getLastScan(array $timeSettings)
+    {
+        $today = date('Y-m-d');
+        
+        $sql = "SELECT
+                    l.student_id,
+                    l.scan_type,
+                    DATE_FORMAT(l.scan_timestamp, '%H:%i:%s') AS time,
+                    s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture,
+                    CASE
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) <= :arrival_late THEN 'à¸¡à¸²à¹€à¸£à¸µà¸¢à¸™'
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) > :arrival_late AND TIME(l.scan_timestamp) <= :arrival_absent THEN 'à¸¡à¸²à¸ªà¸²à¸¢'
+                        WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) > :arrival_absent THEN 'à¸‚à¸²à¸”à¹€à¸£à¸µà¸¢à¸™'
+                        WHEN l.scan_type = 'leave' AND TIME(l.scan_timestamp) < :leave_early THEN 'à¸à¸¥à¸±à¸šà¸à¹ˆà¸­à¸™à¹€à¸§à¸¥à¸²'
+                        WHEN l.scan_type = 'leave' THEN 'à¸à¸¥à¸±à¸šà¸›à¸à¸•à¸´'
+                        ELSE 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸'
+                    END as status
+                FROM attendance_log l
+                INNER JOIN student s ON l.student_id = s.Stu_id
+                WHERE DATE(l.scan_timestamp) = :today
+                ORDER BY l.scan_timestamp DESC
+                LIMIT 1";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':today' => $today,
+            ':arrival_late' => $timeSettings['arrival_late_time'] ?? '08:00:00',
+            ':arrival_absent' => $timeSettings['arrival_absent_time'] ?? '10:00:00',
+            ':leave_early' => $timeSettings['leave_early_time'] ?? '15:40:00',
+        ]);
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            return [
+                'student_id' => $row['student_id'],
+                'fullname'   => $row['Stu_pre'] . $row['Stu_name'] . ' ' . $row['Stu_sur'],
+                'class'      => $row['Stu_major'] . '/' . $row['Stu_room'],
+                'photo'      => !empty($row['Stu_picture']) ? 'https://std.phichai.ac.th/photo/' . $row['Stu_picture'] : 'assets/images/profile.png',
+                'time'       => $row['time'],
+                'scan_type'  => $row['scan_type'] === 'arrival' ? 'à¹€à¸‚à¹‰à¸²' : 'à¸­à¸­à¸',
+                'status'     => $row['status'],
+            ];
+        }
+        return null;
+    }
+
+    /**
+     * à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥à¸à¸²à¸£à¸ªà¹à¸à¸™ RFID (à¸£à¸­à¸‡à¸£à¸±à¸šà¸—à¸±à¹‰à¸‡à¹€à¸‚à¹‰à¸²à¹à¸¥à¸°à¸­à¸­à¸)
+     */
+    public function processRfidScan($rfid, $device_id, array $timeSettings, $term, $year)
+    {
+        // 1. à¸„à¹‰à¸™à¸«à¸²à¸™à¸±à¸à¹€à¸£à¸µà¸¢à¸™
+        $stmt = $this->db->prepare(
+            "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture, s.Stu_status
+             FROM student_rfid r
+             INNER JOIN student s ON r.stu_id = s.Stu_id
+             WHERE r.rfid_code = :rfid AND s.Stu_status = '1'"
+        );
+        $stmt->execute([':rfid' => $rfid]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            throw new \Exception('à¹„à¸¡à¹ˆà¸žà¸šà¸šà¸±à¸•à¸£ RFID à¸™à¸µà¹‰ à¸«à¸£à¸·à¸­à¸™à¸±à¸à¹€à¸£à¸µà¸¢à¸™à¹„à¸¡à¹ˆà¸¡à¸µà¸ªà¸–à¸²à¸™à¸°à¹ƒà¸Šà¹‰à¸‡à¸²à¸™', 404);
+        }
+
+        $stu_id = $row['Stu_id'];
+        $fullname = $row['Stu_pre'] . $row['Stu_name'] . ' ' . $row['Stu_sur'];
+        $class = $row['Stu_major'] . '/' . $row['Stu_room'];
+        $photo = !empty($row['Stu_picture']) ? 'https://std.phichai.ac.th/photo/' . $row['Stu_picture'] : 'assets/images/profile.png';
+
+        // 2. à¸à¸³à¸«à¸™à¸” scan_type (à¹€à¸‚à¹‰à¸²/à¸­à¸­à¸) à¸•à¸²à¸¡à¹€à¸§à¸¥à¸²
+        $now_datetime = date('Y-m-d H:i:s');
+        $now_time = date('H:i:s');
+        $today = date('Y-m-d');
+
+        // à¸”à¸¶à¸‡à¹€à¸§à¸¥à¸² Crossover à¸—à¸µà¹ˆà¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹„à¸§à¹‰ (à¸«à¸£à¸·à¸­à¹ƒà¸Šà¹‰ 12:00:00 à¸–à¹‰à¸²à¹„à¸¡à¹ˆà¸¡à¸µ)
+        $crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
+        
+        // Logic à¹ƒà¸«à¸¡à¹ˆ:
+        // à¸–à¹‰à¸²à¸ªà¹à¸à¸™à¸à¹ˆà¸­à¸™ $crossover_time (à¹€à¸Šà¹ˆà¸™ à¸à¹ˆà¸­à¸™à¹€à¸—à¸µà¹ˆà¸¢à¸‡) = 'arrival' (à¹€à¸‚à¹‰à¸²)
+        // à¸–à¹‰à¸²à¸ªà¹à¸à¸™à¸«à¸¥à¸±à¸‡ $crossover_time (à¹€à¸Šà¹ˆà¸™ à¸«à¸¥à¸±à¸‡à¹€à¸—à¸µà¹ˆà¸¢à¸‡)  = 'leave' (à¸­à¸­à¸)
+        $scan_type = ($now_time < $crossover_time) ? 'arrival' : 'leave';
+
+        // 3. à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸ªà¹à¸à¸™à¸‹à¹‰à¸³ (à¸•à¹ˆà¸­ scan_type)
+        $check_stmt = $this->db->prepare(
+            "SELECT 1 FROM attendance_log 
+             WHERE student_id = :stu_id AND scan_type = :scan_type AND DATE(scan_timestamp) = :today 
+             LIMIT 1"
+        );
+        $check_stmt->execute([':stu_id' => $stu_id, ':scan_type' => $scan_type, ':today' => $today]);
+
+        if ($check_stmt->fetch()) {
+            return [
+                'student_id' => $stu_id, 
+                'fullname' => $fullname, 
+                'class' => $class, 
+                'photo' => $photo,
+                'time' => $now_time, 
+                'scan_type' => $scan_type,
+                'status' => 'à¸ªà¹à¸à¸™à¸‹à¹‰à¸³',
+                'is_duplicate' => true
+            ];
+        }
+
+        // 4. à¸šà¸±à¸™à¸—à¸¶à¸ Log à¸¥à¸‡ attendance_log
+        $insert_stmt = $this->db->prepare(
+            "INSERT INTO attendance_log (student_id, scan_timestamp, scan_type, device_id, term, year)
+             VALUES (:stu_id, :scan_time, :scan_type, :device_id, :term, :year)"
+        );
+        $insert_stmt->execute([
+            ':stu_id' => $stu_id,
+            ':scan_time' => $now_datetime,
+            ':scan_type' => $scan_type,
+            ':device_id' => $device_id,
+            ':term' => $term,
+            ':year' => $year
+        ]);
+
+        // 5. à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥à¸•à¸²à¸¡ scan_type
+        if ($scan_type === 'arrival') {
+            // à¸à¸²à¸£à¸ªà¹à¸à¸™à¹€à¸‚à¹‰à¸² -> à¸­à¸±à¸›à¹€à¸”à¸• student_attendance
+            $statusText = $this->processArrival($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+        } else {
+            // à¸à¸²à¸£à¸ªà¹à¸à¸™à¸­à¸­à¸ -> à¸šà¸±à¸™à¸—à¸¶à¸à¸¥à¸‡ student_leave_log
+            $statusText = $this->processLeave($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+        }
+
+        // 6. à¸ªà¹ˆà¸‡à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œà¸à¸¥à¸±à¸š
+        return [
+            'student_id' => $stu_id,
+            'fullname' => $fullname,
+            'class' => $class,
+            'photo' => $photo,
+            'time' => $now_time,
+            'scan_type' => $scan_type,
+            'status' => $statusText,
+            'is_duplicate' => false
+        ];
+    }
+
+    /**
+     * à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥à¸à¸²à¸£à¸ªà¹à¸à¸™à¹€à¸‚à¹‰à¸² (arrival)
+     */
+    private function processArrival($stu_id, $date, $time, $timeSettings, $term, $year, $device_id)
+    {
+        $arrival_late = $timeSettings['arrival_late_time'] ?? '08:00:00';
+        $arrival_absent = $timeSettings['arrival_absent_time'] ?? '10:00:00';
+
+        // à¸„à¸³à¸™à¸§à¸“à¸ªà¸–à¸²à¸™à¸°
+        if ($time > $arrival_absent) {
+            $statusText = 'à¸‚à¸²à¸”à¹€à¸£à¸µà¸¢à¸™';
+            $statusCode = 2;
+        } elseif ($time > $arrival_late) {
+            $statusText = 'à¸¡à¸²à¸ªà¸²à¸¢';
+            $statusCode = 3;
+        } else {
+            $statusText = 'à¸¡à¸²à¹€à¸£à¸µà¸¢à¸™';
+            $statusCode = 1;
+        }
+
+        // à¸šà¸±à¸™à¸—à¸¶à¸/à¸­à¸±à¸›à¹€à¸”à¸• student_attendance
+        try {
+            $check_sql = "SELECT attendance_status FROM student_attendance 
+                          WHERE student_id = :stu_id AND attendance_date = :date";
+            $check_stmt = $this->db->prepare($check_sql);
+            $check_stmt->execute([':stu_id' => $stu_id, ':date' => $date]);
+            $existing_status = $check_stmt->fetchColumn();
+
+            $manual_statuses = [4, 5, 6]; // à¸¥à¸², à¸¥à¸²à¸›à¹ˆà¸§à¸¢, à¸à¸´à¸ˆ
+
+            if ($existing_status === false) {
+                // à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥ -> INSERT
+                $insert_sql = "INSERT INTO student_attendance 
+                               (student_id, attendance_date, attendance_time, attendance_status, checked_by, term, year, device_id)
+                               VALUES 
+                               (:stu_id, :date, :time, :status, 'RFID', :term, :year, :device_id)";
+                $stmt = $this->db->prepare($insert_sql);
+                $stmt->execute([
+                    ':stu_id' => $stu_id, ':date' => $date, ':time' => $time, ':status' => $statusCode,
+                    ':term' => $term, ':year' => $year, ':device_id' => $device_id
+                ]);
+            } elseif (!in_array($existing_status, $manual_statuses)) {
+                // à¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¹‰à¸§ à¹à¸•à¹ˆà¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸à¸²à¸£à¸¥à¸² -> UPDATE
+                $update_sql = "UPDATE student_attendance 
+                               SET attendance_status = :status, attendance_time = :time, checked_by = 'RFID', device_id = :device_id
+                               WHERE student_id = :stu_id AND attendance_date = :date";
+                $stmt = $this->db->prepare($update_sql);
+                $stmt->execute([
+                    ':status' => $statusCode, ':time' => $time, ':stu_id' => $stu_id,
+                    ':date' => $date, ':device_id' => $device_id
+                ]);
+            }
+        } catch (\PDOException $e) {
+            error_log("Failed to update student_attendance: " . $e->getMessage());
+        }
+
+        return $statusText;
+    }
+
+    /**
+     * à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥à¸à¸²à¸£à¸ªà¹à¸à¸™à¸­à¸­à¸ (leave)
+     */
+    private function processLeave($stu_id, $date, $time, $timeSettings, $term, $year, $device_id)
+    {
+        $leave_early = $timeSettings['leave_early_time'] ?? '15:40:00';
+
+        // à¸„à¸³à¸™à¸§à¸“à¸ªà¸–à¸²à¸™à¸°
+        if ($time < $leave_early) {
+            $statusText = 'à¸à¸¥à¸±à¸šà¸à¹ˆà¸­à¸™à¹€à¸§à¸¥à¸²';
+            $leave_status = 'early';
+        } else {
+            $statusText = 'à¸à¸¥à¸±à¸šà¸›à¸à¸•à¸´';
+            $leave_status = 'normal';
+        }
+
+        // à¸šà¸±à¸™à¸—à¸¶à¸à¸¥à¸‡ student_leave_log
+        try {
+            $insert_sql = "INSERT INTO student_leave_log 
+                           (student_id, leave_date, leave_time, leave_status, device_id, term, year)
+                           VALUES 
+                           (:stu_id, :date, :time, :status, :device_id, :term, :year)
+                           ON DUPLICATE KEY UPDATE
+                           leave_time = :time, leave_status = :status";
+            $stmt = $this->db->prepare($insert_sql);
+            $stmt->execute([
+                ':stu_id' => $stu_id, ':date' => $date, ':time' => $time, ':status' => $leave_status,
+                ':device_id' => $device_id, ':term' => $term, ':year' => $year
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Failed to insert student_leave_log: " . $e->getMessage());
+        }
+
+        return $statusText;
+    }
+
+    /**
+     * à¸”à¸¶à¸‡à¸£à¸²à¸¢à¸Šà¸·à¹ˆà¸­à¸™à¸±à¸à¹€à¸£à¸µà¸¢à¸™à¸—à¸µà¹ˆà¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸à¸¥à¸±à¸šà¸šà¹‰à¸²à¸™
+     */
+    public function getStudentsNotLeftToday()
+    {
+        $today = date('Y-m-d');
+        
+        $sql = "SELECT 
+                    s.Stu_id,
+                    s.Stu_pre,
+                    s.Stu_name,
+                    s.Stu_sur,
+                    s.Stu_major,
+                    s.Stu_room,
+                    sa.attendance_time AS arrival_time
+                FROM student s
+                INNER JOIN student_attendance sa ON s.Stu_id = sa.student_id
+                LEFT JOIN student_leave_log sl ON s.Stu_id = sl.student_id AND sl.leave_date = :today
+                WHERE sa.attendance_date = :today
+                  AND sa.attendance_status IN (1,3) -- à¸¡à¸²à¹€à¸£à¸µà¸¢à¸™à¸«à¸£à¸·à¸­à¸¡à¸²à¸ªà¸²à¸¢
+                  AND sl.id IS NULL -- à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸ªà¹à¸à¸™à¸­à¸­à¸
+                  AND s.Stu_status = '1'
+                ORDER BY s.Stu_major, s.Stu_room, s.Stu_name";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':today' => $today]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * à¸”à¸¶à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸™à¸±à¸à¹€à¸£à¸µà¸¢à¸™à¸žà¸£à¹‰à¸­à¸¡à¸ªà¸–à¸²à¸™à¸°à¸à¸²à¸£à¹€à¸Šà¹‡à¸„à¸Šà¸·à¹ˆà¸­à¸ªà¸³à¸«à¸£à¸±à¸šà¸„à¸£à¸¹
+     * @param string $date à¸§à¸±à¸™à¸—à¸µà¹ˆ (Y-m-d Gregorian)
+     * @param int $class à¸Šà¸±à¹‰à¸™
+     * @param int $room à¸«à¹‰à¸­à¸‡
+     * @param string $term à¸ à¸²à¸„à¹€à¸£à¸µà¸¢à¸™
+     * @param string $year à¸›à¸µà¸à¸²à¸£à¸¨à¸¶à¸à¸©à¸²
+     * @return array
+     */
+    public function getStudentsWithAttendanceForTeacher($date, $class, $room, $term, $year)
+    {
+        $sql = "SELECT 
+                    s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, 
+                    s.Stu_major, s.Stu_room, s.Stu_status,
+                    a.id AS attendance_id, 
+                    a.attendance_date, 
+                    a.attendance_status, 
+                    a.term, 
+                    a.year, 
+                    a.checked_by, 
+                    a.device_id, 
+                    a.reason, 
+                    a.attendance_time,
+                    l.leave_time,
+                    l.leave_status
+                FROM student s
+                LEFT JOIN student_attendance a
+                    ON s.Stu_id = a.student_id 
+                    AND a.attendance_date = :date
+                LEFT JOIN student_leave_log l
+                    ON s.Stu_id = l.student_id
+                    AND l.leave_date = :date
+                WHERE s.Stu_status = '1'
+                  AND s.Stu_major = :class
+                  AND s.Stu_room = :room
+                ORDER BY s.Stu_no ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':date' => $date,
+            ':class' => $class,
+            ':room' => $room
+        ]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * à¸šà¸±à¸™à¸—à¸¶à¸/à¸­à¸±à¸›à¹€à¸”à¸•à¸à¸²à¸£à¹€à¸Šà¹‡à¸„à¸Šà¸·à¹ˆà¸­à¹à¸šà¸š bulk à¸ªà¸³à¸«à¸£à¸±à¸šà¸„à¸£à¸¹
+     * @param array $stu_ids à¸£à¸²à¸¢à¸à¸²à¸£ student IDs
+     * @param array $statuses à¸ªà¸–à¸²à¸™à¸°à¸à¸²à¸£à¹€à¸Šà¹‡à¸„à¸Šà¸·à¹ˆà¸­
+     * @param array $reasons à¹€à¸«à¸•à¸¸à¸œà¸¥
+     * @param string $date à¸§à¸±à¸™à¸—à¸µà¹ˆ (Y-m-d)
+     * @param string $term à¸ à¸²à¸„à¹€à¸£à¸µà¸¢à¸™
+     * @param string $year à¸›à¸µà¸à¸²à¸£à¸¨à¸¶à¸à¸©à¸²
+     * @param string $checked_by à¸œà¸¹à¹‰à¹€à¸Šà¹‡à¸„à¸Šà¸·à¹ˆà¸­
+     * @return int à¸ˆà¸³à¸™à¸§à¸™à¸—à¸µà¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ
+     */
+    public function saveAttendanceBulk($stu_ids, $statuses, $reasons, $date, $term, $year, $checked_by = 'teacher')
+    {
+        $success = 0;
+        
+        foreach ($stu_ids as $stu_id) {
+            $status = $statuses[$stu_id] ?? '1';
+            $reason = $reasons[$stu_id] ?? null;
+            
+            try {
+                // à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸§à¹ˆà¸²à¸¡à¸µ record à¸­à¸¢à¸¹à¹ˆà¹à¸¥à¹‰à¸§à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ
+                $check_stmt = $this->db->prepare(
+                    "SELECT id, checked_by FROM student_attendance 
+                     WHERE student_id = :stu_id AND attendance_date = :date"
+                );
+                $check_stmt->execute([':stu_id' => $stu_id, ':date' => $date]);
+                $existing = $check_stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($existing) {
+                    // à¸­à¸±à¸›à¹€à¸”à¸• (à¸„à¸£à¸¹à¸ªà¸²à¸¡à¸²à¸£à¸–à¹à¸à¹‰à¹„à¸‚à¹„à¸”à¹‰à¹€à¸ªà¸¡à¸­ à¹à¸¡à¹‰à¸ˆà¸°à¹€à¸›à¹‡à¸™à¸à¸²à¸£à¸ªà¹à¸à¸™à¸šà¸±à¸•à¸£)
+                    $update_stmt = $this->db->prepare(
+                        "UPDATE student_attendance 
+                         SET attendance_status = :status, 
+                             reason = :reason, 
+                             checked_by = :checked_by, 
+                             term = :term, 
+                             year = :year
+                         WHERE student_id = :stu_id AND attendance_date = :date"
+                    );
+                    $result = $update_stmt->execute([
+                        ':status' => $status,
+                        ':reason' => $reason,
+                        ':checked_by' => $checked_by,
+                        ':term' => $term,
+                        ':year' => $year,
+                        ':stu_id' => $stu_id,
+                        ':date' => $date
+                    ]);
+                } else {
+                    // à¹€à¸žà¸´à¹ˆà¸¡à¹ƒà¸«à¸¡à¹ˆ
+                    $insert_stmt = $this->db->prepare(
+                        "INSERT INTO student_attendance 
+                         (student_id, attendance_date, attendance_status, reason, checked_by, term, year)
+                         VALUES 
+                         (:stu_id, :date, :status, :reason, :checked_by, :term, :year)"
+                    );
+                    $result = $insert_stmt->execute([
+                        ':stu_id' => $stu_id,
+                        ':date' => $date,
+                        ':status' => $status,
+                        ':reason' => $reason,
+                        ':checked_by' => $checked_by,
+                        ':term' => $term,
+                        ':year' => $year
+                    ]);
+                }
+                
+                if ($result) {
+                    $success++;
+                }
+            } catch (\PDOException $e) {
+                error_log("Failed to save attendance for student {$stu_id}: " . $e->getMessage());
+            }
+        }
+        
+        return $success;
+    }
+
+    /**
+     * ดึงสรุปภาพรวมการเข้าเรียนทั้งรงเรียนแบบ optimized (single query)
+     * @param string $date วันที่ (Y-m-d Gregorian)
+     * @param string $term ภาคเรียน
+     * @param string $year ปีการศึกษา
+     * @return array ['summary' => [...], 'by_class' => [...]]
+     */
+    public function getSchoolAttendanceOverview($date, $term, $year)
+    {
+        // Query เดียวดึงข้อมลทั้งหมด
+        $sql = "SELECT 
+                    s.Stu_major,
+                    s.Stu_room,
+                    COUNT(s.Stu_id) as total_students,
+                    SUM(CASE WHEN a.attendance_status = '1' THEN 1 ELSE 0 END) as status_1,
+                    SUM(CASE WHEN a.attendance_status = '2' THEN 1 ELSE 0 END) as status_2,
+                    SUM(CASE WHEN a.attendance_status = '3' THEN 1 ELSE 0 END) as status_3,
+                    SUM(CASE WHEN a.attendance_status = '4' THEN 1 ELSE 0 END) as status_4,
+                    SUM(CASE WHEN a.attendance_status = '5' THEN 1 ELSE 0 END) as status_5,
+                    SUM(CASE WHEN a.attendance_status = '6' THEN 1 ELSE 0 END) as status_6
+                FROM student s
+                LEFT JOIN student_attendance a
+                    ON s.Stu_id = a.student_id 
+                    AND a.attendance_date = :date
+                WHERE s.Stu_status = '1'
+                GROUP BY s.Stu_major, s.Stu_room
+                ORDER BY s.Stu_major, s.Stu_room";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':date' => $date]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // สรุปรวมทั้งรงเรียน
+        $summary = [
+            '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0, '6' => 0,
+            'total' => 0
+        ];
+        
+        $by_class = [];
+        
+        foreach ($results as $row) {
+            // นับรวมทั้งรงเรียน
+            $summary['1'] += (int)$row['status_1'];
+            $summary['2'] += (int)$row['status_2'];
+            $summary['3'] += (int)$row['status_3'];
+            $summary['4'] += (int)$row['status_4'];
+            $summary['5'] += (int)$row['status_5'];
+            $summary['6'] += (int)$row['status_6'];
+            $summary['total'] += (int)$row['total_students'];
+            
+            // เกบข้อมลแยกตามห้อง
+            $by_class[] = [
+                'class' => $row['Stu_major'],
+                'room' => $row['Stu_room'],
+                'total' => (int)$row['total_students'],
+                'status' => [
+                    '1' => (int)$row['status_1'],
+                    '2' => (int)$row['status_2'],
+                    '3' => (int)$row['status_3'],
+                    '4' => (int)$row['status_4'],
+                    '5' => (int)$row['status_5'],
+                    '6' => (int)$row['status_6']
+                ]
+            ];
+        }
+        
+        return [
+            'summary' => $summary,
+            'by_class' => $by_class
+        ];
+    }
+}

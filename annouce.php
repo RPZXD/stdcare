@@ -24,133 +24,192 @@ require_once('class/Utils.php');
     <!-- /.content-header -->
 
     <section class="content">
-      <div class="max-w-6xl mx-auto py-10 px-4">
-        <div class="bg-gradient-to-br from-yellow-100 via-red-50 to-yellow-200 rounded-2xl shadow-xl p-8 border border-red-200 animate-fade-in">
-          <h2 class="text-3xl font-extrabold text-red-700 mb-4 text-center drop-shadow-lg animate-fade-in-down">
-            โรงเรียนพิชัย อำเภอพิชัย จังหวัดอุตรดิตถ์
-          </h2>
-          <p class="text-center text-lg text-yellow-800 mb-2 animate-fade-in">
-            สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาพิษณุโลก อุตรดิตถ์
-          </p>
-          <p class="text-center text-base text-red-600 mb-6 animate-fade-in">
-            การบริหารจัดการและการดำเนินงาน ระบบการดูแลช่วยเหลือนักเรียน ของสถานศึกษา
-          </p>
-          <div class="mb-6">
-            <h3 class="text-2xl font-bold text-red-700 mb-2 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">🌟</span> วิสัยทัศน์
-            </h3>
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-400 text-red-900 text-lg italic animate-fade-in">
-              “โรงเรียนพิชัยสร้างความเข้มแข็ง ของระบบการดูแลช่วยเหลือนักเรียน โดยคำนึงถึงหลักการเสริมสร้างทักษะชีวิต และการคุ้มครองนักเรียนอย่างครบถ้วนทั่วถึง”
+      <div class="max-w-8xl mx-auto py-12 px-6">
+        <!-- Infographic container -->
+        <div class="infographic bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-8 border border-gray-200">
+          <!-- Header / Hero -->
+          <div class="flex flex-col lg:flex-row items-center gap-6 mb-8">
+            <div class="flex items-center gap-4">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-red-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">พช</div>
+              <div>
+                <h1 class="text-2xl lg:text-3xl font-extrabold text-gray-800">โรงเรียนพิชัย</h1>
+                <p class="text-sm text-gray-600">อำเภอพิชัย จังหวัดอุตรดิตถ์ • สพม. พิษณุโลก-อุตรดิตถ์</p>
+              </div>
+            </div>
+            <div class="ml-auto flex gap-3">
+              <button id="btnPrint" class="px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700">🖨️ พิมพ์</button>
+              <button id="btnPdf" class="px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700">📥 PDF</button>
             </div>
           </div>
-          <div class="mb-6">
-            <h3 class="text-2xl font-bold text-yellow-700 mb-2 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">🎯</span> นโยบาย
-            </h3>
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 text-lg animate-fade-in">
-              “ระบบการดูแลเข้มแข็ง เสริมแรงทักษะชีวิต เพื่อพิชิตการคุ้มครองนักเรียนอย่างครบถ้วนทั่วถึง”
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Timeline / Strategies -->
+            <div class="col-span-1">
+              <div class="bg-white rounded-2xl p-6 shadow-md border">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">กลยุทธ์ & ขั้นตอน</h3>
+                <div class="timeline expanded" id="timelineBlock">
+                  <div class="timeline-item">
+                    <div class="timeline-badge bg-green-500">1</div>
+                    <div class="timeline-body">
+                      <div class="font-medium text-sm">พัฒนาผู้เรียน</div>
+                      <div class="text-xs text-gray-600">พัฒนาสมรรถนะด้านเทคโนโลยีและทักษะชีวิต</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-badge bg-blue-500">2</div>
+                    <div class="timeline-body">
+                      <div class="font-medium text-sm">เครือข่ายความร่วมมือ</div>
+                      <div class="text-xs text-gray-600">สร้างความร่วมมือ ยกระดับมาตรฐาน</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-badge bg-yellow-500">3</div>
+                    <div class="timeline-body">
+                      <div class="font-medium text-sm">นวัตกรรมการเรียนรู้</div>
+                      <div class="text-xs text-gray-600">ส่งเสริมการจัดการเรียนรู้ด้วยเทคโนโลยี</div>
+                    </div>
+                  </div>
+
+                  <hr class="my-3">
+                  <h4 class="ml-12 text-sm font-medium text-gray-700 mb-2">ขั้นตอนสำคัญ 5 ขั้นตอน</h4>
+                  <ol class="ml-18 list-decimal ml-6 text-gray-600 space-y-1">
+                    <li class="text-xs">รู้จักนักเรียนเป็นรายบุคคล</li>
+                    <li class="text-xs">คัดกรองนักเรียน</li>
+                    <li class="text-xs">ส่งเสริมและพัฒนานักเรียน</li>
+                    <li class="text-xs">ป้องกันและแก้ไขปัญหา</li>
+                    <li class="text-xs">ส่งต่อนักเรียนอย่างมีคุณภาพ</li>
+                  </ol>
+
+                  
+                </div>
+              </div>
+            </div>
+
+            <!-- Center: Vision / Mission / Goals big cards -->
+            <div class="col-span-1">
+              <div class="space-y-6">
+                <div class="card-hero bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-2xl p-6 border-l-8 border-yellow-400 shadow-md">
+                  <h3 class="text-xl font-bold text-gray-800">วิสัยทัศน์</h3>
+                  <p class="mt-2 text-gray-700 italic text-lg">“สถานศึกษาพอเพียง ขับเคลื่อนนวัตกรรมสู่มาตรฐานสากล”</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="rounded-xl p-4 bg-white shadow border">
+                    <h4 class="font-semibold text-gray-800">พันธกิจ</h4>
+                    <ul class="mt-2 text-gray-600 list-decimal ml-6 space-y-1">
+                      <li>พัฒนาผู้เรียนให้มีคุณภาพด้านวิชาการและทักษะชีวิต</li>
+                      <li>สร้างเครือข่ายความร่วมมือเพื่อยกระดับคุณภาพ</li>
+                      <li>ส่งเสริมการจัดการเรียนรู้ด้วยนวัตกรรมและเทคโนโลยี</li>
+                    </ul>
+                  </div>
+                  <div class="rounded-xl p-4 bg-white shadow border">
+                    <h4 class="font-semibold text-gray-800">เป้าหมาย</h4>
+                    <ul class="mt-2 text-gray-600 list-decimal ml-6 space-y-1">
+                      <li>ผู้เรียนมีคุณภาพ และใช้เทคโนโลยีอย่างสร้างสรรค์</li>
+                      <li>มีเครือข่ายความร่วมมือที่เข้มแข็ง</li>
+                      <li>ครูและบุคลากรพร้อมใช้นวัตกรรม</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Values / Identity / Competencies -->
+            <div class="col-span-1">
+              <div class="space-y-6">
+                <div class="rounded-2xl p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 border shadow">
+                  <h4 class="font-semibold text-gray-800">อัตลักษณ์</h4>
+                  <p class="text-gray-700 mt-2">ลูกพิชัย พอเพียง กล้าหาญ เสียสละ กตัญญู</p>
+                </div>
+
+                <div class="rounded-2xl p-4 bg-gradient-to-br from-pink-50 to-pink-100 border shadow">
+                  <h4 class="font-semibold text-gray-800">เอกลักษณ์</h4>
+                  <p class="text-gray-700 mt-2">ลูกหลานพระยาพิชัย สืบสานความกล้า ตามหลักปรัชญาของเศรษฐกิจพอเพียง</p>
+                </div>
+
+                <div class="rounded-2xl p-4 bg-white border shadow">
+                  <h4 class="font-semibold text-gray-800">ค่านิยม & วัฒนธรรม</h4>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">กล้าทำสิ่งที่ถูกต้อง</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">ยึดหลักพอเพียง</span>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">รับผิดชอบ</span>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl p-4 bg-white border shadow">
+                  <h4 class="font-semibold text-gray-800">สมรรถนะหลัก</h4>
+                  <div class="mt-3 space-y-3 text-sm text-gray-700">
+                    <div>ระบบการบริหารจัดการที่มีคุณภาพ</div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mt-2">
+                      <div class="bg-indigo-500 h-3 rounded-full" style="width:78%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div>
-            <h3 class="text-2xl font-bold text-red-700 mb-2 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">🚀</span> พันธกิจ
-            </h3>
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-400 text-red-900 text-lg animate-fade-in">
-              “รู้รอบกรอบบุคคล กรองกมลบูรณาการ ประสานเสริมให้พัฒนา คลายปัญหาเป็นระบบ เมื่อพานพบรีบส่งต่อ”
-            </div>
-          </div>
-          <!-- เป้าหมาย -->
-          <div class="mt-8 mb-6">
-            <h3 class="text-2xl font-bold text-yellow-700 mb-2 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">🎯</span> เป้าหมาย
-            </h3>
-            <ul class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 text-lg list-decimal ml-8 animate-fade-in space-y-2">
-              <li>เพื่อให้ระบบการดูแลช่วยเหลือนักเรียนเป็นระบบ และมีประสิทธิภาพ</li>
-              <li>เพื่อส่งเสริมให้ครูที่ปรึกษา บุคลากรในโรงเรียน ผู้ปกครอง ชุมชน หน่วยงาน และองค์กรภายนอก มีส่วนร่วมในการดูแลช่วยเหลือนักเรียน</li>
-              <li>เพื่อให้นักเรียนได้รับการส่งเสริมพัฒนาเต็มตามศักยภาพ เป็นคนเก่ง ดี มีความสุข</li>
-            </ul>
-          </div>
-          <!-- กลยุทธ์การดำเนินงาน -->
-          <div class="mb-6">
-            <h3 class="text-2xl font-bold text-yellow-700 mb-4 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">🛠️</span> กลยุทธ์การดำเนินงาน
-            </h3>
-            <!-- Timeline Steps -->
-            <div class="relative pl-8">
-              <div class="absolute left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-400 via-red-200 to-yellow-100 rounded-full"></div>
-              <ol class="space-y-8">
-                <li class="relative flex items-start group animate-fade-in">
-                  <span class="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-400 text-yellow-700 text-2xl shadow group-hover:scale-110 transition-transform duration-200">🎯</span>
-                  <div class="ml-6 bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 w-full hover:bg-yellow-50 transition-colors duration-200">
-                    <span class="font-semibold text-yellow-700">Step 1:</span> กำหนดนโยบาย เป้าหมายการพัฒนาอย่างต่อเนื่อง
-                  </div>
-                </li>
-                <li class="relative flex items-start group animate-fade-in">
-                  <span class="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-400 text-yellow-700 text-2xl shadow group-hover:scale-110 transition-transform duration-200">👨‍🏫</span>
-                  <div class="ml-6 bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 w-full hover:bg-yellow-50 transition-colors duration-200">
-                    <span class="font-semibold text-yellow-700">Step 2:</span> การพัฒนาบุคลากรให้มีความรู้ความเข้าใจในระบบการดูแลในระบบการดูแล
-                  </div>
-                </li>
-                <li class="relative flex items-start group animate-fade-in">
-                  <span class="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-400 text-yellow-700 text-2xl shadow group-hover:scale-110 transition-transform duration-200">💻</span>
-                  <div class="ml-6 bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 w-full hover:bg-yellow-50 transition-colors duration-200">
-                    <span class="font-semibold text-yellow-700">Step 3:</span> นำเทคโนโลยีมาใช้ในการดำเนินงานเพื่อความสะดวกรวดเร็ว
-                  </div>
-                </li>
-                <li class="relative flex items-start group animate-fade-in">
-                  <span class="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-400 text-yellow-700 text-2xl shadow group-hover:scale-110 transition-transform duration-200">🤝</span>
-                  <div class="ml-6 bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 w-full hover:bg-yellow-50 transition-colors duration-200">
-                    <span class="font-semibold text-yellow-700">Step 4:</span> การมีส่วนร่วม ของทุกภาคส่วน
-                  </div>
-                </li>
-                <li class="relative flex items-start group animate-fade-in">
-                  <span class="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-400 text-yellow-700 text-2xl shadow group-hover:scale-110 transition-transform duration-200">⚙️</span>
-                  <div class="ml-6 bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400 text-yellow-900 w-full hover:bg-yellow-50 transition-colors duration-200">
-                    <span class="font-semibold text-yellow-700">Step 5:</span> การจัดระบบที่มีประสิทธิภาพทุกกระบวนการ
-                  </div>
-                </li>
-              </ol>
-            </div>
-          </div>
-          <!-- ขั้นตอนสำคัญ 5 ขั้นตอน -->
-          <div>
-            <h3 class="text-2xl font-bold text-red-700 mb-4 flex items-center gap-2 animate-bounce-in">
-              <span class="text-3xl">📋</span> ขั้นตอนสำคัญ 5 ขั้นตอน
-            </h3>
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-400 text-red-900 text-lg animate-fade-in">
-              <p class="mb-4 flex items-center gap-2"><span class="text-2xl">✅</span> <span>โดยโรงเรียนพิชัยได้ปฏิบัติตามแนวทางการดำเนินงานระบบการดูแลช่วยเหลือนักเรียน ของสำนักงานคณะกรรมการการศึกษาขั้นพื้นฐานอย่างเป็นระบบและต่อเนื่อง โดยมีขั้นตอนสำคัญ 5 ขั้นตอน ดังนี้</span></p>
-              <ol class="list-decimal ml-8 space-y-3">
-                <li class="flex items-center gap-2"><span class="text-xl">🧑‍🎓</span> การรู้จักนักเรียนเป็นรายบุคคล</li>
-                <li class="flex items-center gap-2"><span class="text-xl">🔎</span> การคัดกรองนักเรียน</li>
-                <li class="flex items-center gap-2"><span class="text-xl">🚀</span> การส่งเสริมและพัฒนานักเรียน</li>
-                <li class="flex items-center gap-2"><span class="text-xl">🛡️</span> การป้องกันและแก้ไขปัญหานักเรียน</li>
-                <li class="flex items-center gap-2"><span class="text-xl">🔗</span> การส่งต่อนักเรียนอย่างมีคุณภาพ</li>
-              </ol>
-            </div>
-          </div>
+
+          <div class="mt-8 text-center text-gray-600">เอกสารอ้างอิง: วิสัยทัศน์และนโยบาย ปี 2569</div>
         </div>
       </div>
+
+      <!-- scripts for PDF/Print remain -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <script>
+      // Print
+      document.getElementById('btnPrint').addEventListener('click', ()=> window.print());
+
+      // Export to PDF (capture infographic container only)
+      document.getElementById('btnPdf').addEventListener('click', async ()=>{
+        const container = document.querySelector('.infographic');
+        const origBg = container.style.backgroundColor;
+        container.style.backgroundColor = '#ffffff';
+        try{
+          const canvas = await html2canvas(container, {scale:2, useCORS:true});
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({orientation:'portrait', unit:'pt', format:'a4'});
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const imgProps = {width: canvas.width, height: canvas.height};
+          const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+          const imgWidth = imgProps.width * ratio;
+          const imgHeight = imgProps.height * ratio;
+          pdf.addImage(imgData, 'JPEG', (pageWidth - imgWidth)/2, 20, imgWidth, imgHeight);
+          pdf.save('วิสัยทัศน์_infographic_โรงเรียนพิชัย.pdf');
+        }catch(err){
+          alert('เกิดข้อผิดพลาดขณะสร้าง PDF: ' + err.message);
+          console.error(err);
+        }finally{ container.style.backgroundColor = origBg; }
+      });
+      
+      // timeline is shown fully by default (no expand/collapse)
+      </script>
+
       <style>
-      @layer utilities {
-        .animate-fade-in { animation: fadeIn 0.8s; }
-        .animate-fade-in-down { animation: fadeInDown 0.8s; }
-        .animate-bounce-in { animation: bounceIn 0.8s; }
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px);}
-        to { opacity: 1; transform: translateY(0);}
-      }
-      @keyframes bounceIn {
-        0% { transform: scale(0.9); opacity: 0.7;}
-        60% { transform: scale(1.05);}
-        80% { transform: scale(0.98);}
-        100% { transform: scale(1); opacity: 1;}
-      }
-      }
+  /* Compact timeline styling */
+  .timeline.compact { max-height: 220px; overflow: auto; padding-right: 6px; }
+  .timeline.expanded { max-height: none; }
+  .timeline.compact::-webkit-scrollbar { width: 8px; }
+  .timeline.compact::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 8px; }
+  .timeline-item { display:flex; gap:10px; align-items:flex-start; padding:6px 0; }
+  .timeline-badge { width:28px; height:28px; border-radius:9999px; color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .timeline-body { flex:1; }
+  /* Draw short connector segments between badges instead of one long line */
+  .timeline-item { position: relative; }
+  .timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 12px; /* align under the badge */
+    top: 28px;  /* start a bit below the badge center */
+    width: 2px;
+    height: 18px; /* short segment */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.04));
+    border-radius: 2px;
+  }
+  .infographic .card-hero { background-image: linear-gradient(120deg, rgba(253,224,71,0.08), rgba(255,244,229,0.08)); }
+  @media print { .infographic { box-shadow:none !important; border: none !important; } }
       </style>
     </section>
     <!-- /.content -->
@@ -159,8 +218,6 @@ require_once('class/Utils.php');
     <?php require_once('footer.php');?>
 </div>
 <!-- ./wrapper -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <?php require_once('script.php');?>
 </body>

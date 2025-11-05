@@ -59,7 +59,8 @@ if (!empty($students)) {
     $stmt->execute([
         ':class' => $report_class,
         ':room' => $report_room,
-        ':year' => $report_year, // B.E. year
+        // Database stores dates in Gregorian (A.D.). Convert input B.E. year to A.D. for query
+        ':year' => ($report_year - 543),
         ':month' => $report_month
     ]);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);

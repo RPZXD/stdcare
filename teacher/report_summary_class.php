@@ -12,50 +12,34 @@ $attendance = new Attendance($db);
 $class = $userData['Teach_class'];
 $room = $userData['Teach_room'];
 
-// กำหนดวันที่ (วันนี้ หรือจาก GET)
-function convertToBuddhistYear($date) {
-    // ตรวจสอบว่ารูปแบบเป็น YYYY-MM-DD
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-        list($year, $month, $day) = explode('-', $date);
-
-        // ถ้าเป็นปี ค.ศ. ให้บวก 543
-        if ($year < 2500) {
-            $year += 543;
-        }
-
-        return $year . '-' . $month . '-' . $day;
-    }
-    // ถ้า format ไม่ถูกต้อง คืนค่าเดิม
-    return $date;
-}
-
 // ฟังก์ชันแปลงวันที่เป็น วัน เดือน ปี พ.ศ. ภาษาไทย
-function thaiDate($date) {
-    $months = [
-        1 => 'มกราคม', 2 => 'กุมภาพันธ์', 3 => 'มีนาคม', 4 => 'เมษายน',
-        5 => 'พฤษภาคม', 6 => 'มิถุนายน', 7 => 'กรกฎาคม', 8 => 'สิงหาคม',
-        9 => 'กันยายน', 10 => 'ตุลาคม', 11 => 'พฤศจิกายน', 12 => 'ธันวาคม'
-    ];
-    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
-        $year = (int)$m[1];
-        $month = (int)$m[2];
-        $day = (int)$m[3];
-        if ($year < 2500) $year += 543;
-        return $day . ' ' . $months[$month] . ' ' . $year;
+if (!function_exists('thaiDate')) {
+    function thaiDate($date) {
+        $months = [
+            1 => 'มกราคม', 2 => 'กุมภาพันธ์', 3 => 'มีนาคม', 4 => 'เมษายน',
+            5 => 'พฤษภาคม', 6 => 'มิถุนายน', 7 => 'กรกฎาคม', 8 => 'สิงหาคม',
+            9 => 'กันยายน', 10 => 'ตุลาคม', 11 => 'พฤศจิกายน', 12 => 'ธันวาคม'
+        ];
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+            $year = (int)$m[1];
+            $month = (int)$m[2];
+            $day = (int)$m[3];
+            if ($year < 2500) $year += 543;
+            return $day . ' ' . $months[$month] . ' ' . $year;
+        }
+        return $date;
     }
-    return $date;
 }
 
-// ใช้งาน
+// ใช้งาน - ใช้ Gregorian date (ค.ศ.) สำหรับ database
 date_default_timezone_set('Asia/Bangkok');
-$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$dateC = convertToBuddhistYear($date);
+$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); // Gregorian format
 
 $term = $user->getTerm();
 $pee = $user->getPee();
 
-// ดึงข้อมูลนักเรียนห้องของครู
-$students_all = $attendance->getStudentsWithAttendance($dateC, $class, $room, $term, $pee);
+// ดึงข้อมูลนักเรียนห้องของครู (ใช้ Gregorian date)
+$students_all = $attendance->getStudentsWithAttendance($date, $class, $room, $term, $pee);
 
 // นับแต่ละประเภท
 $status_labels = [

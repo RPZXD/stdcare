@@ -39,8 +39,10 @@ $teacher_name = $userData['Teach_name'];
 $class = $userData['Teach_class'];
 $room = $userData['Teach_room'];
 
-$currentDate = Utils::convertToThaiDatePlusNum(date("Y-m-d"));
-$currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
+// Use Gregorian date (Y-m-d) for DB/API calls
+$currentDate = date("Y-m-d");
+// For display to Thai users keep a Buddhist-year formatted string
+$currentDateDisplay = Utils::convertToThaiDatePlus(date("Y-m-d"));
 // $count = $student->getStudyStatusCountClassRoom2($class, $room, Utils::convertToThaiDatePlusNum(date("Y-m-d")));
 $countStdCome = $student->getStatusCountClassRoom($class, $room, [1, 3, 6] , $currentDate);
 $countStdAbsent = $student->getStatusCountClassRoom($class, $room, [2, 4, 5] , $currentDate);

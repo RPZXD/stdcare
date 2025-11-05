@@ -60,6 +60,47 @@ try {
             echo json_encode($result);
             break;
 
+        // Action: ดึงข้อมูลนักเรียนสำหรับครู (ใช้แทน /class/Attendance.php)
+        case 'get_students_for_teacher':
+            $date = $_GET['date'] ?? date('Y-m-d');
+            $class = intval($_GET['class'] ?? 0);
+            $room = intval($_GET['room'] ?? 0);
+            $user = new UserLogin($db);
+            $term = $user->getTerm();
+            $year = $user->getPee();
+            
+            $students = $attendanceModel->getStudentsWithAttendanceForTeacher($date, $class, $room, $term, $year);
+            echo json_encode(['success' => true, 'data' => $students]);
+            break;
+
+        // Action: บันทึกการเช็คชื่อจากครู
+        case 'save_teacher_attendance':
+            $date = $_POST['date'] ?? date('Y-m-d');
+            $stu_ids = $_POST['Stu_id'] ?? [];
+            $statuses = $_POST['attendance_status'] ?? [];
+            $reasons = $_POST['reason'] ?? [];
+            $user = new UserLogin($db);
+            $term = $user->getTerm();
+            $year = $user->getPee();
+            
+            // บันทึกโดยระบุ checked_by = 'teacher'
+            $success = $attendanceModel->saveAttendanceBulk(
+                $stu_ids, 
+                $statuses, 
+                $reasons, 
+                $date, 
+                $term, 
+                $year, 
+                'teacher'
+            );
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => "บันทึกสำเร็จ {$success} รายการ",
+                'count' => $success
+            ]);
+            break;
+
         default:
             http_response_code(404);
             echo json_encode(['error' => 'Invalid action']);

@@ -8,13 +8,6 @@ include_once("../../class/Student.php");
 $class = isset($_GET['class']) ? $_GET['class'] : null;
 $room = isset($_GET['room']) ? $_GET['room'] : null;
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-if ($date) {
-    $parts = explode('-', $date);
-    if (count($parts) === 3) {
-        $parts[0] = strval(intval($parts[0]) + 543);
-        $date = implode('-', $parts);
-    }
-}
 
 function status_info($status) {
     switch ($status) {

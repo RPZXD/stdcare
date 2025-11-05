@@ -24,7 +24,7 @@ if (isset($_SESSION['Teacher_login'])) {
     $userData = $user->userData($userid);
 
     // เรียกมาเฉพาะ class และ room ของครูผู้ใช้ปัจจุบัน
-    $class = $๊userData['Teach_class'];
+    $class = $userData['Teach_class'];
     $room = $userData['Teach_room'];
 } else {
     $sw2 = new SweetAlert2(
@@ -52,7 +52,7 @@ require_once('header.php');
             </div>
         </div>
         <section class="content">
-            <div class="container mx-auto py-4">
+            <div class="container col-md-12 py-4">
                 <?php
                 // รับค่า tab จาก query string
                 $tab = $_GET['tab'] ?? 'check';

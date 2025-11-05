@@ -42,18 +42,18 @@ function thaiDate($date) {
 
 // ใช้งาน
 date_default_timezone_set('Asia/Bangkok');
+// ใช้ Gregorian date (ค.ศ.) สำหรับ database query
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$dateC = convertToBuddhistYear($date);
 
-// ดึงข้อมูลนักเรียนห้องของครู
-$students = $attendance->getStudentsWithAttendance($dateC, $class, $room);
+// ดึงข้อมูลนักเรียนห้องของครู - ใช้ Gregorian date
+$students = $attendance->getStudentsWithAttendance($date, $class, $room, $term, $pee);
 $term = $user->getTerm();
 $pee = $user->getPee();
 ?>
 
 <div class="mb-4 flex flex-wrap gap-4 items-center">
     <div class="text-blue-700 font-semibold">
-        เช็คชื่อนักเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> ของวันที่ <?= htmlspecialchars(thaiDate($dateC)) ?>
+        เช็คชื่อนักเรียน ชั้น ม.<?= htmlspecialchars($class) ?> ห้อง <?= htmlspecialchars($room) ?> ของวันที่ <?= htmlspecialchars(thaiDate(convertToBuddhistYear($date))) ?>
     </div>
     <form method="get" class="flex items-center gap-2">
         <input type="hidden" name="tab" value="check">
@@ -106,13 +106,9 @@ $pee = $user->getPee();
     </style>
     <form method="post" action="api/check_std_action.php">
         <?php
-        // แปลงปีใน $date ให้เป็น พ.ศ.
-        $date_thai = $date;
-        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
-            $date_thai = ($m[1] + 543) . '-' . $m[2] . '-' . $m[3];
-        }
+        // ส่งวันที่แบบ Gregorian (ค.ศ.) ไปยัง API
         ?>
-        <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
+        <input type="hidden" name="date" value="<?= htmlspecialchars($date) ?>">
         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
         <div class="overflow-x-auto">
@@ -173,15 +169,15 @@ $pee = $user->getPee();
                                     ?>
                                     <div class="inline-block">
                                         <?= !empty($std['attendance_date']) ? htmlspecialchars($std['attendance_date']) : '-' ?>
-                                        <button type="button" class="btn bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 ml-2 text-white  text-sm edit-attendance-btn" data-stu-id="<?= htmlspecialchars($std['Stu_id']) ?>">แก้ไข</button>
+                                        <button type="button" class="bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 ml-2 text-sm edit-attendance-btn" data-stu-id="<?= htmlspecialchars($std['Stu_id']) ?>">แก้ไข</button>
                                     </div>
-                                    <!-- ฟอร์มแก้ไข (ซ่อนอยู่) - Removed inline style -->
-                                    <form method="post" action="api/check_std_action.php" class="edit-attendance-form mt-2 hidden" id="edit-form-<?= htmlspecialchars($std['Stu_id']) ?>">
+                                    <div class="edit-attendance-form mt-2 hidden" id="edit-form-<?= htmlspecialchars($std['Stu_id']) ?>">
+                                    <!-- ฟอร์มแก้ไข (ซ่อนอยู่) - use a div instead of nested form -->
                                         <input type="hidden" name="edit_mode" value="1">
                                         <input type="hidden" name="Stu_id[]" value="<?= htmlspecialchars($std['Stu_id']) ?>">
                                         <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
                                         <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-                                        <input type="hidden" name="date" value="<?= htmlspecialchars($date_thai) ?>">
+                                        <input type="hidden" name="date" value="<?= htmlspecialchars($date) ?>">
                                         <input type="hidden" name="teach_id[<?= htmlspecialchars($std['Stu_id']) ?>]" value="<?= htmlspecialchars($_SESSION['Teacher_login'] ?? '') ?>">
                                         <div class="flex flex-wrap gap-2 mb-1 justify-center attendance-radio">
                                             <?php
@@ -214,9 +210,10 @@ $pee = $user->getPee();
                                         <input type="hidden" name="behavior_type[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
                                         <input type="hidden" name="behavior_name[<?= htmlspecialchars($std['Stu_id']) ?>]" value="มาโรงเรียนสาย">
                                         <input type="hidden" name="behavior_score[<?= htmlspecialchars($std['Stu_id']) ?>]" value="5">
-                                        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2">บันทึก</button>
-                                        <button type="button" class="cancel-edit-btn btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 ml-2">ยกเลิก</button>
-                                    </form>
+                                        <button type="button" class="save-edit-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-2">บันทึก</button>
+                                        <button type="button" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 ml-2 text-sm cancel-edit-btn ml-2">ยกเลิก</button>
+                                        
+                                    </div>
                                     <?php
                                 } else {
                                     // radio group: name="attendance_status[Stu_id]"
@@ -400,6 +397,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Set display to none, the CSS rule will ensure it stays hidden
                 form.style.display = 'none';
             }
+        });
+    });
+
+    // เมื่อกดปุ่ม "บันทึก" ในแผงแก้ไข ให้ส่งข้อมูลด้วย fetch (ป้องกัน nested form)
+    document.querySelectorAll('.save-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var panel = btn.closest('.edit-attendance-form');
+            if (!panel) return;
+
+            var formData = new FormData();
+            // collect all inputs and radios inside the panel
+            panel.querySelectorAll('input').forEach(function(input) {
+                if (!input.name) return;
+                if (input.type === 'radio') {
+                    if (input.checked) {
+                        formData.append(input.name, input.value);
+                    }
+                } else if (input.type === 'checkbox') {
+                    if (input.checked) formData.append(input.name, input.value);
+                } else {
+                    formData.append(input.name, input.value);
+                }
+            });
+
+            // send to api endpoint
+            fetch('api/check_std_action.php', {
+                method: 'POST',
+                body: formData,
+            }).then(function(resp) {
+                return resp.text();
+            }).then(function(text) {
+                // basic success check - you can adapt based on your API's response
+                // reload to reflect changed status
+                window.location.reload();
+            }).catch(function(err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการบันทึก');
+            });
         });
     });
 });

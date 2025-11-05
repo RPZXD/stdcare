@@ -38,18 +38,9 @@ if (isset($_SESSION['Teacher_login'])) {
 
 // --- Get Filter Data ---
 
-// <input type="date"> and date() in PHP use Gregorian (A.D.) format (e.g., 2024-10-21)
-$report_gregorian_date = $_GET['date'] ?? date('Y-m-d');
-
-// We must convert this A.D. date to a B.E. date string (e.g., 2567-10-21) for the SQL query
-$date_parts = explode('-', $report_gregorian_date);
-$gregorian_year = (int)$date_parts[0];
-$month = $date_parts[1];
-$day = $date_parts[2];
-$buddhist_year = $gregorian_year + 543;
-
-// This B.E. date is for the database query
-$report_buddhist_date = $buddhist_year . '-' . $month . '-' . $day; 
+// Database stores dates in Gregorian (A.D.) format (e.g., 2024-10-21)
+// <input type="date"> and date() in PHP also use Gregorian format
+$report_date = $_GET['date'] ?? date('Y-m-d');
 
 // Get class/room filters
 $report_class = $_GET['class'] ?? $userData['Teach_major'] ?? '1';
@@ -57,13 +48,11 @@ $report_room = $_GET['room'] ?? $userData['Teach_room'] ?? '1';
 
 // --- Fetch Report Data ---
 
-// Use the B.E. date ($report_buddhist_date) for querying the database
-$students = $attendance->getStudentsWithAttendance($report_buddhist_date, $report_class, $report_room, $term, $pee);
+// Use Gregorian date for querying the database
+$students = $attendance->getStudentsWithAttendance($report_date, $report_class, $report_room, $term, $pee);
 
-// Use the B.E. date for the summary
-$summary = new AttendanceSummary($students, $report_class, $report_room, $report_buddhist_date, $term, $pee);
-
-// NOTE: The $report_gregorian_date is still used in the <input> value, which is correct.
+// Create summary with Gregorian date
+$summary = new AttendanceSummary($students, $report_class, $report_room, $report_date, $term, $pee);
 
 
 require_once('header.php');
@@ -91,7 +80,7 @@ require_once('header.php');
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label for="date" class="block text-sm font-medium text-gray-700">วันที่</label>
-                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="<?php echo htmlspecialchars($report_gregorian_date); ?>">
+                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="<?php echo htmlspecialchars($report_date); ?>">
                                 </div>
                                 <div>
                                     <label for="class" class="block text-sm font-medium text-gray-700">ระดับชั้น</label>
@@ -119,7 +108,7 @@ require_once('header.php');
                     </div>
                     <?php if (!empty($students)) : ?>
                         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-                             <h3 class="text-lg font-semibold mb-4">สรุปการมาเรียน ม.<?php echo $report_class . "/" . $report_room; ?> วันที่ <?php echo thaiDateShort($report_buddhist_date); ?> (นักเรียนทั้งหมด <?php echo count($students); ?> คน)</h3>
+                             <h3 class="text-lg font-semibold mb-4">สรุปการมาเรียน ม.<?php echo $report_class . "/" . $report_room; ?> วันที่ <?php echo thaiDateShort($report_date); ?> (นักเรียนทั้งหมด <?php echo count($students); ?> คน)</h3>
                              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 <?php foreach($summary->status_labels as $key => $info): 
                                     $count = $summary->status_count[$key];

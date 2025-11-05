@@ -14,14 +14,6 @@ $user = new UserLogin($db);
 
 
 // กำหนดวันที่ (วันนี้ หรือจาก GET)
-function convertToBuddhistYear($date) {
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-        list($year, $month, $day) = explode('-', $date);
-        if ($year < 2500) $year += 543;
-        return $year . '-' . $month . '-' . $day;
-    }
-    return $date;
-}
 function thaiDateShort($date) {
     $months = [
         1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.',
@@ -40,10 +32,17 @@ function thaiDateShort($date) {
 
 date_default_timezone_set('Asia/Bangkok');
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$dateC = convertToBuddhistYear($date);
 
 $term = isset($user) ? $user->getTerm() : 1;
 $pee = isset($user) ? $user->getPee() : date('Y');
+
+// คำนวณสัปดาห์ปัจจุบัน
+$weekStart = date('Y-m-d', strtotime('monday this week', strtotime($date)));
+$weekEnd = date('Y-m-d', strtotime('sunday this week', strtotime($date)));
+
+// คำนวณเดือนปัจจุบัน
+$monthStart = date('Y-m-01', strtotime($date));
+$monthEnd = date('Y-m-t', strtotime($date));
 
 // เตรียมข้อมูลสรุป
 $status_labels = [
@@ -68,6 +67,63 @@ function tableExists($db, $tableName) {
 
 $attendanceTableExists = tableExists($db, 'student_attendance');
 
+// ดึงสถิติเพิ่มเติม
+$stats = [
+    'today' => ['present' => 0, 'absent' => 0, 'late' => 0, 'total' => 0],
+    'week' => ['present' => 0, 'absent' => 0, 'late' => 0, 'total' => 0],
+    'month' => ['present' => 0, 'absent' => 0, 'late' => 0, 'total' => 0]
+];
+
+if ($attendanceTableExists) {
+    // สถิติวันนี้
+    $stmt = $db->prepare("
+        SELECT 
+            COUNT(DISTINCT student_id) as total,
+            SUM(CASE WHEN attendance_status = 1 THEN 1 ELSE 0 END) as present,
+            SUM(CASE WHEN attendance_status = 2 THEN 1 ELSE 0 END) as absent,
+            SUM(CASE WHEN attendance_status = 3 THEN 1 ELSE 0 END) as late
+        FROM student_attendance 
+        WHERE attendance_date = :date AND term = :term AND year = :pee
+    ");
+    $stmt->execute([':date' => $date, ':term' => $term, ':pee' => $pee]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row['total']) {
+        $stats['today'] = $row;
+    }
+
+    // สถิติสัปดาห์นี้
+    $stmt = $db->prepare("
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN attendance_status = 1 THEN 1 ELSE 0 END) as present,
+            SUM(CASE WHEN attendance_status = 2 THEN 1 ELSE 0 END) as absent,
+            SUM(CASE WHEN attendance_status = 3 THEN 1 ELSE 0 END) as late
+        FROM student_attendance 
+        WHERE attendance_date BETWEEN :start AND :end AND term = :term AND year = :pee
+    ");
+    $stmt->execute([':start' => $weekStart, ':end' => $weekEnd, ':term' => $term, ':pee' => $pee]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row['total']) {
+        $stats['week'] = $row;
+    }
+
+    // สถิติเดือนนี้
+    $stmt = $db->prepare("
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN attendance_status = 1 THEN 1 ELSE 0 END) as present,
+            SUM(CASE WHEN attendance_status = 2 THEN 1 ELSE 0 END) as absent,
+            SUM(CASE WHEN attendance_status = 3 THEN 1 ELSE 0 END) as late
+        FROM student_attendance 
+        WHERE attendance_date BETWEEN :start AND :end AND term = :term AND year = :pee
+    ");
+    $stmt->execute([':start' => $monthStart, ':end' => $monthEnd, ':term' => $term, ':pee' => $pee]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row['total']) {
+        $stats['month'] = $row;
+    }
+}
+
 // ดึงข้อมูล attendance ของทุกห้องในวันที่เลือกในครั้งเดียว
 if ($attendanceTableExists) {
     $stmt = $db->prepare("
@@ -82,7 +138,7 @@ if ($attendanceTableExists) {
         ORDER BY s.Stu_major, s.Stu_room
     ");
     $stmt->execute([
-        ':dateC' => $dateC,
+        ':dateC' => $date,
         ':term' => $term,
         ':pee' => $pee
     ]);
@@ -148,119 +204,225 @@ $classes = array_values($class_map);
 
     <section class="content">
       <div class="container-fluid">
-        <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Header Section with Date Picker -->
+        <div class="mb-6 flex flex-wrap gap-4 items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl shadow">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-500 text-white p-3 rounded-full">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">ภาพรวมการมาเรียน</h2>
+                    <p class="text-gray-600">วันที่ <?= htmlspecialchars(thaiDateShort($date)) ?></p>
+                </div>
+            </div>
+            <form method="get" class="flex items-center gap-2 bg-white p-2 rounded-lg shadow">
+                <label for="date" class="text-gray-700 font-medium">📅</label>
+                <input type="date" id="date" name="date" value="<?= htmlspecialchars($date) ?>" class="border-0 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 transition">
+                <button type="submit" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-md transition-all transform hover:scale-105">
+                    แสดงข้อมูล
+                </button>
+            </form>
+        </div>
+
+        <!-- Quick Stats Cards - Overview -->
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="text-2xl">📊</span> สถิติภาพรวม
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Card: วันนี้ -->
+                <div class="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl shadow-lg p-4 hover:scale-105 transition-transform duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium opacity-90">วันนี้</span>
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <div class="text-3xl font-bold mb-1"><?= number_format($stats['today']['present']) ?></div>
+                    <div class="text-xs opacity-80">มาเรียน / สาย: <?= $stats['today']['late'] ?> / ขาด: <?= $stats['today']['absent'] ?></div>
+                    <div class="mt-2 text-sm font-medium">
+                        <?= $stats['today']['total'] > 0 ? round(($stats['today']['present'] / $stats['today']['total']) * 100, 1) : 0 ?>% เข้าเรียน
+                    </div>
+                </div>
+
+                <!-- Card: สัปดาห์นี้ -->
+                <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-xl shadow-lg p-4 hover:scale-105 transition-transform duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium opacity-90">สัปดาห์นี้</span>
+                        <span class="text-2xl">📆</span>
+                    </div>
+                    <div class="text-3xl font-bold mb-1"><?= number_format($stats['week']['present']) ?></div>
+                    <div class="text-xs opacity-80">มาเรียน / สาย: <?= $stats['week']['late'] ?> / ขาด: <?= $stats['week']['absent'] ?></div>
+                    <div class="mt-2 text-sm font-medium">
+                        <?= $stats['week']['total'] > 0 ? round(($stats['week']['present'] / $stats['week']['total']) * 100, 1) : 0 ?>% เข้าเรียน
+                    </div>
+                </div>
+
+                <!-- Card: เดือนนี้ -->
+                <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl shadow-lg p-4 hover:scale-105 transition-transform duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium opacity-90">เดือนนี้</span>
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <div class="text-3xl font-bold mb-1"><?= number_format($stats['month']['present']) ?></div>
+                    <div class="text-xs opacity-80">มาเรียน / สาย: <?= $stats['month']['late'] ?> / ขาด: <?= $stats['month']['absent'] ?></div>
+                    <div class="mt-2 text-sm font-medium">
+                        <?= $stats['month']['total'] > 0 ? round(($stats['month']['present'] / $stats['month']['total']) * 100, 1) : 0 ?>% เข้าเรียน
+                    </div>
+                </div>
+
+                <!-- Card: เปอร์เซ็นต์โดยรวม -->
+                <div class="bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-xl shadow-lg p-4 hover:scale-105 transition-transform duration-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium opacity-90">อัตราเข้าเรียน</span>
+                        <span class="text-2xl">🎯</span>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">
+                        <?= $stats['today']['total'] > 0 ? round(($stats['today']['present'] / $stats['today']['total']) * 100, 1) : 0 ?>%
+                    </div>
+                    <div class="text-xs opacity-80">เป้าหมาย: 95%</div>
+                    <div class="mt-2">
+                        <div class="bg-white/30 rounded-full h-2 overflow-hidden">
+                            <div class="bg-white h-full rounded-full transition-all duration-500" style="width: <?= $stats['today']['total'] > 0 ? round(($stats['today']['present'] / $stats['today']['total']) * 100) : 0 ?>%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Count Cards -->
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="text-2xl">👥</span> จำนวนนักเรียน
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Card: นักเรียนทั้งหมด -->
-            <div class="rounded-xl shadow-lg bg-gradient-to-br from-blue-400 to-blue-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                <span class="text-4xl mb-2">🎓</span>
                 <div class="text-5xl font-bold mb-2">
                     <?php
                     // นับยอดนักเรียนทั้งหมด
                     $stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1");
                     $stmt->execute();
                     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                    echo number_format($row['total']);
+                    $totalStudents = $row['total'];
+                    echo number_format($totalStudents);
                     ?>
                 </div>
                 <div class="text-lg font-semibold tracking-wide">นักเรียนทั้งหมด</div>
                 <div class="mt-2 text-sm opacity-80">รวมทุกระดับชั้น</div>
             </div>
             <!-- Card: นักเรียน ม.ต้น -->
-            <div class="rounded-xl shadow-lg bg-gradient-to-br from-green-400 to-green-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-teal-400 to-teal-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                <span class="text-4xl mb-2">📚</span>
                 <div class="text-5xl font-bold mb-2">
                     <?php
                     $stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1 AND Stu_major IN (1,2,3)");
                     $stmt->execute();
                     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                    echo number_format($row['total']);
+                    $juniorStudents = $row['total'];
+                    echo number_format($juniorStudents);
                     ?>
                 </div>
                 <div class="text-lg font-semibold tracking-wide">นักเรียนมัธยมต้น</div>
-                <div class="mt-2 text-sm opacity-80">ชั้น ม.1 - ม.3</div>
+                <div class="mt-2 text-sm opacity-80">
+                    ชั้น ม.1 - ม.3 (<?= $totalStudents > 0 ? round(($juniorStudents/$totalStudents)*100, 1) : 0 ?>%)
+                </div>
             </div>
             <!-- Card: นักเรียน ม.ปลาย -->
-            <div class="rounded-xl shadow-lg bg-gradient-to-br from-yellow-400 to-yellow-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200">
+            <div class="rounded-xl shadow-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white flex flex-col items-center justify-center p-6 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                <span class="text-4xl mb-2">🎯</span>
                 <div class="text-5xl font-bold mb-2">
                     <?php
                     $stmt = $db->prepare("SELECT COUNT(*) as total FROM student WHERE Stu_status=1 AND Stu_major IN (4,5,6)");
                     $stmt->execute();
                     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                    echo number_format($row['total']);
+                    $seniorStudents = $row['total'];
+                    echo number_format($seniorStudents);
                     ?>
                 </div>
                 <div class="text-lg font-semibold tracking-wide">นักเรียนมัธยมปลาย</div>
-                <div class="mt-2 text-sm opacity-80">ชั้น ม.4 - ม.6</div>
+                <div class="mt-2 text-sm opacity-80">
+                    ชั้น ม.4 - ม.6 (<?= $totalStudents > 0 ? round(($seniorStudents/$totalStudents)*100, 1) : 0 ?>%)
+                </div>
             </div>
         </div>
-
-        <div class="mb-4 flex flex-wrap gap-4 items-center">
-            <div class="text-yellow-700 font-semibold text-xl flex items-center gap-2">
-                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                สรุปภาพรวมการมาเรียนทั้งโรงเรียน วันที่ <?= htmlspecialchars(thaiDateShort($date)) ?>
-            </div>
-            <form method="get" class="flex items-center gap-2">
-                <label for="date" class="text-gray-700 font-medium">เลือกวันที่:</label>
-                <input type="date" id="date" name="date" value="<?= htmlspecialchars($date) ?>" class="border rounded px-2 py-1 focus:ring-2 focus:ring-yellow-400 transition">
-                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 shadow">แสดง</button>
-            </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Attendance Status Summary -->
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="text-2xl">📋</span> สรุปสถานะการมาเรียนวันนี้
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <?php foreach ($status_labels as $key => $info): ?>
-                <div class="rounded-xl shadow-lg <?= $info['bg'] ?> flex flex-col items-center p-6 hover:scale-105 transition-transform duration-200">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-3xl"><?= $info['emoji'] ?></span>
-                        <span class="font-bold <?= $info['text'] ?> text-lg"><?= $info['label'] ?></span>
+                <div class="rounded-xl shadow-md <?= $info['bg'] ?> flex flex-col items-center p-4 hover:scale-105 transition-all duration-200 cursor-pointer border-2 border-transparent hover:border-gray-300">
+                    <span class="text-4xl mb-2"><?= $info['emoji'] ?></span>
+                    <div class="text-3xl font-bold <?= $info['text'] ?> mb-1"><?= number_format($status_count[$key]) ?></div>
+                    <div class="font-semibold <?= $info['text'] ?> text-sm mb-1"><?= $info['label'] ?></div>
+                    <div class="text-xs text-gray-600">
+                        <?= $total ? round($status_count[$key]*100/$total,1) : 0 ?>%
                     </div>
-                    <div class="text-4xl font-bold <?= $info['text'] ?>"><?= $status_count[$key] ?></div>
-                    <div class="text-xs text-gray-500 mt-1">คิดเป็น <?= $total ? round($status_count[$key]*100/$total,1) : 0 ?>%</div>
                 </div>
             <?php endforeach; ?>
         </div>
+        </div>
 
-        <div class="flex flex-col md:flex-row gap-8 mb-8">
+        <!-- Charts and Table Section -->
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="text-2xl">📈</span> รายละเอียดตามห้องเรียน
+            </h3>
+            <div class="flex flex-col lg:flex-row gap-6">
             <!-- ซ้าย: Pie Chart -->
-            <div class="w-full md:w-1/2 flex justify-center items-center">
-                <div class="bg-white rounded-xl shadow-lg p-4 w-full">
-                    <canvas id="pieChartOverview" width="220" height="220"></canvas>
+            <div class="w-full lg:w-2/5 flex justify-center items-start">
+                <div class="bg-white rounded-xl shadow-lg p-6 w-full">
+                    <h4 class="text-lg font-bold text-gray-700 mb-4 text-center">กราฟสัดส่วนการมาเรียน</h4>
+                    <canvas id="pieChartOverview" height="280"></canvas>
                 </div>
             </div>
             <!-- ขวา: DataTable -->
-            <div class="w-full md:w-1/2">
-                <div class="overflow-x-auto rounded-xl shadow-lg bg-white p-4">
-                    <!-- Filter dropdown -->
-                    <div class="mb-4 flex flex-wrap gap-2 items-center">
-                        <label for="classFilter" class="font-medium text-gray-700">กรองตามชั้น:</label>
-                        <select id="classFilter" class="border rounded px-2 py-1 focus:ring-2 focus:ring-yellow-400 transition">
-                            <option value="">ทุกชั้น</option>
-                            <?php
-                            $class_set = [];
-                            foreach ($classes as $c) {
-                                $class_set[$c['Stu_major']] = true;
-                            }
-                            foreach (array_keys($class_set) as $major) {
-                                echo '<option value="ม.' . htmlspecialchars($major) . '">ม.' . htmlspecialchars($major) . '</option>';
-                            }
-                            ?>
-                        </select>
+            <div class="w-full lg:w-3/5">
+                <div class="overflow-x-auto rounded-xl shadow-lg bg-white p-6">
+                    <div class="flex flex-wrap gap-3 items-center justify-between mb-4">
+                        <h4 class="text-lg font-bold text-gray-700">รายละเอียดแต่ละห้อง</h4>
+                        <div class="flex items-center gap-2">
+                            <label for="classFilter" class="font-medium text-gray-600 text-sm">🔍 กรอง:</label>
+                            <select id="classFilter" class="border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 transition text-sm">
+                                <option value="">ทุกชั้น</option>
+                                <?php
+                                $class_set = [];
+                                foreach ($classes as $c) {
+                                    $class_set[$c['Stu_major']] = true;
+                                }
+                                foreach (array_keys($class_set) as $major) {
+                                    echo '<option value="ม.' . htmlspecialchars($major) . '">ม.' . htmlspecialchars($major) . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
                     </div>
-                    <table id="attendanceTable" class="min-w-full border border-gray-200 rounded-lg">
-                        <thead class="bg-yellow-100">
+                    <table id="attendanceTable" class="min-w-full border-collapse">
+                        <thead class="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                             <tr>
-                                <th class="px-3 py-2 border text-center">ชั้น</th>
-                                <th class="px-3 py-2 border text-center">ห้อง</th>
-                                <th class="px-3 py-2 border text-center">จำนวนนักเรียน</th>
+                                <th class="px-4 py-3 text-center font-semibold">ชั้น</th>
+                                <th class="px-4 py-3 text-center font-semibold">ห้อง</th>
+                                <th class="px-4 py-3 text-center font-semibold">จำนวน</th>
                                 <?php foreach ($status_labels as $info): ?>
-                                    <th class="px-2 py-2 border text-center"><?= $info['emoji'] ?></th>
+                                    <th class="px-3 py-3 text-center font-semibold" title="<?= $info['label'] ?>"><?= $info['emoji'] ?></th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-200">
                             <?php foreach ($classes as $c): ?>
-                                <tr class="hover:bg-yellow-50 transition-colors">
-                                    <td class="px-3 py-2 border text-center">ม.<?= htmlspecialchars($c['Stu_major']) ?></td>
-                                    <td class="px-3 py-2 border text-center"><?= htmlspecialchars($c['Stu_room']) ?></td>
-                                    <td class="px-3 py-2 border text-center"><?= $c['count'] ?></td>
+                                <tr class="hover:bg-blue-50 transition-colors">
+                                    <td class="px-4 py-3 text-center font-medium text-gray-700">ม.<?= htmlspecialchars($c['Stu_major']) ?></td>
+                                    <td class="px-4 py-3 text-center font-medium text-gray-700"><?= htmlspecialchars($c['Stu_room']) ?></td>
+                                    <td class="px-4 py-3 text-center font-bold text-blue-600"><?= $c['count'] ?></td>
                                     <?php foreach ($status_labels as $k => $info): ?>
-                                        <td class="px-2 py-2 border text-center <?= $info['text'] ?>"><?= $c['status'][$k] ?></td>
+                                        <td class="px-3 py-3 text-center font-semibold <?= $info['text'] ?>">
+                                            <?= $c['status'][$k] > 0 ? $c['status'][$k] : '-' ?>
+                                        </td>
                                     <?php endforeach; ?>
                                 </tr>
                             <?php endforeach; ?>
@@ -268,6 +430,7 @@ $classes = array_values($class_map);
                     </table>
                 </div>
             </div>
+        </div>
         </div>
       </div><!-- /.container-fluid -->
     </section>
@@ -286,10 +449,10 @@ $classes = array_values($class_map);
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Pie Chart
+    // Pie Chart with enhanced styling
     var ctx = document.getElementById('pieChartOverview').getContext('2d');
     new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: [
                 <?php foreach ($status_labels as $info): ?>
@@ -301,43 +464,98 @@ document.addEventListener('DOMContentLoaded', function() {
                     <?= implode(',', array_values($status_count)) ?>
                 ],
                 backgroundColor: [
-                    '#bbf7d0', // green
-                    '#fecaca', // red
-                    '#fef9c3', // yellow
-                    '#bae6fd', // blue
-                    '#e9d5ff', // purple
-                    '#fbcfe8', // pink
+                    '#10b981', // green - มาเรียน
+                    '#ef4444', // red - ขาดเรียน
+                    '#f59e0b', // amber - มาสาย
+                    '#3b82f6', // blue - ลาป่วย
+                    '#8b5cf6', // purple - ลากิจ
+                    '#ec4899', // pink - กิจกรรม
                 ],
-                borderWidth: 1
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverOffset: 15
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { font: { size: 14 } }
+                    labels: { 
+                        font: { size: 13, weight: '500' },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let value = context.parsed || 0;
+                            let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return label + ': ' + value + ' คน (' + percentage + '%)';
+                        }
+                    },
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 }
                 }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
             }
         }
     });
 
-    // DataTable init
+    // DataTable with enhanced configuration
     var table = $('#attendanceTable').DataTable({
         paging: true,
+        pageLength: 15,
+        lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, "ทั้งหมด"]],
         searching: true,
         ordering: true,
         info: true,
+        responsive: true,
+        dom: '<"flex flex-wrap gap-2 items-center justify-between mb-3"lf>rtip',
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json"
+            url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json",
+            search: "_INPUT_",
+            searchPlaceholder: "ค้นหา...",
+            lengthMenu: "แสดง _MENU_ รายการ",
+            info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+            infoEmpty: "ไม่มีข้อมูล",
+            infoFiltered: "(กรองจาก _MAX_ รายการทั้งหมด)",
+            paginate: {
+                first: "แรก",
+                last: "สุดท้าย",
+                next: "ถัดไป",
+                previous: "ก่อนหน้า"
+            }
         },
         columnDefs: [
-            { targets: [0], orderable: true }, // ชั้น
-            { targets: [1], orderable: true }, // ห้อง
+            { targets: [0], orderable: true, className: 'font-bold' },
+            { targets: [1], orderable: true },
+            { targets: [2], orderable: true, className: 'font-bold text-blue-600' },
             { targets: '_all', orderable: false }
-        ]
+        ],
+        order: [[0, 'asc'], [1, 'asc']],
+        drawCallback: function() {
+            // Add hover effects and styling after table draw
+            $('#attendanceTable tbody tr').hover(
+                function() { $(this).addClass('bg-blue-50 scale-[1.01] shadow-sm'); },
+                function() { $(this).removeClass('bg-blue-50 scale-[1.01] shadow-sm'); }
+            );
+        }
     });
 
-    // Filter by class
+    // Enhanced filter with animation
     $('#classFilter').on('change', function() {
         var val = $(this).val();
         if (val) {
@@ -345,7 +563,21 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             table.column(0).search('').draw();
         }
+        // Add animation effect
+        $('#attendanceTable').addClass('animate-pulse');
+        setTimeout(() => $('#attendanceTable').removeClass('animate-pulse'), 300);
     });
+
+    // Auto-refresh notification (optional)
+    let lastRefresh = new Date();
+    setInterval(() => {
+        let now = new Date();
+        let diff = Math.floor((now - lastRefresh) / 1000 / 60);
+        if (diff >= 5) {
+            // Show refresh prompt after 5 minutes
+            console.log('ข้อมูลอาจไม่เป็นปัจจุบัน กรุณารีเฟรชหน้าเว็บ');
+        }
+    }, 60000); // Check every minute
 });
 </script>
 <?php require_once('script.php');?>

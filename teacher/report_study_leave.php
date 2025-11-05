@@ -37,20 +37,10 @@ if (isset($_SESSION['Teacher_login'])) {
 }
 
 // --- Get Filter Data ---
-// *** FIXED: A.D. (ค.ศ.) to B.E. (พ.ศ.) conversion ***
+// Database stores dates in Gregorian (A.D.) format
 
 // <input type="date"> and date() in PHP use Gregorian (A.D.) format (e.g., 2024-10-21)
-$report_gregorian_date = $_GET['date'] ?? date('Y-m-d');
-
-// We must convert this A.D. date to a B.E. date string (e.g., 2567-10-21) for the SQL query
-$date_parts = explode('-', $report_gregorian_date);
-$gregorian_year = (int)$date_parts[0];
-$month = $date_parts[1];
-$day = $date_parts[2];
-$buddhist_year = $gregorian_year + 543;
-
-// This B.E. date is for the database query
-$report_buddhist_date = $buddhist_year . '-' . $month . '-' . $day; 
+$report_date = $_GET['date'] ?? date('Y-m-d');
 
 // Allow filtering by all classes/rooms
 $report_class = $_GET['class'] ?? 'all'; // Default to 'all'
@@ -58,9 +48,9 @@ $report_room = $_GET['room'] ?? 'all';   // Default to 'all'
 
 
 // --- Fetch Report Data ---
-// *** FIXED: Use B.E. date ($report_buddhist_date) for querying ***
+// Use Gregorian date for querying
 $all_students = $attendance->getStudentsWithAttendance(
-    $report_buddhist_date, 
+    $report_date, 
     ($report_class === 'all' ? null : $report_class), 
     ($report_room === 'all' ? null : $report_room), 
     $term, 
@@ -109,7 +99,7 @@ require_once('header.php');
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label for="date" class="block text-sm font-medium text-gray-700">วันที่</label>
-                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="<?php echo htmlspecialchars($report_gregorian_date); ?>">
+                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="<?php echo htmlspecialchars($report_date); ?>">
                                 </div>
                                 <div>
                                     <label for="class" class="block text-sm font-medium text-gray-700">ระดับชั้น</label>
@@ -139,7 +129,7 @@ require_once('header.php');
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow-md">
                         <h3 class="text-lg font-semibold mb-4">
-                            รายชื่อนักเรียนที่ไม่มาเรียน วันที่ <?php echo thaiDateShort($report_buddhist_date); ?> 
+                            รายชื่อนักเรียนที่ไม่มาเรียน วันที่ <?php echo thaiDateShort($report_date); ?> 
                             (พบ <?php echo count($absent_students); ?> คน)
                         </h3>
                         <div class="overflow-x-auto">
