@@ -3,16 +3,7 @@
 header('Content-Type: application/json');
 include_once("../../config/Database.php");
 
-// ฟังก์ชันแปลงวันที่เป็น พ.ศ.
-function DateTh($date) {
-    // รับรูปแบบ yyyy-mm-dd
-    $parts = explode('-', $date);
-    if(count($parts) === 3) {
-        $parts[0] = (string)(((int)$parts[0]) + 543);
-        return implode('-', $parts);
-    }
-    return $date;
-}
+
 
 // สร้าง connection ด้วย Database class
 $connectDB = new Database("phichaia_student");
@@ -21,8 +12,8 @@ $db = $connectDB->getConnection();
 // Check if class, room, and date parameters are set
 if(isset($_GET['start_date']) && isset($_GET['end_date']) ) {
     // Assign values from GET parameters
-    $start_date = DateTh($_GET['start_date']);
-    $end_date = DateTh($_GET['end_date']);
+    $start_date = $_GET['start_date'];
+    $end_date = $_GET['end_date'];
 
     try {
         // Prepare SQL statement

@@ -53,6 +53,23 @@ try {
             echo json_encode($data ?: null);
             break;
 
+        // (เพิ่ม) Action สำหรับค้นหาแบบ live-search (หลายผลลัพธ์)
+        case 'search_students':
+            $q = trim($_GET['q'] ?? '');
+            $limit = intval($_GET['limit'] ?? 12);
+            if ($q === '') {
+                echo json_encode([]);
+                break;
+            }
+            try {
+                $rows = $model->searchStudents($q, $limit);
+                echo json_encode($rows ?: []);
+            } catch (\Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+            break;
+
         case 'create':
             $stu_id = $_POST['addStu_id'] ?? '';
             try {

@@ -206,6 +206,157 @@ class AttendanceModel
     }
 
     /**
+     * ประมวลผลการบันทึกการเช็คชื่อแบบ manual โดยเจ้าหน้าที่ (กรณีนักเรียนลืมบัตร)
+     * จะบันทึกลง attendance_log เหมือนการสแกนปกติ และบันทึกเหตุการณ์ลืมบัตรลงตาราง forgot_card
+     * ถ้านับจำนวนวันที่ลืมบัตรในเทอม/ปีนี้เกินค่าเกณฑ์ (3) จะสร้างรายการลง tb_poor เพื่อหักคะแนนพฤติกรรม
+     */
+    public function processManualScan($stu_id, $scan_type, $device_id = 0, $staff_id = null, array $timeSettings, $term, $year)
+    {
+        // ดึงข้อมูลนักเรียน
+        $stmt = $this->db->prepare(
+            "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture
+             FROM student s
+             WHERE s.Stu_id = :stu_id AND s.Stu_status = '1'"
+        );
+        $stmt->execute([':stu_id' => $stu_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            http_response_code(404);
+            return ['error' => 'ไม่พบนักเรียนหรือสถานะไม่ใช้งาน'];
+        }
+
+        $fullname = $row['Stu_pre'] . $row['Stu_name'] . ' ' . $row['Stu_sur'];
+        $class = $row['Stu_major'] . '/' . $row['Stu_room'];
+        $photo = !empty($row['Stu_picture']) ? 'https://std.phichai.ac.th/photo/' . $row['Stu_picture'] : 'assets/images/profile.png';
+
+        $now_datetime = date('Y-m-d H:i:s');
+        $now_time = date('H:i:s');
+        $today = date('Y-m-d');
+
+        // 1) ตรวจสอบสแกนซ้ำสำหรับ scan_type เดียวกัน
+        $check_stmt = $this->db->prepare(
+            "SELECT 1 FROM attendance_log WHERE student_id = :stu_id AND scan_type = :scan_type AND DATE(scan_timestamp) = :today LIMIT 1"
+        );
+        $check_stmt->execute([':stu_id' => $stu_id, ':scan_type' => $scan_type, ':today' => $today]);
+        if ($check_stmt->fetch()) {
+            return [
+                'student_id' => $stu_id,
+                'fullname' => $fullname,
+                'class' => $class,
+                'photo' => $photo,
+                'time' => $now_time,
+                'scan_type' => $scan_type,
+                'status' => 'สแกนซ้ำ (manual)',
+                'is_duplicate' => true
+            ];
+        }
+
+        // 2) บันทึกลง attendance_log เพื่อให้หน้า UI แสดงประวัติ
+        try {
+            $insert_stmt = $this->db->prepare(
+                "INSERT INTO attendance_log (student_id, scan_timestamp, scan_type, device_id, term, year)
+                 VALUES (:stu_id, :scan_time, :scan_type, :device_id, :term, :year)"
+            );
+            $insert_stmt->execute([
+                ':stu_id' => $stu_id,
+                ':scan_time' => $now_datetime,
+                ':scan_type' => $scan_type,
+                ':device_id' => $device_id,
+                ':term' => $term,
+                ':year' => $year
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Failed to insert attendance_log (manual): " . $e->getMessage());
+        }
+
+        // 3) บันทึกเหตุการณ์ลืมบัตรในตาราง forgot_card (สร้างตารางถ้ายังไม่มี)
+        try {
+
+            $f_stmt = $this->db->prepare(
+                "INSERT INTO forgot_card (student_id, forgot_date, staff_id, term, year, note)
+                 VALUES (:stu_id, :forgot_date, :staff_id, :term, :year, :note)
+                 ON DUPLICATE KEY UPDATE staff_id = VALUES(staff_id), note = VALUES(note)"
+            );
+            $f_stmt->execute([
+                ':stu_id' => $stu_id,
+                ':forgot_date' => $today,
+                ':staff_id' => $staff_id,
+                ':term' => $term,
+                ':year' => $year,
+                ':note' => 'Manual scan for forgot card (' . $scan_type . ')'
+            ]);
+        } catch (\PDOException $e) {
+            // ถ้าเกิดปัญหา (เช่น สิทธิ์สร้างตาราง) ให้บันทึก error และดำเนินการต่อ
+            error_log("Failed to record forgot_card: " . $e->getMessage());
+        }
+
+        // 4) อัปเดต student_attendance หรือ student_leave_log ตามประเภทการสแกน
+        if ($scan_type === 'arrival') {
+            $statusText = $this->processArrival($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+        } else {
+            $statusText = $this->processLeave($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+        }
+
+        // 5) นับจำนวนวันที่ลืมบัตรในเทอม/ปีนี้ (distinct forgot_date)
+        $count = 0;
+        try {
+            $count_stmt = $this->db->prepare("SELECT COUNT(DISTINCT forgot_date) FROM forgot_card WHERE student_id = :stu_id AND term = :term AND year = :year");
+            $count_stmt->execute([':stu_id' => $stu_id, ':term' => $term, ':year' => $year]);
+            $count = (int) $count_stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            // fallback: count rows in forgot_card for the student (if term/year not used)
+            try {
+                $count_stmt = $this->db->prepare("SELECT COUNT(DISTINCT forgot_date) FROM forgot_card WHERE student_id = :stu_id");
+                $count_stmt->execute([':stu_id' => $stu_id]);
+                $count = (int) $count_stmt->fetchColumn();
+            } catch (\Exception $ex) {
+                error_log("Failed to count forgot_card: " . $ex->getMessage());
+            }
+        }
+
+        // 6) ถ้าเกิน 3 วัน -> สร้างรายการพฤติกรรม (behavior) เพื่อหักคะแนนพฤติกรรม (บันทึกครั้งเดียวเมื่อเกินเกณฑ์)
+        if ($count >= 3) {
+            try {
+                // ตรวจสอบว่ามีการบันทึกรายการพฤติกรรมเดียวกันสำหรับเหตุผลนี้ในเทอม/ปีหรือยัง
+                $behName = 'ลืมบัตรนักเรียน';
+                $chk = $this->db->prepare("SELECT 1 FROM behavior WHERE stu_id = :stu_id AND behavior_name = :name AND behavior_term = :term AND behavior_pee = :pee LIMIT 1");
+                $chk->execute([':stu_id' => $stu_id, ':name' => $behName, ':term' => $term, ':pee' => $year]);
+                if (!$chk->fetch()) {
+                    // ใส่รายการลงตาราง behavior (ใช้คะแนนติดลบเพื่อหักคะแนน)
+                    $ins = $this->db->prepare("INSERT INTO behavior (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee) VALUES (:stu_id, :date, :type, :name, :score, :teach_id, :term, :pee)");
+                    // ปรับค่านี้ตามนโยบายของโรงเรียน (เช่น -1 หรือ -5)
+                    $deductScore = 5;
+                    $ins->execute([
+                        ':stu_id' => $stu_id,
+                        ':date' => $today,
+                        ':type' => 'ลืมบัตรนักเรียน',
+                        ':name' => $behName,
+                        ':score' => $deductScore,
+                        ':teach_id' => $staff_id ?? 0,
+                        ':term' => $term,
+                        ':pee' => $year
+                    ]);
+                }
+            } catch (\PDOException $e) {
+                error_log("Failed to insert behavior for forgot card: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'student_id' => $stu_id,
+            'fullname' => $fullname,
+            'class' => $class,
+            'photo' => $photo,
+            'time' => $now_time,
+            'scan_type' => $scan_type,
+            'status' => $statusText,
+            'is_duplicate' => false,
+            'forgot_count' => $count
+        ];
+    }
+
+    /**
      * ประมวลผลการสแกนเข้า (arrival)
      */
     private function processArrival($stu_id, $date, $time, $timeSettings, $term, $year, $device_id)

@@ -49,6 +49,22 @@ class BehaviorModel {
     }
 
     /**
+     * ค้นหานักเรียนแบบ fuzzy search (รหัส, ชื่อ, นามสกุล)
+     * คืนค่าเป็น array ของนักเรียน (จำกัดผลลัพธ์)
+     */
+    public function searchStudents($q, $limit = 10) {
+        $pattern = '%' . $q . '%';
+        $sql = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_picture
+                FROM student
+                WHERE Stu_status = '1'
+                  AND (Stu_id LIKE :q OR Stu_name LIKE :q OR Stu_sur LIKE :q OR CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) LIKE :q)
+                ORDER BY Stu_major, Stu_room, Stu_name
+                LIMIT " . intval($limit);
+
+        return $this->db->query($sql, ['q' => $pattern])->fetchAll();
+    }
+
+    /**
      * สร้างรายการพฤติกรรมใหม่
      */
     public function createBehavior($data, $teach_id, $term, $pee) {

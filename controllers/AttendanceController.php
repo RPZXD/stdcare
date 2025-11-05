@@ -4,6 +4,7 @@ require_once(__DIR__ . "/../classes/DatabaseUsers.php");
 require_once(__DIR__ . "/../models/SettingModel.php");
 require_once(__DIR__ . "/../models/AttendanceModel.php");
 require_once(__DIR__ . "/../class/UserLogin.php"); 
+require_once(__DIR__ . "/../class/Poor.php");
 
 use App\DatabaseUsers;
 use App\Models\SettingModel;
@@ -19,6 +20,10 @@ try {
     
     $settingsModel = new SettingModel($db);
     $attendanceModel = new AttendanceModel($db);
+    // Prepare user/term/year for actions that need them
+    $user = new UserLogin($db);
+    $term = $user->getTerm();
+    $year = $user->getPee();
     
     // ดึงการตั้งค่าเวลา (ใช้สำหรับทุก action)
     $timeSettings = $settingsModel->getAllTimeSettings();
@@ -60,45 +65,101 @@ try {
             echo json_encode($result);
             break;
 
-        // Action: ดึงข้อมูลนักเรียนสำหรับครู (ใช้แทน /class/Attendance.php)
-        case 'get_students_for_teacher':
-            $date = $_GET['date'] ?? date('Y-m-d');
-            $class = intval($_GET['class'] ?? 0);
-            $room = intval($_GET['room'] ?? 0);
-            $user = new UserLogin($db);
-            $term = $user->getTerm();
-            $year = $user->getPee();
-            
-            $students = $attendanceModel->getStudentsWithAttendanceForTeacher($date, $class, $room, $term, $year);
-            echo json_encode(['success' => true, 'data' => $students]);
+        // Action: เจ้าหน้าที่บันทึกการเช็คชื่อด้วยตนเอง (กรณีนักเรียนลืมบัตร)
+        case 'manual_scan':
+            // รับค่า student_id และ scan_type (arrival|leave) และ device_id (optional)
+            $student_id = $_POST['student_id'] ?? '';
+            $scan_type = $_POST['scan_type'] ?? '';
+            $device_id = intval($_POST['device_id'] ?? 0);
+
+            if (empty($student_id) || !in_array($scan_type, ['arrival', 'leave'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing student_id or invalid scan_type']);
+                exit;
+            }
+
+            // Determine current staff id from session if available
+            if (session_status() == PHP_SESSION_NONE) session_start();
+            $staff_id = null;
+            $possible_keys = ['Teacher_login', 'Officer_login', 'Director_login', 'Admin_login', 'Group_leader_login'];
+            foreach ($possible_keys as $k) {
+                if (!empty($_SESSION[$k])) { $staff_id = $_SESSION[$k]; break; }
+            }
+
+            $result = $attendanceModel->processManualScan($student_id, $scan_type, $device_id, $staff_id, $timeSettings, $term, $year);
+            echo json_encode($result);
             break;
 
-        // Action: บันทึกการเช็คชื่อจากครู
-        case 'save_teacher_attendance':
-            $date = $_POST['date'] ?? date('Y-m-d');
-            $stu_ids = $_POST['Stu_id'] ?? [];
-            $statuses = $_POST['attendance_status'] ?? [];
-            $reasons = $_POST['reason'] ?? [];
-            $user = new UserLogin($db);
-            $term = $user->getTerm();
-            $year = $user->getPee();
-            
-            // บันทึกโดยระบุ checked_by = 'teacher'
-            $success = $attendanceModel->saveAttendanceBulk(
-                $stu_ids, 
-                $statuses, 
-                $reasons, 
-                $date, 
-                $term, 
-                $year, 
-                'teacher'
-            );
-            
-            echo json_encode([
-                'success' => true, 
-                'message' => "บันทึกสำเร็จ {$success} รายการ",
-                'count' => $success
-            ]);
+        // Action: ดึงจำนวนวันที่ลืมบัตรสำหรับนักเรียน (term/year ปัจจุบัน)
+        case 'get_forgot_count':
+            $student_id = $_GET['student_id'] ?? '';
+            if (empty($student_id)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing student_id']);
+                exit;
+            }
+            try {
+                $count_stmt = $db->prepare("SELECT COUNT(DISTINCT forgot_date) FROM forgot_card WHERE student_id = :stu_id AND term = :term AND year = :year");
+                $count_stmt->execute([':stu_id' => $student_id, ':term' => $term, ':year' => $year]);
+                $count = (int) $count_stmt->fetchColumn();
+                echo json_encode(['count' => $count]);
+            } catch (\PDOException $e) {
+                // fallback: count without term/year
+                try {
+                    $count_stmt = $db->prepare("SELECT COUNT(DISTINCT forgot_date) FROM forgot_card WHERE student_id = :stu_id");
+                    $count_stmt->execute([':stu_id' => $student_id]);
+                    $count = (int) $count_stmt->fetchColumn();
+                    echo json_encode(['count' => $count]);
+                } catch (\Exception $ex) {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Failed to fetch forgot count']);
+                }
+            }
+            break;
+
+        // Action: ดึงประวัติ forgot_card (สำหรับ DataTables)
+        case 'get_forgot_history':
+            // optional filter by student_id
+            $filter_student = $_GET['student_id'] ?? null;
+            try {
+                $sql = "SELECT f.id, f.student_id, f.forgot_date, f.staff_id, f.term, f.year, f.note, f.created_at,
+                               s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room
+                        FROM forgot_card f
+                        LEFT JOIN student s ON f.student_id = s.Stu_id";
+                $params = [];
+                if ($filter_student) {
+                    $sql .= " WHERE f.student_id = :student_id";
+                    $params[':student_id'] = $filter_student;
+                } else {
+                    // default to current term/year
+                    $sql .= " WHERE f.term = :term AND f.year = :year";
+                    $params[':term'] = $term;
+                    $params[':year'] = $year;
+                }
+                $sql .= " ORDER BY f.forgot_date DESC, f.created_at DESC LIMIT 0, 2000";
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute($params);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                // normalize rows for DataTables
+                $data = [];
+                foreach ($rows as $r) {
+                    $data[] = [
+                        'id' => $r['id'],
+                        'student_id' => $r['student_id'],
+                        'fullname' => ($r['Stu_pre'] ?? '') . ($r['Stu_name'] ?? '') . ' ' . ($r['Stu_sur'] ?? ''),
+                        'class' => isset($r['Stu_major']) ? 'ม.' . $r['Stu_major'] . '/' . $r['Stu_room'] : '',
+                        'forgot_date' => $r['forgot_date'],
+                        'staff_id' => $r['staff_id'],
+                        'note' => $r['note'],
+                        'created_at' => $r['created_at']
+                    ];
+                }
+                echo json_encode(['data' => $data]);
+            } catch (\Exception $e) {
+                http_response_code(500);
+                echo json_encode(['data' => [], 'error' => $e->getMessage()]);
+            }
             break;
 
         default:
