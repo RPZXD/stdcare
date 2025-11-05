@@ -70,23 +70,16 @@ if(isset($_GET['start_date']) && isset($_GET['end_date']) ) {
             // Modify fetched data
             foreach($result as &$row) {
                 // Concatenate Stu_pre, Stu_name, and Stu_sur into full_name
-                $row['name'] = $row['Stu_pre'] . $row['Stu_name'] . '&nbsp;&nbsp;' . $row['Stu_sur'];
-                $row['classroom'] = 'ม.' . $row['Stu_major']  . '/' . $row['Stu_room'];
-                // Unset Stu_pre, Stu_name, and Stu_sur
-                $row['count_late'] = $row['count_late'];
-                $row['Study_date'] = $row['Study_date'];
-                $row['parent_tel'] = $row['Par_phone'];
-                unset($row['Stu_pre']);
-                unset($row['Stu_name']);
-                unset($row['Stu_sur']);
-                unset($row['Stu_major']);
-                unset($row['Stu_room']);
-                unset($row['Par_phone']);
-                
-            }
+                $row['name'] = ($row['Stu_pre'] ?? '') . ($row['Stu_name'] ?? '') . '&nbsp;&nbsp;' . ($row['Stu_sur'] ?? '');
+                $row['classroom'] = 'ม.' . ($row['Stu_major'] ?? '')  . '/' . ($row['Stu_room'] ?? '');
+                // Ensure optional fields exist to avoid notices
+                $row['count_late'] = isset($row['count_late']) ? (int)$row['count_late'] : 0;
+                $row['Study_date'] = isset($row['Study_date']) ? $row['Study_date'] : null;
+                $row['parent_tel'] = isset($row['Par_phone']) ? $row['Par_phone'] : null;
 
-            // Set response header to JSON
-            header('Content-Type: application/json');
+                // Remove raw columns we no longer need
+                unset($row['Stu_pre'], $row['Stu_name'], $row['Stu_sur'], $row['Stu_major'], $row['Stu_room'], $row['Par_phone']);
+            }
 
             // Echo JSON response
             echo json_encode($result);

@@ -68,19 +68,22 @@ require_once('header.php');
                                     </div>
                                 </div>
                             <div id="stu-preview" class="mt-3" style="display:none;">
-                                <div class="flex items-center space-x-4">
-                                    <img id="stu-photo" src="../assets/images/profile.png" alt="photo" class="w-28 h-28 rounded-full object-cover border-2 border-gray-200">
-                                    <div>
+                                <!-- Responsive preview: stack on small screens, row on md+ -->
+                                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-3 md:space-y-0 text-center md:text-left">
+                                    <div class="flex-shrink-0 mx-auto md:mx-0">
+                                        <img id="stu-photo" src="../assets/images/profile.png" alt="photo" class="w-32 h-32 md:w-36 lg:w-48 md:h-36 lg:h-48 rounded-full object-cover border-2 border-gray-200 cursor-pointer">
+                                    </div>
+                                    <div class="flex-1">
                                         <h5 id="stu-name" class="text-lg font-semibold">-</h5>
                                         <p id="stu-class" class="text-sm text-gray-600">-</p>
                                         <p id="stu-id" class="text-sm text-gray-500">-</p>
-                                        <div class="mt-3 space-x-2">
-                                            <button id="btn-manual-arrival" class="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600" disabled>✅ เช็คเข้า</button>
-                                            <button id="btn-manual-leave" class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600" disabled>🔴 เช็คออก</button>
+                                        <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <button id="btn-manual-arrival" class="w-full md:w-auto px-3 py-2 rounded bg-green-500 text-white hover:bg-green-600" disabled>✅ เช็คเข้า</button>
+                                            <button id="btn-manual-leave" class="w-full md:w-auto px-3 py-2 rounded bg-red-500 text-white hover:bg-red-600" disabled>🔴 เช็คออก</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-2">
+                                <div class="mt-2 text-center md:text-left">
                                     <strong>จำนวนวันที่ลืมบัตรในเทอมนี้: <span id="forgot-count">0</span></strong>
                                 </div>
                             </div>
@@ -187,7 +190,7 @@ $(document).ready(function(){
         $suggest.empty();
         suggestions.forEach((s, idx) => {
             const label = `${s.Stu_id} — ${s.Stu_pre || ''}${s.Stu_name} ${s.Stu_sur} (ม.${s.Stu_major}/${s.Stu_room})`;
-            const $item = $(`<div class="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center space-x-3" data-idx="${idx}" role="option">` +
+            const $item = $(`<div class="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center space-x-3 text-sm md:text-base" data-idx="${idx}" role="option">` +
                 `<div class="w-10 h-10 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center text-sm text-gray-600">${s.Stu_picture ? '🖼️' : '👤'}</div>` +
                 `<div class="flex-1"><div class="font-medium text-gray-800">${label}</div><div class="text-xs text-gray-500">รหัส: ${s.Stu_id}</div></div>` +
                 `</div>`);
@@ -221,6 +224,22 @@ $(document).ready(function(){
             }
         }).fail(function(){
             $('#forgot-count').text('0');
+        });
+
+        // Bind click-to-enlarge on photo (mobile friendly)
+        $('#stu-photo').off('click').on('click', function(){
+            const src = $(this).attr('src');
+            if(window.Swal){
+                Swal.fire({
+                    imageUrl: src,
+                    imageAlt: 'Photo',
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                    width: '80%'
+                });
+            } else {
+                window.open(src, '_blank');
+            }
         });
     }
 
@@ -348,12 +367,12 @@ $(document).ready(function(){
                 // load Buttons extension
                 $.getScript('https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js', function(){
                     $.getScript('https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js', function(){
-                        // init table with export buttons
+                        // init table with export buttons (styled for mobile)
                         forgotTable = $('#forgotTable').DataTable({
                             dom: 'Bfrtip',
                             buttons: [
-                                { extend: 'csvHtml5', text: 'Export CSV', className: 'btn btn-sm' },
-                                { extend: 'excelHtml5', text: 'Export Excel', className: 'btn btn-sm' }
+                                { extend: 'csvHtml5', text: 'Export CSV', className: 'px-2 py-1 bg-indigo-600 text-white rounded text-xs' },
+                                { extend: 'excelHtml5', text: 'Export Excel', className: 'px-2 py-1 bg-indigo-600 text-white rounded text-xs' }
                             ],
                             ajax: {
                                 url: '../controllers/AttendanceController.php?action=get_forgot_history',
