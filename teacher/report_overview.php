@@ -203,7 +203,7 @@ $status_symbols = [
     <div class="text-yellow-700 font-bold text-xl mb-4">
         📊 สรุปภาพรวมการมาเรียน ม.<?= $teacher_class ?>/<?= $teacher_room ?> <?= $report_title ?>
         <div class="text-sm text-gray-600 font-normal mt-1">
-            จำนวนนักเรียน: <?= $total_students ?> คน | จำนวนครั้งที่บันทึก: <?= number_format($total) ?> ครั้ง
+            จำนวนนักเรียน: <?= $total_students ?> คน | จำนวนคนที่บันทึก: <?= number_format($total) ?> คน
         </div>
     </div>
     
@@ -390,7 +390,7 @@ function toggleDateInputs() {
                                 <?= $info['emoji'] ?> <?= $info['label'] ?>
                             </span>
                             <span class="text-sm font-bold <?= $info['text'] ?>">
-                                <?= $count ?> ครั้ง (<?= $percent ?>%)
+                                <?= $count ?> คน (<?= $percent ?>%)
                             </span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
@@ -407,7 +407,7 @@ function toggleDateInputs() {
             <div class="mt-4 pt-4 border-t border-gray-200">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold text-gray-700">รวมทั้งหมด:</span>
-                    <span class="text-lg font-bold text-gray-900"><?= number_format($total) ?> ครั้ง</span>
+                    <span class="text-lg font-bold text-gray-900"><?= number_format($total) ?> คน</span>
                 </div>
                 <div class="flex justify-between items-center mt-2">
                     <span class="text-sm font-semibold text-gray-700">จำนวนนักเรียน:</span>
@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             let value = context.parsed || 0;
                             let total = <?= $total ?>;
                             let percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                            return label + ': ' + value + ' ครั้ง (' + percent + '%)';
+                            return label + ': ' + value + ' คน (' + percent + '%)';
                         }
                     }
                 }
@@ -500,7 +500,7 @@ function exportToExcel(tableId, filename) {
             <h2>ตารางการมาเรียน</h2>
             <p>ห้อง: ม.<?= $teacher_class ?>/<?= $teacher_room ?></p>
             <p><?= $report_title ?></p>
-            <p>จำนวนนักเรียน: <?= $total_students ?> คน | จำนวนครั้งที่บันทึก: <?= number_format($total) ?> ครั้ง</p>
+            <p>จำนวนนักเรียน: <?= $total_students ?> คน | จำนวนคนที่บันทึก: <?= number_format($total) ?> คน</p>
             ${tableHTML}
         </body>
         </html>`;
