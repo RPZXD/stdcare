@@ -10,21 +10,21 @@ $channel_access_token = '3K7fh1bhbCn0uPjgNoGQpN3jNgpwpSoMA0QaE6m4dOMJkly+SeGyDyS
 
 // --- ฟังก์ชันสำหรับแมป class ไปยัง groupId77 ---
 function getGroupIdByClass($class) {
-    // $map = [
-    //     '1' => 'C0cf2923dbaf5ca2ff308a336bcaf1642', // invite
-    //     '2' => 'C905068e97d63ba1ecc46091121735650', // updated groupId
-    //     '3' => 'Cf28bd4fca19fb6d0d1b1b0f1116912a4',
-    //     '4' => 'C7d75a57ea9078dd70076d7aee38f6e8a', // invite
-    //     '5' => 'Cccc2671904450ba9977acd4992e99898', // invite7
-    //     '6' => 'Ce05c66cecc5b60c51921d722c2825825', // invite
-    // ];
     $map = [
-        '1' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-        '2' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // updated groupId7
-        '4' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-        '5' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-        '6' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+        '1' => 'C0cf2923dbaf5ca2ff308a336bcaf1642', // invite
+        '2' => 'C905068e97d63ba1ecc46091121735650', // updated groupId
+        '3' => 'Cf28bd4fca19fb6d0d1b1b0f1116912a4',
+        '4' => 'C7d75a57ea9078dd70076d7aee38f6e8a', // invite
+        '5' => 'Cccc2671904450ba9977acd4992e99898', // invite7
+        '6' => 'Ce05c66cecc5b60c51921d722c2825825', // invite
     ];
+    // $map = [
+    //     '1' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '2' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // updated groupId7
+    //     '4' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '5' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    //     '6' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
+    // ];
     return $map[$class] ?? '';
 }
 
