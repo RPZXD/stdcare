@@ -17,7 +17,8 @@ try {
     $logger = new DatabaseLogger($pdo);
     
     $admin_id = $_SESSION['Admin_login'] ?? $_SESSION['Officer_login'] ?? 'system';
-    $admin_role = $_SESSION['Admin_login'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
+    // use explicit isset() to avoid undefined index notice for Officer_login
+    $admin_role = $_SESSION['role'] ?? (isset($_SESSION['Officer_login']) ? 'Officer' : 'Admin');
     $teach_id = $_SESSION['Teacher_login'] ?? $_SESSION['Officer_login'] ?? $admin_id;
 
     // --- (3) ส่ง $db object เข้า Model ---

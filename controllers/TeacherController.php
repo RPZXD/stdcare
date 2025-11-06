@@ -49,13 +49,32 @@ try {
                      throw new Exception("รหัสครู $teach_id นี้มีอยู่ในระบบแล้ว");
                 }
 
+                // Prepare data including class/room and optional photo
+                // Basic validation + normalization
+                $teach_name = trim($_POST['addTeach_name'] ?? '');
+                $teach_major = trim($_POST['addTeach_major'] ?? '');
+                $teach_class = $_POST['addTeach_class'] ?? '';
+                $teach_room = $_POST['addTeach_room'] ?? '';
+                $teach_status = $_POST['addTeach_status'] ?? '1';
+                $role_std = $_POST['addrole_std'] ?? '';
+
+                if ($teach_name === '') throw new Exception('ชื่อ-สกุลห้ามว่าง');
+
+                // Validate class/room: allow empty or integer
+                if ($teach_class !== '' && !ctype_digit(strval($teach_class))) throw new Exception('ค่าชั้นต้องเป็นตัวเลขหรือเว้นว่าง');
+                if ($teach_room !== '' && !ctype_digit(strval($teach_room))) throw new Exception('ค่าห้องต้องเป็นตัวเลขหรือเว้นว่าง');
+
                 $data = [
                     'Teach_id' => $teach_id,
-                    'Teach_name' => $_POST['addTeach_name'],
-                    'Teach_major' => $_POST['addTeach_major'],
-                    'Teach_status' => $_POST['addTeach_status'],
-                    'role_std' => $_POST['addrole_std']
+                    'Teach_name' => $teach_name,
+                    'Teach_major' => $teach_major,
+                    'Teach_class' => $teach_class !== '' ? (int)$teach_class : null,
+                    'Teach_room' => $teach_room !== '' ? (int)$teach_room : null,
+                    'Teach_status' => $teach_status,
+                    'role_std' => $role_std
                 ];
+
+                // Do NOT update/upload Teach_photo here — DB stores filename only and external base URL is used.
                 $teacherModel->create($data);
                 
                 // --- (เพิ่ม Log Success) ---
@@ -93,17 +112,36 @@ try {
                  if (empty($teach_id) || empty($teach_id_old)) {
                     throw new Exception('รหัสครู (Teach_id) ห้ามว่าง');
                  }
+                // ดึงข้อมูลเดิมเพื่อใช้ตรวจสอบรูป (ถ้ามี)
+                $old = $teacherModel->getById($teach_id_old);
+
+                // Basic validation + normalization
+                $teach_name = trim($_POST['editTeach_name'] ?? '');
+                $teach_major = trim($_POST['editTeach_major'] ?? '');
+                $teach_class = $_POST['editTeach_class'] ?? '';
+                $teach_room = $_POST['editTeach_room'] ?? '';
+                $teach_status = $_POST['editTeach_status'] ?? '1';
+                $role_std = $_POST['editrole_std'] ?? '';
+
+                if ($teach_name === '') throw new Exception('ชื่อ-สกุลห้ามว่าง');
+                if ($teach_class !== '' && !ctype_digit(strval($teach_class))) throw new Exception('ค่าชั้นต้องเป็นตัวเลขหรือเว้นว่าง');
+                if ($teach_room !== '' && !ctype_digit(strval($teach_room))) throw new Exception('ค่าห้องต้องเป็นตัวเลขหรือเว้นว่าง');
 
                 $data = [
-                    'Teach_name' => $_POST['editTeach_name'],
-                    'Teach_major' => $_POST['editTeach_major'],
-                    'Teach_status' => $_POST['editTeach_status'],
-                    'role_std' => $_POST['editrole_std'],
+                    'Teach_name' => $teach_name,
+                    'Teach_major' => $teach_major,
+                    'Teach_class' => $teach_class !== '' ? (int)$teach_class : null,
+                    'Teach_room' => $teach_room !== '' ? (int)$teach_room : null,
+                    'Teach_status' => $teach_status,
+                    'role_std' => $role_std,
                     // (เพิ่ม 2 field นี้สำหรับ Model)
                     'Teach_id_new' => $teach_id,
                     'Teach_id_old' => $teach_id_old
                 ];
-                
+
+                // Do NOT update Teach_photo on edit — keep existing filename from DB
+                // (model.update will not change Teach_photo)
+
                 // (เราจะส่ง ID เดิมไปให้ Model)
                 $teacherModel->update($teach_id_old, $data);
                 

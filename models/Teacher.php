@@ -28,10 +28,10 @@ class Teacher
 
     public function getAll()
     {
-        // (KEV: เพิ่ม Teach_class และ Teach_room เพื่อให้ View แสดงผลได้ถูกต้อง)
-        $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_status, role_std FROM teacher 
-                WHERE Teach_status = '1' 
-                ORDER BY Teach_major, Teach_name";
+    // (KEV: เพิ่ม Teach_class, Teach_room และ Teach_photo เพื่อให้ View แสดงผลได้ถูกต้อง)
+    $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_photo, Teach_status, role_std FROM teacher 
+        WHERE Teach_status = '1' 
+        ORDER BY Teach_major, Teach_name";
         return $this->db->query($sql)->fetchAll();
     }
 
@@ -49,15 +49,26 @@ class Teacher
     {
         // (เพิ่มรหัสผ่าน = Teach_id)
         $data['Teach_password'] = $data['Teach_id']; // $data ตอนนี้มี 6 items
-        
-        // (SQL มี 6 placeholders)
+        // Use NULL for empty class/room and do NOT set Teach_photo here (DB stores filename only)
         $sql = "INSERT INTO teacher 
-                    (Teach_id, Teach_name, Teach_major, Teach_status, role_std, Teach_password) 
+                    (Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_status, role_std, Teach_password) 
                 VALUES 
-                    (:Teach_id, :Teach_name, :Teach_major, :Teach_status, :role_std, :Teach_password)";
-        
-        // (6 items ตรงกับ 6 placeholders)
-        $stmt = $this->db->query($sql, $data);
+                    (:Teach_id, :Teach_name, :Teach_major, :Teach_class, :Teach_room, :Teach_status, :role_std, :Teach_password)";
+
+        // Normalize optional values: use NULL for empty
+        $data['Teach_class'] = (isset($data['Teach_class']) && $data['Teach_class'] !== '') ? $data['Teach_class'] : null;
+        $data['Teach_room'] = (isset($data['Teach_room']) && $data['Teach_room'] !== '') ? $data['Teach_room'] : null;
+
+        $stmt = $this->db->query($sql, [
+            ':Teach_id' => $data['Teach_id'],
+            ':Teach_name' => $data['Teach_name'],
+            ':Teach_major' => $data['Teach_major'],
+            ':Teach_class' => $data['Teach_class'],
+            ':Teach_room' => $data['Teach_room'],
+            ':Teach_status' => $data['Teach_status'],
+            ':role_std' => $data['role_std'],
+            ':Teach_password' => $data['Teach_password']
+        ]);
         return $stmt->rowCount() > 0;
     }
 
@@ -74,22 +85,29 @@ class Teacher
                     Teach_id = :Teach_id_new,
                     Teach_name = :Teach_name, 
                     Teach_major = :Teach_major, 
+                    Teach_class = :Teach_class,
+                    Teach_room = :Teach_room,
                     Teach_status = :Teach_status, 
                     role_std = :role_std 
                 WHERE Teach_id = :Teach_id_old";
-                
-        // (สร้าง array params ที่มี 6 items เป๊ะๆ)
+
+        // Normalize optional values: use NULL for empty
+        $classVal = isset($data_from_controller['Teach_class']) && $data_from_controller['Teach_class'] !== '' ? $data_from_controller['Teach_class'] : null;
+        $roomVal = isset($data_from_controller['Teach_room']) && $data_from_controller['Teach_room'] !== '' ? $data_from_controller['Teach_room'] : null;
+
         $params = [
             ':Teach_id_new'  => $data_from_controller['Teach_id_new'],
             ':Teach_name'    => $data_from_controller['Teach_name'],
             ':Teach_major'   => $data_from_controller['Teach_major'],
+            ':Teach_class'   => $classVal,
+            ':Teach_room'    => $roomVal,
             ':Teach_status'  => $data_from_controller['Teach_status'],
             ':role_std'      => $data_from_controller['role_std'],
             ':Teach_id_old'  => $id_old // (ใช้ $id_old ที่รับเข้ามา)
         ];
 
         $stmt = $this->db->query($sql, $params);
-        return true; // (คืนค่า true เสมอ)
+        return $stmt !== false; // คืนผลการรัน
     }
 
     public function delete($id)
@@ -105,13 +123,10 @@ class Teacher
      */
     public function resetPassword($id)
     {
-        // รีเซ็ตรหัสผ่านเป็น Teach_id
-        $sql = "UPDATE teacher SET password = :password WHERE Teach_id = :id";
-        $stmt = $this->db->query($sql, ['password' => '', 'id' => $id]);
-        
-        // (เปลี่ยนจาก rowCount() > 0)
-        return true; // <--- แก้ไขจุดนี้
-        // คืนค่า true เสมอ ถ้าคำสั่ง UPDATE รันผ่าน (ไม่มี Error)
+        // รีเซ็ตรหัสผ่านเป็น Teach_id (ตั้งค่า Teach_password = Teach_id)
+        $sql = "UPDATE teacher SET Teach_password = Teach_id WHERE Teach_id = :id";
+        $stmt = $this->db->query($sql, ['id' => $id]);
+        return $stmt !== false;
     }
 
     /**

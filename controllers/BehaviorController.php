@@ -25,7 +25,8 @@ try {
         throw new Exception('ไม่ได้รับอนุญาต', 403);
     }
     $admin_id = $_SESSION['Admin_login'] ?? $_SESSION['Officer_login'] ?? 'system';
-    $admin_role = $_SESSION['role'] ?? ($_SESSION['Officer_login'] ? 'Officer' : 'Admin');
+    // prevent undefined index notice
+    $admin_role = $_SESSION['role'] ?? (isset($_SESSION['Officer_login']) ? 'Officer' : 'Admin');
     $teach_id = $_SESSION['Teacher_login'] ?? $_SESSION['Officer_login'] ?? $admin_id;
 
     // (4) ดึง เทอม/ปี ปัจจุบัน (จาก Server-side)

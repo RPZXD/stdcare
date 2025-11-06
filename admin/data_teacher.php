@@ -51,17 +51,68 @@ require_once('header.php');
         <section class="content">
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
+                    <div class="card-header with-border">
+                        <h3 class="card-title">สรุปข้อมูลครู 📊</h3>
+                    </div>
                     <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="chart-container" style="height:300px;">
+                                    <canvas id="teacherStatusChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="mb-3">
+                                    <h5 class="text-center">รวมครูทั้งหมด: <span id="totalTeachers" class="font-bold text-blue-600">0</span></h5>
+                                    <p class="text-muted text-center">สถานะและบทบาทสรุปโดยรวม</p>
+                                </div>
+
+                                <!-- Summary Cards -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                                        <h6 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                            <span class="mr-2">📚</span> กลุ่มสาระ
+                                        </h6>
+                                        <div class="chart-container" style="height:150px;">
+                                            <canvas id="majorChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                                        <h6 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                            <span class="mr-2">👥</span> บทบาท
+                                        </h6>
+                                        <div class="chart-container" style="height:150px;">
+                                            <canvas id="roleChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white shadow-lg rounded-lg p-4 border border-gray-200">
+                                        <h6 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                            <span class="mr-2">🏫</span> ชั้นที่ปรึกษา
+                                        </h6>
+                                        <div class="chart-container" style="height:150px;">
+                                            <canvas id="classChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addTeacherModal"><i class="fas fa-user-plus"></i> เพิ่มข้อมูลครู</button>
+                        <style>
+                            .avatar-thumb { width:48px; height:48px; object-fit:cover; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+                            .avatar-emoji { width:48px; height:48px; display:inline-flex; align-items:center; justify-content:center; font-size:20px; border-radius:50%; background:linear-gradient(135deg,#6c757d,#343a40); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+                            .btn-emoji { font-weight:600 }
+                        </style>
                         <table id="teacherTable" class="table table-bordered table-striped" style="width:100%">
                             <thead>
                                 <tr>
+                                    <th>รูป 👩‍🏫</th>
                                     <th>รหัสครู</th>
                                     <th>ชื่อ-สกุล</th>
+                                    <th>ชั้น/ห้อง 🏫</th>
                                     <th>กลุ่มสาระ</th>
                                     <th>สถานะ</th>
                                     <th>บทบาท</th>
-                                    <th>จัดการ</th>
+                                    <th>จัดการ ⚙️</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -117,11 +168,34 @@ require_once('header.php');
                                     <option value="พนักงานขับรถ">พนักงานขับรถ</option>
                                 </select>
                             </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>ชั้น (ระดับ)</label>
+                                    <select class="form-control text-center" name="addTeach_class">
+                                        <option value="">-- ระดับชั้น --</option>
+                                        <option value="1">ม.1</option>
+                                        <option value="2">ม.2</option>
+                                        <option value="3">ม.3</option>
+                                        <option value="4">ม.4</option>
+                                        <option value="5">ม.5</option>
+                                        <option value="6">ม.6</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>ห้อง</label>
+                                    <input type="text" class="form-control" name="addTeach_room" placeholder="เช่น 1, 2, A">
+                                </div>
+                            </div>
+
+                            <!-- Teach_photo managed externally (filename in DB). ไม่อนุญาตให้อัปเดตรูปที่นี่ -->
                             <div class="form-group">
                                 <label>สถานะ</label>
                                 <select class="form-control text-center" name="addTeach_status">
                                     <option value="1">ปกติ</option>
-                                    <option value="0">ไม่ใช้งาน</option>
+                                    <option value="2">ย้าย</option>
+                                    <option value="3">เกษียณ</option>
+                                    <option value="4">ลาออก</option>
+                                    <option value="9">เสียชีวิต</option>
                                 </select>
                             </div>
                              <div class="form-group">
@@ -191,11 +265,34 @@ require_once('header.php');
                                     <option value="พนักงานขับรถ">พนักงานขับรถ</option>
                                 </select>
                             </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>ชั้น (ระดับ)</label>
+                                    <select class="form-control text-center" name="editTeach_class">
+                                        <option value="">-- ระดับชั้น --</option>
+                                        <option value="1">ม.1</option>
+                                        <option value="2">ม.2</option>
+                                        <option value="3">ม.3</option>
+                                        <option value="4">ม.4</option>
+                                        <option value="5">ม.5</option>
+                                        <option value="6">ม.6</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>ห้อง</label>
+                                    <input type="text" class="form-control" name="editTeach_room" placeholder="เช่น 1, 2, A">
+                                </div>
+                            </div>
+
+                            <!-- Teach_photo managed externally (filename in DB). ไม่อนุญาตให้อัปเดตรูปที่นี่ -->
                             <div class="form-group">
                                 <label>สถานะ</label>
                                 <select class="form-control text-center" name="editTeach_status">
                                     <option value="1">ปกติ</option>
-                                    <option value="0">ไม่ใช้งาน</option>
+                                    <option value="2">ย้าย</option>
+                                    <option value="3">เกษียณ</option>
+                                    <option value="4">ลาออก</option>
+                                    <option value="9">เสียชีวิต</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -220,9 +317,17 @@ require_once('header.php');
         </div>
 
 <script>
+        // Load Tailwind CSS
+        const tailwindLink = document.createElement('link');
+        tailwindLink.rel = 'stylesheet';
+        tailwindLink.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
+        document.head.appendChild(tailwindLink);
+
         let teacherTable;
-        // (URL ใหม่ ชี้ไปที่ Controller)
-        const API_URL = '../controllers/TeacherController.php'; 
+    // (URL ใหม่ ชี้ไปที่ Controller)
+    const API_URL = '../controllers/TeacherController.php';
+    // Base URL สำหรับรูปครู (DB เก็บเฉพาะชื่อไฟล์)
+    const PHOTO_BASE_URL = 'https://std.phichai.ac.th/teacher/uploads/phototeach/';
 
         document.addEventListener('DOMContentLoaded', function() {
             teacherTable = $('#teacherTable').DataTable({
@@ -233,24 +338,45 @@ require_once('header.php');
                     "dataSrc": ""
                 },
                 "columns": [
+                    { "data": "Teach_photo", "render": function(data){
+                        if (data) {
+                            const src = PHOTO_BASE_URL + data;
+                            return `<img src="${src}" class="avatar-thumb img-thumb">`;
+                        }
+                        // no file -> show emoji avatar
+                        return `<div class="avatar-emoji" title="ไม่มีรูป">👩‍🏫</div>`;
+                    }, "orderable": false },
                     { "data": "Teach_id" },
                     { "data": "Teach_name" },
+                    { "data": null, "render": function(row){
+                        const cls = row.Teach_class || '-';
+                        const room = row.Teach_room || '-';
+                        return `<span>📚 ${cls} / ${room}</span>`;
+                    }},
                     { "data": "Teach_major" },
                     { 
                         "data": "Teach_status",
                         "render": function(data) {
-                            return data == '1' ? '<span class="badge badge-success">ปกติ</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>';
+                            switch(String(data)) {
+                                case '1': return '<span class="badge badge-success">✅ ปกติ</span>';
+                                case '2': return '<span class="badge badge-info">🔁 ย้าย</span>';
+                                case '3': return '<span class="badge badge-secondary">🎖️ เกษียณ</span>';
+                                case '4': return '<span class="badge badge-warning">⚠️ ลาออก</span>';
+                                case '9': return '<span class="badge badge-dark">⚰️ เสียชีวิต</span>';
+                                case '0': return '<span class="badge badge-danger">⛔ ไม่ใช้งาน</span>';
+                                default: return '<span class="badge badge-light">'+(data||'-')+'</span>';
+                            }
                         }
                     },
                     { "data": "role_std",
                         "render": function(data) {
                             let roleText = '';
                             switch(data) {
-                                case 'T': roleText = 'ครู'; break;
-                                case 'OF': roleText = 'เจ้าหน้าที่'; break;
-                                case 'VP': roleText = 'รองผู้อำนวยการ'; break;
-                                case 'DIR': roleText = 'ผู้อำนวยการ'; break;
-                                case 'ADM': roleText = 'Admin'; break;
+                                case 'T': roleText = '👩‍🏫 ครู'; break;
+                                case 'OF': roleText = '🏢 เจ้าหน้าที่'; break;
+                                case 'VP': roleText = '🧑‍💼 รองผอ.'; break;
+                                case 'DIR': roleText = '👨‍💼 ผอ.'; break;
+                                case 'ADM': roleText = '🛠️ Admin'; break;
                                 default: roleText = data; 
                             }
                             return roleText;
@@ -260,9 +386,9 @@ require_once('header.php');
                         "data": "Teach_id",
                         "render": function(data) {
                             return `
-                                <button class="btn btn-warning btn-sm editTeacherBtn" data-id="${data}"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm deleteTeacherBtn" data-id="${data}"><i class="fas fa-trash"></i></button>
-                                <button class="btn btn-secondary btn-sm resetTeacherPwdBtn" data-id="${data}"><i class="fas fa-key"></i></button>
+                                <button title="แก้ไข ✏️" class="btn btn-warning btn-sm editTeacherBtn btn-emoji" data-id="${data}"><i class="fas fa-edit"></i></button>
+                                <button title="ปิดการใช้งาน 🗑️" class="btn btn-danger btn-sm deleteTeacherBtn btn-emoji" data-id="${data}"><i class="fas fa-trash"></i></button>
+                                <button title="รีเซ็ตรหัสผ่าน 🔑" class="btn btn-secondary btn-sm resetTeacherPwdBtn btn-emoji" data-id="${data}"><i class="fas fa-key"></i></button>
                             `;
                         },
                         "orderable": false
@@ -275,9 +401,135 @@ require_once('header.php');
                 }
             });
 
-            // (ฟังก์ชันโหลดข้อมูลใหม่)
+            // Photo modal
+            $('body').append(`
+                <div class="modal fade" id="photoModal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                                            <div class="modal-body text-center p-3">
+                                                <img id="photoModalImg" src="" style="max-width:100%; height:auto; border-radius:8px; display:block; margin:0 auto;"> 
+                                            </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            `);
+
+            // Click thumbnail to open modal
+            $('#teacherTable').on('click', 'img.avatar-thumb', function(){
+                const src = $(this).attr('src');
+                $('#photoModalImg').attr('src', src);
+                $('#photoModal').modal('show');
+            });
+
+            // Fetch data for chart
+            async function loadChart() {
+                try {
+                    const res = await fetch(API_URL + '?action=list');
+                    const data = await res.json();
+                    const total = data.length || 0;
+                    $('#totalTeachers').text(total);
+                    // count status
+                    const statusCounts = { '1':0, '2':0, '3':0, '4':0, '9':0, '0':0 };
+                    data.forEach(r => { const s = String(r.Teach_status || '0'); statusCounts[s] = (statusCounts[s]||0) + 1; });
+                    // build additional summaries: major, role, advisory class
+                    const majorCounts = {};
+                    const roleCounts = {};
+                    const classCounts = {};
+                    data.forEach(r => {
+                        // major
+                        const maj = (r.Teach_major && String(r.Teach_major).trim()) ? r.Teach_major : 'ไม่ระบุ';
+                        majorCounts[maj] = (majorCounts[maj]||0) + 1;
+                        // role
+                        const role = (r.role_std && String(r.role_std).trim()) ? r.role_std : 'UNK';
+                        roleCounts[role] = (roleCounts[role]||0) + 1;
+                        // class (advisory level)
+                        const cls = (r.Teach_class || r.Teach_class === 0) ? String(r.Teach_class) : 'ไม่ระบุ';
+                        classCounts[cls] = (classCounts[cls]||0) + 1;
+                    });
+                    // render chart (Chart.js) showing all defined statuses
+                    if (typeof Chart === 'undefined') {
+                        // load Chart.js from CDN
+                        await new Promise((resolve) => {
+                            const s = document.createElement('script');
+                            s.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+                            s.onload = resolve; document.head.appendChild(s);
+                        });
+                    }
+                    const ctx = document.getElementById('teacherStatusChart').getContext('2d');
+                    if (window.teacherStatusChartObj) window.teacherStatusChartObj.destroy();
+                    window.teacherStatusChartObj = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['ปกติ','ย้าย','เกษียณ','ลาออก','เสียชีวิต','ไม่ใช้งาน'],
+                            datasets: [{
+                                data: [
+                                    statusCounts['1']||0,
+                                    statusCounts['2']||0,
+                                    statusCounts['3']||0,
+                                    statusCounts['4']||0,
+                                    statusCounts['9']||0,
+                                    statusCounts['0']||0
+                                ],
+                                backgroundColor: ['#28a745','#17a2b8','#6c757d','#ffc107','#343a40','#dc3545']
+                            }]
+                        },
+                        options: { responsive:true, maintainAspectRatio:false }
+                    });
+
+                    // render summary charts
+                    function renderSummaryChart(canvasId, countsObj, formatter, color) {
+                        const ctx = document.getElementById(canvasId).getContext('2d');
+                        const entries = Object.entries(countsObj).sort((a,b)=>b[1]-a[1]).slice(0, 5); // top 5
+                        const labels = entries.map(([k]) => formatter ? formatter(k) : k);
+                        const data = entries.map(([,v]) => v);
+                        if (window[canvasId + 'Chart']) window[canvasId + 'Chart'].destroy();
+                        window[canvasId + 'Chart'] = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: data,
+                                    backgroundColor: color,
+                                    borderColor: color.replace('0.8', '1'),
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                                    y: { ticks: { font: { size: 10 } } }
+                                }
+                            }
+                        });
+                    }
+
+                    renderSummaryChart('majorChart', majorCounts, (k)=>k, 'rgba(54, 162, 235, 0.8)');
+                    renderSummaryChart('roleChart', roleCounts, (k)=>{
+                        const map = { 'T':'ครู', 'OF':'เจ้าหน้าที่', 'VP':'รองผอ.', 'DIR':'ผอ.', 'ADM':'Admin', 'UNK':'อื่นๆ' };
+                        return map[k]||k;
+                    }, 'rgba(255, 99, 132, 0.8)');
+                    renderSummaryChart('classChart', classCounts, (k)=>{
+                        if (k === 'ไม่ระบุ') return 'ไม่ระบุ';
+                        if (/^\d+$/.test(k)) return `ม.${k}`;
+                        return k;
+                    }, 'rgba(75, 192, 192, 0.8)');
+                } catch (e) { console.error('Chart load error', e); }
+            }
+            // initial load
+            loadChart();
+
+            // refresh chart after reload (also reloads table)
             window.loadTeachers = function() {
-                teacherTable.ajax.reload(null, false); // โหลดใหม่แบบไม่รีเซ็ตหน้า
+                teacherTable.ajax.reload(null, false);
+                // reload chart too
+                setTimeout(loadChart, 500);
             }
 
             // (Event: Add Teacher)
@@ -309,6 +561,8 @@ require_once('header.php');
                     $('[name="editTeach_id"]').val(data.Teach_id);
                     $('[name="editTeach_name"]').val(data.Teach_name);
                     $('[name="editTeach_major"]').val(data.Teach_major);
+                    $('[name="editTeach_class"]').val(data.Teach_class);
+                    $('[name="editTeach_room"]').val(data.Teach_room);
                     $('[name="editTeach_status"]').val(data.Teach_status);
                     $('[name="editrole_std"]').val(data.role_std);
                     $('#editTeacherModal').modal('show');
@@ -386,6 +640,11 @@ require_once('header.php');
                 } else {
                     Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถรีเซ็ตรหัสผ่านได้', 'error');
                 }
+            });
+
+            // When opening Add modal reset form (no photo upload here)
+            $('#addTeacherModal').on('show.bs.modal', function(){
+                $('#addTeacherForm')[0].reset();
             });
         });
 </script>

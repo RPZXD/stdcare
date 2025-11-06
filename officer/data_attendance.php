@@ -796,13 +796,13 @@ document.addEventListener('DOMContentLoaded', function() {
         order: [[0, 'asc']], // เรียงตามเลขที่
         language: {
             processing: '<div class="flex items-center justify-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div><span class="ml-2">กำลังโหลด...</span></div>',
-            search: "🔍 ค้นหา:",
-            searchPlaceholder: "ค้นหาชื่อนักเรียน...",
-            lengthMenu: "แสดง _MENU_ รายการ",
-            info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ คน",
-            infoEmpty: "ไม่พบข้อมูล",
-            infoFiltered: "(กรองจากทั้งหมด _MAX_ คน)",
-            zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+            search: '🔍 ค้นหา:',
+            searchPlaceholder: 'ค้นหาชื่อนักเรียน...',
+            lengthMenu: 'แสดง _MENU_ รายการ',
+            info: 'แสดง _START_ ถึง _END_ จาก _TOTAL_ คน',
+            infoEmpty: 'ไม่พบข้อมูล',
+            infoFiltered: '(กรองจากทั้งหมด _MAX_ คน)',
+            zeroRecords: 'ไม่พบข้อมูลที่ค้นหา',
             paginate: {
                 first: "หน้าแรก",
                 last: "หน้าสุดท้าย",
