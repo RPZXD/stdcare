@@ -77,7 +77,7 @@ function thaiDateShort($date) {
     }
     return $date;
 }
-$dateC = convertToBuddhistYear($date);
+
 
 // --- ส่ง flex ของทุก class ทุก room ---
 $results = [];
@@ -96,7 +96,7 @@ foreach ($classMap as $classKey => $groupId) {
     $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     foreach ($rooms as $room) {
-        $students_all = $attendance->getStudentsWithAttendance($dateC, $classKey, $room, $term, $pee);
+        $students_all = $attendance->getStudentsWithAttendance($date, $classKey, $room, $term, $pee);
         // Determine whether there is any attendance data recorded for this room
         $hasAttendanceData = false;
         if (!empty($students_all) && is_array($students_all)) {
