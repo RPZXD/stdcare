@@ -344,7 +344,8 @@ $pee = $user->getPee();
                     <th class="px-4 py-3 border-0 text-left">👤 ชื่อ-สกุล</th>
                     <th class="px-4 py-3 border-0 text-center whitespace-nowrap">✅ การเช็คชื่อ</th>
                     <th class="px-4 py-3 border-0 text-center">📊 สถานะ</th>
-                    <th class="px-3 py-3 border-0 text-center">📝<br><span class="text-xs">สาเหตุ</span></th>
+                    <th class="px-3 py-3 border-0 text-center">🕐<br><span class="text-xs">เวลาสแกน</span></th>
+                    <th class="px-3 py-3 border-0 text-center"><br><span class="text-xs">สาเหตุ</span></th>
                     <th class="px-3 py-3 border-0 text-center">👨‍🏫<br><span class="text-xs">เช็คโดย</span></th>
                 </tr>
             </thead>
@@ -532,6 +533,31 @@ $pee = $user->getPee();
                                 ?></td>
                             <td class="px-4 py-3 text-center">
                                 <?php
+                                // เวลาสแกนเข้า-ออก
+                                $has_scan = false;
+                                if (!empty($std['arrival_time']) || !empty($std['leave_time'])) {
+                                    echo '<div class="flex flex-col gap-1 items-center">';
+                                    if (!empty($std['arrival_time'])) {
+                                        echo '<span class="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full text-white text-xs font-medium shadow-sm">';
+                                        echo '🔵 เข้า: ' . htmlspecialchars(substr($std['arrival_time'], 0, 5));
+                                        echo '</span>';
+                                        $has_scan = true;
+                                    }
+                                    if (!empty($std['leave_time'])) {
+                                        echo '<span class="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-red-400 to-rose-500 rounded-full text-white text-xs font-medium shadow-sm">';
+                                        echo '🔴 ออก: ' . htmlspecialchars(substr($std['leave_time'], 0, 5));
+                                        echo '</span>';
+                                        $has_scan = true;
+                                    }
+                                    echo '</div>';
+                                }
+                                if (!$has_scan) {
+                                    echo '<span class="text-gray-400 text-sm">➖</span>';
+                                }
+                                ?>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <?php
                                 // สาเหตุ
                                 if (!empty($std['attendance_status'])) {
                                     echo !empty($std['reason']) ? '<span class="text-gray-700 font-medium">' . htmlspecialchars($std['reason']) . '</span>' : '<span class="text-gray-400">➖</span>';
@@ -548,6 +574,8 @@ $pee = $user->getPee();
                                 if (!empty($std['checked_by'])) {
                                     if ($std['checked_by'] === 'system' || $std['checked_by'] === 'teacher') {
                                         echo '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full text-white text-sm font-medium shadow-md">👨‍🏫 ครูที่ปรึกษา</span>';
+                                    } elseif ($std['checked_by'] === 'officer') {
+                                        echo '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-400 to-violet-500 rounded-full text-white text-sm font-medium shadow-md">👮 เจ้าหน้าที่</span>';
                                     } elseif ($std['checked_by'] === 'rfid' || $std['checked_by'] === 'RFID') {
                                         $time = !empty($std['attendance_time']) ? date('H:i', strtotime($std['attendance_time'])) : null;
                                         echo '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full text-white text-sm font-medium shadow-md">💳 สแกนบัตร';
@@ -567,7 +595,7 @@ $pee = $user->getPee();
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7" class="text-center py-12 text-gray-500">
+                        <td colspan="8" class="text-center py-12 text-gray-500">
                             <div class="flex flex-col items-center gap-3">
                                 <span class="text-6xl">📭</span>
                                 <p class="text-lg font-medium">ไม่พบนักเรียนในห้องนี้</p>
@@ -624,8 +652,9 @@ document.addEventListener('DOMContentLoaded', function() {
             { className: "text-left font-semibold", targets: [2], width: "220px", orderable: true },
             { className: "text-center", targets: [3], width: "140px" },
             { className: "text-center whitespace-nowrap", targets: [4], width: "280px", orderable: false },
-            { className: "text-center", targets: [5], width: "140px" },
-            { className: "text-center", targets: [6], width: "130px" },
+            { className: "text-center", targets: [5], width: "120px" },
+            { className: "text-center", targets: [6], width: "140px" },
+            { className: "text-center", targets: [7], width: "130px" },
         ],
         order: [[0, 'asc']], // เรียงตามเลขที่
         language: {
@@ -717,10 +746,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             var info = json.results[stuId];
                             var tr = document.querySelector('tr[data-stu-id="' + stuId + '"]');
                             if (!tr) return;
-                            // status cell index 3
-                            var statusCell = tr.cells[3];
-                            var reasonCell = tr.cells[5];
-                            var checkedCell = tr.cells[6];
+                            // Update cell indices: status=4, scanTime=5, reason=6, checked=7
+                            var statusCell = tr.cells[4];
+                            var reasonCell = tr.cells[6];
+                            var checkedCell = tr.cells[7];
                             // render status badge
                             function renderStatusBadge(code){
                                 if (!code) return '<span class="status-badge inline-block px-3 py-1.5 bg-gray-200 rounded-full text-gray-600">➖</span>';
@@ -741,6 +770,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             var cb = info && info.checked_by ? info.checked_by : null;
                             if (cb === 'system' || cb === 'teacher') {
                                 checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full text-white text-sm font-medium shadow-md">👨‍🏫 ครูที่ปรึกษา</span>';
+                            } else if (cb === 'officer') {
+                                checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-400 to-violet-500 rounded-full text-white text-sm font-medium shadow-md">👮 เจ้าหน้าที่</span>';
                             } else if (cb === 'rfid' || cb === 'RFID') {
                                 var t = info.attendance_time ? (' <span class="text-xs opacity-90">(' + info.attendance_time.substring(0,5) + ')</span>') : '';
                                 checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full text-white text-sm font-medium shadow-md">💳 สแกนบัตร' + t + '</span>';
@@ -801,7 +832,52 @@ document.addEventListener('DOMContentLoaded', function() {
             saveBtn.innerHTML = 'กำลังบันทึก...';
             saveBtn.disabled = true;
 
-            const formData = new FormData(attendanceForm);
+            // Only include students without existing attendance (no edit button)
+            const formData = new FormData();
+            
+            // Add date, term, pee from form
+            formData.append('date', attendanceForm.querySelector('input[name="date"]').value);
+            formData.append('term', attendanceForm.querySelector('input[name="term"]').value);
+            formData.append('pee', attendanceForm.querySelector('input[name="pee"]').value);
+            
+            // Only collect data from rows that DON'T have the edit button (no existing attendance)
+            const allRows = document.querySelectorAll('tr[data-stu-id]');
+            allRows.forEach(function(row) {
+                const hasEditBtn = row.querySelector('.edit-attendance-btn');
+                if (hasEditBtn) {
+                    // Skip - this student already has attendance record
+                    return;
+                }
+                
+                // Collect data for new attendance records only
+                const stuId = row.dataset.stuId;
+                const radioChecked = row.querySelector('input[name="attendance_status[' + stuId + ']"]:checked');
+                const reasonInput = row.querySelector('input[name="reason[' + stuId + ']"]');
+                const teachIdInput = row.querySelector('input[name="teach_id[' + stuId + ']"]');
+                const behaviorTypeInput = row.querySelector('input[name="behavior_type[' + stuId + ']"]');
+                const behaviorNameInput = row.querySelector('input[name="behavior_name[' + stuId + ']"]');
+                const behaviorScoreInput = row.querySelector('input[name="behavior_score[' + stuId + ']"]');
+                
+                if (radioChecked) {
+                    formData.append('Stu_id[]', stuId);
+                    formData.append('attendance_status[' + stuId + ']', radioChecked.value);
+                    if (reasonInput && reasonInput.value) {
+                        formData.append('reason[' + stuId + ']', reasonInput.value);
+                    }
+                    if (teachIdInput) {
+                        formData.append('teach_id[' + stuId + ']', teachIdInput.value);
+                    }
+                    if (behaviorTypeInput) {
+                        formData.append('behavior_type[' + stuId + ']', behaviorTypeInput.value);
+                    }
+                    if (behaviorNameInput) {
+                        formData.append('behavior_name[' + stuId + ']', behaviorNameInput.value);
+                    }
+                    if (behaviorScoreInput) {
+                        formData.append('behavior_score[' + stuId + ']', behaviorScoreInput.value);
+                    }
+                }
+            });
 
             fetch('../controllers/AttendanceController.php?action=save_bulk', {
                 method: 'POST',
@@ -816,9 +892,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             var info = json.results[stuId];
                             var tr = document.querySelector('tr[data-stu-id="' + stuId + '"]');
                             if (!tr) return;
-                            var statusCell = tr.cells[3];
-                            var reasonCell = tr.cells[5];
-                            var checkedCell = tr.cells[6];
+                            // Update cell indices: status=4, scanTime=5, reason=6, checked=7
+                            var statusCell = tr.cells[4];
+                            var reasonCell = tr.cells[6];
+                            var checkedCell = tr.cells[7];
                             function renderStatusBadge(code){
                                 if (!code) return '<span class="status-badge inline-block px-3 py-1.5 bg-gray-200 rounded-full text-gray-600">➖</span>';
                                 switch (String(code)){
@@ -836,6 +913,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             var cb = info && info.checked_by ? info.checked_by : null;
                             if (cb === 'system' || cb === 'teacher') {
                                 checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full text-white text-sm font-medium shadow-md">👨‍🏫 ครูที่ปรึกษา</span>';
+                            } else if (cb === 'officer') {
+                                checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-400 to-violet-500 rounded-full text-white text-sm font-medium shadow-md">👮 เจ้าหน้าที่</span>';
                             } else if (cb === 'rfid' || cb === 'RFID') {
                                 var t = info.attendance_time ? (' <span class="text-xs opacity-90">(' + info.attendance_time.substring(0,5) + ')</span>') : '';
                                 checkedCell.innerHTML = '<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full text-white text-sm font-medium shadow-md">💳 สแกนบัตร' + t + '</span>';

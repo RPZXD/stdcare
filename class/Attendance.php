@@ -21,11 +21,13 @@ class Attendance {
     public function getStudentsWithAttendance($date, $class = null, $room = null, $term = null, $pee = null) {
         $query = "SELECT 
                     s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_status,
-                    a.id AS attendance_id, a.attendance_date, a.attendance_status, a.term, a.year, a.checked_by, a.device_id, a.reason, a.attendance_time
+                    a.id AS attendance_id, a.attendance_date, a.attendance_status, a.term, a.year, a.checked_by, a.device_id, a.reason, a.attendance_time,
+                    (SELECT TIME(scan_timestamp) FROM attendance_log WHERE student_id = s.Stu_id AND DATE(scan_timestamp) = :date_arr AND scan_type = 'arrival' ORDER BY scan_timestamp ASC LIMIT 1) AS arrival_time,
+                    (SELECT TIME(scan_timestamp) FROM attendance_log WHERE student_id = s.Stu_id AND DATE(scan_timestamp) = :date_lv AND scan_type = 'leave' ORDER BY scan_timestamp DESC LIMIT 1) AS leave_time
                   FROM {$this->table_student} s
                   LEFT JOIN {$this->table_attendance} a
                     ON s.Stu_id = a.student_id AND a.attendance_date = :date";
-        $params = [':date' => $date];
+        $params = [':date' => $date, ':date_arr' => $date, ':date_lv' => $date];
 
         $where = " WHERE s.Stu_status = 1";
         if (!is_null($class)) {

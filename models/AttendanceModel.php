@@ -292,10 +292,11 @@ class AttendanceModel
         }
 
         // 4) อัปเดต student_attendance หรือ student_leave_log ตามประเภทการสแกน
+        // สำหรับ manual scan (ลืมบัตร) ไม่ต้องตรวจสอบเวลา - บันทึกเป็นปกติเสมอ
         if ($scan_type === 'arrival') {
-            $statusText = $this->processArrival($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+            $statusText = $this->processManualArrival($stu_id, $today, $now_time, $term, $year, $device_id);
         } else {
-            $statusText = $this->processLeave($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
+            $statusText = $this->processManualLeave($stu_id, $today, $now_time, $term, $year, $device_id);
         }
 
         // 5) นับจำนวนวันที่ลืมบัตรในเทอม/ปีนี้ (distinct forgot_date)
@@ -446,6 +447,86 @@ class AttendanceModel
             ]);
         } catch (\PDOException $e) {
             error_log("Failed to insert student_leave_log: " . $e->getMessage());
+        }
+
+        return $statusText;
+    }
+
+    /**
+     * ประมวลผลการสแกนเข้าแบบ Manual (ลืมบัตร) - ไม่ตรวจสอบเวลา บันทึกเป็นมาเรียนปกติเสมอ
+     */
+    private function processManualArrival($stu_id, $date, $time, $term, $year, $device_id)
+    {
+        // กรณีเจ้าหน้าที่เช็ค (ลืมบัตร) -> บันทึกเป็น "มาเรียนปกติ" เสมอ ไม่สนใจเวลา
+        $statusText = 'มาเรียน (ลืมบัตร)';
+        $statusCode = 1; // 1 = มาเรียน
+
+        // บันทึก/อัปเดต student_attendance
+        try {
+            $check_sql = "SELECT attendance_status FROM student_attendance 
+                          WHERE student_id = :stu_id AND attendance_date = :date";
+            $check_stmt = $this->db->prepare($check_sql);
+            $check_stmt->execute([':stu_id' => $stu_id, ':date' => $date]);
+            $existing_status = $check_stmt->fetchColumn();
+
+            $manual_statuses = [4, 5, 6]; // ลา, ลาป่วย, กิจ
+
+            if ($existing_status === false) {
+                // ยังไม่มีข้อมูล -> INSERT
+                $insert_sql = "INSERT INTO student_attendance 
+                               (student_id, attendance_date, attendance_time, attendance_status, checked_by, term, year, device_id, reason)
+                               VALUES 
+                               (:stu_id, :date, :time, :status, 'officer', :term, :year, :device_id, 'ลืมบัตร - เจ้าหน้าที่บันทึก')";
+                $stmt = $this->db->prepare($insert_sql);
+                $stmt->execute([
+                    ':stu_id' => $stu_id, ':date' => $date, ':time' => $time, ':status' => $statusCode,
+                    ':term' => $term, ':year' => $year, ':device_id' => $device_id
+                ]);
+            } elseif (!in_array($existing_status, $manual_statuses)) {
+                // มีข้อมูลแล้วและไม่ใช่การลา -> UPDATE เป็นมาเรียนปกติ
+                $update_sql = "UPDATE student_attendance 
+                               SET attendance_time = :time, attendance_status = :status, 
+                                   checked_by = 'officer', device_id = :device_id,
+                                   reason = 'ลืมบัตร - เจ้าหน้าที่บันทึก'
+                               WHERE student_id = :stu_id AND attendance_date = :date";
+                $stmt = $this->db->prepare($update_sql);
+                $stmt->execute([
+                    ':stu_id' => $stu_id, ':date' => $date, ':time' => $time, ':status' => $statusCode,
+                    ':device_id' => $device_id
+                ]);
+            }
+            // ถ้าเป็นสถานะลา (4,5,6) -> ไม่แก้ไข เพื่อรักษาข้อมูลการลา
+        } catch (\PDOException $e) {
+            error_log("Failed to update student_attendance (manual): " . $e->getMessage());
+        }
+
+        return $statusText;
+    }
+
+    /**
+     * ประมวลผลการสแกนออกแบบ Manual (ลืมบัตร) - ไม่ตรวจสอบเวลา บันทึกเป็นกลับปกติเสมอ
+     */
+    private function processManualLeave($stu_id, $date, $time, $term, $year, $device_id)
+    {
+        // กรณีเจ้าหน้าที่เช็ค (ลืมบัตร) -> บันทึกเป็น "กลับปกติ" เสมอ ไม่สนใจเวลา
+        $statusText = 'กลับปกติ (ลืมบัตร)';
+        $leave_status = 'normal';
+
+        // บันทึกลง student_leave_log
+        try {
+            $insert_sql = "INSERT INTO student_leave_log 
+                           (student_id, leave_date, leave_time, leave_status, device_id, term, year)
+                           VALUES 
+                           (:stu_id, :date, :time, :status, :device_id, :term, :year)
+                           ON DUPLICATE KEY UPDATE
+                           leave_time = :time, leave_status = :status";
+            $stmt = $this->db->prepare($insert_sql);
+            $stmt->execute([
+                ':stu_id' => $stu_id, ':date' => $date, ':time' => $time, ':status' => $leave_status,
+                ':device_id' => $device_id, ':term' => $term, ':year' => $year
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Failed to insert student_leave_log (manual): " . $e->getMessage());
         }
 
         return $statusText;
