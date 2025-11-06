@@ -556,13 +556,7 @@ require_once('header.php');
                                     </th>
                                     <th class="px-4 py-6 border-0 text-center font-bold">
                                         <div class="flex flex-col items-center gap-1">
-                                            <span class="text-2xl">📊</span>
-                                            <span class="text-xs font-medium">การเช็คชื่อ</span>
-                                        </div>
-                                    </th>
-                                    <th class="px-4 py-6 border-0 text-center font-bold">
-                                        <div class="flex flex-col items-center gap-1">
-                                            <span class="text-2xl">🕐</span>
+                                            <span class="text-2xl"></span>
                                             <span class="text-xs font-medium">เวลาสแกน</span>
                                         </div>
                                     </th>
@@ -714,7 +708,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 className: 'btn btn-success btn-sm',
                 title: 'ข้อมูลการเช็คชื่อ - <?= thaiDate(convertToBuddhistYear($date)) ?>',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                    columns: [0, 1, 2, 3, 4, 5, 6]
                 }
             },
             {
@@ -723,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 className: 'btn btn-info btn-sm',
                 title: 'ข้อมูลการเช็คชื่อ',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                    columns: [0, 1, 2, 3, 4, 5, 6]
                 }
             }
         ],
@@ -763,14 +757,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: 'attendance_status',
                 className: "text-center",
                 width: "100px",
-                render: function(data, type, row) {
-                    return '<td class="px-4 py-3 text-center">' + getStatusBadge(data) + '</td>';
-                }
-            },
-            {
-                data: 'attendance_status',
-                className: "text-center",
-                width: "150px",
                 render: function(data, type, row) {
                     return '<td class="px-4 py-3 text-center">' + getStatusBadge(data) + '</td>';
                 }
@@ -900,10 +886,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             var info = json.results[stuId];
                             var tr = document.querySelector('tr[data-stu-id="' + stuId + '"]');
                             if (!tr) return;
-                            // Update cell indices: status=4, scanTime=5, reason=6, checked=7
-                            var statusCell = tr.cells[4];
-                            var reasonCell = tr.cells[6];
-                            var checkedCell = tr.cells[7];
+                            // Update cell indices: status=3, scanTime=4, reason=5, checked=6
+                            var statusCell = tr.cells[3];
+                            var reasonCell = tr.cells[5];
+                            var checkedCell = tr.cells[6];
                             // render status badge
                             function renderStatusBadge(code){
                                 if (!code) return '<span class="status-badge unknown">➖</span>';
@@ -1046,10 +1032,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             var info = json.results[stuId];
                             var tr = document.querySelector('tr[data-stu-id="' + stuId + '"]');
                             if (!tr) return;
-                            // Update cell indices: status=4, scanTime=5, reason=6, checked=7
-                            var statusCell = tr.cells[4];
-                            var reasonCell = tr.cells[6];
-                            var checkedCell = tr.cells[7];
+                            // Update cell indices: status=3, scanTime=4, reason=5, checked=6
+                            var statusCell = tr.cells[3];
+                            var reasonCell = tr.cells[5];
+                            var checkedCell = tr.cells[6];
                             function renderStatusBadge(code){
                                 if (!code) return '<span class="status-badge unknown">➖</span>';
                                 switch (String(code)){
