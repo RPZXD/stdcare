@@ -5,6 +5,7 @@ require_once(__DIR__ . "/../models/SettingModel.php");
 require_once(__DIR__ . "/../models/AttendanceModel.php");
 require_once(__DIR__ . "/../class/UserLogin.php"); 
 require_once(__DIR__ . "/../class/Poor.php");
+require_once(__DIR__ . "/../config/Database.php");
 
 use App\DatabaseUsers;
 use App\Models\SettingModel;
@@ -37,6 +38,99 @@ try {
         case 'get_log':
             $data = $attendanceModel->getTodayAttendanceLog($timeSettings);
             echo json_encode(['data' => $data]);
+            break;
+
+        // Action: บันทึกการเช็คชื่อแบบกลุ่ม (จากหน้า teacher) -> ใช้ POST และคืนค่า JSON
+        case 'save_bulk':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['error' => 'Method Not Allowed']);
+                exit;
+            }
+
+            // Use the school database connection for attendance class
+            require_once(__DIR__ . "/../class/Attendance.php");
+            require_once(__DIR__ . "/../class/Behavior.php");
+            require_once(__DIR__ . "/../class/Utils.php");
+
+            try {
+                $schoolDbObj = new \Database("phichaia_student");
+                $schoolDb = $schoolDbObj->getConnection();
+                $attendanceClass = new Attendance($schoolDb);
+                $behaviorClass = new Behavior($schoolDb);
+
+                // Read POST payload
+                $date = $_POST['date'] ?? date('Y-m-d');
+                $stu_ids = $_POST['Stu_id'] ?? [];
+                $statuses = $_POST['attendance_status'] ?? [];
+                $reasons = $_POST['reason'] ?? [];
+                $behavior_names = $_POST['behavior_name'] ?? [];
+                $behavior_scores = $_POST['behavior_score'] ?? [];
+                $teach_ids = $_POST['teach_id'] ?? [];
+                $term_post = $_POST['term'] ?? $term;
+                $year_post = $_POST['pee'] ?? $year;
+
+                // determine checked_by as enum-like indicator (not user id)
+                // store 'teacher' when a teacher is logged in, otherwise fallback to 'system'
+                if (session_status() == PHP_SESSION_NONE) session_start();
+                $checked_by = 'system';
+                if (!empty($_SESSION['Teacher_login'])) {
+                    $checked_by = 'teacher';
+                }
+
+                // Save bulk attendance
+                $savedCount = $attendanceClass->saveAttendanceBulk($stu_ids, $statuses, $reasons, $date, $term_post, $year_post, $checked_by);
+
+                // Optionally create behavior records for late students (status == '3')
+                foreach ($stu_ids as $stu_id) {
+                    $status = $statuses[$stu_id] ?? '1';
+                    if ($status == '3') {
+                        $behavior_type = 'มาโรงเรียนสาย';
+                        $behavior_name = $behavior_names[$stu_id] ?? 'มาโรงเรียนสาย';
+                        $behavior_score = !empty($behavior_scores[$stu_id]) && $behavior_scores[$stu_id] != 5 ? $behavior_scores[$stu_id] : 5;
+                        $teach_id = $teach_ids[$stu_id] ?? $checked_by;
+
+                        // avoid duplicate for the same date
+                        $stmt = $schoolDb->prepare("SELECT id FROM behavior WHERE stu_id = :stu_id AND behavior_date = :date AND behavior_type = :behavior_type LIMIT 1");
+                        $stmt->execute([':stu_id' => $stu_id, ':date' => $date, ':behavior_type' => $behavior_type]);
+                        if (!$stmt->fetch()) {
+                            $behaviorClass->stu_id = $stu_id;
+                            $behaviorClass->behavior_date = $date;
+                            $behaviorClass->behavior_type = $behavior_type;
+                            $behaviorClass->behavior_name = $behavior_name;
+                            $behaviorClass->behavior_score = $behavior_score;
+                            $behaviorClass->teach_id = $teach_id;
+                            $behaviorClass->term = $term_post;
+                            $behaviorClass->pee = $year_post;
+                            $behaviorClass->create();
+                        }
+                    }
+                }
+
+                // Build per-student result snapshot by querying student_attendance for each student
+                $perResults = [];
+                $stmtFetch = $schoolDb->prepare("SELECT attendance_status, reason, checked_by, attendance_time, attendance_date FROM student_attendance WHERE student_id = :stu_id AND attendance_date = :date LIMIT 1");
+                foreach ($stu_ids as $stu_id) {
+                    $stmtFetch->execute([':stu_id' => $stu_id, ':date' => $date]);
+                    $row = $stmtFetch->fetch(PDO::FETCH_ASSOC);
+                    if ($row) {
+                        $perResults[$stu_id] = [
+                            'attendance_status' => $row['attendance_status'],
+                            'reason' => $row['reason'],
+                            'checked_by' => $row['checked_by'],
+                            'attendance_time' => $row['attendance_time'],
+                            'attendance_date' => $row['attendance_date']
+                        ];
+                    } else {
+                        $perResults[$stu_id] = null;
+                    }
+                }
+
+                echo json_encode(['success' => true, 'saved' => $savedCount, 'results' => $perResults]);
+            } catch (\Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
             break;
 
         // Action: ดึงการสแกนล่าสุดสำหรับแสดงผล
