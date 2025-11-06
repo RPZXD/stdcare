@@ -37,6 +37,7 @@ $menuItems = [
     ['href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
     ['href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
     ['href' => 'data_forgotrfid.php', 'icon' => 'fa-id-card-alt', 'text' => 'บันทึกลืมบัตร'],
+    ['href' => 'data_attendance.php', 'icon' => 'fa-clipboard-check', 'text' => 'ข้อมูลเช็คชื่อ'],
     ['href' => 'rfid.php', 'icon' => 'fa-credit-card', 'text' => 'จัดการ rfid'],
     ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล'],
     ['href' => '../logout.php', 'icon' => 'fa-sign-out-alt', 'text' => 'ออกจากระบบ'],
