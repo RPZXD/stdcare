@@ -64,8 +64,9 @@
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
     <style>
-    body {
-        font-family: 'Mali', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    html, body {
+        /* Force Mali as the primary UI font; use !important to override injected frameworks (Tailwind/AdminLTE) */
+        font-family: 'Mali', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         transition: background-color 0.5s, color 0.5s;
     }
 

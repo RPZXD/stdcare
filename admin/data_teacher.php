@@ -317,13 +317,7 @@ require_once('header.php');
         </div>
 
 <script>
-        // Load Tailwind CSS
-        const tailwindLink = document.createElement('link');
-        tailwindLink.rel = 'stylesheet';
-        tailwindLink.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
-        document.head.appendChild(tailwindLink);
-
-        let teacherTable;
+    let teacherTable;
     // (URL ใหม่ ชี้ไปที่ Controller)
     const API_URL = '../controllers/TeacherController.php';
     // Base URL สำหรับรูปครู (DB เก็บเฉพาะชื่อไฟล์)
