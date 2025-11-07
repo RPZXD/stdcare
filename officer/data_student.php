@@ -178,39 +178,27 @@ $(document).ready(function() {
             } else {
                 response.data.forEach((item, index) => {
                     const studentCard = `
-                        <div class="student-card hover-lift"
+                        <div class="student-card profile-card" 
                             data-name="${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}"
                             data-id="${item.Stu_id}"
                             data-no="${item.Stu_no}"
                             data-nick="${item.Stu_nick}"
-                            style="animation-delay: ${index * 0.1}s; opacity: 0;">
-                            <div class="student-photo-container" style="position: relative;">
-                                <img class="student-photo w-full h-128 object-cover"
-                                     src="https://std.phichai.ac.th/photo/${item.Stu_picture}"
-                                     alt="Student Picture"
-                                     onerror="handleImageError(this, '${item.Stu_pre}${item.Stu_name}')"
-                                     onload="this.classList.add('animate-fadeInUp')">
-                                <div class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full px-2 py-1 text-xs font-bold text-gray-700">
-                                    #${item.Stu_no}
+                            style="animation-delay: ${index * 0.08}s; opacity: 0;">
+                            <div class="profile-top bg-gradient-to-r from-purple-400 to-indigo-500 rounded-t-2xl"></div>
+                            <div class="profile-body px-6 pb-6 -mt-12">
+                                <div class="avatar-wrap mx-auto w-36 h-36 rounded-full bg-white p-1 shadow-xl">
+                                    <img class="profile-avatar zoomable-avatar w-full h-full rounded-full object-cover" src="https://std.phichai.ac.th/photo/${item.Stu_picture}" alt="${item.Stu_pre}${item.Stu_name}" onerror="handleImageError(this, '${item.Stu_pre}${item.Stu_name}')" data-fullsrc="https://std.phichai.ac.th/photo/${item.Stu_picture}">
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="text-center mb-4">
-                                    <h5 class="text-lg font-bold text-purple-500 mb-2">
-                                        ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}
-                                    </h5>
-                                    <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                        รหัส: ${item.Stu_id}
-                                    </div>
+                                <h3 class="profile-name mt-4 text-2xl font-extrabold text-purple-700">🎓 ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}</h3>
+                                <div class="id-badge inline-block mt-2 px-3 py-1 rounded-full bg-white text-sm text-gray-700 shadow-sm">🆔 รหัส: <span class="font-semibold">${item.Stu_id}</span></div>
+
+                                <div class="badges flex flex-col items-center gap-3 mt-4">
+                                    ${item.Stu_nick ? `<div class="info-badge inline-flex items-center px-4 py-2 rounded-full bg-white text-sm text-gray-800 shadow-sm">😊<div class="text-left"><div class="label text-xs text-gray-500">ชื่อเล่น : ${item.Stu_nick}</div></div></div>` : ''}
+                                    ${item.Stu_phone ? `<div class="info-badge inline-flex items-center px-4 py-2 rounded-full bg-white text-sm text-gray-800 shadow-sm">📞<div class="text-left"><div class="label text-xs text-gray-500">เบอร์ : <a href="tel:${item.Stu_phone}" class="text-blue-700">${item.Stu_phone}</a></div></div></div>` : ''}
+                                    ${item.Par_phone ? `<div class="info-badge inline-flex items-center px-4 py-2 rounded-full bg-white text-sm text-gray-800 shadow-sm">👨‍👩‍👧‍👦<div class="text-left"><div class="label text-xs text-gray-500">ผู้ปกครอง : <a href="tel:${item.Par_phone}" class="text-blue-700">${item.Par_phone}</a></div></div></div>` : ''}
                                 </div>
-                                <div class="space-y-2 text-sm">
-                                    ${item.Stu_nick ? `<div class="flex justify-between"><span class="text-gray-900">ชื่อเล่น:</span><span class="font-semibold text-purple-600">${item.Stu_nick}</span></div>` : ''}
-                                    ${item.Stu_phone ? `<div class="flex justify-between"><span class="text-gray-900">เบอร์:</span><a href="tel:${item.Stu_phone}" class="text-gray-900 hover:underline flex items-center">📞 ${item.Stu_phone}</a></div>` : ''}
-                                    ${item.Par_phone ? `<div class="flex justify-between"><span class="text-gray-900">ผู้ปกครอง:</span><a href="tel:${item.Par_phone}" class="text-gray-900 hover:underline flex items-center">👨‍👩‍👧‍👦 ${item.Par_phone}</a></div>` : ''}
-                                </div>
-                                <div class="flex justify-center space-x-2 mt-6">
-                                    <button class="btn-modern btn-view btn-sm hover-lift" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด"><span class="text-lg">👀</span></button>
-                                </div>
+
+                                <button class="btn-view btn-gradient w-full mt-5" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">👀 ดูข้อมูล</button>
                             </div>
                         </div>
                     `;
@@ -220,10 +208,13 @@ $(document).ready(function() {
                 $('.student-card').each(function(index) {
                     $(this).css({
                         'opacity': '0',
-                        'transform': 'translateY(50px)'
-                    }).delay(index * 100).animate({
+                        'transform': 'translateY(20px) scale(0.95)'
+                    }).delay(index * 80).animate({
                         'opacity': '1'
-                    }, 500).css('transform', 'translateY(0)');
+                    }, 420).queue(function(next){
+                        $(this).css('transform', 'translateY(0) scale(1)');
+                        next();
+                    });
                 });
             }
         } catch(error) {
@@ -305,6 +296,34 @@ $(document).ready(function() {
     function showLoading() { $('#loadingOverlay').fadeIn(200); }
     function hideLoading() { $('#loadingOverlay').fadeOut(200); }
 
+        // avatar click -> open modal with large image
+        $(document).on('click', '.zoomable-avatar', function(e) {
+                e.preventDefault();
+                var src = $(this).data('fullsrc') || $(this).attr('src');
+                var alt = $(this).attr('alt') || '';
+
+                // remove any existing modal placeholder
+                $('#avatarModal').remove();
+
+                var modalHtml = `
+                        <div id="avatarModal" class="modal fade" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content bg-transparent border-0">
+                                    <div class="modal-body text-center p-0">
+                                        <button type="button" class="close modal-close p-2" data-dismiss="modal" aria-label="Close" style="position:absolute; right:8px; top:8px; z-index:1052; background: rgba(255,255,255,0.8); border-radius:50%;">&times;</button>
+                                        <img src="${src}" alt="${alt}" style="max-width:90vw; max-height:90vh; border-radius:8px; box-shadow:0 18px 40px rgba(0,0,0,0.45);">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                `;
+
+                var $modal = $(modalHtml);
+                $modal.appendTo('body');
+                $modal.modal('show');
+                $modal.on('hidden.bs.modal', function() { $(this).remove(); });
+        });
+
     // notification and image handlers from teacher page (minimal implementations)
     function handleImageError(img, studentName) {
         img.src = '../dist/img/default-avatar.svg';
@@ -343,9 +362,34 @@ $(document).ready(function() {
 </div>
 
 <style>
-/* minimal styles reuse from teacher file */
-.student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
-.student-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
-.student-photo { width: 100%; height: 200px; object-fit: cover; }
-.card-body { padding: 12px 16px; }
+/* Profile card styles to complement Tailwind utility classes */
+.student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+.profile-card { position: relative; overflow: visible; border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245,248,255,0.9)); }
+.profile-top { height: 48px; border-top-left-radius: 18px; border-top-right-radius: 18px; }
+.profile-body { position: relative; background: transparent; }
+.avatar-wrap { position: relative; width: 144px; height: 144px; margin-top: -72px; }
+.profile-avatar { display:block; }
+.zoomable-avatar { cursor: pointer; transition: transform .18s ease; }
+.zoomable-avatar:hover { transform: scale(1.04); }
+.profile-name { letter-spacing: 0.6px; }
+.id-badge { opacity: 0.95; }
+.info-box { backdrop-filter: blur(4px); }
+.info-badge { display: inline-flex; align-items: center; gap: 12px; padding: 8px 14px; border-radius: 9999px; background: #ffffff; box-shadow: 0 6px 14px rgba(2,6,23,0.06); }
+.badges { width: 100%; }
+.btn-gradient { display:inline-block; background: linear-gradient(90deg,#7c3aed,#ec4899); color:#fff; padding:0.6rem 1rem; border-radius:9999px; font-weight:600; box-shadow: 0 10px 20px rgba(124,58,237,0.12); border: none; }
+.btn-gradient:hover { transform: translateY(-3px); box-shadow: 0 18px 30px rgba(124,58,237,0.14); }
+.profile-card .icon { font-size: 20px; width: 34px; text-align: center; flex: 0 0 34px; }
+.profile-card .label { color: #6b7280; font-size: 12px; }
+.profile-card .value { color: #111827; font-size: 15px; }
+.info-box p.info-row { display: grid; grid-template-columns: 40px 1fr; gap:12px; align-items: start; padding:10px 0; border-bottom: 1px solid rgba(17,24,39,0.04); margin:0; }
+.info-box p.info-row:last-child { border-bottom: none; }
+.info-box p.info-row .label { font-size: 12px; color: #6b7280; display:block; }
+.info-box p.info-row .value { font-size: 15px; color: #111827; margin-top: 6px; display:block; }
+.info-box p.info-row .value a { color: #1d4ed8; text-decoration: none; }
+
+/* small responsive tweaks */
+@media (max-width: 480px) {
+    .avatar-wrap { width: 112px; height: 112px; margin-top: -56px; }
+    .profile-name { font-size: 1.125rem; }
+}
 </style>
