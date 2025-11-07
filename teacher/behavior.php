@@ -189,62 +189,89 @@ body {
     
     .print-content {
         display: block !important;
-        padding: 20px;
+        padding: 10px;
+        max-width: none;
     }
     
     .print-header {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         page-break-after: avoid;
     }
     
     .print-header img {
-        max-width: 80px;
+        max-width: 60px;
         height: auto;
         display: block;
-        margin: 0 auto 10px;
+        margin: 0 auto 8px;
     }
     
     .print-header h1 {
-        font-size: 18pt;
+        font-size: 16pt;
         font-weight: bold;
-        margin: 5px 0;
-    }
-    
-    .print-header h2, .print-header h3 {
-        font-size: 12pt;
         margin: 3px 0;
     }
     
-    .print-header p {
-        font-size: 10pt;
+    .print-header h2 {
+        font-size: 11pt;
         margin: 2px 0;
     }
     
+    .print-header p {
+        font-size: 9pt;
+        margin: 1px 0;
+    }
+    
     .print-table {
-        margin-top: 20px;
+        margin-top: 15px;
     }
     
     .print-table table {
         width: 100% !important;
         border-collapse: collapse !important;
-        font-size: 10pt !important;
+        font-size: 8pt !important;
+        table-layout: fixed;
+        page-break-inside: avoid;
+    }
+    
+    .print-table table th:nth-child(1), .print-table table td:nth-child(1) {
+        width: 8% !important;
+    }
+    
+    .print-table table th:nth-child(2), .print-table table td:nth-child(2) {
+        width: 15% !important;
+    }
+    
+    .print-table table th:nth-child(3), .print-table table td:nth-child(3) {
+        width: 45% !important;
+    }
+    
+    .print-table table th:nth-child(4), .print-table table td:nth-child(4) {
+        width: 12% !important;
     }
     
     .print-table table th, .print-table table td {
         border: 1px solid #000 !important;
-        padding: 8px !important;
+        padding: 3px !important;
         text-align: center !important;
+        word-wrap: break-word;
+        overflow: hidden;
     }
     
     .print-table table th {
         background: #f0f0f0 !important;
         font-weight: bold !important;
         color: #000 !important;
+        font-size: 9pt !important;
     }
     
     .print-table table td:nth-child(3) {
         text-align: left !important;
+    }
+    
+    .print-table table td:nth-child(4) {
+        font-weight: bold !important;
+        color: #dc2626 !important;
     }
     
     .print-table table tbody tr:nth-child(even) {
@@ -284,7 +311,11 @@ body {
     /* Page setup */
     @page {
         size: A4 portrait;
-        margin: 1cm;
+        margin: 0.5cm;
+    }
+    
+    .print-table table tbody {
+        page-break-inside: avoid;
     }
 }
 </style>
@@ -548,10 +579,9 @@ window.printPage = function() {
             <div class="print-header">
                 <img src="../dist/img/logo-phicha.png" alt="Phichai Logo">
                 <h1>📊 รายงานคะแนนพฤติกรรมของนักเรียน</h1>
-                <h2>ระดับชั้นมัธยมศึกษาปีที่ ${classRoom}</h2>
-                <h3>ภาคเรียนที่ ${term} ปีการศึกษา ${pee}</h3>
-                <p>ครูที่ปรึกษา: ${teacherName}</p>
-                <p>วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH', { 
+                <h2>ระดับชั้นมัธยมศึกษาปีที่ ${classRoom} ภาคเรียนที่ ${term} ปีการศึกษา ${pee}</h2>
+                <p>ครูที่ปรึกษา: ${teacherName}
+                 วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH', { 
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
@@ -559,7 +589,27 @@ window.printPage = function() {
                 <hr style="border: 1px solid #000; margin: 10px 0;">
             </div>
             <div class="print-table">
-                ${$('#record_table').parent().html()}
+                <table class="w-full table-auto">
+                    <thead class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                        <tr>
+                            <th class="px-2 py-2 text-center font-semibold text-xs">เลขที่</th>
+                            <th class="px-2 py-2 text-center font-semibold text-xs">เลขประจำตัว</th>
+                            <th class="px-2 py-2 text-center font-semibold text-xs">ชื่อ-นามสกุล</th>
+                            <th class="px-2 py-2 text-center font-semibold text-xs">ถูกหัก</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${$('#record_table tbody tr').map(function() {
+                            const cells = $(this).find('td');
+                            return '<tr>' +
+                                '<td class="px-2 py-1 text-center text-xs">' + $(cells[0]).text() + '</td>' +
+                                '<td class="px-2 py-1 text-center text-xs">' + $(cells[1]).text() + '</td>' +
+                                '<td class="px-2 py-1 text-left text-xs">' + $(cells[2]).text() + '</td>' +
+                                '<td class="px-2 py-1 text-center text-xs font-bold text-red-600">' + $(cells[3]).find('span').last().text() + '</td>' +
+                            '</tr>';
+                        }).get().join('')}
+                    </tbody>
+                </table>
             </div>
         </div>
     `;
