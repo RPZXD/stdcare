@@ -43,7 +43,7 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h5 class="m-0">ข้อมูลครู</h5>
+                        <h5 class="m-0">ข้อมูลครู 👨‍🏫</h5>
                     </div>
                 </div>
             </div>
@@ -53,186 +53,196 @@ require_once('header.php');
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
                     <div class="card-body">
-                        <table id="teacherTable" class="table table-bordered table-striped" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>ชื่อ-สกุล</th>
-                                    <th>กลุ่มสาระ</th>
-                                    <th>ครูที่ปรึกษา</th>
-                                    <th>สถานะ</th>
-                                    <th>บทบาท</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <!-- Search Filter -->
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" id="teacherSearch" placeholder="ค้นหาครู... 🔍" class="w-full px-4 py-3 pl-12 pr-4 text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 text-center">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-400 text-lg">🔍</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="loading" class="text-center py-8 text-lg font-semibold text-gray-600">
+                            กำลังโหลดข้อมูลครู... ⏳
+                        </div>
+                        <div id="teacherContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
                     </div>
                 </div>
             </div>
         </section>
 
 
+<style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+.teacher-card {
+    transition: all 0.3s ease;
+}
+.teacher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.zoomable-avatar {
+    cursor: pointer;
+    transition: transform 0.18s ease;
+}
+.zoomable-avatar:hover {
+    transform: scale(1.04);
+}
+</style>
+
 <script>
-        let teacherTable;
-        // (URL ใหม่ ชี้ไปที่ Controller)
-        const API_URL = '../controllers/TeacherController.php'; 
+        // API URL for reading teacher data only
+        const API_URL = '../controllers/TeacherController.php';
+
+        let allTeachers = [];
+
+        function handleImageError(img, fallbackText) {
+            img.style.display = 'none';
+            const container = img.parentElement;
+            container.innerHTML = '👨‍🏫';
+            container.classList.add('flex', 'items-center', 'justify-center');
+        }
+
+        function renderTeachers(data, filterText = '') {
+            $('#teacherContainer').empty();
+            $('#loading').hide();
+            
+            let filteredData = data;
+            if (filterText) {
+                filteredData = data.filter(teacher => {
+                    let roleText = '';
+                    switch(teacher.role_std) {
+                        case 'T': roleText = 'ครู'; break;
+                        case 'OF': roleText = 'เจ้าหน้าที่'; break;
+                        case 'VP': roleText = 'รองผู้อำนวยการ'; break;
+                        case 'DIR': roleText = 'ผู้อำนวยการ'; break;
+                        case 'ADM': roleText = 'Admin'; break;
+                        default: roleText = teacher.role_std;
+                    }
+                    return teacher.Teach_name.toLowerCase().includes(filterText.toLowerCase()) ||
+                           teacher.Teach_major.toLowerCase().includes(filterText.toLowerCase()) ||
+                           roleText.toLowerCase().includes(filterText.toLowerCase());
+                });
+            }
+            
+            filteredData.forEach((teacher, index) => {
+                let statusBadge = teacher.Teach_status == '1' ? 
+                    '<span class="inline-block bg-gradient-to-r from-green-400 to-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">ปกติ ✅</span>' : 
+                    '<span class="inline-block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">ไม่ใช้งาน ❌</span>';
+                
+                let roleText = '';
+                let roleEmoji = '';
+                switch(teacher.role_std) {
+                    case 'T': roleText = 'ครู'; roleEmoji = '👨‍🏫'; break;
+                    case 'OF': roleText = 'เจ้าหน้าที่'; roleEmoji = '👔'; break;
+                    case 'VP': roleText = 'รองผู้อำนวยการ'; roleEmoji = '👨‍💼'; break;
+                    case 'DIR': roleText = 'ผู้อำนวยการ'; roleEmoji = '🏫'; break;
+                    case 'ADM': roleText = 'Admin'; roleEmoji = '⚙️'; break;
+                    default: roleText = teacher.role_std; roleEmoji = '👤';
+                }
+                
+                let classRoom = teacher.Teach_class && teacher.Teach_room ? `ม.${teacher.Teach_class}/${teacher.Teach_room}` : 'ไม่มี';
+                
+                let photoUrl = teacher.Teach_photo ? `https://std.phichai.ac.th/teacher/uploads/phototeach/${teacher.Teach_photo}` : '';
+                
+                let card = `
+                    <div class="teacher-card bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 rounded-2xl shadow-lg border border-gray-200 hover:border-indigo-300 transition-all duration-300 animate-fade-in" style="animation-delay: ${index * 0.1}s;">
+                        <div class="flex items-center mb-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl mr-4 shadow-lg ring-4 ring-indigo-200 relative overflow-hidden">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${teacher.Teach_name}" class="w-full h-full rounded-full object-cover zoomable-avatar" onerror="handleImageError(this, '${teacher.Teach_name}')" data-fullsrc="${photoUrl}">` : roleEmoji}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">${teacher.Teach_name}</h3>
+                                <p class="text-sm text-indigo-600 font-medium">${teacher.Teach_major} 📚</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center text-sm">
+                                <span class="font-semibold text-gray-700 mr-2">🏫 ครูที่ปรึกษา:</span>
+                                <span class="text-gray-600">${classRoom}</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <span class="font-semibold text-gray-700 mr-2">📊 สถานะ:</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <span class="font-semibold text-gray-700 mr-2">🎭 บทบาท:</span>
+                                <span class="text-gray-600">${roleText} ${roleEmoji}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#teacherContainer').append(card);
+            });
+            
+            if (filteredData.length === 0 && filterText) {
+                $('#teacherContainer').html('<div class="col-span-full text-center py-8 text-gray-500 text-lg">ไม่พบครูที่ตรงกับการค้นหา �</div>');
+            }
+        }
+
+        function loadTeachers() {
+            $('#loading').show();
+            $('#teacherContainer').empty();
+            $.ajax({
+                url: API_URL + "?action=list",
+                method: 'GET',
+                success: function(data) {
+                    allTeachers = data;
+                    renderTeachers(data);
+                },
+                error: function() {
+                    $('#loading').html('<p class="text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล 😞</p>');
+                }
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
-            teacherTable = $('#teacherTable').DataTable({
-                "processing": true,
-                "serverSide": false, // (เราจะใช้ Client-side สำหรับ list (ตามโค้ดเดิม))
-                "ajax": {
-                    "url": API_URL + "?action=list", // (เรียก list)
-                    "dataSrc": ""
-                },
-                "columns": [
-                    { "data": "Teach_name" },
-                    { "data": "Teach_major" },
-                    { 
-                        "data": null,
-                        "render": function(data, type, row) {
-                            return row.Teach_class && row.Teach_room ? `ม.${row.Teach_class}/${row.Teach_room}` : '-';
-                        }
-                    },
-                    { 
-                        "data": "Teach_status",
-                        "render": function(data) {
-                            return data == '1' ? '<span class="badge badge-success">ปกติ</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>';
-                        }
-                    },
-                    { "data": "role_std",
-                        "render": function(data) {
-                            let roleText = '';
-                            switch(data) {
-                                case 'T': roleText = 'ครู'; break;
-                                case 'OF': roleText = 'เจ้าหน้าที่'; break;
-                                case 'VP': roleText = 'รองผู้อำนวยการ'; break;
-                                case 'DIR': roleText = 'ผู้อำนวยการ'; break;
-                                case 'ADM': roleText = 'Admin'; break;
-                                default: roleText = data; 
-                            }
-                            return roleText;
-                        }
-                    }
-                ],
-                "language": {
-                    "zeroRecords": "ไม่พบข้อมูล",
-                    "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-                    // ... (ภาษาไทยอื่นๆ) ...
-                }
+            loadTeachers();
+
+            // Search functionality
+            $('#teacherSearch').on('input', function() {
+                const searchText = $(this).val();
+                renderTeachers(allTeachers, searchText);
             });
 
-            // (ฟังก์ชันโหลดข้อมูลใหม่)
-            window.loadTeachers = function() {
-                teacherTable.ajax.reload(null, false); // โหลดใหม่แบบไม่รีเซ็ตหน้า
-            }
-
-            // (Event: Add Teacher)
-            document.getElementById('addTeacherForm').addEventListener('submit', async function(e) {
+            // Avatar click -> open modal with large image
+            $(document).on('click', '.zoomable-avatar', function(e) {
                 e.preventDefault();
-                const formData = new FormData(this);
-                const res = await fetch(API_URL + "?action=create", {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await res.json();
-                if (result.success) {
-                    $('#addTeacherModal').modal('hide');
-                    loadTeachers();
-                    Swal.fire('สำเร็จ', 'เพิ่มข้อมูลครูเรียบร้อย', 'success');
-                } else {
-                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถเพิ่มข้อมูลได้', 'error');
-                }
-            });
+                var src = $(this).data('fullsrc') || $(this).attr('src');
+                var alt = $(this).attr('alt') || '';
 
-            // (Event: Show Edit Modal)
-            $('#teacherTable').on('click', '.editTeacherBtn', async function() {
-                const id = $(this).data('id');
-                const res = await fetch(API_URL + "?action=get&id=" + id);
-                const data = await res.json();
-                
-                if (data && data.Teach_id) {
-                    $('[name="editTeach_id_old"]').val(data.Teach_id);
-                    $('[name="editTeach_id"]').val(data.Teach_id);
-                    $('[name="editTeach_name"]').val(data.Teach_name);
-                    $('[name="editTeach_major"]').val(data.Teach_major);
-                    $('[name="editTeach_status"]').val(data.Teach_status);
-                    $('[name="editrole_std"]').val(data.role_std);
-                    $('#editTeacherModal').modal('show');
-                }
-            });
+                // remove any existing modal placeholder
+                $('#avatarModal').remove();
 
-            // (Event: Edit Teacher)
-            document.getElementById('editTeacherForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                // (Controller ใหม่รับ Teach_id ใน body ไม่ใช่ใน URL)
-                const res = await fetch(API_URL + "?action=update", {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await res.json();
-                if (result.success) {
-                    $('#editTeacherModal').modal('hide');
-                    loadTeachers();
-                    Swal.fire('สำเร็จ', 'แก้ไขข้อมูลเรียบร้อย', 'success');
-                } else {
-                    Swal.fire('ล้มเหลว', result.message || 'ไม่สามารถแก้ไขข้อมูลได้', 'error');
-                }
-            });
+                var modalHtml = `
+                    <div id="avatarModal" class="modal fade" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content bg-transparent border-0">
+                                <div class="modal-body text-center p-0">
+                                    <button type="button" class="close modal-close p-2" data-dismiss="modal" aria-label="Close" style="position:absolute; right:8px; top:8px; z-index:1052; background: rgba(255,255,255,0.8); border-radius:50%;">&times;</button>
+                                    <img src="${src}" alt="${alt}" style="max-width:90vw; max-height:90vh; border-radius:8px; box-shadow:0 18px 40px rgba(0,0,0,0.45);">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
-            // (Event: Delete Teacher)
-            $('#teacherTable').on('click', '.deleteTeacherBtn', async function() {
-                const id = $(this).data('id');
-                const result = await Swal.fire({
-                    title: 'ยืนยันการลบข้อมูลครูนี้?',
-                    text: "ข้อมูลจะถูกตั้งค่าเป็น 'ไม่ใช้งาน'",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'ใช่, ลบเลย',
-                    cancelButtonText: 'ยกเลิก'
-                });
-                if (!result.isConfirmed) return;
-                
-                const res = await fetch(API_URL + "?action=delete", {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'id=' + encodeURIComponent(id)
-                });
-                const response = await res.json();
-                if (response.success) {
-                    loadTeachers();
-                    Swal.fire('สำเร็จ', 'ลบข้อมูลสำเร็จ', 'success');
-                } else {
-                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถลบข้อมูลได้', 'error');
-                }
-            });
-
-            // (Event: Reset Password)
-             $('#teacherTable').on('click', '.resetTeacherPwdBtn', async function() {
-                const id = $(this).data('id');
-                const result = await Swal.fire({
-                    title: 'รีเซ็ตรหัสผ่าน?',
-                    text: `รหัสผ่านของ ${id} จะถูกตั้งค่าเป็น ${id}`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ใช่, รีเซ็ต',
-                    cancelButtonText: 'ยกเลิก'
-                });
-                if (!result.isConfirmed) return;
-                
-                const res = await fetch(API_URL + "?action=resetpwd", {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'id=' + encodeURIComponent(id)
-                });
-                const response = await res.json();
-                if (response.success) {
-                    Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อย', 'success');
-                } else {
-                    Swal.fire('ล้มเหลว', response.message || 'ไม่สามารถรีเซ็ตรหัสผ่านได้', 'error');
-                }
+                var $modal = $(modalHtml);
+                $modal.appendTo('body');
+                $modal.modal('show');
+                $modal.on('hidden.bs.modal', function() { $(this).remove(); });
             });
         });
 </script>

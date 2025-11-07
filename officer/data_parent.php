@@ -97,20 +97,19 @@ require_once('header.php');
 
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-body">
-                        <table id="parentTable" class="table table-bordered table-striped" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>รหัสนักเรียน</th>
-                                    <th>ชื่อนักเรียน</th>
-                                    <th>ชั้น/ห้อง</th>
-                                    <th>ชื่อบิดา</th>
-                                    <th>ชื่อมารดา</th>
-                                    <th>ชื่อผู้ปกครอง</th>
-                                    <th>เบอร์โทรผู้ปกครอง</th>
-                                    <th>จัดการ</th>
-                                </tr>
-                            </thead>
-                        </table>
+                        <!-- Search Filter -->
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" id="parentSearch" placeholder="ค้นหาผู้ปกครองหรือนักเรียน... 🔍" class="w-full px-4 py-3 pl-12 pr-4 text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-400 text-lg">🔍</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="loading" class="text-center py-8 text-lg font-semibold text-gray-600">
+                            กำลังโหลดข้อมูลผู้ปกครอง... ⏳
+                        </div>
+                        <div id="parentContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                     </div>
                 </div>
             </div>
@@ -195,74 +194,143 @@ require_once('header.php');
             </div>
         </div>
         
+        <style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+.parent-card {
+    transition: all 0.3s ease;
+}
+.parent-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+</style>
+
         <script>
-        // (API_TOKEN_KEY ไม่ต้องใช้แล้ว)
-        // const API_TOKEN_KEY = 'YOUR_SECURE_TOKEN_HERE'; 
-        
-        // (URL ใหม่ ชี้ไปที่ Controller)
+        // API URL for parent data
         const API_URL = '../controllers/ParentController.php';
 
-        let parentTable;
+        let allParents = [];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            parentTable = $('#parentTable').DataTable({
-                "processing": true,
-                "serverSide": false, // (ใช้ Client-side เหมือนเดิม)
-                "ajax": {
-                    "url": API_URL + "?action=list", // (เรียก list)
-                    "dataSrc": ""
+        function renderParents(data, filterText = '') {
+            $('#parentContainer').empty();
+            $('#loading').hide();
+            
+            let filteredData = data;
+            if (filterText) {
+                filteredData = data.filter(parent => {
+                    const studentName = (parent.Stu_name || '') + ' ' + (parent.Stu_sur || '');
+                    const parentName = parent.Par_name || '';
+                    const fatherName = parent.Father_name || '';
+                    const motherName = parent.Mother_name || '';
+                    const studentId = parent.Stu_id || '';
+                    
+                    return studentName.toLowerCase().includes(filterText.toLowerCase()) ||
+                           parentName.toLowerCase().includes(filterText.toLowerCase()) ||
+                           fatherName.toLowerCase().includes(filterText.toLowerCase()) ||
+                           motherName.toLowerCase().includes(filterText.toLowerCase()) ||
+                           studentId.toLowerCase().includes(filterText.toLowerCase());
+                });
+            }
+            
+            filteredData.forEach((parent, index) => {
+                const studentName = (parent.Stu_name || '') + ' ' + (parent.Stu_sur || '');
+                const classRoom = 'ม.' + (parent.Stu_major || '') + '/' + (parent.Stu_room || '');
+                
+                let card = `
+                    <div class="parent-card bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-6 rounded-2xl shadow-lg border border-gray-200 hover:border-emerald-300 transition-all duration-300 animate-fade-in" style="animation-delay: ${index * 0.1}s;">
+                        <div class="flex items-center mb-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-2xl mr-4 shadow-lg ring-4 ring-emerald-200">
+                                👨‍👩‍👧‍👦
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">${studentName}</h3>
+                                <p class="text-sm text-emerald-600 font-medium">รหัส: ${parent.Stu_id} 📚</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-4">
+                            <div class="bg-white/60 rounded-lg p-3">
+                                <p class="text-sm font-semibold text-gray-700 mb-2">🏫 ข้อมูลนักเรียน</p>
+                                <p class="text-sm text-gray-600">${classRoom}</p>
+                            </div>
+                            <div class="bg-white/60 rounded-lg p-3">
+                                <p class="text-sm font-semibold text-gray-700 mb-2">👨‍👩‍👧‍👦 ข้อมูลผู้ปกครอง</p>
+                                <div class="grid grid-cols-1 gap-2">
+                                    ${parent.Father_name ? `<p class="text-sm"><span class="font-medium">บิดา:</span> ${parent.Father_name} 👨</p>` : ''}
+                                    ${parent.Mother_name ? `<p class="text-sm"><span class="font-medium">มารดา:</span> ${parent.Mother_name} 👩</p>` : ''}
+                                    ${parent.Par_name ? `<p class="text-sm"><span class="font-medium">ผู้ปกครอง:</span> ${parent.Par_name} ${parent.Par_relate ? `(${parent.Par_relate})` : ''} 👤</p>` : ''}
+                                    ${parent.Par_phone ? `<p class="text-sm"><span class="font-medium">โทร:</span> ${parent.Par_phone} 📞</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <button class="editParentBtn bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm font-semibold" data-id="${parent.Stu_id}">
+                                แก้ไข ✏️
+                            </button>
+                        </div>
+                    </div>
+                `;
+                $('#parentContainer').append(card);
+            });
+            
+            if (filteredData.length === 0 && filterText) {
+                $('#parentContainer').html('<div class="col-span-full text-center py-8 text-gray-500 text-lg">ไม่พบผู้ปกครองที่ตรงกับการค้นหา 😔</div>');
+            }
+        }
+
+        function loadParents(classVal = '', roomVal = '') {
+            $('#loading').show();
+            $('#parentContainer').empty();
+            
+            let url = API_URL + "?action=list";
+            if (classVal) url += "&class=" + encodeURIComponent(classVal);
+            if (roomVal) url += "&room=" + encodeURIComponent(roomVal);
+            
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(data) {
+                    allParents = data;
+                    renderParents(data);
                 },
-                "columns": [
-                    { "data": "Stu_id" },
-                    { "data": null, "render": function(data, type, row) {
-                        return (row.Stu_name || '') + ' ' + (row.Stu_sur || '');
-                    }},
-                    { "data": null, "render": function(data, type, row) {
-                        return 'ม.' + (row.Stu_major || '') + '/' + (row.Stu_room || '');
-                    }},
-                    { "data": "Father_name" },
-                    { "data": "Mother_name" },
-                    { "data": "Par_name" },
-                    { "data": "Par_phone" },
-                    { 
-                        "data": "Stu_id",
-                        "render": function(data) {
-                            return `<button class="btn btn-warning btn-sm editParentBtn" data-id="${data}"><i class="fas fa-edit"></i> แก้ไข</button>`;
-                        },
-                        "orderable": false
-                    }
-                ],
-                "language": {
-                    // (ภาษาไทย)
-                    "zeroRecords": "ไม่พบข้อมูล",
-                    "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-                    "processing": "กำลังโหลดข้อมูล... ⏳",
-                    "search": "ค้นหา:",
-                    "paginate": { "next": "ถัดไป", "previous": "ก่อนหน้า" }
+                error: function() {
+                    $('#loading').html('<p class="text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล 😞</p>');
                 }
             });
+        }
 
-            // (ฟังก์ชันโหลดข้อมูลใหม่)
-            window.loadParents = function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            loadParents();
+
+            // Search functionality
+            $('#parentSearch').on('input', function() {
+                const searchText = $(this).val();
+                renderParents(allParents, searchText);
+            });
+
+            // Filter functionality (keep existing)
+            document.getElementById('filterButton').addEventListener('click', function() {
                 const classVal = document.getElementById('filterClass').value;
                 const roomVal = document.getElementById('filterRoom').value;
-                
-                // (สร้าง URL ใหม่สำหรับโหลดข้อมูล)
-                const fetchUrl = `${API_URL}?action=list&class=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`;
-                
-                parentTable.ajax.url(fetchUrl).load();
-            }
+                loadParents(classVal, roomVal);
+            });
 
-            // (Event: กดปุ่มค้นหา)
-            document.getElementById('filterButton').addEventListener('click', loadParents);
-
-            // (ฟังก์ชันโหลดตัวกรอง - เรียกจาก Controller ของ Student)
+            // Populate filter selects (keep existing)
             async function populateFilterSelects() {
-                // (ใช้ Controller ของ Student เพื่อดึง ชั้น/ห้อง)
                 const res = await fetch('../controllers/StudentController.php?action=get_filters');
                 const data = await res.json();
                 
-                // (แก้ data.classes เป็น data.majors)
                 const classSel = document.getElementById('filterClass');
                 data.majors.forEach(cls => {
                     if (cls) classSel.innerHTML += `<option value="${cls}">${cls}</option>`;
@@ -275,11 +343,9 @@ require_once('header.php');
             }
             populateFilterSelects();
 
-
-            // (Event: Show Edit Modal)
-            $('#parentTable').on('click', '.editParentBtn', async function() {
+            // Edit modal functionality (keep existing)
+            $(document).on('click', '.editParentBtn', async function() {
                 const id = $(this).data('id');
-                // (เรียก Controller ใหม่)
                 const res = await fetch(API_URL + "?action=get&id=" + id);
                 const p = await res.json();
                 
@@ -302,13 +368,11 @@ require_once('header.php');
                 }
             });
 
-            // (Event: Submit Edit Modal)
+            // Submit edit form (keep existing)
             $('#submitEditParentForm').on('click', async function() {
                 const form = document.getElementById('editParentForm');
                 const formData = new FormData(form);
-                // (formData.append('token', API_TOKEN_KEY); ไม่ต้องใช้)
                 
-                // (เรียก Controller ใหม่ และตัด token ออก)
                 const res = await fetch(API_URL + '?action=update', {
                     method: 'POST',
                     body: formData
@@ -316,14 +380,16 @@ require_once('header.php');
                 const result = await res.json();
                 if (result.success) {
                     $('#editParentModal').modal('hide');
-                    loadParents(); // โหลดข้อมูลใหม่
+                    const classVal = document.getElementById('filterClass').value;
+                    const roomVal = document.getElementById('filterRoom').value;
+                    loadParents(classVal, roomVal);
                     Swal.fire('✅ สำเร็จ', 'บันทึกข้อมูลสำเร็จ', 'success');
                 } else {
                     Swal.fire('❌ ล้มเหลว', result.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
                 }
             });
 
-            // (Event: Submit CSV Upload)
+            // CSV upload functionality (keep existing)
             $('#csvUploadForm').on('submit', async function(e) {
                 e.preventDefault();
                 const formData = new FormData(this);
@@ -353,28 +419,21 @@ require_once('header.php');
                         `บันทึกข้อมูลสำเร็จ: ${result.report.success} รายการ\nล้มเหลว: ${result.report.failed} รายการ`,
                         'success'
                     );
-                    loadParents(); // โหลดข้อมูลใหม่
+                    const classVal = document.getElementById('filterClass').value;
+                    const roomVal = document.getElementById('filterRoom').value;
+                    loadParents(classVal, roomVal);
                 } else {
                     Swal.fire('❌ ล้มเหลว', result.message || 'ไม่สามารถอัปโหลดไฟล์ได้', 'error');
                 }
             });
 
-            //
-            // !! KEV: เพิ่มส่วนนี้ !!
-            // (Event: Click Download Template Button)
-            //
+            // Download template functionality (keep existing)
             $('#downloadTemplateBtn').on('click', function() {
-                // (1) ดึงค่าจากตัวกรอง
                 const classVal = $('#filterClass').val();
                 const roomVal = $('#filterRoom').val();
-                
-                // (2) สร้าง URL พร้อมตัวกรอง
                 const url = `${API_URL}?action=download_template&class=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`;
-                
-                // (3) สั่งให้เบราว์เซอร์ดาวน์โหลดไฟล์
                 window.location.href = url;
             });
-
         });
         </script>
     </div>
