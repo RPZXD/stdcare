@@ -110,6 +110,14 @@ require_once('header.php');
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
+
+/* Ensure slide show container can scroll */
+#showDataStudent {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    max-height: 600px;
+}
 </style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
@@ -175,8 +183,8 @@ require_once('header.php');
                 </div>
 
                 <!-- Student Cards Slide Show -->
-                <div class="relative">
-                    <div class="flex space-x-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide" id="showDataStudent" style="scroll-behavior: smooth;">
+                <div class="relative overflow-hidden">
+                    <div class="flex space-x-6 transition-transform duration-500 ease-in-out" id="showDataStudent" style="width: calc(100% * var(--total-slides, 1)); transform: translateX(0);">
                         <!-- Student cards will be injected here -->
                     </div>
                     
@@ -459,13 +467,13 @@ async function loadStudentData() {
                             </div>
                             
                             <div class="flex justify-center space-x-3 mt-6">
-                                <button class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">
+                                <button class="btn-view bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">
                                     <span class="text-lg">👀</span>
                                 </button>
-                                <button class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-yellow-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="แก้ไขข้อมูล">
+                                <button class="btn-edit bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-yellow-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="แก้ไขข้อมูล">
                                     <span class="text-lg">✏️</span>
                                 </button>
-                                <button class="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="เปลี่ยนรูปภาพ">
+                                <button class="btn-photo bg-gradient-to-r from-pink-500 to-pink-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="เปลี่ยนรูปภาพ">
                                     <span class="text-lg">📷</span>
                                 </button>
                             </div>
@@ -479,6 +487,40 @@ async function loadStudentData() {
             $('.student-card').each(function(index) {
                 $(this).delay(index * 100).animate({'opacity': '1'}, 500);
             });
+
+            // Re-bind navigation buttons after loading new data
+            setTimeout(function() {
+                currentSlideIndex = 0; // Reset slide index
+                
+                $('#prevBtn').off('click').on('click', function() {
+                    console.log('Prev button clicked');
+                    const container = $('#showDataStudent');
+                    const cards = container.find('.student-card');
+                    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
+                    
+                    if (currentSlideIndex > 0) {
+                        currentSlideIndex--;
+                        container.animate({
+                            scrollLeft: currentSlideIndex * cardWidth
+                        }, 500);
+                    }
+                });
+
+                $('#nextBtn').off('click').on('click', function() {
+                    console.log('Next button clicked');
+                    const container = $('#showDataStudent');
+                    const cards = container.find('.student-card');
+                    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
+                    const maxSlides = Math.max(0, cards.length - Math.floor(container.width() / cardWidth));
+                    
+                    if (currentSlideIndex < maxSlides) {
+                        currentSlideIndex++;
+                        container.animate({
+                            scrollLeft: currentSlideIndex * cardWidth
+                        }, 500);
+                    }
+                });
+            }, 600);
         }
 
     } catch (error) {
@@ -495,7 +537,9 @@ $('#studentSearch').on('input', function() {
 
 // Enhanced button handlers
 $(document).on('click', '.btn-view', function() {
+    console.log('View button clicked');
     var stuId = $(this).data('id');
+    console.log('Student ID:', stuId);
     showLoading();
     
     $.ajax({
@@ -515,7 +559,9 @@ $(document).on('click', '.btn-view', function() {
 });
 
 $(document).on('click', '.btn-edit', function() {
+    console.log('Edit button clicked');
     var stuId = $(this).data('id');
+    console.log('Student ID:', stuId);
     showLoading();
     
     $.ajax({
@@ -1137,6 +1183,38 @@ const debouncedSearch = debounce(function(searchValue) {
 
 // Load initial data
 loadStudentData();
+
+// Navigation buttons for slide show
+let currentSlideIndex = 0;
+
+$('#prevBtn').on('click', function() {
+    console.log('Prev button clicked');
+    const container = $('#showDataStudent');
+    const cards = container.find('.student-card');
+    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
+    
+    if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        container.animate({
+            scrollLeft: currentSlideIndex * cardWidth
+        }, 500);
+    }
+});
+
+$('#nextBtn').on('click', function() {
+    console.log('Next button clicked');
+    const container = $('#showDataStudent');
+    const cards = container.find('.student-card');
+    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
+    const maxSlides = Math.max(0, cards.length - Math.floor(container.width() / cardWidth));
+    
+    if (currentSlideIndex < maxSlides) {
+        currentSlideIndex++;
+        container.animate({
+            scrollLeft: currentSlideIndex * cardWidth
+        }, 500);
+    }
+});
 
 // Make functions globally available
 window.handleImageError = handleImageError;
