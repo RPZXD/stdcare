@@ -101,6 +101,15 @@ require_once('header.php');
 .cropper-line:hover {
     opacity: 1;
 }
+
+/* Hide scrollbars for the slide show container */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
 </style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
@@ -122,53 +131,66 @@ require_once('header.php');
     <!-- /.content-header -->
     <!-- Modal -->
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="col-md-12">
-            <div class="callout callout-success text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 20px; padding: 40px;">
-                <div class="logo-container mb-4">
-                    <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="brand-image rounded-full opacity-90 mb-3" style="width: 80px; height: 80px; border: 4px solid rgba(255,255,255,0.3);">
-                </div>
-                <h2 class="text-center text-2xl font-bold mb-2">รายชื่อนักเรียนระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?></h2>
-                <h4 class="text-center text-lg opacity-90">ปีการศึกษา <?=$pee?></h4>
-
-                <!-- Enhanced Search Box -->
-                <div class="search-container">
-                    <div class="search-icon">🔍</div>
-                    <input type="text" id="studentSearch" class="search-input" placeholder="ค้นหาชื่อนักเรียน, รหัส, เลขที่ หรือชื่อเล่น...">
-                </div>
-
-                <!-- Enhanced Toggle Switch -->
-                <div class="toggle-container">
-                    <div class="flex items-center justify-center space-x-4">
-                        <span class="text-2xl">🙅‍♂️</span>
-                        <div class="flex items-center space-x-3">
-                            <div class="toggle-switch" id="allowEditSwitch">
-                                <span class="toggle-emoji">🔒</span>
-                            </div>
-                            <span class="text-lg font-medium text-gray-900" id="editStatusText">ปิดให้นักเรียนแก้ไขข้อมูล</span>
+    <section class="content py-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header Card -->
+                <div class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white rounded-3xl shadow-2xl p-10 mb-8 transform hover:scale-105 transition-all duration-500">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-6">
+                            <img src="../dist/img/logo-phicha.png" alt="Phichai Logo" class="rounded-full w-24 h-24 border-4 border-white shadow-xl animate-pulse">
                         </div>
-                        <span class="text-2xl">🙆‍♀️</span>
+                        <h2 class="text-4xl font-bold mb-4 animate-bounce">👨‍🎓 รายชื่อนักเรียน</h2>
+                        <h4 class="text-2xl font-semibold opacity-90 mb-6">ระดับชั้นมัธยมศึกษาปีที่ <?= $class."/".$room; ?> ปีการศึกษา <?=$pee?></h4>
+                        
+                        <!-- Enhanced Search Box -->
+                        <div class="max-w-md mx-auto mb-6">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-purple-200 text-xl">🔍</span>
+                                </div>
+                                <input type="text" id="studentSearch" class="block w-full pl-12 pr-4 py-3 text-lg text-gray-900 bg-white bg-opacity-90 backdrop-blur-sm border border-purple-300 rounded-full shadow-lg focus:ring-4 focus:ring-purple-400 focus:border-purple-500 transition-all duration-300 placeholder-gray-500" placeholder="ค้นหาชื่อนักเรียน, รหัส, เลขที่ หรือชื่อเล่น...">
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Toggle Switch -->
+                        <div class="flex items-center justify-center space-x-6 mb-6">
+                            <span class="text-3xl animate-bounce">🙅‍♂️</span>
+                            <div class="flex items-center space-x-4 bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-6 py-3">
+                                <div class="toggle-switch" id="allowEditSwitch">
+                                    <span class="toggle-emoji">🔒</span>
+                                </div>
+                                <span class="text-lg font-medium text-white" id="editStatusText">ปิดให้นักเรียนแก้ไขข้อมูล</span>
+                            </div>
+                            <span class="text-3xl animate-bounce">🙆‍♀️</span>
+                        </div>
+
+                        <!-- Print Button -->
+                        <div class="text-center">
+                            <button id="printStudentList" class="bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-8 rounded-full shadow-xl hover:shadow-2xl hover:shadow-green-500/50 hover:scale-110 transition-all duration-300 animate-pulse">
+                                <i class="fas fa-print mr-2"></i>🖨️ พิมพ์รายชื่อนักเรียน
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Print Button -->
-                <div class="print-container mt-4">
-                    <button id="printStudentList" class="btn btn-success btn-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; border-radius: 25px; padding: 12px 30px; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;">
-                        <i class="fas fa-print mr-2"></i>🖨️ พิมพ์รายชื่อนักเรียน
+                <!-- Student Cards Slide Show -->
+                <div class="relative">
+                    <div class="flex space-x-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide" id="showDataStudent" style="scroll-behavior: smooth;">
+                        <!-- Student cards will be injected here -->
+                    </div>
+                    
+                    <!-- Navigation Arrows -->
+                    <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 text-purple-600 text-2xl z-10" id="prevBtn">
+                        ◀️
                     </button>
-                </div>
-
-                <!-- Enhanced Grid Container -->
-                <div id="showDataStudent" class="student-grid">
-                    <!-- Student cards will be injected here -->
+                    <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 text-purple-600 text-2xl z-10" id="nextBtn">
+                        ▶️
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
-
+    </section>
   <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
@@ -390,61 +412,60 @@ async function loadStudentData() {
             `);
         } else {
             response.data.forEach((item, index) => {                const studentCard = `
-                    <div class="student-card hover-lift"
+                    <div class="student-card w-80 flex-shrink-0 snap-center bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-500 transform"
                         data-name="${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}"
                         data-id="${item.Stu_id}"
                         data-no="${item.Stu_no}"
                         data-nick="${item.Stu_nick}"
                         style="animation-delay: ${index * 0.1}s; opacity: 0;">
                         
-                        <div class="student-photo-container" style="position: relative;">
-                            <img class="student-photo w-full h-128 object-cover" 
+                        <div class="relative">
+                            <img class="w-full h-64 object-cover rounded-t-2xl" 
                                  src="../photo/${item.Stu_picture}" 
                                  alt="Student Picture"
-                                 onerror="handleImageError(this, '${item.Stu_pre}${item.Stu_name}')"
-                                 onload="this.classList.add('animate-fadeInUp')">
-                            <div class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full px-2 py-1 text-xs font-bold text-gray-700">
+                                 onerror="handleImageError(this, '${item.Stu_pre}${item.Stu_name}')">
+                            <div class="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-3 py-1 text-sm font-bold shadow-lg">
                                 #${item.Stu_no}
+                            </div>
+                            <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}
                             </div>
                         </div>
                         
-                        <div class="card-body">
+                        <div class="p-6">
                             <div class="text-center mb-4">
-                                <h5 class="text-lg font-bold text-purple-500 mb-2">
-                                    ${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}
-                                </h5>
-                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                                     รหัส: ${item.Stu_id}
                                 </div>
                             </div>
                             
-                            <div class="space-y-2 text-sm">
-                                ${item.Stu_nick ? `<div class="flex justify-between">
-                                    <span class="text-gray-900">ชื่อเล่น:</span>
-                                    <span class="font-semibold text-purple-600">${item.Stu_nick}</span>
+                            <div class="space-y-3 text-sm">
+                                ${item.Stu_nick ? `<div class="flex justify-between items-center p-2 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                                    <span class="text-purple-700 font-medium">ชื่อเล่น:</span>
+                                    <span class="font-semibold text-purple-800">${item.Stu_nick}</span>
                                 </div>` : ''}
-                                ${item.Stu_phone ? `<div class="flex justify-between">
-                                    <span class="text-gray-900">เบอร์:</span>
-                                    <a href="tel:${item.Stu_phone}" class="text-gray-900 hover:underline flex items-center">
+                                ${item.Stu_phone ? `<div class="flex justify-between items-center p-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                                    <span class="text-blue-700 font-medium">เบอร์:</span>
+                                    <a href="tel:${item.Stu_phone}" class="text-blue-800 hover:text-blue-900 hover:underline font-semibold">
                                         📞 ${item.Stu_phone}
                                     </a>
                                 </div>` : ''}
-                                ${item.Par_phone ? `<div class="flex justify-between">
-                                    <span class="text-gray-900">ผู้ปกครอง:</span>
-                                    <a href="tel:${item.Par_phone}" class="text-gray-900 hover:underline flex items-center">
+                                ${item.Par_phone ? `<div class="flex justify-between items-center p-2 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                                    <span class="text-green-700 font-medium">ผู้ปกครอง:</span>
+                                    <a href="tel:${item.Par_phone}" class="text-green-800 hover:text-green-900 hover:underline font-semibold">
                                         👨‍👩‍👧‍👦 ${item.Par_phone}
                                     </a>
                                 </div>` : ''}
                             </div>
                             
-                            <div class="flex justify-center space-x-2 mt-6">
-                                <button class="btn-modern btn-view btn-sm hover-lift" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">
+                            <div class="flex justify-center space-x-3 mt-6">
+                                <button class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="ดูข้อมูลทั้งหมด">
                                     <span class="text-lg">👀</span>
                                 </button>
-                                <button class="btn-modern btn-edit btn-sm hover-lift" data-id="${item.Stu_id}" title="แก้ไขข้อมูล">
+                                <button class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-yellow-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="แก้ไขข้อมูล">
                                     <span class="text-lg">✏️</span>
                                 </button>
-                                <button class="btn-modern btn-photo btn-sm hover-lift" data-id="${item.Stu_id}" title="เปลี่ยนรูปภาพ">
+                                <button class="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300" data-id="${item.Stu_id}" title="เปลี่ยนรูปภาพ">
                                     <span class="text-lg">📷</span>
                                 </button>
                             </div>
@@ -456,12 +477,7 @@ async function loadStudentData() {
             
             // Add entrance animation
             $('.student-card').each(function(index) {
-                $(this).css({
-                    'opacity': '0',
-                    'transform': 'translateY(50px)'
-                }).delay(index * 100).animate({
-                    'opacity': '1'
-                }, 500).css('transform', 'translateY(0)');
+                $(this).delay(index * 100).animate({'opacity': '1'}, 500);
             });
         }
 
