@@ -59,7 +59,7 @@ require_once('header.php');
 
     <section class="content">
       <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-6xl mx-auto">
           <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 text-blue-800 p-8 rounded-xl shadow-lg mb-8">
             <h3 class="text-center text-3xl font-bold mb-6 text-gray-800">
               🏠 ระบบการดูแลช่วยเหลือนักเรียน 5 ขั้นตอน
