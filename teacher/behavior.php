@@ -169,6 +169,124 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Print styles for better report printing */
+@media print {
+    body {
+        font-family: 'Sarabun', 'Mali', sans-serif;
+        font-size: 12pt;
+        line-height: 1.4;
+        color: #000;
+        background: white !important;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Hide everything except print content */
+    body > *:not(.print-content) {
+        display: none !important;
+    }
+    
+    .print-content {
+        display: block !important;
+        padding: 20px;
+    }
+    
+    .print-header {
+        text-align: center;
+        margin-bottom: 20px;
+        page-break-after: avoid;
+    }
+    
+    .print-header img {
+        max-width: 80px;
+        height: auto;
+        display: block;
+        margin: 0 auto 10px;
+    }
+    
+    .print-header h1 {
+        font-size: 18pt;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+    
+    .print-header h2, .print-header h3 {
+        font-size: 12pt;
+        margin: 3px 0;
+    }
+    
+    .print-header p {
+        font-size: 10pt;
+        margin: 2px 0;
+    }
+    
+    .print-table {
+        margin-top: 20px;
+    }
+    
+    .print-table table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 10pt !important;
+    }
+    
+    .print-table table th, .print-table table td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
+        text-align: center !important;
+    }
+    
+    .print-table table th {
+        background: #f0f0f0 !important;
+        font-weight: bold !important;
+        color: #000 !important;
+    }
+    
+    .print-table table td:nth-child(3) {
+        text-align: left !important;
+    }
+    
+    .print-table table tbody tr:nth-child(even) {
+        background: #f9f9f9 !important;
+    }
+    
+    /* Progress bar styling for print */
+    .w-full.bg-gray-200 {
+        background: #e5e5e5 !important;
+        border: 1px solid #000 !important;
+        height: 20px !important;
+        position: relative !important;
+    }
+    
+    .bg-gradient-to-r.from-red-500 {
+        background: #dc2626 !important;
+        height: 100% !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+    }
+    
+    .absolute.inset-0 {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 8pt !important;
+    }
+    
+    /* Page setup */
+    @page {
+        size: A4 portrait;
+        margin: 1cm;
+    }
+}
 </style>
 
 <?php
@@ -418,19 +536,45 @@ $(document).ready(function() {
 
 // Function to handle printing
 window.printPage = function() {
-    let elementsToHide = $('#addButton, #showBehavior, #printButton, #filter, #reset, #addTraining, #footer, .dataTables_length, .dataTables_filter, .dataTables_paginate, .dataTables_info');
-
-    // Hide the export to Excel button
-    $('#record_table_wrapper .dt-buttons').hide(); // Hides the export buttons
-
-    // Hide the elements you want to exclude from the print
-    elementsToHide.hide();
-    $('thead').css('display', 'table-header-group'); // Ensure header shows
-
+    // Get PHP variables for print header
+    const classRoom = "<?=$class."/".$room?>";
+    const term = "<?=$term?>";
+    const pee = "<?=$pee?>";
+    const teacherName = "<?=$teacher_name?>";
+    
+    // Create print content
+    const printContent = `
+        <div class="print-content">
+            <div class="print-header">
+                <img src="../dist/img/logo-phicha.png" alt="Phichai Logo">
+                <h1>📊 รายงานคะแนนพฤติกรรมของนักเรียน</h1>
+                <h2>ระดับชั้นมัธยมศึกษาปีที่ ${classRoom}</h2>
+                <h3>ภาคเรียนที่ ${term} ปีการศึกษา ${pee}</h3>
+                <p>ครูที่ปรึกษา: ${teacherName}</p>
+                <p>วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}</p>
+                <hr style="border: 1px solid #000; margin: 10px 0;">
+            </div>
+            <div class="print-table">
+                ${$('#record_table').parent().html()}
+            </div>
+        </div>
+    `;
+    
+    // Hide the entire body content and show only print content
+    $('body').children().hide();
+    $('body').append(printContent);
+    
+    // Trigger print
+    window.print();
+    
+    // Cleanup after printing
     setTimeout(() => {
-        window.print();
-        elementsToHide.show();
-        $('#record_table_wrapper .dt-buttons').show();
+        $('.print-content').remove();
+        $('body').children().show();
     }, 100);
 };
 
