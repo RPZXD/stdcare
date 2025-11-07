@@ -110,14 +110,6 @@ require_once('header.php');
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
-
-/* Ensure slide show container can scroll */
-#showDataStudent {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    max-height: 600px;
-}
 </style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
@@ -182,9 +174,9 @@ require_once('header.php');
                     </div>
                 </div>
 
-                <!-- Student Cards Slide Show -->
-                <div class="relative overflow-hidden">
-                    <div class="flex space-x-6 transition-transform duration-500 ease-in-out" id="showDataStudent" style="width: calc(100% * var(--total-slides, 1)); transform: translateX(0);">
+                <!-- Student Cards Horizontal Scroll -->
+                <div class="relative">
+                    <div class="flex space-x-6 overflow-x-auto pb-6 scrollbar-hide" id="showDataStudent" style="scroll-behavior: smooth;">
                         <!-- Student cards will be injected here -->
                     </div>
                     
@@ -419,8 +411,11 @@ async function loadStudentData() {
                 </div>
             `);
         } else {
+            const container = $('#showDataStudent');
+            container.empty();
+
             response.data.forEach((item, index) => {                const studentCard = `
-                    <div class="student-card w-80 flex-shrink-0 snap-center bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-500 transform"
+                    <div class="student-card flex-shrink-0 w-80 bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-500 transform"
                         data-name="${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}"
                         data-id="${item.Stu_id}"
                         data-no="${item.Stu_no}"
@@ -480,8 +475,14 @@ async function loadStudentData() {
                         </div>
                     </div>
                 `;
-                showDataStudent.append(studentCard);
+                container.append(studentCard);
             });
+            
+            // Set up horizontal scroll navigation
+            const totalCards = response.data.length;
+            const cardWidth = 320; // Approximate width of each card including margin
+            const visibleCards = Math.floor(container.parent().width() / cardWidth) || 3;
+            const scrollAmount = cardWidth * visibleCards;
             
             // Add entrance animation
             $('.student-card').each(function(index) {
@@ -490,35 +491,17 @@ async function loadStudentData() {
 
             // Re-bind navigation buttons after loading new data
             setTimeout(function() {
-                currentSlideIndex = 0; // Reset slide index
-                
                 $('#prevBtn').off('click').on('click', function() {
-                    console.log('Prev button clicked');
-                    const container = $('#showDataStudent');
-                    const cards = container.find('.student-card');
-                    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
-                    
-                    if (currentSlideIndex > 0) {
-                        currentSlideIndex--;
-                        container.animate({
-                            scrollLeft: currentSlideIndex * cardWidth
-                        }, 500);
-                    }
+                    const currentScroll = container.scrollLeft();
+                    const newScroll = Math.max(0, currentScroll - scrollAmount);
+                    container.animate({ scrollLeft: newScroll }, 500, 'easeInOutCubic');
                 });
 
                 $('#nextBtn').off('click').on('click', function() {
-                    console.log('Next button clicked');
-                    const container = $('#showDataStudent');
-                    const cards = container.find('.student-card');
-                    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
-                    const maxSlides = Math.max(0, cards.length - Math.floor(container.width() / cardWidth));
-                    
-                    if (currentSlideIndex < maxSlides) {
-                        currentSlideIndex++;
-                        container.animate({
-                            scrollLeft: currentSlideIndex * cardWidth
-                        }, 500);
-                    }
+                    const currentScroll = container.scrollLeft();
+                    const maxScroll = container[0].scrollWidth - container[0].clientWidth;
+                    const newScroll = Math.min(maxScroll, currentScroll + scrollAmount);
+                    container.animate({ scrollLeft: newScroll }, 500, 'easeInOutCubic');
                 });
             }, 600);
         }
@@ -537,9 +520,7 @@ $('#studentSearch').on('input', function() {
 
 // Enhanced button handlers
 $(document).on('click', '.btn-view', function() {
-    console.log('View button clicked');
     var stuId = $(this).data('id');
-    console.log('Student ID:', stuId);
     showLoading();
     
     $.ajax({
@@ -559,9 +540,7 @@ $(document).on('click', '.btn-view', function() {
 });
 
 $(document).on('click', '.btn-edit', function() {
-    console.log('Edit button clicked');
     var stuId = $(this).data('id');
-    console.log('Student ID:', stuId);
     showLoading();
     
     $.ajax({
@@ -1183,38 +1162,6 @@ const debouncedSearch = debounce(function(searchValue) {
 
 // Load initial data
 loadStudentData();
-
-// Navigation buttons for slide show
-let currentSlideIndex = 0;
-
-$('#prevBtn').on('click', function() {
-    console.log('Prev button clicked');
-    const container = $('#showDataStudent');
-    const cards = container.find('.student-card');
-    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
-    
-    if (currentSlideIndex > 0) {
-        currentSlideIndex--;
-        container.animate({
-            scrollLeft: currentSlideIndex * cardWidth
-        }, 500);
-    }
-});
-
-$('#nextBtn').on('click', function() {
-    console.log('Next button clicked');
-    const container = $('#showDataStudent');
-    const cards = container.find('.student-card');
-    const cardWidth = 320 + 24; // card width + space-x-6 (24px)
-    const maxSlides = Math.max(0, cards.length - Math.floor(container.width() / cardWidth));
-    
-    if (currentSlideIndex < maxSlides) {
-        currentSlideIndex++;
-        container.animate({
-            scrollLeft: currentSlideIndex * cardWidth
-        }, 500);
-    }
-});
 
 // Make functions globally available
 window.handleImageError = handleImageError;
