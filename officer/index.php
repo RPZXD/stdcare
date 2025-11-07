@@ -265,37 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <canvas id="scoreChart" height="450" class="rounded-2xl"></canvas>
                 
             </div>
-            <div class="mt-8 bg-white bg-opacity-70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white border-opacity-20">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <span class="text-2xl mr-2">⚡</span>
-                        สรุปข้อมูลด่วน
-                    </h3>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">อัปเดตล่าสุด:</span>
-                        <span class="text-sm font-medium text-gray-800" id="lastUpdateTime"></span>
-                    </div>
-                </div>
-        
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                        <div class="text-2xl font-bold text-blue-600"><?= $studentCount ?></div>
-                        <div class="text-xs text-blue-700">นักเรียนทั้งหมด</div>
-                    </div>
-                    <div class="text-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
-                        <div class="text-2xl font-bold text-green-600"><?= $teacherCount ?></div>
-                        <div class="text-xs text-green-700">บุคลากรทั้งหมด</div>
-                    </div>
-                    <div class="text-center p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-                        <div class="text-2xl font-bold text-orange-600"><?= $behaviorCount ?></div>
-                        <div class="text-xs text-orange-700">พฤติกรรมทั้งหมด</div>
-                    </div>
-                    <div class="text-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                        <div class="text-2xl font-bold text-purple-600"><?= $behaviorScore ?></div>
-                        <div class="text-xs text-purple-700">คะแนนรวม</div>
-                    </div>
-                </div>
-            </div>
+           
             </div>
         </div>
     </div>
