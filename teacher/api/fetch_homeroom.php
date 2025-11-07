@@ -1,13 +1,13 @@
 <?php
 require_once "../../config/Database.php";
-require_once "../../class/Homeroom.php";
+require_once "../../controllers/HomeroomController.php";
 
 // Initialize database connection
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize Homeroom class
-$homeroom = new Homeroom($db);
+$homeroom = new HomeroomController($db);
 
 // Get parameters from request
 $class = isset($_GET['class']) ? $_GET['class'] : '';
@@ -18,7 +18,7 @@ $pee = isset($_GET['pee']) ? $_GET['pee'] : '';
 $response = array('success' => false, 'data' => array());
 
 if (!empty($class) && !empty($room)) {
-    $homerooms = $homeroom->fetchHomerooms($class, $room, $term, $pee);
+    $homerooms = $homeroom->getHomerooms($class, $room, $term, $pee);
 
     if ($homerooms) {
         $response['success'] = true;

@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/Database.php";
-require_once "../../class/Homeroom.php";
+require_once "../../controllers/HomeroomController.php";
 
 header('Content-Type: application/json');
 
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $database = new Database("phichaia_student");
     $db = $database->getConnection();
-    $homeroom = new Homeroom($db);
+    $homeroom = new HomeroomController($db);
 
     if ($homeroom->deleteHomeroom($id)) {
         echo json_encode(['success' => true, 'message' => 'ลบข้อมูลสำเร็จ']);

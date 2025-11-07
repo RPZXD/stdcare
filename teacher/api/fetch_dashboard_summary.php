@@ -7,7 +7,7 @@ require_once("../../class/Poor.php");
 require_once("../../class/SDQ.php");
 require_once("../../class/EQ.php");
 require_once("../../class/Screeningdata.php");
-require_once("../../class/Homeroom.php");
+require_once("../../controllers/HomeroomController.php");
 
 $class = $_GET['class'] ?? '';
 $room = $_GET['room'] ?? '';
@@ -114,8 +114,8 @@ try {
 
 // Homeroom (นับกิจกรรมโฮมรูม)
 try {
-    $homeroom = new Homeroom($db);
-    $data = $homeroom->fetchHomerooms($class, $room, $term, $pee);
+    $homeroom = new HomeroomController($db);
+    $data = $homeroom->getHomerooms($class, $room, $term, $pee);
     $result["homeroom_count"] = is_array($data) ? count($data) : 0;
 } catch (\Throwable $e) {}
 

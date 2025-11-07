@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/Database.php";
-require_once "../../class/Homeroom.php";
+require_once "../../controllers/HomeroomController.php";
 
 header('Content-Type: application/json');
 
@@ -40,10 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $database = new Database("phichaia_student");
     $db = $database->getConnection();
-    $homeroom = new Homeroom($db);
+    $homeroom = new HomeroomController($db);
 
     // Fetch existing homeroom data
-    $existingHomeroom = $homeroom->fetchHomeroomById($id);
+    $existingHomeroom = $homeroom->getHomeroomById($id);
     if ($existingHomeroom) {
         $existingHomeroom = $existingHomeroom[0];
         $image1 = $image1 ?? $existingHomeroom['h_pic1'];

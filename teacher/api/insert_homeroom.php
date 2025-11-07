@@ -1,13 +1,14 @@
 <?php
 require_once "../../config/Database.php";
-require_once "../../class/Homeroom.php";
+require_once "../../controllers/HomeroomController.php";
 
 // Initialize database connection
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
 // Initialize Homeroom class
-$homeroom = new Homeroom($db);
+// Use controller which wraps the model
+$homeroom = new HomeroomController($db);
 
 // Get POST data
 $type = $_POST['type'];
@@ -41,24 +42,8 @@ if (isset($_FILES['image2']) && $_FILES['image2']['error'] == 0) {
     move_uploaded_file($_FILES['image2']['tmp_name'], $image2Path);
 }
 
-// Insert data into database
-$query = "INSERT INTO tb_homeroom (th_id, h_topic, h_detail, h_result, h_major, h_room, h_term, h_pee, h_date, h_pic1, h_pic2)
-          VALUES (:type, :title, :detail, :result, :class, :room, :term, :pee, :date, :image1, :image2)";
-
-$stmt = $db->prepare($query);
-$stmt->bindParam(':type', $type);
-$stmt->bindParam(':title', $title);
-$stmt->bindParam(':detail', $detail);
-$stmt->bindParam(':result', $result);
-$stmt->bindParam(':class', $class);
-$stmt->bindParam(':room', $room);
-$stmt->bindParam(':term', $term);
-$stmt->bindParam(':pee', $pee);
-$stmt->bindParam(':date', $date);
-$stmt->bindParam(':image1', $image1);
-$stmt->bindParam(':image2', $image2);
-
-if ($stmt->execute()) {
+// Insert data through controller
+if ($homeroom->insertHomeroom($type, $title, $detail, $result, $date, $class, $room, $term, $pee, $image1, $image2)) {
     echo json_encode(array('success' => true));
 } else {
     echo json_encode(array('success' => false));
