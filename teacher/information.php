@@ -56,53 +56,61 @@ require_once('header.php');
     </div>
     <!-- /.content-header -->
 
-    <section class="content">
-      <div class="container mx-auto py-6">
-        <div class="flex flex-wrap justify-center">
-          <div class="w-full lg:w-1/3 md:w-2/3 sm:w-full">
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
-              <div class="bg-gray-800 text-white text-center py-4">
-                <h2 class="text-2xl font-bold">
-                  <span>👩‍🏫</span> ข้อมูลครู
-                </h2>
-              </div>
-              <div class="p-6">
-                <div class="text-center">
-                  <img class="rounded-full mx-auto h-80 w-auto"
+    <section class="content py-8">
+      <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+          <div class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-10 rounded-3xl shadow-2xl">
+            <div class="text-center mb-10">
+              <h2 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
+                👩‍🏫 ข้อมูลครู
+              </h2>
+            </div>
+            <div class="flex flex-col lg:flex-row items-center lg:items-start gap-10">
+              <div class="flex-shrink-0">
+                <div class="relative group">
+                  <img class="rounded-full h-96 w-96 object-cover border-8 border-white shadow-2xl hover:shadow-3xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-500"
                        src="<?php echo $setting->getImgProfile().$userData['Teach_photo'];?>"
                        alt="<?php echo $userData['Teach_name'];?>">
+                  <div class="absolute inset-0 rounded-full bg-gradient-to-t from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span class="text-sm font-semibold text-gray-700">ครู <?php echo $userData['Teach_name'];?></span>
+                  </div>
                 </div>
-                <h3 class="text-center text-xl font-semibold mt-4"><?php echo $userData['Teach_name'];?></h3>
-                <p class="text-center text-gray-600"><?php echo $userData['Teach_major'];?></p>
-                <ul class="mt-4 space-y-2">
-                  <li class="flex justify-between">
-                    <span><b>🆔 รหัสประจำตัวครู:</b></span>
-                    <span><?php echo $userData['Teach_id'];?></span>
+              </div>
+              <div class="flex-1 bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl p-8 shadow-xl">
+                <h3 class="text-center text-4xl font-bold text-gray-800 mb-4"><?php echo $userData['Teach_name'];?></h3>
+                <p class="text-center text-xl text-gray-600 mb-8 font-medium"><?php echo $userData['Teach_major'];?></p>
+                <ul class="space-y-6">
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-blue-700 text-lg"><b>🆔 รหัสประจำตัวครู:</b></span>
+                    <span class="text-blue-800 font-semibold"><?php echo $userData['Teach_id'];?></span>
                   </li>
-                  <li class="flex justify-between">
-                    <span><b>🚻 เพศ:</b></span>
-                    <span><?php echo $userData['Teach_sex'];?></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-green-700 text-lg"><b>🚻 เพศ:</b></span>
+                    <span class="text-green-800 font-semibold"><?php echo $userData['Teach_sex'];?></span>
                   </li>
-                  <li class="flex justify-between">
-                    <span><b>🎂 วัน/เดือน/ปีเกิด:</b></span>
-                    <span><?php echo Utils::convertToThaiDate($userData['Teach_birth']);?></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-purple-700 text-lg"><b>🎂 วัน/เดือน/ปีเกิด:</b></span>
+                    <span class="text-purple-800 font-semibold"><?php echo Utils::convertToThaiDate($userData['Teach_birth']);?></span>
                   </li>
-                  <li class="flex justify-between">
-                    <span><b>🏠 ที่อยู่:</b></span>
-                    <span><?php echo $userData['Teach_addr'];?></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-yellow-700 text-lg"><b>🏠 ที่อยู่:</b></span>
+                    <span class="text-yellow-800 font-semibold"><?php echo $userData['Teach_addr'];?></span>
                   </li>
-                  <li class="flex justify-between">
-                    <span><b>📞 เบอร์โทรศัพท์:</b></span>
-                    <span><?php echo $userData['Teach_phone'];?></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-pink-700 text-lg"><b>📞 เบอร์โทรศัพท์:</b></span>
+                    <span class="text-pink-800 font-semibold"><?php echo $userData['Teach_phone'];?></span>
                   </li>
-                  <li class="flex justify-between">
-                    <span><b>📚 ครูที่ปรึกษาประจำชั้น:</b></span>
-                    <span><?php echo "ม.".$userData['Teach_class']."/".$userData['Teach_room'];?></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
+                    <span class="font-bold text-indigo-700 text-lg"><b>📚 ครูที่ปรึกษาประจำชั้น:</b></span>
+                    <span class="text-indigo-800 font-semibold"><?php echo "ม.".$userData['Teach_class']."/".$userData['Teach_room'];?></span>
                   </li>
                 </ul>
-                <button type="button" class="form-control block mt-6 bg-blue-500 text-white text-center py-2 rounded-lg hover:bg-blue-600" id="editBtn">
-                  ✏️ แก้ไขข้อมูล
-                </button>
+                <div class="text-center mt-10">
+                  <button type="button" class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold py-4 px-10 rounded-full shadow-xl hover:shadow-2xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300 animate-bounce" id="editBtn">
+                    ✏️ แก้ไขข้อมูล
+                  </button>
+                </div>
               </div>
             </div>
           </div>
