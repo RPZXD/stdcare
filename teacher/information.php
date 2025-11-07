@@ -37,6 +37,21 @@ require_once('header.php');
 
 
 ?>
+<style>
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 <div class="wrapper">
 
@@ -61,7 +76,7 @@ require_once('header.php');
         <div class="max-w-6xl mx-auto">
           <div class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-10 rounded-3xl shadow-2xl">
             <div class="text-center mb-10">
-              <h2 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">
+              <h2 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 animate-bounce">
                 👩‍🏫 ข้อมูลครู
               </h2>
             </div>
@@ -81,33 +96,33 @@ require_once('header.php');
                 <h3 class="text-center text-4xl font-bold text-gray-800 mb-4"><?php echo $userData['Teach_name'];?></h3>
                 <p class="text-center text-xl text-gray-600 mb-8 font-medium"><?php echo $userData['Teach_major'];?></p>
                 <ul class="space-y-6">
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-blue-700 text-lg"><b>🆔 รหัสประจำตัวครู:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-blue-700 text-lg animate-pulse"><b>🆔 รหัสประจำตัวครู:</b></span>
                     <span class="text-blue-800 font-semibold"><?php echo $userData['Teach_id'];?></span>
                   </li>
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-green-700 text-lg"><b>🚻 เพศ:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-green-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-green-700 text-lg animate-pulse"><b>🚻 เพศ:</b></span>
                     <span class="text-green-800 font-semibold"><?php echo $userData['Teach_sex'];?></span>
                   </li>
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-purple-700 text-lg"><b>🎂 วัน/เดือน/ปีเกิด:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-purple-700 text-lg animate-pulse"><b>🎂 วัน/เดือน/ปีเกิด:</b></span>
                     <span class="text-purple-800 font-semibold"><?php echo Utils::convertToThaiDate($userData['Teach_birth']);?></span>
                   </li>
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-yellow-700 text-lg"><b>🏠 ที่อยู่:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-yellow-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-yellow-700 text-lg animate-pulse"><b>🏠 ที่อยู่:</b></span>
                     <span class="text-yellow-800 font-semibold"><?php echo $userData['Teach_addr'];?></span>
                   </li>
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-pink-700 text-lg"><b>📞 เบอร์โทรศัพท์:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-pink-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-pink-700 text-lg animate-pulse"><b>📞 เบอร์โทรศัพท์:</b></span>
                     <span class="text-pink-800 font-semibold"><?php echo $userData['Teach_phone'];?></span>
                   </li>
-                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:scale-102 transition-all duration-300">
-                    <span class="font-bold text-indigo-700 text-lg"><b>📚 ครูที่ปรึกษาประจำชั้น:</b></span>
+                  <li class="flex justify-between items-center p-5 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-105 transition-all duration-300 animate-fadeInUp">
+                    <span class="font-bold text-indigo-700 text-lg animate-pulse"><b>📚 ครูที่ปรึกษาประจำชั้น:</b></span>
                     <span class="text-indigo-800 font-semibold"><?php echo "ม.".$userData['Teach_class']."/".$userData['Teach_room'];?></span>
                   </li>
                 </ul>
                 <div class="text-center mt-10">
-                  <button type="button" class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold py-4 px-10 rounded-full shadow-xl hover:shadow-2xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300 animate-bounce" id="editBtn">
+                  <button type="button" class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold py-4 px-10 rounded-full shadow-xl hover:shadow-2xl hover:shadow-pink-500/70 hover:scale-110 transition-all duration-300 animate-pulse" id="editBtn">
                     ✏️ แก้ไขข้อมูล
                   </button>
                 </div>
