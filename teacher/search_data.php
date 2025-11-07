@@ -129,7 +129,7 @@ $(document).ready(function() {
                         if (type === 'teacher') {
                             // แสดงข้อมูลครู
                             card = `
-                                <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 overflow-hidden">
+                                <div class="my-4 bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 overflow-hidden">
                                     <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-center py-6">
                                         <h2 class="text-3xl font-bold"><span class="animate-spin">👩‍🏫</span> ข้อมูลครู</h2>
                                     </div>
@@ -152,7 +152,7 @@ $(document).ready(function() {
                         } else if (type === 'student') {
                             // แสดงข้อมูลนักเรียน
                             card = `
-                                <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 p-6">
+                                <div class="my-4 bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 p-6">
                                     <img class="rounded-xl mb-6 shadow-lg hover:shadow-xl transition-all duration-300" src="${linkprofileStudent}${item.Stu_picture}" alt="Student Picture" style="height: 300px; object-fit: cover;">
                                     <div class="space-y-4">
                                         <h5 class="text-xl font-bold text-gray-800 text-center">${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}</h5>
