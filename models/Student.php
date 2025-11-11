@@ -397,34 +397,89 @@ class Student
     }
 
     /**
-     * (ใหม่) ดึงข้อมูลนักเรียนทั้งหมดในห้อง (พร้อม RFID ถ้ามี)
-     * สำหรับดาวน์โหลด CSV ใน rfid.php
-     * @param string $major ชั้น
-     * @param string $room ห้อง
-     * @return array
+     * (ใหม่) อัปโหลดหรือลบรูปโปรไฟล์นักเรียน
+     * @param string $stu_id รหัสนักเรียน
+     * @param bool $delete_image ถ้า true จะลบรูปภาพปัจจุบัน
+     * @return array ['success' => bool, 'message' => string]
      */
-    public function getStudentsWithRfidForCsv($major, $room)
+    public function uploadProfileImage($stu_id, $delete_image = false)
     {
-        // (ใช้ LEFT JOIN เพื่อดึงนักเรียนทุกคน แม้จะไม่มี RFID)
-        $sql = "SELECT s.Stu_id, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room,
-                       r.rfid_code 
-                FROM student s 
-                LEFT JOIN student_rfid r ON s.Stu_id = r.stu_id
-                WHERE s.Stu_status = '1'";
-        
-        $params = [];
-        if (!empty($major)) {
-            $sql .= " AND s.Stu_major = :major";
-            $params[':major'] = $major;
+        try {
+            // ตรวจสอบว่ามีนักเรียนนี้อยู่หรือไม่
+            $student = $this->getById($stu_id);
+            if (!$student) {
+                return ['success' => false, 'message' => 'ไม่พบข้อมูลนักเรียน'];
+            }
+
+            if ($delete_image) {
+                // ลบรูปภาพ - ตั้งค่า Stu_picture เป็น NULL หรือ empty string
+                $sql = "UPDATE student SET Stu_picture = NULL WHERE Stu_id = :stu_id";
+                $this->db->query($sql, ['stu_id' => $stu_id]);
+                return ['success' => true, 'message' => 'ลบรูปโปรไฟล์เรียบร้อยแล้ว'];
+            }
+
+            // ตรวจสอบไฟล์ที่อัปโหลด
+            if (!isset($_FILES['profile_image']) || $_FILES['profile_image']['error'] !== UPLOAD_ERR_OK) {
+                return ['success' => false, 'message' => 'ไม่พบไฟล์รูปภาพที่อัปโหลด'];
+            }
+
+            $file = $_FILES['profile_image'];
+            
+            // ตรวจสอบขนาดไฟล์ (2MB)
+            if ($file['size'] > 2 * 1024 * 1024) {
+                return ['success' => false, 'message' => 'ไฟล์รูปภาพมีขนาดใหญ่เกิน 2MB'];
+            }
+
+            // ตรวจสอบประเภทไฟล์
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!in_array($file['type'], $allowedTypes)) {
+                return ['success' => false, 'message' => 'ประเภทไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์ JPG, PNG หรือ GIF เท่านั้น'];
+            }
+
+            // สร้างชื่อไฟล์ใหม่ (ใช้รหัสนักเรียน + timestamp + นามสกุลเดิม)
+            $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $newFileName = $stu_id . '_' . time() . '.' . $fileExtension;
+
+            // โฟลเดอร์สำหรับเก็บรูปภาพ (ในโปรเจ็คนี้)
+            $uploadDir = __DIR__ . '/../../photo/';
+            
+            // สร้างโฟลเดอร์ถ้ายังไม่มี
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $uploadPath = $uploadDir . $newFileName;
+
+            // ย้ายไฟล์ไปยังโฟลเดอร์ปลายทาง
+            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                // อัปเดตฐานข้อมูล
+                $sql = "UPDATE student SET Stu_picture = :picture WHERE Stu_id = :stu_id";
+                $this->db->query($sql, [
+                    'picture' => $newFileName,
+                    'stu_id' => $stu_id
+                ]);
+
+                return ['success' => true, 'message' => 'อัปโหลดรูปโปรไฟล์เรียบร้อยแล้ว'];
+            } else {
+                return ['success' => false, 'message' => 'ไม่สามารถบันทึกไฟล์รูปภาพได้'];
+            }
+
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()];
         }
-        if (!empty($room)) {
-            $sql .= " AND s.Stu_room = :room";
-            $params[':room'] = $room;
+    }
+    
+    public function updatePhoto($stu_id, $filename) {
+        try {
+            $query = "UPDATE student SET Stu_picture = :filename WHERE Stu_id = :stu_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':filename', $filename);
+            $stmt->bindParam(':stu_id', $stu_id);
+            return $stmt->execute();
+        } catch (\Exception $e) {
+            error_log("Error updating photo: " . $e->getMessage());
+            return false;
         }
-        $sql .= " ORDER BY s.Stu_major, s.Stu_room, s.Stu_no, s.Stu_id";
-        
-        // (ใช้ $params ที่ถูกต้อง)
-        return $this->db->query($sql, $params)->fetchAll();
     }
     
 }

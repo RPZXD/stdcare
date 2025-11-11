@@ -606,6 +606,84 @@ try {
             header('Content-Type: text/html; charset=utf-8');
             echo $html;
             break;
+        
+        case 'upload_photo':
+            try {
+                $stu_id = $_POST['stu_id'] ?? '';
+                
+                if (empty($stu_id)) {
+                    throw new Exception('ไม่พบรหัสนักเรียน');
+                }
+                
+                if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+                    throw new Exception('ไม่พบไฟล์รูปภาพ หรืออัปโหลดไม่สำเร็จ');
+                }
+                
+                $file = $_FILES['photo'];
+                $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+                $max_size = 5 * 1024 * 1024; // 5MB
+                
+                if (!in_array($file['type'], $allowed_types)) {
+                    throw new Exception('ประเภทไฟล์ไม่ถูกต้อง (รองรับเฉพาะ JPG, PNG, GIF)');
+                }
+                
+                if ($file['size'] > $max_size) {
+                    throw new Exception('ขนาดไฟล์เกิน 5MB');
+                }
+                
+                // สร้างชื่อไฟล์ใหม่
+                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $new_filename = $stu_id . '.' . $extension;
+                $upload_path = __DIR__ . '/../photo/' . $new_filename;
+                
+                // ลบรูปเก่า (ถ้ามี)
+                $old_photo = $studentModel->getById($stu_id)['Stu_picture'] ?? '';
+                if ($old_photo && file_exists(__DIR__ . '/../photo/' . $old_photo)) {
+                    @unlink(__DIR__ . '/../photo/' . $old_photo);
+                }
+                
+                // อัปโหลดรูปใหม่
+                if (!move_uploaded_file($file['tmp_name'], $upload_path)) {
+                    throw new Exception('ไม่สามารถอัปโหลดไฟล์ได้');
+                }
+                
+                // อัปเดตชื่อไฟล์ในฐานข้อมูล
+                $result = $studentModel->updatePhoto($stu_id, $new_filename);
+                
+                if ($result) {
+                    $logger->log([
+                        'user_id' => $admin_id,
+                        'role' => $admin_role,
+                        'action_type' => 'student_upload_photo_success',
+                        'status_code' => 200,
+                        'message' => 'Admin uploaded photo for student ID: ' . htmlspecialchars($stu_id)
+                    ]);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'อัปโหลดรูปภาพสำเร็จ',
+                        'filename' => $new_filename
+                    ]);
+                } else {
+                    throw new Exception('ไม่สามารถอัปเดตข้อมูลในฐานข้อมูลได้');
+                }
+                
+            } catch (Exception $e) {
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_upload_photo_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed to upload photo. Error: ' . $e->getMessage()
+                ]);
+                
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
 
         
 
