@@ -18,9 +18,9 @@ class DatabaseUsers
         // --- ADDED: Auto-detect environment ---
         // ตรวจสอบว่าเรากำลังรันบน localhost (XAMPP) หรือไม่
         $is_local = in_array(
-            $_SERVER['SERVER_NAME'] ?? '', 
+            $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost', 
             ['localhost', '127.0.0.1']
-        );
+        ) || php_sapi_name() === 'cli'; // Also consider CLI as local
 
         if ($is_local) {
             // --- ใช้สำหรับ Localhost (XAMPP) ---

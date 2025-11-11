@@ -287,15 +287,32 @@ $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
                                                 <a href="../controllers/SettingController.php?action=download_number_template" 
                                                    class="inline-flex items-center px-5 py-3 bg-white border-2 border-blue-300 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 hover:border-blue-400 transform hover:scale-105 transition-all duration-300 shadow-md">
                                                     <i class="fas fa-download mr-2"></i>
-                                                    ดาวน์โหลดเทมเพลต
+                                                    ดาวน์โหลดเทมเพลต (ทั้งหมด)
                                                 </a>
                                             </div>
                                             
                                             <div class="relative">
                                                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                                                     <i class="fas fa-file-csv text-blue-500 mr-2"></i>
-                                                    อัปโหลดไฟล์ CSV (ที่แก้ไข 'Stu_no_new')
+                                                    อัปโหลดไฟล์ CSV ที่แก้ไขแล้ว
                                                 </label>
+                                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-3 rounded-lg">
+                                                    <div class="flex">
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-info-circle text-blue-400"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <p class="text-sm text-blue-700">
+                                                                <strong>📝 วิธีการใช้งาน:</strong><br>
+                                                                1. ดาวน์โหลดเทมเพลต CSV ด้านบน<br>
+                                                                2. เปิดไฟล์ด้วย Excel หรือ Google Sheets<br>
+                                                                3. <strong class="text-red-600">กรอกเลขที่ใหม่ในคอลัมน์ "Stu_no_new"</strong> (คอลัมน์ D)<br>
+                                                                4. บันทึกไฟล์และอัปโหลดกลับมาที่นี่<br>
+                                                                <em class="text-xs">⚠️ ห้ามแก้ไขคอลัมน์ Stu_id, Stu_major, Stu_room</em>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <input type="file" 
                                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
                                                        id="number_csv" 
@@ -313,6 +330,101 @@ $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Section 1.5: Update Student Numbers by Room -->
+                            <div class="bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300">
+                                <div class="flex items-start space-x-4">
+                                    <div class="bg-cyan-500 text-white p-4 rounded-xl shadow-lg">
+                                        <i class="fas fa-door-closed text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h5 class="text-xl font-bold text-gray-800 mb-2">🏫 อัปเดตเลขที่ แบบรายห้อง</h5>
+                                        <p class="text-gray-600 text-sm mb-4">เลือกชั้นและห้องเพื่อดาวน์โหลดเทมเพลตเฉพาะห้องนั้นๆ</p>
+
+                                        <form id="uploadNumberByRoomForm" class="space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <i class="fas fa-layer-group text-cyan-500 mr-2"></i>
+                                                        เลือกชั้น
+                                                    </label>
+                                                    <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all"
+                                                            id="number_pe"
+                                                            name="number_pe"
+                                                            required>
+                                                        <option value="">🎯 เลือกชั้น</option>
+                                                        <?php foreach ($studentClass as $class): ?>
+                                                            <option value="<?php echo $class; ?>">ม.<?php echo $class; ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <i class="fas fa-door-open text-cyan-500 mr-2"></i>
+                                                        เลือกห้อง
+                                                    </label>
+                                                    <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all"
+                                                            id="number_room"
+                                                            name="number_room"
+                                                            required>
+                                                        <option value="">🚪 เลือกห้อง</option>
+                                                        <?php foreach ($studentRoom as $room): ?>
+                                                            <option value="<?php echo $room; ?>">ห้อง <?php echo $room; ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-gray-700 mb-2">&nbsp;</label>
+                                                    <button type="button"
+                                                            id="downloadNumberByRoomBtn"
+                                                            class="w-full bg-white border-2 border-cyan-300 text-cyan-600 font-semibold py-3 px-4 rounded-xl hover:bg-cyan-50 hover:border-cyan-400 transform hover:scale-105 transition-all duration-300 shadow-md flex items-center justify-center">
+                                                        <i class="fas fa-download mr-2"></i>
+                                                        ดาวน์โหลดเทมเพลต
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="border-t-2 border-gray-200 my-4"></div>
+
+                                            <div class="relative">
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                                    <i class="fas fa-file-csv text-cyan-500 mr-2"></i>
+                                                    อัปโหลดไฟล์ CSV ที่แก้ไขแล้ว
+                                                </label>
+                                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-3 rounded-lg">
+                                                    <div class="flex">
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-info-circle text-blue-400"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <p class="text-sm text-blue-700">
+                                                                <strong>📝 วิธีการใช้งาน:</strong><br>
+                                                                1. ดาวน์โหลดเทมเพลต CSV ด้านบน<br>
+                                                                2. เปิดไฟล์ด้วย Excel หรือ Google Sheets<br>
+                                                                3. <strong class="text-red-600">กรอกเลขที่ใหม่ในคอลัมน์ "Stu_no_new"</strong> (คอลัมน์ D)<br>
+                                                                4. บันทึกไฟล์และอัปโหลดกลับมาที่นี่<br>
+                                                                <em class="text-xs">⚠️ ห้ามแก้ไขคอลัมน์ Stu_id, Stu_major, Stu_room</em>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="file"
+                                                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"
+                                                       id="number_room_csv"
+                                                       name="number_room_csv"
+                                                       accept=".csv"
+                                                       required>
+                                            </div>
+
+                                            <button type="submit"
+                                                    class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2">
+                                                <i class="fas fa-upload"></i>
+                                                <span>อัปโหลดและอัปเดตเลขที่ (รายห้อง)</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <!-- Section 2: New Student Template -->
                             <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300">
@@ -324,11 +436,28 @@ $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
                                         <h5 class="text-xl font-bold text-gray-800 mb-2">👨‍🎓 เทมเพลตนักเรียนใหม่</h5>
                                         <p class="text-gray-600 text-sm mb-4">สำหรับเพิ่มนักเรียนใหม่ (อัปโหลดที่หน้า "จัดการข้อมูลนักเรียน")</p>
                                         
-                                        <a href="../controllers/SettingController.php?action=download_new_student_template" 
-                                           class="inline-flex items-center px-5 py-3 bg-white border-2 border-green-300 text-green-600 font-semibold rounded-xl hover:bg-green-50 hover:border-green-400 transform hover:scale-105 transition-all duration-300 shadow-md">
-                                            <i class="fas fa-download mr-2"></i>
-                                            ดาวน์โหลดเทมเพลต นร. ใหม่
-                                        </a>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <a href="../controllers/SettingController.php?action=download_new_student_template" 
+                                               class="inline-flex items-center px-5 py-3 bg-white border-2 border-green-300 text-green-600 font-semibold rounded-xl hover:bg-green-50 hover:border-green-400 transform hover:scale-105 transition-all duration-300 shadow-md">
+                                                <i class="fas fa-download mr-2"></i>
+                                                ดาวน์โหลดเทมเพลต
+                                            </a>
+                                            
+                                            <button type="button" 
+                                                    id="uploadNewStudentBtn" 
+                                                    class="inline-flex items-center px-5 py-3 bg-green-500 border-2 border-green-500 text-white font-semibold rounded-xl hover:bg-green-600 hover:border-green-600 transform hover:scale-105 transition-all duration-300 shadow-md">
+                                                <i class="fas fa-upload mr-2"></i>
+                                                อัปโหลดนักเรียนใหม่
+                                            </button>
+                                        </div>
+
+                                        <!-- Hidden file input for new student upload -->
+                                        <input type="file" 
+                                               class="hidden" 
+                                               id="new_student_csv" 
+                                               name="new_student_csv" 
+                                               accept=".csv" 
+                                               required>
                                     </div>
                                 </div>
                             </div>
@@ -343,7 +472,7 @@ $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
                                         <h5 class="text-xl font-bold text-gray-800 mb-2">📋 อัปเดตข้อมูลนักเรียนทั้งหมด</h5>
                                         <p class="text-gray-600 text-sm mb-4">ดาวน์โหลดข้อมูลตามชั้น/ห้อง แก้ไข แล้วอัปโหลดกลับ</p>
                                         
-                                        <form id="uploadFullDataForm" class="space-y-4">
+                                        <form id="uploadFullDataForm" method="post" enctype="multipart/form-data" class="space-y-4">
                                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <div>
                                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -505,14 +634,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Enhanced error message
     function showError(message) {
+        // แยกข้อความหลักกับรายละเอียด error
+        const parts = message.split('\n\n');
+        const mainMessage = parts[0];
+        const errorDetails = parts[1];
+
+        let html = `<p class="text-lg text-gray-700 mb-4">${mainMessage}</p>`;
+
+        if (errorDetails) {
+            html += `
+                <div class="bg-gray-50 border-l-4 border-red-400 p-4 rounded-lg max-h-60 overflow-y-auto">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-2">📋 รายละเอียดข้อผิดพลาด:</h4>
+                    <pre class="text-xs text-gray-600 whitespace-pre-wrap font-mono">${errorDetails}</pre>
+                </div>
+            `;
+        }
+
         Swal.fire({
             icon: 'error',
             title: '<span class="text-2xl">❌ ล้มเหลว!</span>',
-            html: `<p class="text-lg text-gray-700">${message}</p>`,
+            html: html,
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#ef4444',
             customClass: {
-                popup: 'rounded-3xl',
+                popup: 'rounded-3xl max-w-2xl',
                 confirmButton: 'rounded-xl px-6 py-3'
             },
             showClass: {
@@ -627,6 +772,67 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 4.5. Download Number Template by Room
+    const downloadNumberByRoomBtn = document.getElementById('downloadNumberByRoomBtn');
+    if (downloadNumberByRoomBtn) {
+        downloadNumberByRoomBtn.addEventListener('click', function() {
+            const pe = document.getElementById('number_pe').value;
+            const room = document.getElementById('number_room').value;
+
+            if (!pe || !room) {
+                showError('กรุณาเลือกชั้นและห้อง');
+                return;
+            }
+
+            Swal.fire({
+                title: '📥 กำลังเตรียมดาวน์โหลด...',
+                html: `
+                    <div class="space-y-2 text-left">
+                        <p><strong>ชั้น:</strong> ม.${pe}</p>
+                        <p><strong>ห้อง:</strong> ห้อง ${room}</p>
+                    </div>
+                `,
+                icon: 'info',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+
+            const url = `../controllers/SettingController.php?action=download_number_template_by_room&pe=${pe}&room=${room}`;
+            window.open(url, '_blank');
+        });
+    }
+
+    // 4.6. Upload Number Data by Room Form
+    const uploadNumberByRoomForm = document.getElementById('uploadNumberByRoomForm');
+    if (uploadNumberByRoomForm) {
+        uploadNumberByRoomForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('number_room_csv');
+            const pe = document.getElementById('number_pe').value;
+            const room = document.getElementById('number_room').value;
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError('กรุณาเลือกไฟล์ CSV');
+                return;
+            }
+
+            if (!pe || !room) {
+                showError('กรุณาเลือกชั้นและห้อง');
+                return;
+            }
+
+            // File size validation (max 5MB)
+            if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                showError('ไฟล์มีขนาดใหญ่เกิน 5MB');
+                return;
+            }
+
+            const formData = new FormData(this);
+            handleFetch('../controllers/SettingController.php?action=upload_number_data_by_room', formData, 'อัปเดตเลขที่นักเรียน (รายห้อง) สำเร็จ');
+        });
+    }
+
     // 5. Download Full Data Button
     const downloadFullDataBtn = document.getElementById('downloadFullDataBtn');
     if (downloadFullDataBtn) {
@@ -653,11 +859,75 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 6. Upload Full Data Form
+    // 6. Upload New Student Button
+    const uploadNewStudentBtn = document.getElementById('uploadNewStudentBtn');
+    if (uploadNewStudentBtn) {
+        uploadNewStudentBtn.addEventListener('click', function() {
+            const fileInput = document.getElementById('new_student_csv');
+            fileInput.click();
+        });
+    }
+
+    // 7. Handle New Student CSV File Selection
+    const newStudentCsvInput = document.getElementById('new_student_csv');
+    if (newStudentCsvInput) {
+        newStudentCsvInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            // File size validation (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('ไฟล์มีขนาดใหญ่เกิน 5MB');
+                this.value = '';
+                return;
+            }
+
+            Swal.fire({
+                title: '<span class="text-2xl">📤 อัปโหลดนักเรียนใหม่?</span>',
+                html: `
+                    <div class="space-y-3 text-left">
+                        <p class="text-gray-700">คุณต้องการเพิ่มนักเรียนใหม่จากไฟล์ CSV นี้หรือไม่?</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                            <p class="text-sm text-blue-800">
+                                <strong>📋 ข้อมูลสำคัญ:</strong><br>
+                                • ตรวจสอบให้แน่ใจว่าข้อมูลในไฟล์ถูกต้อง<br>
+                                • นักเรียนที่มีรหัสซ้ำจะไม่ถูกเพิ่ม<br>
+                                • ฟิลด์ที่จำเป็น: Stu_id, Stu_pre, Stu_name, Stu_sur
+                            </p>
+                        </div>
+                        <p class="text-sm text-gray-600"><strong>ไฟล์:</strong> ${file.name}</p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '✅ เพิ่มนักเรียนใหม่',
+                cancelButtonText: '❌ ยกเลิก',
+                customClass: {
+                    popup: 'rounded-3xl',
+                    confirmButton: 'rounded-xl px-6 py-3',
+                    cancelButton: 'rounded-xl px-6 py-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('new_student_csv', file);
+                    handleFetch('../controllers/SettingController.php?action=upload_new_student_data', formData, 'เพิ่มนักเรียนใหม่สำเร็จ');
+                } else {
+                    // Clear file input if cancelled
+                    this.value = '';
+                }
+            });
+        });
+    }
+
+    // 8. Upload Full Data Form
     const uploadFullDataForm = document.getElementById('uploadFullDataForm');
     if (uploadFullDataForm) {
         uploadFullDataForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            
             const fileInput = document.getElementById('student_csv');
             if (!fileInput.files || fileInput.files.length === 0) {
                 showError('กรุณาเลือกไฟล์ CSV');
