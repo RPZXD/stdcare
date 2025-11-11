@@ -56,21 +56,24 @@ class SettingModel
     /**
      * อัปเดตเลขที่นักเรียน (จาก CSV)
      */
-    public function batchUpdateStudentNumbers(array $data, array $header)
+    public function batchUpdateStudentNumbers(array $data)
     {
-        // (ส่วนนี้จากไฟล์ที่คุณส่งมาถูกต้องแล้ว)
         $report = ['success' => 0, 'failed' => 0, 'errors' => []];
-        $sql = "UPDATE student SET Stu_number = :number WHERE Stu_id = :id AND Stu_status = '1'";
+        $sql = "UPDATE student SET Stu_no = :number WHERE Stu_id = :id AND Stu_status = '1'";
         $stmt = $this->pdo->prepare($sql);
 
         foreach ($data as $row) {
             $stu_id = trim($row['Stu_id'] ?? '');
-            $stu_number = trim($row['Stu_number'] ?? '');
+            $stu_no_new = trim($row['Stu_no_new'] ?? '');
 
-            if (empty($stu_id) || empty($stu_number)) continue;
+            if (empty($stu_id) || empty($stu_no_new)) {
+                $report['failed']++;
+                $report['errors'][] = "ข้อมูลไม่ครบ: Stu_id=$stu_id";
+                continue;
+            }
 
             try {
-                $stmt->execute([':number' => $stu_number, ':id' => $stu_id]);
+                $stmt->execute([':number' => $stu_no_new, ':id' => $stu_id]);
                 if ($stmt->rowCount() > 0) {
                     $report['success']++;
                 } else {
@@ -90,39 +93,64 @@ class SettingModel
      */
     public function batchUpdateStudentData(array $data, array $header)
     {
-         // (ส่วนนี้จากไฟล์ที่คุณส่งมาถูกต้องแล้ว)
         $report = ['success' => 0, 'failed' => 0, 'errors' => []];
         
-        // (โค้ดส่วนนี้ยาวมาก - จะใช้โค้ดเดิมจากไฟล์ที่คุณอัปโหลดมา)
-        // ... (ตรรกะการอัปเดตข้อมูลนักเรียนทั้งหมด) ...
-        // (ตรวจสอบให้แน่ใจว่าทุกคำสั่ง SQL ใช้ $this->pdo)
-
-        //ตัวอย่าง (หากคุณคัดลอกมาไม่ครบ):
-        $sql = "UPDATE student SET Stu_pre = :pre, Stu_name = :name, Stu_sur = :sur, Stu_major = :major, Stu_room = :room, Stu_number = :number
-                WHERE Stu_id = :id AND Stu_status = '1'";
-        $stmt = $this->pdo->prepare($sql);
+        // Build dynamic UPDATE query based on CSV headers
+        $allowedFields = [
+            'Stu_id', 'Stu_citizenid', 'Stu_no', 'Stu_password', 'Stu_sex', 
+            'Stu_pre', 'Stu_name', 'Stu_sur', 'Stu_nick', 'Stu_birth', 
+            'Stu_religion', 'Stu_blood', 'Stu_phone', 'Stu_addr', 'vehicle',
+            'Stu_major', 'Stu_room', 'Stu_status', 'Risk_group',
+            'Father_name', 'Father_occu', 'Father_income',
+            'Mother_name', 'Mother_occu', 'Mother_income',
+            'Par_name', 'Par_relate', 'Par_occu', 'Par_income', 'Par_phone', 'Par_addr'
+        ];
 
         foreach ($data as $row) {
-             try {
-                $stu_id = trim($row['Stu_id']);
-                // (ตรวจสอบข้อมูล $row อื่นๆ)
+            try {
+                $stu_id = trim($row['Stu_id'] ?? '');
                 
-                $params = [
-                    ':id' => $stu_id,
-                    ':pre' => trim($row['Stu_pre']),
-                    ':name' => trim($row['Stu_name']),
-                    ':sur' => trim($row['Stu_sur']),
-                    ':major' => trim($row['Stu_major']),
-                    ':room' => trim($row['Stu_room']),
-                    ':number' => trim($row['Stu_number']),
-                ];
+                if (empty($stu_id)) {
+                    $report['failed']++;
+                    $report['errors'][] = "ข้อมูลไม่มี Stu_id";
+                    continue;
+                }
+
+                // Build SET clause dynamically
+                $setFields = [];
+                $params = [':id' => $stu_id];
+                
+                foreach ($header as $field) {
+                    if ($field === 'Stu_id') continue; // Skip primary key
+                    if (in_array($field, $allowedFields) && isset($row[$field])) {
+                        $setFields[] = "$field = :$field";
+                        $params[":$field"] = trim($row[$field]);
+                    }
+                }
+
+                if (empty($setFields)) {
+                    $report['failed']++;
+                    $report['errors'][] = "ไม่มีฟิลด์ที่จะอัปเดตสำหรับ Stu_id: $stu_id";
+                    continue;
+                }
+
+                $sql = "UPDATE student SET " . implode(', ', $setFields) . " WHERE Stu_id = :id";
+                $stmt = $this->pdo->prepare($sql);
                 $stmt->execute($params);
-                $report['success']++;
-             } catch (\PDOException $e) {
-                 $report['failed']++;
-                 $report['errors'][] = "Error at $stu_id: " . $e->getMessage();
-             }
+                
+                if ($stmt->rowCount() > 0) {
+                    $report['success']++;
+                } else {
+                    $report['failed']++;
+                    $report['errors'][] = "ไม่พบหรือไม่มีการเปลี่ยนแปลง Stu_id: $stu_id";
+                }
+                
+            } catch (\PDOException $e) {
+                $report['failed']++;
+                $report['errors'][] = "Error at " . ($stu_id ?? 'unknown') . ": " . $e->getMessage();
+            }
         }
+        
         return $report;
     }
 
@@ -166,4 +194,43 @@ class SettingModel
         }
         return true;
     }
-}
+
+    /**
+     * ดึงข้อมูลนักเรียนสำหรับอัปเดตเลขที่ (CSV Template)
+     */
+    public function getStudentsForNumberUpdate()
+    {
+        $sql = "SELECT Stu_id, Stu_major, Stu_room, Stu_no, 
+                CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) as fullname
+                FROM student 
+                WHERE Stu_status = '1'
+                ORDER BY Stu_major, Stu_room, Stu_no";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * ดึงข้อมูลนักเรียนทั้งหมดสำหรับอัปเดต (CSV Template)
+     */
+    public function getStudentsForFullUpdate($class = '', $room = '')
+    {
+        $sql = "SELECT * FROM student WHERE Stu_status = '1'";
+        $params = [];
+        
+        if (!empty($class)) {
+            $sql .= " AND Stu_major = :class";
+            $params[':class'] = $class;
+        }
+        
+        if (!empty($room)) {
+            $sql .= " AND Stu_room = :room";
+            $params[':room'] = $room;
+        }
+        
+        $sql .= " ORDER BY Stu_major, Stu_room, Stu_no";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}   
