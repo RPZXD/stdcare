@@ -183,7 +183,7 @@ foreach ($all_attendance as $row) {
 // สร้าง $classes ใหม่สำหรับตาราง
 $classes = array_values($class_map);
 ?>
-<body class="hold-transition sidebar-mini layout-fixed light-mode">
+<body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
@@ -449,6 +449,10 @@ $classes = array_values($class_map);
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Load saved theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'light-mode';
+    document.body.classList.remove('light-mode', 'dark-mode');
+    document.body.classList.add(savedTheme);
     // Pie Chart with enhanced styling
     var ctx = document.getElementById('pieChartOverview').getContext('2d');
     new Chart(ctx, {
@@ -580,6 +584,97 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 60000); // Check every minute
 });
 </script>
+<style>
+/* Dark mode support - Manual Toggle */
+body.dark-mode .bg-gradient-to-r.from-blue-50.to-purple-50 {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #1a1a2e 100%) !important;
+}
+
+body.dark-mode .text-gray-800,
+body.dark-mode .text-gray-700,
+body.dark-mode .text-gray-600 {
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .bg-white {
+    background-color: rgba(30, 30, 30, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .text-gray-600 {
+    color: #9ca3af !important;
+}
+
+body.dark-mode .border-gray-200,
+body.dark-mode .divide-gray-200 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .hover\:bg-blue-50:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+body.dark-mode .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+body.dark-mode input, 
+body.dark-mode select {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #e5e7eb !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+body.dark-mode input::placeholder {
+    color: #6b7280 !important;
+}
+
+/* Dark mode support - Auto Detection */
+@media (prefers-color-scheme: dark) {
+    body:not(.light-mode) .bg-gradient-to-r.from-blue-50.to-purple-50 {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #1a1a2e 100%);
+    }
+    
+    body:not(.light-mode) .text-gray-800,
+    body:not(.light-mode) .text-gray-700,
+    body:not(.light-mode) .text-gray-600 {
+        color: #e5e7eb !important;
+    }
+    
+    body:not(.light-mode) .bg-white {
+        background-color: rgba(30, 30, 30, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    body:not(.light-mode) .text-gray-600 {
+        color: #9ca3af !important;
+    }
+    
+    body:not(.light-mode) .border-gray-200,
+    body:not(.light-mode) .divide-gray-200 {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    body:not(.light-mode) .hover\:bg-blue-50:hover {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    body:not(.light-mode) .bg-blue-50 {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    body:not(.light-mode) input, 
+    body:not(.light-mode) select {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #e5e7eb !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    body:not(.light-mode) input::placeholder {
+        color: #6b7280 !important;
+    }
+}
+</style>
 <?php require_once('script.php');?>
 </body>
 </html>

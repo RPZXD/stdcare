@@ -52,7 +52,7 @@ require_once('header.php');
 
 
 ?>
-<body class="hold-transition sidebar-mini layout-fixed light-mode">
+<body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
     <?php require_once('wrapper.php');?>
@@ -294,5 +294,75 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'light-mode';
+    document.body.classList.remove('light-mode', 'dark-mode');
+    document.body.classList.add(savedTheme);
+});
+</script>
+<style>
+/* Dark mode support - Manual Toggle */
+body.dark-mode .bg-white {
+    background-color: rgba(30, 30, 30, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .text-gray-800,
+body.dark-mode .text-gray-700,
+body.dark-mode .text-gray-600 {
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+body.dark-mode .border-gray-200,
+body.dark-mode .divide-gray-200 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .bg-gray-50 {
+    background-color: rgba(20, 20, 20, 0.5) !important;
+}
+
+body.dark-mode .hover\:bg-gray-100:hover {
+    background-color: rgba(75, 85, 99, 0.1) !important;
+}
+
+/* Dark mode support - Auto Detection */
+@media (prefers-color-scheme: dark) {
+    body:not(.light-mode) .bg-white {
+        background-color: rgba(30, 30, 30, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    body:not(.light-mode) .text-gray-800,
+    body:not(.light-mode) .text-gray-700,
+    body:not(.light-mode) .text-gray-600 {
+        color: #e5e7eb !important;
+    }
+    
+    body:not(.light-mode) .text-gray-500 {
+        color: #9ca3af !important;
+    }
+    
+    body:not(.light-mode) .border-gray-200,
+    body:not(.light-mode) .divide-gray-200 {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    body:not(.light-mode) .bg-gray-50 {
+        background-color: rgba(20, 20, 20, 0.5) !important;
+    }
+    
+    body:not(.light-mode) .hover\:bg-gray-100:hover {
+        background-color: rgba(75, 85, 99, 0.1) !important;
+    }
+}
+</style>
+<?php require_once('../script.php');?>
 </body>
 </html>
