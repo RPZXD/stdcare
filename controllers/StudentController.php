@@ -295,17 +295,38 @@ try {
 
         case 'update':
             try {
-                // รับข้อมูลจาก POST (จาก Edit Modal)
+                // รับข้อมูลจาก POST (จาก Edit Modal) - รองรับข้อมูลครบถ้วนทั้ง 32 ฟิลด์
                 $data = [
                     'OldStu_id' => $_POST['editStu_id_old'] ?? '', // รหัสเดิมสำหรับ WHERE clause
                     'Stu_id' => $_POST['editStu_id'] ?? '',
+                    'Stu_citizenid' => $_POST['editStu_citizenid'] ?? '0000000000000',
                     'Stu_no' => $_POST['editStu_no'] ?? '',
                     'Stu_pre' => $_POST['editStu_pre'] ?? '',
                     'Stu_name' => $_POST['editStu_name'] ?? '',
                     'Stu_sur' => $_POST['editStu_sur'] ?? '',
+                    'Stu_nick' => $_POST['editStu_nick'] ?? '',
+                    'Stu_birth' => $_POST['editStu_birth'] ?? '',
+                    'Stu_religion' => $_POST['editStu_religion'] ?? '',
+                    'Stu_blood' => $_POST['editStu_blood'] ?? '',
+                    'Stu_phone' => $_POST['editStu_phone'] ?? '',
+                    'Stu_addr' => $_POST['editStu_addr'] ?? '',
+                    'vehicle' => $_POST['editVehicle'] ?? '0',
                     'Stu_major' => $_POST['editStu_major'] ?? '',
                     'Stu_room' => $_POST['editStu_room'] ?? '',
-                    'Stu_status' => $_POST['editStu_status'] ?? '1'
+                    'Stu_status' => $_POST['editStu_status'] ?? '1',
+                    'Risk_group' => $_POST['editRisk_group'] ?? '',
+                    'Father_name' => $_POST['editFather_name'] ?? '',
+                    'Father_occu' => $_POST['editFather_occu'] ?? '',
+                    'Father_income' => $_POST['editFather_income'] ?? '',
+                    'Mother_name' => $_POST['editMother_name'] ?? '',
+                    'Mother_occu' => $_POST['editMother_occu'] ?? '',
+                    'Mother_income' => $_POST['editMother_income'] ?? '',
+                    'Par_name' => $_POST['editPar_name'] ?? '',
+                    'Par_relate' => $_POST['editPar_relate'] ?? '',
+                    'Par_occu' => $_POST['editPar_occu'] ?? '',
+                    'Par_income' => $_POST['editPar_income'] ?? '',
+                    'Par_phone' => $_POST['editPar_phone'] ?? '',
+                    'Par_addr' => $_POST['editPar_addr'] ?? ''
                 ];
                 
                 // คำนวณเพศจากคำนำหน้า (เหมือนใน createStudent)

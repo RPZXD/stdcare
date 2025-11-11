@@ -145,7 +145,7 @@ class Student
     // !! KEV: นี่คือเมธอดที่ขาดไป !!
     //
     /**
-     * อัปเดตข้อมูลนักเรียนจากฟอร์ม (Form Update)
+     * อัปเดตข้อมูลนักเรียนจากฟอร์ม (Form Update) - รองรับข้อมูลครบถ้วน
      * @param array $data ข้อมูลนักเรียนจาก $_POST
      * @return bool True ถ้าสำเร็จ
      */
@@ -161,20 +161,62 @@ class Student
                     Stu_sur = :Stu_sur,
                     Stu_major = :Stu_major,
                     Stu_room = :Stu_room,
-                    Stu_status = :Stu_status
+                    Stu_status = :Stu_status,
+                    Stu_nick = :Stu_nick,
+                    Stu_birth = :Stu_birth,
+                    Stu_religion = :Stu_religion,
+                    Stu_blood = :Stu_blood,
+                    Stu_addr = :Stu_addr,
+                    Stu_phone = :Stu_phone,
+                    Father_name = :Father_name,
+                    Father_occu = :Father_occu,
+                    Father_income = :Father_income,
+                    Mother_name = :Mother_name,
+                    Mother_occu = :Mother_occu,
+                    Mother_income = :Mother_income,
+                    Par_name = :Par_name,
+                    Par_relate = :Par_relate,
+                    Par_occu = :Par_occu,
+                    Par_income = :Par_income,
+                    Par_addr = :Par_addr,
+                    Par_phone = :Par_phone,
+                    Risk_group = :Risk_group,
+                    vehicle = :vehicle,
+                    Stu_citizenid = :Stu_citizenid
                 WHERE Stu_id = :OldStu_id"; // (สำคัญ) อัปเดตโดยอ้างอิง ID เดิม
 
         $params = [
             ':Stu_id' => $data['Stu_id'],
-            ':Stu_no' => $data['Stu_no'],
+            ':Stu_no' => $data['Stu_no'] ?? null,
             ':Stu_password' => $data['Stu_password'],
-            ':Stu_sex' => $data['Stu_sex'],
-            ':Stu_pre' => $data['Stu_pre'],
-            ':Stu_name' => $data['Stu_name'],
-            ':Stu_sur' => $data['Stu_sur'],
-            ':Stu_major' => $data['Stu_major'],
-            ':Stu_room' => $data['Stu_room'],
-            ':Stu_status' => $data['Stu_status'],
+            ':Stu_sex' => $data['Stu_sex'] ?? null,
+            ':Stu_pre' => $data['Stu_pre'] ?? null,
+            ':Stu_name' => $data['Stu_name'] ?? null,
+            ':Stu_sur' => $data['Stu_sur'] ?? null,
+            ':Stu_major' => $data['Stu_major'] ?? null,
+            ':Stu_room' => $data['Stu_room'] ?? null,
+            ':Stu_status' => $data['Stu_status'] ?? 1,
+            ':Stu_nick' => $data['Stu_nick'] ?? null,
+            ':Stu_birth' => $data['Stu_birth'] ?? null,
+            ':Stu_religion' => $data['Stu_religion'] ?? null,
+            ':Stu_blood' => $data['Stu_blood'] ?? null,
+            ':Stu_addr' => $data['Stu_addr'] ?? null,
+            ':Stu_phone' => $data['Stu_phone'] ?? null,
+            ':Father_name' => $data['Father_name'] ?? null,
+            ':Father_occu' => $data['Father_occu'] ?? null,
+            ':Father_income' => $data['Father_income'] ?? null,
+            ':Mother_name' => $data['Mother_name'] ?? null,
+            ':Mother_occu' => $data['Mother_occu'] ?? null,
+            ':Mother_income' => $data['Mother_income'] ?? null,
+            ':Par_name' => $data['Par_name'] ?? null,
+            ':Par_relate' => $data['Par_relate'] ?? null,
+            ':Par_occu' => $data['Par_occu'] ?? null,
+            ':Par_income' => $data['Par_income'] ?? null,
+            ':Par_addr' => $data['Par_addr'] ?? null,
+            ':Par_phone' => $data['Par_phone'] ?? null,
+            ':Risk_group' => $data['Risk_group'] ?? null,
+            ':vehicle' => $data['vehicle'] ?? null,
+            ':Stu_citizenid' => $data['Stu_citizenid'] ?? '0000000000000',
             ':OldStu_id' => $data['OldStu_id']
         ];
 
@@ -235,7 +277,7 @@ class Student
     }
 
     /**
-     * สร้างนักเรียนใหม่ (Form Create)
+     * สร้างนักเรียนใหม่ (Form Create) - รองรับข้อมูลครบถ้วน
      * @param array $data ข้อมูลนักเรียนจาก $_POST
      * @return bool True ถ้าสำเร็จ
      */
@@ -250,25 +292,55 @@ class Student
             $stu_sex = 2;
         }
 
-        $stu_password = $data['Stu_id']; // ตั้งรหัสผ่านเริ่มต้น = รหัสนักเรียน
-        $stu_status = 1; // สถานะ "ปกติ"
+        $stu_password = $data['Stu_password'] ?? $data['Stu_id']; // ตั้งรหัสผ่านเริ่มต้น = รหัสนักเรียน
+        $stu_status = $data['Stu_status'] ?? 1; // สถานะ "ปกติ"
+        $stu_citizenid = $data['Stu_citizenid'] ?? '0000000000000';
         
         $sql = "INSERT INTO student 
-                    (Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status)
+                    (Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status,
+                     Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone,
+                     Father_name, Father_occu, Father_income, Mother_name, Mother_occu, Mother_income,
+                     Par_name, Par_relate, Par_occu, Par_income, Par_addr, Par_phone,
+                     Risk_group, vehicle, Stu_citizenid)
                 VALUES 
-                    (:Stu_id, :Stu_no, :Stu_password, :Stu_sex, :Stu_pre, :Stu_name, :Stu_sur, :Stu_major, :Stu_room, :Stu_status)";
+                    (:Stu_id, :Stu_no, :Stu_password, :Stu_sex, :Stu_pre, :Stu_name, :Stu_sur, :Stu_major, :Stu_room, :Stu_status,
+                     :Stu_nick, :Stu_birth, :Stu_religion, :Stu_blood, :Stu_addr, :Stu_phone,
+                     :Father_name, :Father_occu, :Father_income, :Mother_name, :Mother_occu, :Mother_income,
+                     :Par_name, :Par_relate, :Par_occu, :Par_income, :Par_addr, :Par_phone,
+                     :Risk_group, :vehicle, :Stu_citizenid)";
         
         $params = [
             ':Stu_id' => $data['Stu_id'],
-            ':Stu_no' => $data['Stu_no'],
+            ':Stu_no' => $data['Stu_no'] ?? null,
             ':Stu_password' => $stu_password,
             ':Stu_sex' => $stu_sex,
-            ':Stu_pre' => $data['Stu_pre'],
-            ':Stu_name' => $data['Stu_name'],
-            ':Stu_sur' => $data['Stu_sur'],
-            ':Stu_major' => $data['Stu_major'],
-            ':Stu_room' => $data['Stu_room'],
-            ':Stu_status' => $stu_status
+            ':Stu_pre' => $data['Stu_pre'] ?? null,
+            ':Stu_name' => $data['Stu_name'] ?? null,
+            ':Stu_sur' => $data['Stu_sur'] ?? null,
+            ':Stu_major' => $data['Stu_major'] ?? null,
+            ':Stu_room' => $data['Stu_room'] ?? null,
+            ':Stu_status' => $stu_status,
+            ':Stu_nick' => $data['Stu_nick'] ?? null,
+            ':Stu_birth' => $data['Stu_birth'] ?? null,
+            ':Stu_religion' => $data['Stu_religion'] ?? null,
+            ':Stu_blood' => $data['Stu_blood'] ?? null,
+            ':Stu_addr' => $data['Stu_addr'] ?? null,
+            ':Stu_phone' => $data['Stu_phone'] ?? null,
+            ':Father_name' => $data['Father_name'] ?? null,
+            ':Father_occu' => $data['Father_occu'] ?? null,
+            ':Father_income' => $data['Father_income'] ?? null,
+            ':Mother_name' => $data['Mother_name'] ?? null,
+            ':Mother_occu' => $data['Mother_occu'] ?? null,
+            ':Mother_income' => $data['Mother_income'] ?? null,
+            ':Par_name' => $data['Par_name'] ?? null,
+            ':Par_relate' => $data['Par_relate'] ?? null,
+            ':Par_occu' => $data['Par_occu'] ?? null,
+            ':Par_income' => $data['Par_income'] ?? null,
+            ':Par_addr' => $data['Par_addr'] ?? null,
+            ':Par_phone' => $data['Par_phone'] ?? null,
+            ':Risk_group' => $data['Risk_group'] ?? null,
+            ':vehicle' => $data['vehicle'] ?? null,
+            ':Stu_citizenid' => $stu_citizenid
         ];
         
         // ใช้ $this->db (DatabaseUsers object)

@@ -50,21 +50,21 @@ require_once('header.php');
                         <div class="flex flex-wrap gap-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-500">🏫</span>
-                                <select id="filterClass" class="pl-10 pr-4 py-3 bg-white border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-gray-700 font-medium shadow-md hover:shadow-lg">
+                                <select id="filterClass" class="pl-10 pr-4 py-4 bg-white border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-gray-700 font-semibold text-lg">
                                     <option value="">-- เลือกชั้น --</option>
                                 </select>
                             </div>
                             
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">🚪</span>
-                                <select id="filterRoom" class="pl-10 pr-4 py-3 bg-white border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-700 font-medium shadow-md hover:shadow-lg">
+                                <select id="filterRoom" class="pl-10 pr-4 py-4 bg-white border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-700 font-semibold text-lg">
                                     <option value="">-- เลือกห้อง --</option>
                                 </select>
                             </div>
                             
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500">📊</span>
-                                <select id="filterStatus" class="pl-10 pr-4 py-3 bg-white border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-gray-700 font-medium shadow-md hover:shadow-lg">
+                                <select id="filterStatus" class="pl-10 pr-4 py-4 bg-white border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 text-gray-700 font-semibold text-lg">
                                     <option value="">-- สถานะ --</option>
                                     <option value="1">✅ ปกติ</option>
                                     <option value="2">🎓 จบการศึกษา</option>
@@ -127,76 +127,76 @@ require_once('header.php');
                                     </label>
                                     <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white" id="addStu_id" name="addStu_id" maxlength="10" required>
                                 </div>
-                            
-                            <div class="form-group">
-                                <label for="addStu_no" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">🔢</span>
-                                    เลขที่
-                                </label>
-                                <select name="addStu_no" id="addStu_no" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white">
-                                    <option value="">-- โปรดเลือกเลขที่ --</option>
-                                    <?php for ($i = 1; $i <= 50; $i++): ?>
-                                        <option value="<?= $i ?>"><?= $i ?></option>
-                                    <?php endfor; ?>
-                                </select>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_no" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🔢</span>
+                                        เลขที่
+                                    </label>
+                                    <select name="addStu_no" id="addStu_no" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white text-base font-semibold text-gray-800">
+                                        <option value="">-- โปรดเลือกเลขที่ --</option>
+                                        <?php for ($i = 1; $i <= 50; $i++): ?>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_pre" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">👤</span>
+                                        คำนำหน้าชื่อ
+                                    </label>
+                                    <select name="addStu_pre" id="addStu_pre" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white text-base font-semibold text-gray-800">
+                                        <option value="">-- โปรดเลือกคำนำหน้า --</option>
+                                        <option value="เด็กชาย">👦 เด็กชาย</option>
+                                        <option value="เด็กหญิง">👧 เด็กหญิง</option>
+                                        <option value="นาย">👨 นาย</option>
+                                        <option value="นางสาว">👩 นางสาว</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_name" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">📝</span>
+                                        ชื่อ
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white" id="addStu_name" name="addStu_name" maxlength="100" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_sur" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">📝</span>
+                                        นามสกุล
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white" id="addStu_sur" name="addStu_sur" maxlength="100" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_major" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🏫</span>
+                                        ชั้น
+                                    </label>
+                                    <select name="addStu_major" id="addStu_major" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white text-base font-semibold text-gray-800">
+                                        <option value="">-- โปรดเลือกชั้น --</option>
+                                        <?php for ($i = 1; $i <= 6; $i++): ?>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addStu_room" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🚪</span>
+                                        ห้อง
+                                    </label>
+                                    <select name="addStu_room" id="addStu_room" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white text-base font-semibold text-gray-800">
+                                        <option value="">-- โปรดเลือกห้อง --</option>
+                                        <?php for ($i = 1; $i <= 12; $i++): ?>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="addStu_pre" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">👤</span>
-                                    คำนำหน้าชื่อ
-                                </label>
-                                <select name="addStu_pre" id="addStu_pre" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white">
-                                    <option value="">-- โปรดเลือกคำนำหน้า --</option>
-                                    <option value="เด็กชาย">👦 เด็กชาย</option>
-                                    <option value="เด็กหญิง">👧 เด็กหญิง</option>
-                                    <option value="นาย">👨 นาย</option>
-                                    <option value="นางสาว">👩 นางสาว</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="addStu_name" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">📝</span>
-                                    ชื่อ
-                                </label>
-                                <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white" id="addStu_name" name="addStu_name" maxlength="100" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="addStu_sur" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">📝</span>
-                                    นามสกุล
-                                </label>
-                                <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white" id="addStu_sur" name="addStu_sur" maxlength="100" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="addStu_major" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">🏫</span>
-                                    ชั้น
-                                </label>
-                                <select name="addStu_major" id="addStu_major" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white">
-                                    <option value="">-- โปรดเลือกชั้น --</option>
-                                    <?php for ($i = 1; $i <= 6; $i++): ?>
-                                        <option value="<?= $i ?>"><?= $i ?></option>
-                                    <?php endfor; ?>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group md:col-span-2">
-                                <label for="addStu_room" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="text-lg mr-2">🚪</span>
-                                    ห้อง
-                                </label>
-                                <select name="addStu_room" id="addStu_room" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white">
-                                    <option value="">-- โปรดเลือกห้อง --</option>
-                                    <?php for ($i = 1; $i <= 12; $i++): ?>
-                                        <option value="<?= $i ?>"><?= $i ?></option>
-                                    <?php endfor; ?>
-                                </select>
-                            </div>
-                        </div>
                         </form>
                     </div>
                     <div class="modal-footer bg-gray-50 rounded-b-3xl border-0 p-6 flex justify-end space-x-3">
@@ -225,22 +225,32 @@ require_once('header.php');
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-8">
+                    <div class="modal-body p-8" style="max-height: 70vh; overflow-y: auto;">
                         <form id="editStudentForm">
                             <input type="hidden" id="editStu_id_old" name="editStu_id_old" required>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- ข้อมูลพื้นฐาน -->
+                            <h6 class="text-lg font-bold text-gray-800 mb-4 flex items-center border-b-2 border-yellow-300 pb-2">
+                                <span class="text-2xl mr-2">📋</span> ข้อมูลพื้นฐาน
+                            </h6>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div class="form-group">
                                     <label for="editStu_id" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">🆔</span>
-                                        รหัสนักเรียน
+                                        <span class="text-lg mr-2">🆔</span> รหัสนักเรียน
                                     </label>
                                     <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_id" name="editStu_id" maxlength="10" required>
                                 </div>
                                 
                                 <div class="form-group">
+                                    <label for="editStu_citizenid" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🪪</span> เลขบัตรประชาชน
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_citizenid" name="editStu_citizenid" maxlength="13" pattern="[0-9]{13}">
+                                </div>
+                                
+                                <div class="form-group">
                                     <label for="editStu_no" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">🔢</span>
-                                        เลขที่
+                                        <span class="text-lg mr-2">🔢</span> เลขที่
                                     </label>
                                     <select name="editStu_no" id="editStu_no" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white">
                                         <option value="">-- โปรดเลือกเลขที่ --</option>
@@ -252,8 +262,7 @@ require_once('header.php');
                                 
                                 <div class="form-group">
                                     <label for="editStu_pre" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">👤</span>
-                                        คำนำหน้าชื่อ
+                                        <span class="text-lg mr-2">👤</span> คำนำหน้าชื่อ
                                     </label>
                                     <select name="editStu_pre" id="editStu_pre" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white">
                                         <option value="เด็กชาย">👦 เด็กชาย</option>
@@ -265,24 +274,85 @@ require_once('header.php');
                                 
                                 <div class="form-group">
                                     <label for="editStu_name" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">📝</span>
-                                        ชื่อ
+                                        <span class="text-lg mr-2">📝</span> ชื่อ
                                     </label>
-                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_name" name="editStu_name" maxlength="100" required>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_name" name="editStu_name" maxlength="50" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="editStu_sur" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">📝</span>
-                                        นามสกุล
+                                        <span class="text-lg mr-2">📝</span> นามสกุล
                                     </label>
-                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_sur" name="editStu_sur" maxlength="100" required>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_sur" name="editStu_sur" maxlength="50" required>
                                 </div>
                                 
                                 <div class="form-group">
+                                    <label for="editStu_nick" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">😊</span> ชื่อเล่น
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_nick" name="editStu_nick" maxlength="30">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editStu_birth" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🎂</span> วันเกิด
+                                    </label>
+                                    <input type="date" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_birth" name="editStu_birth">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editStu_religion" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🙏</span> ศาสนา
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_religion" name="editStu_religion" maxlength="30">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editStu_blood" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🩸</span> หมู่เลือด
+                                    </label>
+                                    <select class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_blood" name="editStu_blood">
+                                        <option value="">-- เลือกหมู่เลือด --</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="AB">AB</option>
+                                        <option value="O">O</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editStu_phone" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">📱</span> เบอร์โทร
+                                    </label>
+                                    <input type="tel" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_phone" name="editStu_phone" maxlength="15">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editVehicle" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🚗</span> ยานพาหนะ
+                                    </label>
+                                    <select class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editVehicle" name="editVehicle">
+                                        <option value="0">ไม่มี</option>
+                                        <option value="1">มี</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group md:col-span-2">
+                                    <label for="editStu_addr" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">🏠</span> ที่อยู่
+                                    </label>
+                                    <textarea class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editStu_addr" name="editStu_addr" rows="2" maxlength="100"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- ข้อมูลการศึกษา -->
+                            <h6 class="text-lg font-bold text-gray-800 mb-4 flex items-center border-b-2 border-yellow-300 pb-2">
+                                <span class="text-2xl mr-2">🏫</span> ข้อมูลการศึกษา
+                            </h6>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="form-group">
                                     <label for="editStu_major" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">🏫</span>
-                                        ชั้น
+                                        <span class="text-lg mr-2">📚</span> ชั้น
                                     </label>
                                     <select name="editStu_major" id="editStu_major" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white">
                                         <option value="">-- โปรดเลือกชั้น --</option>
@@ -294,8 +364,7 @@ require_once('header.php');
                                 
                                 <div class="form-group">
                                     <label for="editStu_room" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">🚪</span>
-                                        ห้อง
+                                        <span class="text-lg mr-2">🚪</span> ห้อง
                                     </label>
                                     <select name="editStu_room" id="editStu_room" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white">
                                         <option value="">-- โปรดเลือกห้อง --</option>
@@ -305,10 +374,9 @@ require_once('header.php');
                                     </select>
                                 </div>
                                 
-                                <div class="form-group md:col-span-2">
+                                <div class="form-group">
                                     <label for="editStu_status" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <span class="text-lg mr-2">📊</span>
-                                        สถานะ
+                                        <span class="text-lg mr-2">📊</span> สถานะ
                                     </label>
                                     <select class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" name="editStu_status" id="editStu_status">
                                         <option value="1">✅ ปกติ</option>
@@ -317,6 +385,82 @@ require_once('header.php');
                                         <option value="4">❌ ออกกลางคัน</option>
                                         <option value="9">🕊️ เสียชีวิต</option>
                                     </select>
+                                </div>
+                                
+                                <div class="form-group md:col-span-3">
+                                    <label for="editRisk_group" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <span class="text-lg mr-2">⚠️</span> กลุ่มเสี่ยง
+                                    </label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editRisk_group" name="editRisk_group" maxlength="2">
+                                </div>
+                            </div>
+                            
+                            <!-- ข้อมูลบิดา -->
+                            <h6 class="text-lg font-bold text-gray-800 mb-4 flex items-center border-b-2 border-yellow-300 pb-2">
+                                <span class="text-2xl mr-2">👨</span> ข้อมูลบิดา
+                            </h6>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="form-group">
+                                    <label for="editFather_name" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อบิดา</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editFather_name" name="editFather_name" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editFather_occu" class="block text-sm font-semibold text-gray-700 mb-2">อาชีพ</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editFather_occu" name="editFather_occu" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editFather_income" class="block text-sm font-semibold text-gray-700 mb-2">รายได้/เดือน</label>
+                                    <input type="number" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editFather_income" name="editFather_income" min="0">
+                                </div>
+                            </div>
+                            
+                            <!-- ข้อมูลมารดา -->
+                            <h6 class="text-lg font-bold text-gray-800 mb-4 flex items-center border-b-2 border-yellow-300 pb-2">
+                                <span class="text-2xl mr-2">👩</span> ข้อมูลมารดา
+                            </h6>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="form-group">
+                                    <label for="editMother_name" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อมารดา</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editMother_name" name="editMother_name" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editMother_occu" class="block text-sm font-semibold text-gray-700 mb-2">อาชีพ</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editMother_occu" name="editMother_occu" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editMother_income" class="block text-sm font-semibold text-gray-700 mb-2">รายได้/เดือน</label>
+                                    <input type="number" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editMother_income" name="editMother_income" min="0">
+                                </div>
+                            </div>
+                            
+                            <!-- ข้อมูลผู้ปกครอง -->
+                            <h6 class="text-lg font-bold text-gray-800 mb-4 flex items-center border-b-2 border-yellow-300 pb-2">
+                                <span class="text-2xl mr-2">👥</span> ข้อมูลผู้ปกครอง
+                            </h6>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="form-group">
+                                    <label for="editPar_name" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ปกครอง</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_name" name="editPar_name" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPar_relate" class="block text-sm font-semibold text-gray-700 mb-2">ความสัมพันธ์</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_relate" name="editPar_relate" maxlength="30">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPar_occu" class="block text-sm font-semibold text-gray-700 mb-2">อาชีพ</label>
+                                    <input type="text" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_occu" name="editPar_occu" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPar_income" class="block text-sm font-semibold text-gray-700 mb-2">รายได้/เดือน</label>
+                                    <input type="number" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_income" name="editPar_income" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPar_phone" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์โทร</label>
+                                    <input type="tel" class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_phone" name="editPar_phone" maxlength="15">
+                                </div>
+                                <div class="form-group md:col-span-2">
+                                    <label for="editPar_addr" class="block text-sm font-semibold text-gray-700 mb-2">ที่อยู่ผู้ปกครอง</label>
+                                    <textarea class="form-control w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-white" id="editPar_addr" name="editPar_addr" rows="2" maxlength="100"></textarea>
                                 </div>
                             </div>
                         </form>
@@ -927,15 +1071,47 @@ require_once('header.php');
             }
             const form = document.getElementById('editStudentForm');
             form.reset();
+            
+            // ข้อมูลพื้นฐาน
             document.getElementById('editStu_id_old').value = data.Stu_id;
-            document.getElementById('editStu_no').value = data.Stu_no;
             document.getElementById('editStu_id').value = data.Stu_id;
-            document.getElementById('editStu_pre').value = data.Stu_pre;
-            document.getElementById('editStu_name').value = data.Stu_name;
-            document.getElementById('editStu_sur').value = data.Stu_sur;
-            document.getElementById('editStu_major').value = data.Stu_major;
-            document.getElementById('editStu_room').value = data.Stu_room;
-            document.getElementById('editStu_status').value = data.Stu_status;
+            document.getElementById('editStu_citizenid').value = data.Stu_citizenid || '';
+            document.getElementById('editStu_no').value = data.Stu_no || '';
+            document.getElementById('editStu_pre').value = data.Stu_pre || '';
+            document.getElementById('editStu_name').value = data.Stu_name || '';
+            document.getElementById('editStu_sur').value = data.Stu_sur || '';
+            document.getElementById('editStu_nick').value = data.Stu_nick || '';
+            document.getElementById('editStu_birth').value = data.Stu_birth || '';
+            document.getElementById('editStu_religion').value = data.Stu_religion || '';
+            document.getElementById('editStu_blood').value = data.Stu_blood || '';
+            document.getElementById('editStu_phone').value = data.Stu_phone || '';
+            document.getElementById('editStu_addr').value = data.Stu_addr || '';
+            document.getElementById('editVehicle').value = data.vehicle || '0';
+            
+            // ข้อมูลการศึกษา
+            document.getElementById('editStu_major').value = data.Stu_major || '';
+            document.getElementById('editStu_room').value = data.Stu_room || '';
+            document.getElementById('editStu_status').value = data.Stu_status || '1';
+            document.getElementById('editRisk_group').value = data.Risk_group || '';
+            
+            // ข้อมูลบิดา
+            document.getElementById('editFather_name').value = data.Father_name || '';
+            document.getElementById('editFather_occu').value = data.Father_occu || '';
+            document.getElementById('editFather_income').value = data.Father_income || '';
+            
+            // ข้อมูลมารดา
+            document.getElementById('editMother_name').value = data.Mother_name || '';
+            document.getElementById('editMother_occu').value = data.Mother_occu || '';
+            document.getElementById('editMother_income').value = data.Mother_income || '';
+            
+            // ข้อมูลผู้ปกครอง
+            document.getElementById('editPar_name').value = data.Par_name || '';
+            document.getElementById('editPar_relate').value = data.Par_relate || '';
+            document.getElementById('editPar_occu').value = data.Par_occu || '';
+            document.getElementById('editPar_income').value = data.Par_income || '';
+            document.getElementById('editPar_phone').value = data.Par_phone || '';
+            document.getElementById('editPar_addr').value = data.Par_addr || '';
+            
             $('#editStudentModalLabel').text('แก้ไขข้อมูลนักเรียน');
             $('#editStudentModal').modal('show');
         }
@@ -1336,15 +1512,6 @@ input[type="file"]:hover::file-selector-button {
     padding: 15px !important;
 }
 
-/* Filter select enhancements */
-#filterClass, #filterRoom, #filterStatus {
-    transition: all 0.3s ease;
-}
-
-#filterClass:focus, #filterRoom:focus, #filterStatus:focus {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-}
 
 /* SweetAlert2 custom styling */
 .swal2-popup {
@@ -1430,6 +1597,52 @@ input[type="file"]:hover::file-selector-button {
 .resetStuPwdBtn:hover::before {
     left: 100%;
 }
+
+/* Enhanced select styling for better text visibility and consistency */
+select.form-control {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    line-height: 1.8 !important;
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 12px 2.5rem 12px 16px !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-color: white !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    vertical-align: middle !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+select.form-control option {
+    color: #1f2937 !important;
+    background-color: white !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.8 !important;
+    min-height: 40px !important;
+}
+
+select.form-control:focus {
+    outline: none !important;
+}
+
+select.form-control:focus option {
+    background-color: #f9fafb !important;
+}
+
+select.form-control:focus option:checked {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+
 </style>
 
 <?php require_once('../footer.php'); ?>
