@@ -5,13 +5,13 @@ require_once('header.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-include_once("class/Utils.php");
+// include_once("class/Utils.php");
 // include_once("class/Logger.php"); // ปิดตัวเก่า
 require_once(__DIR__ . "/controllers/DatabaseLogger.php"); // เรียกใช้ Controller ใหม่
 require_once(__DIR__ . "/classes/DatabaseUsers.php"); // เรียกใช้ Database Class ใหม่
 use App\DatabaseUsers; // อย่าลืม use namespace
 
-$bs = new Bootstrap();
+// $bs = new Bootstrap();
 
 function redirectUser() {
     $roles = [
@@ -73,7 +73,7 @@ redirectUser(); // Ensure this is called before any HTML output
                 $logger = new DatabaseLogger($studentConn);
                 $loginController = new LoginController($logger);
                 
-                $bs = new Bootstrap();
+                // $bs = new Bootstrap();
 
                 if (isset($_POST['signin'])) {
                     // รับข้อมูลจากฟอร์ม
