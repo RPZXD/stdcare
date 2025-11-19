@@ -192,7 +192,16 @@ class AttendanceModel
             $statusText = $this->processLeave($stu_id, $today, $now_time, $timeSettings, $term, $year, $device_id);
         }
 
-        // 6. ส่งผลลัพธ์กลับ
+        // 6. แจ้งผู้ปกครองทาง Telegram (ถ้ามีการลงทะเบียน) — ทำเฉพาะเมื่อไม่ใช่สแกนซ้ำ
+        try {
+            $notifyMsg = sprintf("%s (%s) %s เวลา %s", $fullname, $stu_id, ($scan_type === 'arrival' ? 'มาโรงเรียน' : 'กลับบ้าน'), $now_time);
+            $this->notifyParentsByTelegram($stu_id, $notifyMsg);
+        } catch (\Exception $e) {
+            // ไม่ให้กระทบการทำงานหลัก — บันทึก error
+            error_log('Telegram notify failed: ' . $e->getMessage());
+        }
+
+        // 7. ส่งผลลัพธ์กลับ
         return [
             'student_id' => $stu_id,
             'fullname' => $fullname,
@@ -203,6 +212,59 @@ class AttendanceModel
             'status' => $statusText,
             'is_duplicate' => false
         ];
+    }
+
+    /**
+     * ส่งข้อความ Telegram ไปยังผู้ปกครองที่ลงทะเบียนไว้
+     * จะค้นจากตาราง parents ที่ verified = 1 และ student_id ตรงกัน
+     */
+    private function notifyParentsByTelegram($student_id, $message)
+    {
+        // อ่าน token จาก env ก่อน ถ้าไม่มีให้ใช้ค่า fallback (จาก webhook ปัจจุบัน)
+        $token = getenv('TELEGRAM_BOT_TOKEN') ?: '8503085481:AAGU1Qh4_rm0J5XSt0MS4d5zf42WFuA0Emg';
+        if (empty($token)) return;
+
+        // ดึง telegram_id ของผู้ปกครองที่ verified
+        try {
+            $stmt = $this->db->prepare("SELECT DISTINCT telegram_id FROM parents WHERE student_id = :stu AND verified = 1");
+            $stmt->execute([':stu' => $student_id]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log('Failed to fetch parents for Telegram notify: ' . $e->getMessage());
+            return;
+        }
+
+        if (empty($rows)) return;
+
+        $apiUrl = "https://api.telegram.org/bot" . $token . "/sendMessage";
+
+        foreach ($rows as $r) {
+            $chatId = $r['telegram_id'];
+            if (empty($chatId)) continue;
+
+            // เตรียม payload
+            $payload = [
+                'chat_id' => $chatId,
+                'text' => $message
+            ];
+
+            // ส่งแบบ POST ด้วย curl
+            try {
+                $ch = curl_init($apiUrl);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+                $result = curl_exec($ch);
+                if ($result === false) {
+                    error_log('curl error sending telegram: ' . curl_error($ch));
+                }
+                curl_close($ch);
+            } catch (\Exception $e) {
+                error_log('Exception sending telegram: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
