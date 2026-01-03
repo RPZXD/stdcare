@@ -180,7 +180,7 @@ $menuItems = [
         <div class="px-6 py-4 border-b border-white/5">
             <div class="flex items-center space-x-3">
                 <?php if (!empty($userPhoto)): ?>
-                <img src="/stdcare/teacher/uploads/phototeach/<?php echo htmlspecialchars($userPhoto); ?>" class="w-10 h-10 rounded-full object-cover ring-2 ring-blue-400/50" alt="Profile">
+                <img src="../teacher/uploads/phototeach/<?php echo htmlspecialchars($userPhoto); ?>" class="w-10 h-10 rounded-full object-cover ring-2 ring-blue-400/50" alt="Profile">
                 <?php else: ?>
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                     <i class="fas fa-chalkboard-teacher text-white"></i>
