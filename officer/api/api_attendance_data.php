@@ -125,7 +125,15 @@ $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Format data for DataTables
 $data = [];
+$stats = ['present' => 0, 'absent' => 0, 'late' => 0, 'leave' => 0];
+
 foreach ($students as $std) {
+    $status = $std['attendance_status'];
+    if ($status == '1') $stats['present']++;
+    else if ($status == '2') $stats['absent']++;
+    else if ($status == '3') $stats['late']++;
+    else if (in_array($status, ['4', '5'])) $stats['leave']++;
+
     $data[] = [
         'stu_no' => $std['Stu_no'],
         'stu_id' => $std['Stu_id'],
@@ -144,8 +152,10 @@ echo json_encode([
     'draw' => $draw,
     'recordsTotal' => intval($recordsTotal),
     'recordsFiltered' => intval($recordsFiltered),
-    'data' => $data
+    'data' => $data,
+    'stats' => $stats
 ]);
+exit;
 
 function getStatusBadge($status) {
     if (empty($status)) {

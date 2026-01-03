@@ -1,6 +1,9 @@
-
 <?php
-// เปลี่ยน path ให้ถูกต้อง (จาก ../../ เป็น ../)
+/**
+ * API: Fetch Deduct Group Data (JSON)
+ * Refactored to return raw data for modern UI rendering
+ */
+header('Content-Type: application/json');
 include_once("../../config/Database.php");
 include_once("../../class/Behavior.php");
 
@@ -13,143 +16,69 @@ $class = $_GET['class'] ?? '';
 $major = $_GET['major'] ?? '';
 $room = $_GET['room'] ?? '';
 
-
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 $behavior = new Behavior($db);
 
-function buildTableRows($students) {
-    $html = '';
-    $i = 1;
-    foreach ($students as $stu) {
+$allStudents = [];
 
-        $score = intval($stu['behavior_count']);
-        $barColor = 'bg-green-500';
-        if ($score > 50) $barColor = 'bg-red-500';
-        else if ($score >= 30 && $score <= 50) $barColor = 'bg-yellow-400';
-        $html .= '<tr class="border-b hover:bg-pink-50 transition">';
-        $html .= '<td class="py-2 px-4 text-center">'.$i++.'</td>';
-        $html .= '<td class="py-2 px-4 text-center">'.$stu['Stu_id'].'</td>';
-        $html .= '<td class="py-2 px-4">'.$stu['Stu_pre'].$stu['Stu_name'].' '.$stu['Stu_sur'].'</td>';
-        $html .= '<td class="py-2 px-4 text-center">ม.'.$stu['Stu_major'].'/'.$stu['Stu_room'].'</td>';
-        $html .= '<td class="py-2 px-4 text-center">'.$stu['Stu_no'].'</td>';
-        $html .= '<td class="py-2 px-4 text-center text-red-600 font-semibold">'.$stu['behavior_count'].' ✂️</td>';
-        $html .= '<td class="py-2 px-4"><div class="w-32 bg-gray-200 rounded-full h-4 overflow-hidden"><div class="'.$barColor.' h-4 rounded-full transition-all" style="width: '.$score.'%;"></div></div><div class="text-xs text-gray-600 mt-1 text-center">'.$score.' / 100</div></td>';
-        $html .= '</tr>';
-    }
-    return $html;
-}
-
-$html = '';
 if ($type === 'all') {
-    // รวมข้อมูลทุกกลุ่ม (1,2,3)
-    $allStudents = [];
     for ($g = 1; $g <= 3; $g++) {
         $students = $behavior->getScoreBehaviorsGroup($g, $term, $pee);
         if ($students && is_array($students)) {
             $allStudents = array_merge($allStudents, $students);
         }
     }
-    // sort by ชั้น/เลขที่
-    usort($allStudents, function($a, $b) {
-        if ($a['Stu_major'] != $b['Stu_major']) return $a['Stu_major'] - $b['Stu_major'];
-        if ($a['Stu_room'] != $b['Stu_room']) return $a['Stu_room'] - $b['Stu_room'];
-        return $a['Stu_no'] - $b['Stu_no'];
-    });
-    if (empty($allStudents)) {
-        $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-    } else {
-        $html = buildTableRows($allStudents);
-    }
-} elseif ($type === 'level') {
+} else {
     $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
-
-    if (!$students) $students = [];
-    // filter เฉพาะช่วงชั้นที่เลือก
-    if ($level === 'lower') {
-        $students = array_filter($students, fn($s) => intval($s['Stu_major']) >= 1 && intval($s['Stu_major']) <= 3);
-
-        $html = buildTableRows($students);
-        if (empty($students)) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
+    if ($students) {
+        if ($type === 'level') {
+            if ($level === 'lower') {
+                $allStudents = array_filter($students, fn($s) => intval($s['Stu_major']) >= 1 && intval($s['Stu_major']) <= 3);
+            } else if ($level === 'upper') {
+                $allStudents = array_filter($students, fn($s) => intval($s['Stu_major']) >= 4 && intval($s['Stu_major']) <= 6);
+            } else {
+                $allStudents = $students;
+            }
+        } else if ($type === 'class') {
+            if ($class) {
+                $allStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($class));
+            } else {
+                $allStudents = $students;
+            }
+        } else if ($type === 'room') {
+            if ($major && $room) {
+                $allStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major) && intval($s['Stu_room']) === intval($room));
+            } elseif ($major) {
+                $allStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major));
+            } else {
+                $allStudents = $students;
+            }
         }
-    } else if ($level === 'upper') {
-        $students = array_filter($students, fn($s) => intval($s['Stu_major']) >= 4 && intval($s['Stu_major']) <= 6);
-
-        $html = buildTableRows($students);
-        if (empty($students)) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-        }
-    } else {
-        // เดิม: แสดงทั้ง lower/upper
-        $lower = array_filter($students, fn($s) => intval($s['Stu_major']) >= 1 && intval($s['Stu_major']) <= 3);
-        $upper = array_filter($students, fn($s) => intval($s['Stu_major']) >= 4 && intval($s['Stu_major']) <= 6);
-        $html .= '<tr><td colspan="7" class="bg-blue-50 font-bold text-blue-700 text-center">ช่วงชั้น ม.ต้น</td></tr>';
-        $html .= buildTableRows($lower);
-        $html .= '<tr><td colspan="7" class="bg-purple-50 font-bold text-purple-700 text-center">ช่วงชั้น ม.ปลาย</td></tr>';
-        $html .= buildTableRows($upper);
-        if (empty($lower) && empty($upper)) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-        }
-    }
-} elseif ($type === 'class') {
-    $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
-
-    if (!$students) $students = [];
-    if ($class) {
-        $classStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($class));
-        if (empty($classStudents)) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-        } else {
-            $html = buildTableRows($classStudents);
-        }
-    } else {
-        // เดิม: แสดงทุกชั้น
-        $found = false;
-        for ($m = 1; $m <= 6; $m++) {
-            $classArr = array_filter($students, fn($s) => intval($s['Stu_major']) === $m);
-            // เพิ่ม page-break เฉพาะห้องที่ไม่ใช่ห้องแรก
-            $trStyle = $m > 1 ? ' style="page-break-before: always;"' : '';
-            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-green-50 font-bold text-green-700 text-center">ระดับชั้น ม.'.$m.'</td></tr>';
-            $html .= buildTableRows($classArr);
-            if (!empty($classArr)) $found = true;
-        }
-        if (!$found) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-        }
-    }
-} elseif ($type === 'room') {
-    // แยกตามห้อง: ต้องการ major และ room หรือ ถ้าไม่มี จะโชว์ทั้ง major/room ตามที่เลือก
-    $students = $behavior->getScoreBehaviorsGroup($group, $term, $pee);
-    if (!$students) $students = [];
-    // ถ้ามีทั้ง major และ room ให้กรองตามทั้งสองค่า
-    if ($major && $room) {
-        $roomStudents = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major) && intval($s['Stu_room']) === intval($room));
-        if (empty($roomStudents)) {
-            $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-        } else {
-            $html = buildTableRows($roomStudents);
-        }
-    } elseif ($major) {
-        // แสดงทุกห้องใน major นั้น ๆ (แยกห้องเป็นกลุ่มและขึ้นหน้าใหม่เมื่อพิมพ์)
-        $found = false;
-        // หา list ของห้องจากข้อมูล
-        $rooms = [];
-        foreach ($students as $s) {
-            if (intval($s['Stu_major']) === intval($major)) $rooms[intval($s['Stu_room'])] = true;
-        }
-        ksort($rooms);
-        foreach (array_keys($rooms) as $r) {
-            $roomArr = array_filter($students, fn($s) => intval($s['Stu_major']) === intval($major) && intval($s['Stu_room']) === $r);
-            $trStyle = $r > 0 ? ' style="page-break-before: always;"' : '';
-            $html .= '<tr'.$trStyle.'><td colspan="7" class="bg-orange-50 font-bold text-orange-700 text-center">ชั้น ม.'.intval($major).' ห้อง '.intval($r).'</td></tr>';
-            $html .= buildTableRows($roomArr);
-            if (!empty($roomArr)) $found = true;
-        }
-        if (!$found) $html = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-    } else {
-        // ไม่มี major/room ระบุ -> แจ้งให้เลือก
-        $html = '';
     }
 }
-echo json_encode(['success'=>true, 'html'=>$html]);
+
+// Global Sort by Class/Room/No
+usort($allStudents, function($a, $b) {
+    if ($a['Stu_major'] != $b['Stu_major']) return $a['Stu_major'] - $b['Stu_major'];
+    if ($a['Stu_room'] != $b['Stu_room']) return $a['Stu_room'] - $b['Stu_room'];
+    return $a['Stu_no'] - $b['Stu_no'];
+});
+
+// Final mapping to ensure clean response
+$data = array_map(function($s) {
+    return [
+        'Stu_id' => $s['Stu_id'],
+        'Stu_no' => $s['Stu_no'],
+        'FullName' => ($s['Stu_pre'] ?? '') . ($s['Stu_name'] ?? '') . ' ' . ($s['Stu_sur'] ?? ''),
+        'ClassRoom' => 'ม.' . ($s['Stu_major'] ?? '') . '/' . ($s['Stu_room'] ?? ''),
+        'major' => $s['Stu_major'],
+        'room' => $s['Stu_room'],
+        'behavior_count' => (int)$s['behavior_count']
+    ];
+}, array_values($allStudents));
+
+echo json_encode([
+    'success' => true,
+    'data' => $data
+]);

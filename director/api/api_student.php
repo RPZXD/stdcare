@@ -35,10 +35,11 @@ switch ($action) {
         echo json_encode(['classes' => $classes, 'rooms' => $rooms]);
         break;
     case 'list':
-        // รับ filter class/room
+        // รับ filter class/room/status
         $class = $_GET['class'] ?? '';
         $room = $_GET['room'] ?? '';
-        $data = $student->fetchFilteredStudents($class, $room);
+        $status = $_GET['status'] ?? '';
+        $data = $student->fetchFilteredStudents($class, $room, $status);
         echo json_encode($data ?: []);
         break;
     case 'get':

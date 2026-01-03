@@ -87,6 +87,11 @@ class LoginController
                 $_SESSION['user'] = $username;
                 $_SESSION[$role . '_login'] = $username;
                 
+                // เก็บข้อมูลผู้ใช้ทั้งหมดลง session สำหรับ navbar และ components
+                if ($role === 'Teacher') {
+                    $_SESSION['teacher_data'] = $user; // เก็บข้อมูลครูทั้งหมด
+                }
+                
                 // เพิ่มเก็บ term pee ลง session
                 $termPee = TermPee::getCurrent();
                 $_SESSION['term'] = $termPee->term;

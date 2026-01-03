@@ -7,7 +7,9 @@ include_once("../../class/Student.php");
 // รับค่า GET
 $class = isset($_GET['class']) ? $_GET['class'] : null;
 $room = isset($_GET['room']) ? $_GET['room'] : null;
-$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+$date = isset($_GET['date']) ? $_GET['date'] : null;
+$startDate = isset($_GET['startDate']) ? $_GET['startDate'] : null;
+$endDate = isset($_GET['endDate']) ? $_GET['endDate'] : null;
 
 function status_info($status) {
     switch ($status) {
@@ -30,16 +32,21 @@ $attendance = new Attendance($db);
 $studentObj = new Student($db);
 
 // ดึงข้อมูลนักเรียนพร้อมสถานะการเช็คชื่อ
-$students = $attendance->getStudentsWithAttendance($date, $class, $room);
+if ($startDate && $endDate) {
+    $students = $attendance->getStudentsWithAttendanceRange($startDate, $endDate, $class, $room);
+} else {
+    $date = $date ?: date('Y-m-d');
+    $students = $attendance->getStudentsWithAttendance($date, $class, $room);
+}
 
-// กรองเฉพาะคนที่ "ขาด" หรือ "มาสาย" (attendance_status = 2 หรือ 3)
+// กรองและตกแต่งข้อมูล
 $result = [];
 foreach ($students as $stu) {
-    // 2 = ขาด, 3 = สาย (สมมติฐาน, ปรับตามระบบจริง)
     if (isset($stu['attendance_status']) && in_array($stu['attendance_status'], ['1', '2', '3', '4', '5', '6'])) {
-        // ดึงเบอร์ผู้ปกครอง
-        $parent_tel = $studentObj->getParentTel($stu['Stu_id']);
-        $stu['parent_tel'] = $parent_tel;
+        // ดึงเบอร์ผู้ปกครอง (ถ้ายังไม่มีจากการ JOIN)
+        if (!isset($stu['parent_tel'])) {
+            $stu['parent_tel'] = $studentObj->getParentTel($stu['Stu_id']);
+        }
         // เพิ่มรายละเอียดสถานะ
         $stu['attendance_status_info'] = status_info($stu['attendance_status']);
         $result[] = $stu;

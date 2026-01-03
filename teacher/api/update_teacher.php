@@ -27,6 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ตรวจสอบไฟล์อัปโหลด
     if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = "../uploads/phototeach/";
+        
+        // สร้างโฟลเดอร์ถ้ายังไม่มี
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
         $allowedTypes = ['jpg', 'jpeg', 'png'];
         $fileExtension = strtolower(pathinfo($_FILES['image1']['name'], PATHINFO_EXTENSION));
 

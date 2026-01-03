@@ -28,10 +28,24 @@ class StudentVisit {
                 s.Stu_room,
                 s.Stu_status,
                 CASE 
+                    WHEN SUM(CASE WHEN v.Term = 1 AND (
+                        (v.picture1 IS NOT NULL AND v.picture1 != '') OR 
+                        (v.picture2 IS NOT NULL AND v.picture2 != '') OR 
+                        (v.picture3 IS NOT NULL AND v.picture3 != '') OR 
+                        (v.picture4 IS NOT NULL AND v.picture4 != '') OR 
+                        (v.picture5 IS NOT NULL AND v.picture5 != '')
+                    ) THEN 1 ELSE 0 END) > 0 THEN 2
                     WHEN SUM(CASE WHEN v.Term = 1 THEN 1 ELSE 0 END) > 0 THEN 1
                     ELSE 0
                 END AS visit_status1,
                 CASE 
+                    WHEN SUM(CASE WHEN v.Term = 2 AND (
+                        (v.picture1 IS NOT NULL AND v.picture1 != '') OR 
+                        (v.picture2 IS NOT NULL AND v.picture2 != '') OR 
+                        (v.picture3 IS NOT NULL AND v.picture3 != '') OR 
+                        (v.picture4 IS NOT NULL AND v.picture4 != '') OR 
+                        (v.picture5 IS NOT NULL AND v.picture5 != '')
+                    ) THEN 1 ELSE 0 END) > 0 THEN 2
                     WHEN SUM(CASE WHEN v.Term = 2 THEN 1 ELSE 0 END) > 0 THEN 1
                     ELSE 0
                 END AS visit_status2
@@ -284,6 +298,53 @@ class StudentVisit {
         $stmt->bindParam(':pee', $pee, PDO::PARAM_STR);
         $stmt->execute();
 
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Get the count of students visited with at least one photo.
+     */
+    public function getTotalVisitWithPhotoCount($class, $room, $term, $pee) {
+        $query = "
+            SELECT COUNT(*) 
+            FROM (
+                SELECT DISTINCT v.Stu_id
+                FROM visithome v
+                JOIN student s ON s.Stu_id = v.Stu_id
+                WHERE s.Stu_major = :class 
+                  AND s.Stu_room = :room
+                  AND s.Stu_status = 1 
+                  AND v.Term = :term
+                  AND v.Pee = :pee
+                  AND (
+                      (v.picture1 IS NOT NULL AND v.picture1 != '') OR 
+                      (v.picture2 IS NOT NULL AND v.picture2 != '') OR 
+                      (v.picture3 IS NOT NULL AND v.picture3 != '') OR 
+                      (v.picture4 IS NOT NULL AND v.picture4 != '') OR 
+                      (v.picture5 IS NOT NULL AND v.picture5 != '')
+                  )
+            ) AS subquery
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':class', $class, PDO::PARAM_STR);
+        $stmt->bindParam(':room', $room, PDO::PARAM_STR);
+        $stmt->bindParam(':term', $term, PDO::PARAM_STR);
+        $stmt->bindParam(':pee', $pee, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Get total students in class/room.
+     */
+    public function getStudentCount($class, $room) {
+        $query = "SELECT COUNT(*) FROM student WHERE Stu_major = :class AND Stu_room = :room AND Stu_status = 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':class', $class, PDO::PARAM_STR);
+        $stmt->bindParam(':room', $room, PDO::PARAM_STR);
+        $stmt->execute();
         return $stmt->fetchColumn();
     }
 

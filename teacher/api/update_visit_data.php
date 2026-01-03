@@ -135,9 +135,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }    // Handle file uploads with enhanced image processing
-    $uploadDir = "../uploads/visithome" . ($_POST['pee'] - 543) . "/";
+    $yearDir = $data['pee'] - 543;
+    $uploadDir = __DIR__ . "/../uploads/visithome{$yearDir}/";
+    
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
+        if (!mkdir($uploadDir, 0777, true)) {
+            echo json_encode(['success' => false, 'message' => "ไม่สามารถสร้างโฟลเดอร์สำหรับเก็บรูปภาพได้: $yearDir"]);
+            exit;
+        }
     }
 
     // ดึงข้อมูลภาพเดิมจากฐานข้อมูล (ต้องมีฟังก์ชัน getVisitDataByKey ใน StudentVisit)

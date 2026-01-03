@@ -1,211 +1,242 @@
 <?php
+/**
+ * API: SDQ Result Table by Room
+ * Modern UI with Tailwind CSS & Glassmorphism
+ */
 include_once("../../config/Database.php");
 include_once("../../class/SDQ.php");
+include_once("../../class/UserLogin.php");
+
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 $sdq = new SDQ($db);
+$user = new UserLogin($db);
 
 $class = $_GET['class'] ?? '';
 $room = $_GET['room'] ?? '';
-$pee = ''; $term = '';
-// ดึงปี/เทอมจากระบบ (หรือ session/global)
-include_once("../../class/UserLogin.php");
-$user = new UserLogin($db);
 $term = $user->getTerm();
 $pee = $user->getPee();
 
 $students = [];
-if ($class && $room && $pee && $term) {
+if ($class && $room) {
     $students = $sdq->getSDQByClassAndRoom($class, $room, $pee, $term);
 }
 
-// ฟังก์ชันคำนวณคะแนนแต่ละด้าน
-function calc_sdq_scores($answers) {
+// Stats Calculation
+$countAll = count($students);
+$countNormal = 0;
+$countRisk = 0;
+$countProblem = 0;
+$countNotEvaluated = 0;
+
+function calc_total_problem_score($answers) {
+    if (empty($answers)) return null;
     $map = [
-        'อารมณ์ 😖' => [3, 8, 13, 16, 24],
-        'เกเร 😠' => [5, 12, 18, 22],
-        'สมาธิ/ไฮเปอร์ ⚡' => [2, 10, 15, 21],
-        'เพื่อน 🧍‍♂️🧍‍♀️' => [6, 11, 14, 19, 23],
-        'จุดแข็ง 🤝' => [1, 4, 7, 9, 17, 20, 25],
+        'อารมณ์' => [3, 8, 13, 16, 24],
+        'เกเร' => [5, 12, 18, 22],
+        'สมาธิ' => [2, 10, 15, 21],
+        'เพื่อน' => [6, 11, 14, 19, 23],
     ];
-    $scores = [];
-    foreach ($map as $key => $qs) {
-        $sum = 0;
+    $sum = 0;
+    foreach ($map as $qs) {
         foreach ($qs as $q) {
             $sum += (int)($answers["q$q"] ?? 0);
         }
-        $scores[$key] = $sum;
     }
-    return $scores;
+    return $sum;
 }
 
-// ฟังก์ชันตีความคะแนนแต่ละด้าน
-function scoreLevel($score, $category) {
-    // กำหนดเกณฑ์จาก SDQ จริง
-    $cutoffs = [
-        'อารมณ์ 😖' => [4, 6],
-        'เกเร 😠' => [3, 5],
-        'สมาธิ/ไฮเปอร์ ⚡' => [5, 7],
-        'เพื่อน 🧍‍♂️🧍‍♀️' => [3, 6],
-        'จุดแข็ง 🤝' => [5, 6], // สูงดี
-    ];
-    [$normal, $borderline] = $cutoffs[$category] ?? [0, 0];
-    if ($category == 'จุดแข็ง 🤝') {
-        return $score >= $borderline ? 'ปกติ/มีจุดแข็ง' : ($score >= $normal ? 'ภาวะเสี่ยง' : 'มีปัญหา');
-    }
-    return $score <= $normal ? 'ปกติ' : ($score <= $borderline ? 'ภาวะเสี่ยง' : 'มีปัญหา');
+function get_interpretation($score) {
+    if ($score === null) return "ยังไม่ได้ทำ";
+    if ($score >= 20) return "มีปัญหา";
+    if ($score >= 14) return "ภาวะเสี่ยง";
+    return "ปกติ";
 }
+
+$processedData = [];
+foreach ($students as $stu) {
+    $sdqData = $sdq->getSDQSelfData($stu['Stu_id'], $pee, $term);
+    $score = calc_total_problem_score($sdqData['answers'] ?? []);
+    $level = get_interpretation($score);
+    
+    if ($score === null) $countNotEvaluated++;
+    elseif ($level === "มีปัญหา") $countProblem++;
+    elseif ($level === "ภาวะเสี่ยง") $countRisk++;
+    else $countNormal++;
+    
+    $processedData[] = [
+        'info' => $stu,
+        'score' => $score,
+        'level' => $level,
+        'answers' => $sdqData['answers'] ?? []
+    ];
+}
+
+$evaluatedCount = $countAll - $countNotEvaluated;
+$percentEvaluated = $countAll > 0 ? round(($evaluatedCount / $countAll) * 100) : 0;
 ?>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <!-- Card: ตัวเลขรวม -->
-    <?php
-    $countAll = count($students);
-    $countNormal = $countRisk = $countProblem = 0;
-    foreach ($students as $stu) {
-        $sdqData = $sdq->getSDQSelfData($stu['Stu_id'], $pee, $term);
-        $scores = calc_sdq_scores($sdqData['answers'] ?? []);
-        $totalProblemScore =
-            ($scores['อารมณ์ 😖'] ?? 0) +
-            ($scores['เกเร 😠'] ?? 0) +
-            ($scores['สมาธิ/ไฮเปอร์ ⚡'] ?? 0) +
-            ($scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? 0);
-        if ($totalProblemScore >= 20) $countProblem++;
-        elseif ($totalProblemScore >= 14) $countRisk++;
-        else $countNormal++;
-    }
-    ?>
-    <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg shadow p-6 flex flex-col items-center border border-blue-200">
-        <div class="font-bold text-2xl mb-2 flex items-center gap-2">👩‍🎓 นักเรียนในห้องนี้</div>
-        <div class="text-5xl font-extrabold text-blue-700 mb-2 animate-bounce"><?= $countAll ?></div>
-        <div class="flex flex-col gap-1 text-center text-lg">
-            <div class="text-green-700">🟢 ปกติ <span class="font-bold"><?= $countNormal ?></span> คน</div>
-            <div class="text-yellow-700">🟡 เสี่ยง <span class="font-bold"><?= $countRisk ?></span> คน</div>
-            <div class="text-red-700">🔴 มีปัญหา <span class="font-bold"><?= $countProblem ?></span> คน</div>
-        </div>
-        <div class="w-full flex flex-col gap-2 mt-4">
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-green-400 flex items-center justify-center text-white text-lg">🟢</span>
-                <div class="flex-1 bg-green-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-green-500 h-4 rounded-full transition-all duration-700" style="width: <?= $countAll ? round($countNormal/$countAll*100) : 0 ?>%"></div>
+
+<!-- Premium Stats Dashboard -->
+<div class="mb-10 animate-fadeIn">
+    <div class="xl:col-span-12 glass-effect rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden shadow-2xl border border-white/40 shadow-rose-500/5">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row items-center gap-10">
+            <!-- Overall Circle Performance -->
+            <div class="flex flex-col items-center shrink-0">
+                <div class="relative w-40 h-40 flex items-center justify-center">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-100 dark:text-slate-800" />
+                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="439.8" stroke-dashoffset="<?= 439.8 * (1 - $percentEvaluated/100) ?>" class="text-rose-500 shadow-lg transition-all duration-1000" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span class="text-4xl font-black text-slate-800 dark:text-white"><?= $percentEvaluated ?>%</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Evaluated</span>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-green-700"><?= $countAll ? round($countNormal/$countAll*100) : 0 ?>%</span>
+                <div class="mt-4 text-center">
+                    <p class="text-[11px] font-black text-rose-500 uppercase tracking-widest italic">ประเมินแล้ว <?= $evaluatedCount ?> / <?= $countAll ?> คน</p>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white text-lg">🟡</span>
-                <div class="flex-1 bg-yellow-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-yellow-400 h-4 rounded-full transition-all duration-700" style="width: <?= $countAll ? round($countRisk/$countAll*100) : 0 ?>%"></div>
+
+            <!-- Detailed Breakdown -->
+            <div class="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Stat Card -->
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-emerald-500 mb-1"><?= $countNormal ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic">ปกติ</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" style="width: <?= $evaluatedCount > 0 ? ($countNormal/$evaluatedCount)*100 : 0 ?>%"></div>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-yellow-700"><?= $countAll ? round($countRisk/$countAll*100) : 0 ?>%</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white text-lg">🔴</span>
-                <div class="flex-1 bg-red-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-red-500 h-4 rounded-full transition-all duration-700" style="width: <?= $countAll ? round($countProblem/$countAll*100) : 0 ?>%"></div>
+                <!-- Stat Card -->
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-amber-500 mb-1"><?= $countRisk ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic">ภาวะเสี่ยง</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full transition-all duration-1000" style="width: <?= $evaluatedCount > 0 ? ($countRisk/$evaluatedCount)*100 : 0 ?>%"></div>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-red-700"><?= $countAll ? round($countProblem/$countAll*100) : 0 ?>%</span>
+                <!-- Stat Card -->
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-rose-500 mb-1"><?= $countProblem ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic">มีปัญหา</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-rose-500 h-full rounded-full transition-all duration-1000" style="width: <?= $evaluatedCount > 0 ? ($countProblem/$evaluatedCount)*100 : 0 ?>%"></div>
+                    </div>
+                </div>
+                <!-- Stat Card -->
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-slate-400 mb-1"><?= $countNotEvaluated ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic">ไม่ได้ทำ</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 opacity-30"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<div class="overflow-x-auto">
-    <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm animate-fade-in">
+
+<!-- Results Table -->
+<div class="overflow-x-auto overflow-y-visible">
+    <table class="w-full text-left border-separate border-spacing-y-2">
         <thead>
-            <tr class="bg-gradient-to-r from-blue-100 to-pink-100 text-gray-700">
-                <th class="py-2 px-3 border-b text-center">🆔 เลขประจำตัว</th>
-                <th class="py-2 px-3 border-b text-center">👨‍🎓 ชื่อนักเรียน</th>
-                <th class="py-2 px-3 border-b text-center">🔢 เลขที่</th>
-                <th class="py-2 px-3 border-b text-center">🏫 ห้อง</th>
-                <th class="py-2 px-3 border-b text-center">คะแนนรวม</th>
-                <th class="py-2 px-3 border-b text-center">อารมณ์ 😖</th>
-                <th class="py-2 px-3 border-b text-center">เกเร 😠</th>
-                <th class="py-2 px-3 border-b text-center">สมาธิ/ไฮเปอร์ ⚡</th>
-                <th class="py-2 px-3 border-b text-center">เพื่อน 🧍‍♂️🧍‍♀️</th>
-                <th class="py-2 px-3 border-b text-center">จุดแข็ง 🤝</th>
+            <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">เลขที่ / นักเรียน</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนรวม</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">อารมณ์</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">เกเร</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">สมาธิ</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">เพื่อน</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">จุดแข็ง</th>
             </tr>
         </thead>
-        <tbody>
-            <?php if (count($students) > 0): ?>
-                <?php foreach ($students as $stu):
-                    $sdqData = $sdq->getSDQSelfData($stu['Stu_id'], $pee, $term);
-                    $scores = calc_sdq_scores($sdqData['answers'] ?? []);
-                    $totalProblemScore =
-                        ($scores['อารมณ์ 😖'] ?? 0) +
-                        ($scores['เกเร 😠'] ?? 0) +
-                        ($scores['สมาธิ/ไฮเปอร์ ⚡'] ?? 0) +
-                        ($scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? 0);
+        <tbody class="font-bold text-slate-700 dark:text-slate-300">
+            <?php if (!empty($processedData)): ?>
+                <?php foreach ($processedData as $row): 
+                    $stu = $row['info'];
+                    $score = $row['score'];
+                    $level = $row['level'];
+                    
+                    $levelColor = 'slate';
+                    if ($level === 'ปกติ') $levelColor = 'emerald';
+                    elseif ($level === 'ภาวะเสี่ยง') $levelColor = 'amber';
+                    elseif ($level === 'มีปัญหา') $levelColor = 'rose';
                 ?>
-                <tr class="hover:bg-blue-50 transition-colors duration-150">
-                    <td class="px-3 py-2 text-center"><?= htmlspecialchars($stu['Stu_id']) ?></td>
-                    <td class="px-3 py-2"><?= htmlspecialchars($stu['full_name']) ?></td>
-                    <td class="px-3 py-2 text-center"><?= htmlspecialchars($stu['Stu_no']) ?></td>
-                    <td class="px-3 py-2 text-center"><?= htmlspecialchars($room) ?></td>
-                    <td class="px-3 py-2 text-center">
-                        <div>
-                            <p class="text-center text-2xl text-gray-900 font-bold"><?= htmlspecialchars($totalProblemScore) ?></p>
-                            <p class="text-center text-base font-bold
-                                <?php 
-                                    if ($totalProblemScore >= 20) {
-                                        echo 'text-red-500';
-                                    } elseif ($totalProblemScore >= 14) {
-                                        echo 'text-yellow-500';
-                                    } else {
-                                        echo 'text-green-500';
-                                    }
-                                ?>">
-                                <?php if ($totalProblemScore >= 20): ?>
-                                    มีปัญหา 😥
-                                <?php elseif ($totalProblemScore >= 14): ?>
-                                    ภาวะเสี่ยง 😐
-                                <?php else: ?>
-                                    ปกติ 😄
-                                <?php endif; ?>
-                            </p>
+                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                    <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="เลขที่ / นักเรียน">
+                        <div class="flex items-center gap-4">
+                            <span class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-[10px] font-black italic"><?= $stu['Stu_no'] ?></span>
+                            <div class="text-[13px] font-black text-slate-800 dark:text-white"><?= $stu['full_name'] ?></div>
                         </div>
                     </td>
-                    <td class="px-3 py-2 text-center">
-                        <?= $scores['อารมณ์ 😖'] ?? '-' ?>
-                        <span class="block text-xs <?= scoreLevel($scores['อารมณ์ 😖'] ?? 0, 'อารมณ์ 😖') === 'ปกติ' ? 'text-green-600' : (scoreLevel($scores['อารมณ์ 😖'] ?? 0, 'อารมณ์ 😖') === 'ภาวะเสี่ยง' ? 'text-yellow-600' : 'text-red-600') ?>">
-                            <?= scoreLevel($scores['อารมณ์ 😖'] ?? 0, 'อารมณ์ 😖') ?>
-                        </span>
+                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
+                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest font-mono italic">ID: <?= $stu['Stu_id'] ?></span>
                     </td>
-                    <td class="px-3 py-2 text-center">
-                        <?= $scores['เกเร 😠'] ?? '-' ?>
-                        <span class="block text-xs <?= scoreLevel($scores['เกเร 😠'] ?? 0, 'เกเร 😠') === 'ปกติ' ? 'text-green-600' : (scoreLevel($scores['เกเร 😠'] ?? 0, 'เกเร 😠') === 'ภาวะเสี่ยง' ? 'text-yellow-600' : 'text-red-600') ?>">
-                            <?= scoreLevel($scores['เกเร 😠'] ?? 0, 'เกเร 😠') ?>
-                        </span>
+                    <td class="px-4 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนรวม">
+                        <div class="flex flex-col items-center">
+                            <span class="text-base font-black text-<?= $levelColor ?>-600 italic"><?= $score ?? '-' ?></span>
+                            <span class="text-[9px] font-black text-<?= $levelColor ?>-500 uppercase tracking-widest italic"><?= $level ?></span>
+                        </div>
                     </td>
-                    <td class="px-3 py-2 text-center">
-                        <?= $scores['สมาธิ/ไฮเปอร์ ⚡'] ?? '-' ?>
-                        <span class="block text-xs <?= scoreLevel($scores['สมาธิ/ไฮเปอร์ ⚡'] ?? 0, 'สมาธิ/ไฮเปอร์ ⚡') === 'ปกติ' ? 'text-green-600' : (scoreLevel($scores['สมาธิ/ไฮเปอร์ ⚡'] ?? 0, 'สมาธิ/ไฮเปอร์ ⚡') === 'ภาวะเสี่ยง' ? 'text-yellow-600' : 'text-red-600') ?>">
-                            <?= scoreLevel($scores['สมาธิ/ไฮเปอร์ ⚡'] ?? 0, 'สมาธิ/ไฮเปอร์ ⚡') ?>
-                        </span>
+                    <!-- Individual aspects could be shown here as well, but for brevity and clean card view, we focus on the main ones -->
+                    <?php 
+                    $aspects = [
+                        ['อารมณ์', [3, 8, 13, 16, 24], [4, 6]],
+                        ['เกเร', [5, 12, 18, 22], [3, 5]],
+                        ['สมาธิ', [2, 10, 15, 21], [5, 7]],
+                        ['เพื่อน', [6, 11, 14, 19, 23], [3, 6]],
+                        ['จุดแข็ง', [1, 4, 7, 9, 17, 20, 25], [5, 6]]
+                    ];
+                    foreach ($aspects as $aspect):
+                        $label = $aspect[0];
+                        $qs = $aspect[1];
+                        $cutoffs = $aspect[2];
+                        
+                        $s_aspect = 0;
+                        if (empty($row['answers'])) {
+                            $s_aspect = null;
+                        } else {
+                            foreach ($qs as $q) $s_aspect += (int)($row['answers']["q$q"] ?? 0);
+                        }
+                        
+                        $asp_level = 'ปกติ';
+                        $asp_color = 'emerald';
+                        
+                        if ($s_aspect === null) {
+                            $asp_level = '-';
+                            $asp_color = 'slate';
+                        } else {
+                            if ($label === 'จุดแข็ง') {
+                                if ($s_aspect >= $cutoffs[1]) { $asp_level = 'ดีมาก'; $asp_color = 'emerald'; }
+                                elseif ($s_aspect >= $cutoffs[0]) { $asp_level = 'ปกติ'; $asp_color = 'emerald'; }
+                                else { $asp_level = 'มีปัญหา'; $asp_color = 'rose'; }
+                            } else {
+                                if ($s_aspect <= $cutoffs[0]) { $asp_level = 'ปกติ'; $asp_color = 'emerald'; }
+                                elseif ($s_aspect <= $cutoffs[1]) { $asp_level = 'ภาวะเสี่ยง'; $asp_color = 'amber'; }
+                                else { $asp_level = 'มีปัญหา'; $asp_color = 'rose'; }
+                            }
+                        }
+                    ?>
+                    <td class="px-4 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="<?= $label ?>">
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs font-black text-slate-700 dark:text-slate-300"><?= $s_aspect ?? '-' ?></span>
+                            <span class="text-[8px] font-black text-<?= $asp_color ?>-500 uppercase tracking-widest italic"><?= $asp_level ?></span>
+                        </div>
                     </td>
-                    <td class="px-3 py-2 text-center">
-                        <?= $scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? '-' ?>
-                        <span class="block text-xs <?= scoreLevel($scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? 0, 'เพื่อน 🧍‍♂️🧍‍♀️') === 'ปกติ' ? 'text-green-600' : (scoreLevel($scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? 0, 'เพื่อน 🧍‍♂️🧍‍♀️') === 'ภาวะเสี่ยง' ? 'text-yellow-600' : 'text-red-600') ?>">
-                            <?= scoreLevel($scores['เพื่อน 🧍‍♂️🧍‍♀️'] ?? 0, 'เพื่อน 🧍‍♂️🧍‍♀️') ?>
-                        </span>
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                        <?= $scores['จุดแข็ง 🤝'] ?? '-' ?>
-                        <span class="block text-xs <?= strpos(scoreLevel($scores['จุดแข็ง 🤝'] ?? 0, 'ปกติ') , 'ปกติ') !== false ? 'text-green-600' : (strpos(scoreLevel($scores['จุดแข็ง 🤝'] ?? 0, 'เสี่ยง') , 'เสี่ยง') !== false ? 'text-yellow-600' : 'text-red-600') ?>">
-                            <?= scoreLevel($scores['จุดแข็ง 🤝'] ?? 0, 'จุดแข็ง 🤝') ?>
-                        </span>
-                    </td>
+                    <?php endforeach; ?>
                 </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="10" class="text-center text-gray-400 py-6">ไม่พบข้อมูล SDQ สำหรับห้องนี้</td>
+                    <td colspan="8" class="px-6 py-20 text-center bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <div class="flex flex-col items-center justify-center gap-4">
+                            <i class="fas fa-folder-open text-4xl text-slate-200"></i>
+                            <p class="text-sm font-bold text-slate-400 italic">ไม่พบข้อมูล SDQ สำหรับห้องที่เลือก</p>
+                        </div>
+                    </td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
 </div>
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.animate-fade-in { animation: fadeIn 0.7s; }
-</style>

@@ -1,142 +1,224 @@
-<div>
-    <h2 class="text-2xl font-bold mb-4 flex items-center">
-        ⏰ <span class="ml-2">รายงานข้อมูลมาสาย</span>
-    </h2>
-
-    <form id="lateForm" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50 p-4 rounded-lg shadow">
+<?php
+/**
+ * Sub-View: Late Report (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ * Included in officer/report.php
+ */
+?>
+<div class="animate-fadeIn">
+    <!-- Header & Search Form -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
         <div>
-            <label class="block text-gray-700 mb-1" for="date_start">📅 วันที่เริ่มต้น</label>
-            <input type="date" id="date_start" name="date_start" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-clock"></i>
+                </span>
+                ประวัติการ <span class="text-indigo-600 italic">มาสาย</span> (สถิติ 3 ครั้งขึ้นไป)
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Student Lateness History Report</p>
         </div>
-        <div>
-            <label class="block text-gray-700 mb-1" for="date_end">📅 วันที่สิ้นสุด</label>
-            <input type="date" id="date_end" name="date_end" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300">
-        </div>
-        <div class="flex items-end">
-            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center">
-                🔍 <span class="ml-2">ค้นหา</span>
-            </button>
-        </div>
-    </form>
-    <div class="mb-4 flex justify-end">
-        <button onclick="printLateTable()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow flex items-center">
-            🖨️ <span class="ml-2">พิมพ์หน้านี้</span>
-        </button>
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white rounded-lg shadow" id="lateTable">
+
+    <!-- Enhanced Search Box -->
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+        <form id="lateForm" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-5 space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">วันที่เริ่มต้น</label>
+                <div class="relative">
+                    <i class="fas fa-calendar-alt absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400"></i>
+                    <input type="date" id="date_start" name="date_start" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm">
+                </div>
+            </div>
+            <div class="md:col-span-1 flex justify-center pb-4 hidden md:flex">
+                <i class="fas fa-arrow-right text-slate-300"></i>
+            </div>
+            <div class="md:col-span-4 space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">วันที่สิ้นสุด</label>
+                <div class="relative">
+                    <i class="fas fa-calendar-check absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400"></i>
+                    <input type="date" id="date_end" name="date_end" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm">
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="w-full py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> ค้นหา
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Stats (Loaded via JS) -->
+    <div id="lateStats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 hidden animate-fadeIn">
+        <div class="bg-indigo-50/50 dark:bg-indigo-900/20 px-6 py-5 rounded-[2rem] border border-indigo-100/50 dark:border-indigo-800/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-users-viewfinder text-xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-indigo-600/60 dark:text-indigo-400 uppercase tracking-widest italic">นักเรียนที่พบ</p>
+                <p id="total-late-count" class="text-2xl font-black text-slate-800 dark:text-white">0 คน</p>
+            </div>
+        </div>
+        <div class="bg-amber-50/50 dark:bg-amber-900/20 px-6 py-5 rounded-[2rem] border border-amber-100/50 dark:border-amber-800/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-chart-line text-xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-amber-600/60 dark:text-amber-400 uppercase tracking-widest italic">เฉลี่ยมาสาย</p>
+                <p id="avg-late-count" class="text-2xl font-black text-slate-800 dark:text-white">0 ครั้ง</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="overflow-x-auto overflow-y-visible">
+        <table class="w-full text-left border-separate border-spacing-y-2" id="lateTable">
             <thead>
-                <tr>
-                    <th class="px-4 py-2 text-center bg-blue-100">#</th>
-                    <th class="px-4 py-2 text-left bg-blue-100">🆔 เลขประจำตัว</th>
-                    <th class="px-4 py-2 text-center bg-blue-100">👨‍🎓 ชื่อนักเรียน</th>
-                    <th class="px-4 py-2 text-center bg-blue-100">🔢 เลขที่</th>
-                    <th class="px-4 py-2 text-center bg-blue-100">🏫 ห้อง</th>
-                    <th class="px-4 py-2 text-center bg-blue-100">📱 เบอร์ผู้ปกครอง</th>
-                    <th class="px-4 py-2 text-center bg-blue-100">⏰ จำนวนครั้งที่มาสาย</th>
+                <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">เลขที่ / นักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">ติดต่อผู้ปกครอง</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">จำนวนครั้งที่สาย</th>
                 </tr>
             </thead>
-            <tbody id="lateTableBody">
-                <!-- ข้อมูลจะถูกเติมโดย JS -->
+            <tbody id="lateTableBody" class="font-bold text-slate-700 dark:text-slate-300">
+                <!-- Data will be loaded via AJAX -->
             </tbody>
         </table>
-        <div id="lateTableEmpty" class="text-gray-500 text-center py-4 hidden">กรุณาเลือกช่วงวันที่และกดค้นหา</div>
+        
+        <!-- Empty State -->
+        <div id="lateTableEmpty" class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-300 mb-6">
+                <i class="fas fa-magnifying-glass text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 dark:text-white">กรุณาเลือกช่วงวันที่</h3>
+            <p class="text-sm text-slate-400 mt-2 font-bold italic">ระบุช่วงวันที่ต้องการตรวจสอบและกดปุ่มค้นหา</p>
+        </div>
     </div>
-    <script>
-    // ฟังก์ชันแปลงวันที่ yyyy-mm-dd เป็นภาษาไทยเต็มรูปแบบ
-    function thaiDateRange(start, end) {
-        const months = [
-            "", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-        ];
-        function toThai(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            const day = d.getDate();
-            const month = months[d.getMonth() + 1];
-            const year = d.getFullYear() + 543;
-            return `${day} ${month} พ.ศ. ${year}`;
-        }
-        return `ตั้งแต่ ${toThai(start)} ถึง ${toThai(end)}`;
-    }
-
-    function printLateTable() {
-        const start = document.getElementById('date_start').value;
-        const end = document.getElementById('date_end').value;
-        const table = document.getElementById('lateTable');
-        let tableHTML = table.outerHTML;
-        let rangeText = '';
-        if (start && end) {
-            rangeText = `<div style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem;text-align:center;">
-                นักเรียนที่มาสายเกิน 3 ครั้ง<br>(${thaiDateRange(start, end)})
-            </div>`;
-        } else {
-            rangeText = `<div style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem;text-align:center;">
-                นักเรียนที่มาสายเกิน 3 ครั้ง
-            </div>`;
-        }
-        const style = `
-            <style>
-                body { font-family: 'TH SarabunPSK', 'Sarabun', sans-serif; }
-                table { width: 100%; border-collapse: collapse; margin: 0 auto;}
-                th, td { border: 1px solid #ccc; padding: 8px; font-size: 1rem;}
-                th { background: #e0e7ff; }
-                tr:nth-child(even) { background: #f1f5f9; }
-                h2 { text-align: center; }
-                /* จัดตำแหน่งคอลัมน์ */
-                th, td { text-align: center; }
-                th:nth-child(3), td:nth-child(3) { text-align: left !important; }
-            </style>
-        `;
-        const win = window.open('', '', 'width=900,height=700');
-        win.document.write(`<html><head><title>พิมพ์รายงานมาสาย</title>${style}</head><body>${rangeText}${tableHTML}</body></html>`);
-        win.document.close();
-        setTimeout(() => { win.print(); win.close(); }, 500);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('lateForm');
-        const tbody = document.getElementById('lateTableBody');
-        const emptyMsg = document.getElementById('lateTableEmpty');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            tbody.innerHTML = '';
-            emptyMsg.classList.add('hidden');
-            const start = document.getElementById('date_start').value;
-            const end = document.getElementById('date_end').value;
-            if (!start || !end) {
-                emptyMsg.textContent = 'กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด';
-                emptyMsg.classList.remove('hidden');
-                return;
-            }
-            fetch(`api/fetch_checklate.php?start_date=${start}&end_date=${end}`)
-                .then(res => res.json())
-                .then(data => {
-                    tbody.innerHTML = '';
-                    if (Array.isArray(data) && data.length > 0) {
-                        data.forEach((row, idx) => {
-                            tbody.innerHTML += `
-                                <tr class="hover:bg-blue-50">
-                                    <td class="px-4 py-2 text-center">${idx + 1}</td>
-                                    <td class="px-4 py-2 text-center">${row.Stu_id || '-'}</td>
-                                    <td class="px-4 py-2">${row.name || '-'}</td>
-                                    <td class="px-4 py-2 text-center">${row.Stu_no || '-'}</td>
-                                    <td class="px-4 py-2 text-center">${row.classroom || '-'}</td>
-                                    <td class="px-4 py-2 text-center">${row.parent_tel || '-'}</td>
-                                    <td class="px-4 py-2 text-center">${row.count_late || '-'}</td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        emptyMsg.textContent = 'ไม่พบข้อมูลมาสายในช่วงวันที่ที่เลือก';
-                        emptyMsg.classList.remove('hidden');
-                    }
-                })
-                .catch(() => {
-                    emptyMsg.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูล';
-                    emptyMsg.classList.remove('hidden');
-                });
-        });
-    });
-    </script>
 </div>
+
+<script>
+$(document).ready(function() {
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+        if (!str && str !== 0) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // Helper: Format Thai Date Range
+    function thaiDateRange(start, end) {
+        const months = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const toThai = (s) => {
+            const [y, m, d] = s.split('-');
+            return `${parseInt(d)} ${months[parseInt(m)]} ${parseInt(y) + 543}`;
+        };
+        return `ตั้งแต่วันที่ ${toThai(start)} - ${toThai(end)}`;
+    }
+
+    const $form = $('#lateForm');
+    const $tbody = $('#lateTableBody');
+    const $empty = $('#lateTableEmpty');
+    const $stats = $('#lateStats');
+
+    $form.on('submit', function(e) {
+        e.preventDefault();
+        const start = $('#date_start').val();
+        const end = $('#date_end').val();
+
+        $tbody.empty();
+        $empty.removeClass('hidden').html(`
+            <div class="flex flex-col items-center gap-4 py-10">
+                <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-sm font-bold text-slate-500 italic">กำลังรวบรวมข้อมูลสถิติ...</p>
+            </div>
+        `);
+        $stats.addClass('hidden');
+
+        fetch(`api/fetch_checklate.php?start_date=${start}&end_date=${end}`)
+            .then(res => res.json())
+            .then(data => {
+                $tbody.empty();
+                if (Array.isArray(data) && data.length > 0) {
+                    $empty.addClass('hidden');
+                    $stats.removeClass('hidden');
+                    
+                    let totalLate = 0;
+                    data.forEach((row, idx) => {
+                        totalLate += row.count_late;
+                        
+                        // Badge color logic
+                        const count = parseInt(row.count_late);
+                        let badgeClasses = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20';
+                        if (count > 8) {
+                            badgeClasses = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+                        } else if (count > 5) {
+                            badgeClasses = 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
+                        } else if (count >= 3) {
+                            badgeClasses = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+                        }
+
+                        const html = `
+                            <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                                <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="เลขที่ / นักเรียน">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-indigo-500 text-[10px] font-black italic">
+                                            ${row.Stu_no}
+                                        </div>
+                                        <div class="text-[13px] font-black text-slate-800 dark:text-white">${row.name}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest font-mono italic">ID: ${row.Stu_id}</span>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ชั้น / ห้อง">
+                                    <span class="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-black italic">
+                                        ${row.classroom}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800" data-label="ติดต่อผู้ปกครอง">
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-black text-slate-600 dark:text-slate-300">
+                                            <i class="fas fa-phone-alt mr-1.5 text-indigo-400 text-[10px]"></i> ${row.parent_tel || 'ไม่ระบุเบอร์'}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="จำนวนครั้งที่สาย">
+                                    <div class="inline-flex items-center gap-2 px-4 py-1.5 ${badgeClasses} rounded-full border shadow-sm">
+                                        <span class="text-sm font-black italic">${row.count_late}</span>
+                                        <span class="text-[10px] font-black uppercase tracking-widest italic opacity-70">ครั้ง</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        $tbody.append(html);
+                    });
+
+                    $('#total-late-count').text(data.length + ' คน');
+                    $('#avg-late-count').text((totalLate / data.length).toFixed(1) + ' ครั้ง');
+
+                } else {
+                    $stats.addClass('hidden');
+                    $empty.removeClass('hidden').html(`
+                        <div class="flex flex-col items-center justify-center py-20 text-center">
+                            <div class="w-20 h-20 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-500 mb-6 group-hover:rotate-12 transition-transform">
+                                <i class="fas fa-triangle-exclamation text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 dark:text-white">ไม่พบข้อมูล</h3>
+                            <p class="text-sm text-slate-400 mt-2 font-bold italic">ไม่พบนักเรียนที่มาสายเกิน 3 ครั้งในช่วงวันที่ระบุ</p>
+                        </div>
+                    `);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                $empty.removeClass('hidden').html(`
+                    <div class="text-rose-500 font-black italic py-10">
+                        <i class="fas fa-circle-exclamation mr-2"></i> เกิดข้อผิดพลาดในการโหลดข้อมูล
+                    </div>
+                `);
+            });
+    });
+});
+</script>

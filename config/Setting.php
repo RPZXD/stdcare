@@ -4,14 +4,12 @@ class Setting {
     private $titlesystem = "ระบบดูแลช่วยเหลือนักเรียน";
     private $pageTitle;
     private $pageTitleShort = "STDCARE";
-    private $logoImage = "/dist/img/logo-phicha.png";
-    private $imgProfile = "https://std.phichai.ac.th/teacher/uploads/phototeach/";
-    private $imgVisitHome = "https://std.phichai.ac.th/teacher/uploads/visithome/";
-    private $imgProfileStudent = "https://std.phichai.ac.th/photo/";
-    private $imgAwards = "https://person.phichai.ac.th/teacher/uploads/file_award/";
-    // private $imgAwards = "uploads/file_award/";
-    private $imgTraining = "https://person.phichai.ac.th/teacher/uploads/file_seminar/";
-    // private $imgTraining = "uploads/seminar/";
+    private $logoImage = "/stdcare/dist/img/logo-phicha.png";
+    private $imgProfile = "/stdcare/teacher/uploads/phototeach/";
+    private $imgVisitHome = "/stdcare/teacher/uploads/visithome/";
+    private $imgProfileStudent = "/stdcare/photo/";
+    private $imgAwards = "/stdcare/teacher/uploads/file_award/";
+    private $imgTraining = "/stdcare/teacher/uploads/file_seminar/";
     private $uploadDir_seminar = "../uploads/file_seminar/";
     private $uploadDir_award = "../uploads/file_award/";
     private $uploadDir_profile = "/teacher/uploads/phototeach/";
@@ -34,7 +32,7 @@ class Setting {
     }
 
     public function getImgVisitHome() {
-        return $this->getImgVisitHome;
+        return $this->imgVisitHome;
     }
 
     public function getImgProfileStudent() {
@@ -56,6 +54,5 @@ class Setting {
     public function getUploadDir_profile() {
         return $this->uploadDir_profile;
     }
-
 }
 ?>

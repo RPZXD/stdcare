@@ -1,4 +1,8 @@
 <?php
+/**
+ * Sub-View: White Class Committee List (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ */
 require_once("../config/Database.php");
 require_once("../class/Wroom.php");
 require_once("../class/Teacher.php");
@@ -6,285 +10,260 @@ require_once("../class/Teacher.php");
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
-// ดึงรายชื่อห้องทั้งหมด
+// ดึงรายชื่อห้องทั้งหมดเพื่อใช้ใน Filter
 $rooms = [];
 $stmt = $db->query("SELECT Stu_major, Stu_room FROM student WHERE Stu_status=1 GROUP BY Stu_major, Stu_room ORDER BY Stu_major, Stu_room");
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $rooms[] = $row;
 }
+
+$selectedClass = $_GET['class'] ?? '';
+$selectedRoom = $_GET['room'] ?? '';
 ?>
-<div class="max-w-full mx-auto bg-white rounded-xl shadow p-6 mt-6">
-    <form id="roomForm" method="get" class="mb-6 flex flex-wrap gap-3 items-center justify-center">
-        <label class="font-semibold text-gray-700">เลือกห้อง:</label>
-        <select name="class" id="classSelect" class="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-            <option value="">-- ชั้น --</option>
-            <?php foreach(array_unique(array_column($rooms, 'Stu_major')) as $c): ?>
-                <option value="<?= $c ?>">ม.<?= $c ?></option>
-            <?php endforeach; ?>
-        </select>
-        <select name="room" id="roomSelect" class="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-            <option value="">-- ห้อง --</option>
-        </select>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow font-semibold transition">แสดง</button>
-    </form>
-    <div id="resultArea" class="mt-4"></div>
-    <div class="flex justify-center mt-4">
-        <button id="printBtn" type="button" class="hidden bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow font-semibold transition">
-            🖨️ พิมพ์รายชื่อ
+
+<div class="animate-fadeIn">
+    <!-- Header Area -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-users"></i>
+                </span>
+                รายชื่อคณะกรรมการ <span class="text-sky-600 italic">ห้องเรียนสีขาว</span>
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Committee Members • By Room</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8 no-print">
+        <form id="roomForm" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-4 space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">ระดับชั้น</label>
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-sky-400"></i>
+                    <select name="class" id="classSelect" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-sky-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- ชั้น --</option>
+                        <?php foreach(array_unique(array_column($rooms, 'Stu_major')) as $c): ?>
+                            <option value="<?= $c ?>" <?= $c == $selectedClass ? 'selected' : '' ?>>มัธยมศึกษาปีที่ <?= $c ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="md:col-span-4 space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">ห้องเรียน</label>
+                <div class="relative">
+                    <i class="fas fa-door-open absolute left-4 top-1/2 -translate-y-1/2 text-sky-400"></i>
+                    <select name="room" id="roomSelect" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-sky-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- ห้อง --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="md:col-span-4">
+                <button type="submit" class="w-full py-3.5 bg-sky-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-sky-600/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> แสดงข้อมูล
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Content Container -->
+    <div id="resultArea" class="space-y-8 min-h-[200px]">
+        <div class="flex flex-col items-center justify-center py-20 text-center text-slate-400 italic font-bold">
+            <i class="fas fa-mouse-pointer text-4xl mb-4 opacity-20"></i>
+            <p>กรุณาเลือกห้องเพื่อดูรายชื่อคณะกรรมการ</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons (Hidden by default) -->
+    <div id="actionButtons" class="hidden flex flex-wrap justify-center gap-4 mt-10 no-print">
+        <button id="printBtn" class="px-8 py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fas fa-print"></i> พิมพ์รายชื่อ
         </button>
-        <button id="wordBtn" type="button" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded shadow font-semibold transition ml-2">
-            ⬇️ ส่งออกเป็น Word
+        <button id="wordBtn" class="px-8 py-3.5 bg-blue-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fas fa-file-word"></i> ส่งออกเป็น Word
         </button>
     </div>
 </div>
+
 <script>
-const allRooms = <?php echo json_encode($rooms); ?>;
+$(document).ready(function() {
+    const allRooms = <?= json_encode($rooms) ?>;
+    const $classSelect = $('#classSelect');
+    const $roomSelect = $('#roomSelect');
+    const $resultArea = $('#resultArea');
+    const $actionButtons = $('#actionButtons');
 
-// ดึงค่าจาก query string (ถ้ามี)
-function getQueryParam(name) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name) || '';
-}
+    function updateRoomSelect(selectedClass, selectedRoom = '') {
+        $roomSelect.html('<option value="">-- ห้อง --</option>');
+        allRooms.forEach(r => {
+            if (!selectedClass || r.Stu_major == selectedClass) {
+                const isSelected = (selectedRoom && r.Stu_room == selectedRoom) ? 'selected' : '';
+                $roomSelect.append(`<option value="${r.Stu_room}" ${isSelected}>${r.Stu_room}</option>`);
+            }
+        });
+    }
 
-// กรอกห้องอัตโนมัติเมื่อเลือกชั้น
-function updateRoomSelect(selectedClass, selectedRoom = '') {
-    const roomSelect = document.getElementById('roomSelect');
-    roomSelect.innerHTML = '<option value="">-- ห้อง --</option>';
-    allRooms.forEach(r => {
-        if (!selectedClass || r.Stu_major == selectedClass) { // เปลี่ยน === เป็น ==
-            const sel = (selectedRoom && r.Stu_room == selectedRoom) ? 'selected' : ''; // เปลี่ยน === เป็น ==
-            roomSelect.innerHTML += `<option value="${r.Stu_room}" ${sel}>${r.Stu_room}</option>`;
+    $classSelect.on('change', function() {
+        updateRoomSelect($(this).val());
+    });
+
+    $('#roomForm').on('submit', function(e) {
+        e.preventDefault();
+        const classVal = $classSelect.val();
+        const roomVal = $roomSelect.val();
+
+        if (classVal && roomVal) {
+            fetchCommittee(classVal, roomVal);
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกข้อมูล',
+                text: 'กรุณาเลือกชั้นและห้องให้ครบถ้วน',
+                confirmButtonColor: '#0ea5e9'
+            });
         }
     });
-}
 
-// โหลดค่าจาก query string (ถ้ามี)
-document.addEventListener('DOMContentLoaded', function() {
-    const classVal = getQueryParam('class');
-    const roomVal = getQueryParam('room');
-    if (classVal) {
-        document.getElementById('classSelect').value = classVal;
-        updateRoomSelect(classVal, roomVal);
-    }
-    // ถ้ามีค่า room ใน query string ให้ set ค่า
-    if (classVal && roomVal) {
-        document.getElementById('roomSelect').value = roomVal;
-        fetchCommittee(classVal, roomVal);
-    }
-});
+    function fetchCommittee(classVal, roomVal) {
+        $resultArea.html(`
+            <div class="flex flex-col items-center justify-center py-20 text-center animate-pulse">
+                <div class="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-sm font-bold text-slate-500 italic">กำลังโหลดข้อมูลคณะกรรมการ...</p>
+            </div>
+        `);
+        $actionButtons.addClass('hidden');
 
-// อัปเดตห้องเมื่อเลือกชั้น
-document.getElementById('classSelect').addEventListener('change', function() {
-    updateRoomSelect(this.value);
-    document.getElementById('roomSelect').value = '';
-});
-
-// ดัก submit ฟอร์ม
-document.getElementById('roomForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const classVal = document.getElementById('classSelect').value;
-    const roomVal = document.getElementById('roomSelect').value;
-    if (classVal && roomVal) {
-        // อัปเดต query string
-        const url = new URL(window.location.href);
-        url.searchParams.set('class', classVal);
-        url.searchParams.set('room', roomVal);
-        window.history.replaceState({}, '', url);
-        fetchCommittee(classVal, roomVal);
-    } else {
-        document.getElementById('resultArea').innerHTML = '<div class="text-gray-500 text-center">กรุณาเลือกห้องเพื่อดูรายชื่อคณะกรรมการ</div>';
-    }
-});
-
-// เรียก API
-function fetchCommittee(classVal, roomVal) {
-    document.getElementById('resultArea').innerHTML = '<div class="text-gray-400 text-center animate-pulse">กำลังโหลดข้อมูล...</div>';
-    document.getElementById('printBtn').classList.add('hidden');
-    document.getElementById('wordBtn').classList.add('hidden');
-    fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || !data.positions) {
-                document.getElementById('resultArea').innerHTML = '<div class="text-gray-500 text-center">ไม่พบข้อมูล</div>';
-                document.getElementById('printBtn').classList.add('hidden');
-                document.getElementById('wordBtn').classList.add('hidden');
-                return;
-            }
-            let html = `<div class='font-bold text-lg mb-2 text-blue-700 text-center'>ห้อง ม.${classVal}/${roomVal}</div>`;
-            html += `<div class='mb-4 text-center'><span class="font-semibold">ครูที่ปรึกษา:</span> ${data.advisors && data.advisors.length ? data.advisors.map(a => a.Teach_name).join(', ') : '-'}</div>`;
-            html += `<div class="divide-y divide-gray-200">`;
-            Object.entries(data.positions).forEach(([key, label]) => {
-                html += `<div class='py-2 flex flex-wrap items-center'><span class='font-semibold w-56'>${label}:</span> `;
-                if (data.grouped[key] && data.grouped[key].length) {
-                    html += `<span class="text-gray-800">${data.grouped[key].map(s => s.Stu_pre + s.Stu_name + ' ' + s.Stu_sur).join(', ')}</span>`;
-                } else {
-                    html += "<span class='text-gray-400'>- ไม่มี -</span>";
+        fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.positions) {
+                    $resultArea.html('<div class="text-slate-400 text-center py-20 font-bold italic">ไม่พบข้อมูล</div>');
+                    return;
                 }
-                html += "</div>";
-            });
-            html += `</div>`;
-            html += `<div class='mt-6 p-4 bg-gray-50 border border-gray-200 rounded-xl text-center'><span class='font-semibold'>✍️ คติพจน์:</span> ${data.maxim ? `<span class="text-blue-700">${data.maxim}</span>` : "<span class='text-gray-400'>- ยังไม่ได้กรอก -</span>"}</div>`;
-            document.getElementById('resultArea').innerHTML = html;
-            document.getElementById('printBtn').classList.remove('hidden');
-            document.getElementById('wordBtn').classList.remove('hidden');
-        })
-        .catch(() => {
-            document.getElementById('resultArea').innerHTML = '<div class="text-red-500 text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
-            document.getElementById('printBtn').classList.add('hidden');
-            document.getElementById('wordBtn').classList.add('hidden');
-        });
-}
 
-// ฟังก์ชันรวมลำดับตำแหน่งตามที่ต้องการ
-function buildOrderedList(data) {
-    // ฟังก์ชันแปลงเลขอารบิกเป็นเลขไทย
-    function toThaiNum(num) {
-        return String(num).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
-    }
-    let list = [];
-    // ครูที่ปรึกษา
-    if (data.advisors && data.advisors.length) {
-        data.advisors.forEach(a => {
-            list.push({
-                name: `${a.Teach_pre || ''}${a.Teach_name} ${a.Teach_sur || ''}`.replace(/\s+/g, ' ').trim(),
-                pos: 'ครูที่ปรึกษา'
-            });
-        });
-    }
-    // หัวหน้าห้อง
-    if (data.grouped && data.grouped.head && data.grouped.head.length) {
-        data.grouped.head.forEach(s => {
-            list.push({
-                name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`.replace(/\s+/g, ' ').trim(),
-                pos: data.positions.head
-            });
-        });
-    }
-    // เลขานุการ
-    if (data.grouped && data.grouped.secretary && data.grouped.secretary.length) {
-        data.grouped.secretary.forEach(s => {
-            list.push({
-                name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`.replace(/\s+/g, ' ').trim(),
-                pos: data.positions.secretary
-            });
-        });
-    }
-    // ผู้ช่วยเลขานุการ
-    if (data.grouped && data.grouped.assist_secretary && data.grouped.assist_secretary.length) {
-        data.grouped.assist_secretary.forEach(s => {
-            list.push({
-                name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`.replace(/\s+/g, ' ').trim(),
-                pos: data.positions.assist_secretary
-            });
-        });
-    }
-    // ตำแหน่งอื่นๆ
-    if (data.positions && data.grouped) {
-        Object.entries(data.positions).forEach(([key, label]) => {
-            if (['head','secretary','assist_secretary'].includes(key)) return;
-            if (data.grouped[key] && data.grouped[key].length) {
-                data.grouped[key].forEach(s => {
-                    list.push({
-                        name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`.replace(/\s+/g, ' ').trim(),
-                        pos: label
-                    });
+                let html = `
+                    <div class="glass-effect rounded-[2.5rem] p-8 md:p-10 border border-white/40 shadow-xl">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-slate-100 dark:border-slate-800 pb-8">
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">ห้อง ม.${classVal}/${roomVal}</h3>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <span class="px-3 py-1 bg-sky-500/10 text-sky-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-sky-500/20">ครูที่ปรึกษา</span>
+                                    <span class="text-[13px] font-black text-slate-500 italic">
+                                        ${data.advisors && data.advisors.length ? data.advisors.map(a => a.Teach_name).join(', ') : '-'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="shrink-0 text-right">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">ปีการศึกษา</span>
+                                <span class="text-xl font-black text-sky-600 italic">2568</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                `;
+
+                Object.entries(data.positions).forEach(([key, label]) => {
+                    const members = data.grouped[key] || [];
+                    const memberNames = members.length 
+                        ? members.map(s => s.Stu_pre + s.Stu_name + ' ' + s.Stu_sur).join(', ') 
+                        : '- ไม่มี -';
+                    
+                    html += `
+                        <div class="flex flex-col md:flex-row items-start md:items-center py-4 px-6 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                            <span class="w-full md:w-64 text-[10px] font-black text-slate-400 uppercase tracking-widest italic mb-1 md:mb-0">${label}</span>
+                            <div class="flex-1">
+                                <span class="text-[14px] font-black ${members.length ? 'text-slate-700 dark:text-slate-300' : 'text-slate-300'}">
+                                    ${memberNames}
+                                </span>
+                            </div>
+                        </div>
+                    `;
                 });
-            }
-        });
+
+                html += `
+                        </div>
+
+                        <div class="mt-10 p-8 rounded-[2rem] bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-xl shadow-sky-600/20 relative overflow-hidden group">
+                            <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-all duration-700"></div>
+                            <div class="relative z-10 text-center">
+                                <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2 block italic">✍️ คติพจน์ประจำห้องเรียน</span>
+                                <p class="text-xl md:text-2xl font-black italic">${data.maxim || '- ยังไม่ได้กรอก -'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $resultArea.hide().html(html).fadeIn(500);
+                $actionButtons.removeClass('hidden');
+            })
+            .catch(() => {
+                $resultArea.html('<div class="text-rose-500 text-center py-20 font-bold italic">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>');
+            });
     }
-    return list;
-}
 
-// ฟังก์ชันพิมพ์เฉพาะผลลัพธ์
-document.getElementById('printBtn').addEventListener('click', function() {
-    const classVal = document.getElementById('classSelect').value;
-    const roomVal = document.getElementById('roomSelect').value;
-    fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
-        .then(res => res.json())
-        .then(data => {
-            function toThaiNum(num) {
-                return String(num).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
-            }
-            let list = buildOrderedList(data);
-            // แยกชื่อ-นามสกุล
-            let lines = [];
-            lines.push(`ระดับชั้นมัธยมศึกษาปีที่ ${toThaiNum(classVal)}/${toThaiNum(roomVal)}`);
-            list.forEach((item, idx) => {
-                // แยกคำนำหน้า ชื่อ นามสกุล
-                let parts = item.name.trim().split(' ');
-                let pre = parts[0] || '';
-                let fname = parts[1] || '';
-                let lname = parts.slice(2).join(' ') || '';
-                // ถ้าไม่มีคำนำหน้า
-                if (parts.length < 3) {
-                    fname = parts[0] || '';
-                    lname = parts[1] || '';
-                    pre = '';
-                }
-                // 1 tab ระหว่างชื่อ-นามสกุล, 2 tab ระหว่างนามสกุล-ตำแหน่ง
-                lines.push(`${toThaiNum(idx+1)}.${pre}${fname}\t${lname}\t\t${item.pos}`);
-            });
-            let printHtml = `<pre style="font-size:1.1rem;line-height:2;font-family:'TH SarabunPSK',Tahoma,monospace;">${lines.join('\n')}</pre>`;
-            const win = window.open('', '', 'width=900,height=650');
-            win.document.write(`
-                <html>
-                <head>
-                    <title>พิมพ์รายชื่อคณะกรรมการห้อง</title>
-                    <style>
-                        body { padding: 2rem; font-family: 'TH SarabunPSK', 'Tahoma', sans-serif; }
-                        pre { font-family: 'TH SarabunPSK', 'Tahoma', monospace; }
-                    </style>
-                </head>
-                <body onload="window.print();window.close()">
-                    ${printHtml}
-                </body>
-                </html>
-            `);
-            win.document.close();
+    // Reuse and modernize print logic
+    function buildOrderedList(data) {
+        let list = [];
+        if (data.advisors) data.advisors.forEach(a => list.push({ name: a.Teach_name, pos: 'ครูที่ปรึกษา' }));
+        const order = ['1', '10', '11']; // Head, Secretary, Assist
+        order.forEach(k => {
+            if (data.grouped[k]) data.grouped[k].forEach(s => list.push({ name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`, pos: data.positions[k] }));
         });
-});
+        Object.keys(data.positions).forEach(k => {
+            if (order.includes(k)) return;
+            if (data.grouped[k]) data.grouped[k].forEach(s => list.push({ name: `${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`, pos: data.positions[k] }));
+        });
+        return list;
+    }
 
-// ฟังก์ชันส่งออกเป็น Word
-document.getElementById('wordBtn').addEventListener('click', function() {
-    const classVal = document.getElementById('classSelect').value;
-    const roomVal = document.getElementById('roomSelect').value;
-    fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
-        .then(res => res.json())
-        .then(data => {
-            function toThaiNum(num) {
-                return String(num).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
-            }
-            let list = buildOrderedList(data);
-            let lines = [];
-            lines.push(`ระดับชั้นมัธยมศึกษาปีที่ ${toThaiNum(classVal)}/${toThaiNum(roomVal)}`);
-            list.forEach((item, idx) => {
-                let parts = item.name.trim().split(' ');
-                let pre = parts[0] || '';
-                let fname = parts[1] || '';
-                let lname = parts.slice(2).join(' ') || '';
-                if (parts.length < 3) {
-                    fname = parts[0] || '';
-                    lname = parts[1] || '';
-                    pre = '';
-                }
-                lines.push(`${toThaiNum(idx+1)}.${pre}${fname}\t${lname}\t\t${item.pos}`);
+    $('#printBtn').on('click', function() {
+        const classVal = $classSelect.val();
+        const roomVal = $roomSelect.val();
+        fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = buildOrderedList(data);
+                const toThaiNum = n => String(n).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
+                let lines = [`ระดับชั้นมัธยมศึกษาปีที่ ${toThaiNum(classVal)}/${toThaiNum(roomVal)}`];
+                list.forEach((item, idx) => {
+                    let p = item.name.split(' ');
+                    lines.push(`${toThaiNum(idx+1)}.${p[0] || ''}\t${p.slice(1).join(' ')}\t\t${item.pos}`);
+                });
+                const win = window.open('', '', 'width=900,height=650');
+                win.document.write(`<html><body onload="window.print();window.close()"><pre style="font-family:Tahoma; line-height:2;">${lines.join('\n')}</pre></body></html>`);
+                win.document.close();
             });
-            let wordHtml = `<pre style="font-size:1.1rem;line-height:2;font-family:'TH SarabunPSK',Tahoma,monospace;">${lines.join('\n')}</pre>`;
-            let blob = new Blob([
-                `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>รายชื่อคณะกรรมการห้อง</title></head>
-                <body>${wordHtml}</body></html>`
-            ], {type: 'application/msword'});
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `รายชื่อคณะกรรมการห้อง_${toThaiNum(classVal)}_${toThaiNum(roomVal)}.doc`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-        });
+    });
+
+    $('#wordBtn').on('click', function() {
+        // Simple Word Export Logic
+        const classVal = $classSelect.val();
+        const roomVal = $roomSelect.val();
+        fetch(`api/api_wroom_committee.php?major=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = buildOrderedList(data);
+                const toThaiNum = n => String(n).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
+                let content = `ระดับชั้นมัธยมศึกษาปีที่ ${toThaiNum(classVal)}/${toThaiNum(roomVal)}\n\n`;
+                list.forEach((item, idx) => content += `${idx+1}. ${item.name} (${item.pos})\n`);
+                let blob = new Blob([content], {type: 'application/msword'});
+                let url = URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = `WhiteClass_${classVal}_${roomVal}.doc`;
+                a.click();
+            });
+    });
+
+    // Check query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const cParam = urlParams.get('class');
+    const rParam = urlParams.get('room');
+    if (cParam) {
+        $classSelect.val(cParam);
+        updateRoomSelect(cParam, rParam);
+        if (rParam) fetchCommittee(cParam, rParam);
+    }
 });
 </script>

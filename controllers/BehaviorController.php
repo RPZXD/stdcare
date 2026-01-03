@@ -220,12 +220,106 @@ try {
             }
             break;
 
+        // ดึงคะแนนเพิ่มจากกิจกรรมจิตอาสา (1 ชั่วโมง = 1 คะแนน)
+        case 'volunteer_bonus':
+            $stu_id = $_GET['stu_id'] ?? '';
+            $classReq = $_GET['class'] ?? '';
+            $roomReq = $_GET['room'] ?? '';
+            try {
+                // Connect to eventstd database
+                require_once __DIR__ . '/../classes/DatabaseEventstd.php';
+                $eventDb = new \App\DatabaseEventstd(); // This connects to phichaia_eventstd
+                $eventPdo = $eventDb->getPDO();
+                
+                if (!empty($stu_id)) {
+                    // Get bonus for single student
+                    $sql = "SELECT COALESCE(SUM(a.hours), 0) AS bonus_hours
+                            FROM student_activity_logs sal
+                            INNER JOIN activities a ON sal.activity_id = a.id
+                            WHERE sal.student_id = :stu_id 
+                              AND a.category = 'จิตอาสา'
+                              AND a.term = :term 
+                              AND a.pee = :pee";
+                    $stmt = $eventPdo->prepare($sql);
+                    $stmt->execute(['stu_id' => $stu_id, 'term' => $term, 'pee' => $pee]);
+                    $result = $stmt->fetch();
+                    $bonusPoints = (int)($result['bonus_hours'] ?? 0);
+                    echo json_encode(['success' => true, 'bonus_points' => $bonusPoints]);
+                } elseif (!empty($classReq) && !empty($roomReq)) {
+                    // Get bonus for all students in class/room
+                    // First get student IDs from main db
+                    $studentsSql = "SELECT Stu_id FROM student WHERE Stu_status = '1' AND Stu_major = :class AND Stu_room = :room";
+                    $studentsStmt = $pdo->prepare($studentsSql);
+                    $studentsStmt->execute(['class' => $classReq, 'room' => $roomReq]);
+                    $students = $studentsStmt->fetchAll(\PDO::FETCH_COLUMN);
+                    
+                    $bonusData = [];
+                    if (!empty($students)) {
+                        $placeholders = implode(',', array_fill(0, count($students), '?'));
+                        $sql = "SELECT sal.student_id, COALESCE(SUM(a.hours), 0) AS bonus_hours
+                                FROM student_activity_logs sal
+                                INNER JOIN activities a ON sal.activity_id = a.id
+                                WHERE sal.student_id IN ($placeholders)
+                                  AND a.category = 'จิตอาสา'
+                                  AND a.term = ?
+                                  AND a.pee = ?
+                                GROUP BY sal.student_id";
+                        $stmt = $eventPdo->prepare($sql);
+                        $params = array_merge($students, [$term, $pee]);
+                        $stmt->execute($params);
+                        $rows = $stmt->fetchAll();
+                        foreach ($rows as $row) {
+                            $bonusData[$row['student_id']] = (int)$row['bonus_hours'];
+                        }
+                    }
+                    echo json_encode(['success' => true, 'data' => $bonusData]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Missing parameters']);
+                }
+            } catch (\Exception $e) {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            break;
+
+        // ดึงรายละเอียดคะแนนจิตอาสารายบุคคล
+        case 'volunteer_bonus_details':
+            $stu_id = $_GET['stu_id'] ?? '';
+            try {
+                require_once __DIR__ . '/../classes/DatabaseEventstd.php';
+                $eventDb = new \App\DatabaseEventstd();
+                $eventPdo = $eventDb->getPDO();
+                
+                if (empty($stu_id)) {
+                    echo json_encode(['success' => false, 'message' => 'Missing stu_id']);
+                    break;
+                }
+
+                $sql = "SELECT sal.id, a.title AS activity_name, a.event_date AS activity_date, a.hours
+                        FROM student_activity_logs sal
+                        INNER JOIN activities a ON sal.activity_id = a.id
+                        WHERE sal.student_id = :stu_id 
+                          AND a.category = 'จิตอาสา'
+                          AND a.term = :term 
+                          AND a.pee = :pee
+                        ORDER BY a.event_date DESC";
+                $stmt = $eventPdo->prepare($sql);
+                $stmt->execute(['stu_id' => $stu_id, 'term' => $term, 'pee' => $pee]);
+                $rows = $stmt->fetchAll();
+                
+                echo json_encode(['success' => true, 'data' => $rows]);
+            } catch (\Throwable $e) {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Detail error: ' . $e->getMessage()]);
+            }
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);
     }
-} catch (\Exception $e) {
-    $code = $e->getCode() ?: 500;
+} catch (\Throwable $e) {
+    $code = is_numeric($e->getCode()) && $e->getCode() > 0 ? $e->getCode() : 500;
     http_response_code($code);
     echo json_encode(['error' => 'General Controller error: ' . $e->getMessage()]);
 }

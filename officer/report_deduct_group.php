@@ -1,257 +1,276 @@
 <?php
-// สมมติว่ามี $term และ $pee จาก session หรือ context เดียวกับ report.php
+/**
+ * Sub-View: Deduct Point Report by Group (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ * Included in officer/report.php
+ */
+$term = $user->getTerm();
+$pee = $user->getPee();
 ?>
-<div>
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        📊 รายงานการหักคะแนน (แบ่งตามกลุ่ม)
-    </h2>
-    <div class="flex flex-wrap items-center gap-4 mb-6">
-        <!-- Tabs -->
-    <div class="flex flex-wrap gap-1" id="tab-group">
-            <button data-type="all" class="tab-btn bg-blue-100 text-blue-700 px-3 py-1 rounded border border-blue-300 font-medium">รวมทั้งหมด</button>
-            <button data-type="level" class="tab-btn bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 font-medium">แยกช่วงชั้น</button>
-            <button data-type="class" class="tab-btn bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 font-medium">แยกตามระดับชั้น</button>
-            <button data-type="room" class="tab-btn bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 font-medium">แยกตามห้อง</button>
+
+<div class="animate-fadeIn">
+    <!-- Header Area -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-layer-group"></i>
+                </span>
+                รายงานการหักคะแนน <span class="text-rose-600 italic">แบ่งตามกลุ่ม</span>
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Behavioral Score Groups Analysis</p>
         </div>
-        <label class="font-medium" for="group-select">เลือกกลุ่มคะแนน:</label>
-        <select id="group-select" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <option value="">-- เลือกกลุ่ม --</option>
-            <option value="1">คะแนนพฤติกรรมต่ำกว่า 50 คะแนน</option>
-            <option value="2">คะแนนพฤติกรรมอยู่ระหว่าง 50 - 70 คะแนน</option>
-            <option value="3">คะแนนพฤติกรรมอยู่ระหว่าง 71 - 99 คะแนน</option>
-        </select>
-        <!-- เพิ่ม select สำหรับช่วงชั้น -->
-        <select id="level-select" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 hidden">
-            <option value="">-- เลือกช่วงชั้น --</option>
-            <option value="lower">ม.ต้น</option>
-            <option value="upper">ม.ปลาย</option>
-        </select>
-        <!-- เพิ่ม select สำหรับระดับชั้น -->
-        <select id="class-select" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 hidden">
-            <option value="">-- เลือกระดับชั้น --</option>
-            <option value="1">ม.1</option>
-            <option value="2">ม.2</option>
-            <option value="3">ม.3</option>
-            <option value="4">ม.4</option>
-            <option value="5">ม.5</option>
-            <option value="6">ม.6</option>
-        </select>
-        <!-- เพิ่ม select สำหรับแยกตามห้อง -->
-        <select id="major-select" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 hidden">
-            <option value="">-- เลือกชั้น --</option>
-            <option value="1">ม.1</option>
-            <option value="2">ม.2</option>
-            <option value="3">ม.3</option>
-            <option value="4">ม.4</option>
-            <option value="5">ม.5</option>
-            <option value="6">ม.6</option>
-        </select>
-        <select id="room-select" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 hidden">
-            <option value="">-- เลือกห้อง --</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-            <option value="14">14</option>
-            <option value="15">15</option>
-        </select>
-        <button id="print-btn" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
-            🖨️ พิมพ์รายงาน
-        </button>
+        
+        <div class="flex gap-2 no-print">
+            <button id="print-btn" class="px-5 py-2.5 bg-rose-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                <i class="fas fa-print"></i> พิมพ์รายงาน
+            </button>
+        </div>
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow" id="group-table">
+
+    <!-- Interactive Navigation -->
+    <div class="flex flex-wrap gap-2 mb-8 no-print" id="tab-group">
+        <?php 
+        $tabs = [
+            ['id' => 'all', 'label' => 'รวมทั้งหมด', 'icon' => 'globe'],
+            ['id' => 'level', 'label' => 'แยกช่วงชั้น', 'icon' => 'arrows-up-down'],
+            ['id' => 'class', 'label' => 'แยกตามระดับชั้น', 'icon' => 'chevron-up'],
+            ['id' => 'room', 'label' => 'แยกตามห้อง', 'icon' => 'door-open']
+        ];
+        foreach ($tabs as $idx => $tab): ?>
+            <button data-type="<?= $tab['id'] ?>" class="tab-btn px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 <?= $idx === 0 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-white dark:bg-slate-900 text-slate-400 hover:text-rose-500 hover:bg-rose-50 border border-slate-100 dark:border-slate-800 shadow-sm' ?>">
+                <i class="fas fa-<?= $tab['icon'] ?> opacity-60"></i>
+                <?= $tab['label'] ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Enhanced Filters -->
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
+            <!-- Group Select - Always Visible except maybe for 'all' tab if we want -->
+            <div class="lg:col-span-4 space-y-2 group-selector">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกกลุ่มคะแนน</label>
+                <div class="relative">
+                    <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                    <select id="group-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- เลือกกลุ่มคะแนน --</option>
+                        <option value="1">ต่ำกว่า 50 คะแนน</option>
+                        <option value="2">50 - 70 คะแนน</option>
+                        <option value="3">71 - 99 คะแนน</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contextual Filters -->
+            <div id="filter-level" class="lg:col-span-4 space-y-2 hidden">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกช่วงชั้น</label>
+                <div class="relative">
+                    <i class="fas fa-arrow-up-wide-short absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                    <select id="level-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- เลือกช่วงชั้น --</option>
+                        <option value="lower">มัธยมศึกษาตอนต้น</option>
+                        <option value="upper">มัธยมศึกษาตอนปลาย</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="filter-class" class="lg:col-span-4 space-y-2 hidden">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกชั้น</label>
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                    <select id="class-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- เลือกชั้น --</option>
+                        <?php for($i=1;$i<=6;$i++): ?><option value="<?= $i ?>">ม.<?= $i ?></option><?php endfor; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div id="filter-room" class="lg:col-span-8 grid grid-cols-2 gap-4 hidden">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">ชั้น</label>
+                    <div class="relative">
+                         <i class="fas fa-chalkboard-user absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                         <select id="major-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                            <option value="">-- เลือกชั้น --</option>
+                            <?php for($i=1;$i<=6;$i++): ?><option value="<?= $i ?>">ม.<?= $i ?></option><?php endfor; ?>
+                         </select>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">ห้อง</label>
+                    <div class="relative">
+                         <i class="fas fa-door-open absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                         <select id="room-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                            <option value="">-- เลือกห้อง --</option>
+                            <?php for($i=1;$i<=15;$i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+                         </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="overflow-x-auto overflow-y-visible">
+        <table class="w-full text-left border-separate border-spacing-y-2" id="group-table">
             <thead>
-                <tr class="bg-pink-100 text-pink-900">
-                    <th class="py-3 px-4 text-center">ลำดับ</th>
-                    <th class="py-3 px-4 text-center">เลขประจำตัว</th>
-                    <th class="py-3 px-4 text-left">👤 ชื่อ - สกุล</th>
-                    <th class="py-3 px-4 text-center">ชั้น</th>
-                    <th class="py-3 px-4 text-center">เลขที่</th>
-                    <th class="py-3 px-4 text-center">✂️ คะแนนที่ถูกหัก</th>
-                    <th class="py-3 px-4 text-center">Score Bar</th>
+                <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">ลำดับ / นักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง / เลขที่</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่ถูกหัก</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">ความสมบูรณ์คะแนน</th>
                 </tr>
             </thead>
-            <tbody id="group-table-body">
-                <tr>
-                    <td colspan="7" class="py-4 text-center text-gray-500">กรุณาเลือกกลุ่มคะแนน</td>
-                </tr>
+            <tbody id="group-table-body" class="font-bold text-slate-700 dark:text-slate-300">
+                <!-- Loaded via JS -->
             </tbody>
         </table>
+        
+        <!-- Empty State -->
+        <div id="table-empty-state" class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-300 mb-6 transition-transform hover:rotate-12">
+                <i class="fas fa-magnifying-glass-chart text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 dark:text-white">กรุณาเลือกเกณฑ์การกรองข้อมูล</h3>
+            <p class="text-sm text-slate-400 mt-2 font-bold italic">ระบุกลุ่มคะแนนและพารามิเตอร์เพื่อแสดงรายงาน</p>
+        </div>
     </div>
 </div>
+
 <script>
-const groupSelect = document.getElementById('group-select');
-const groupTableBody = document.getElementById('group-table-body');
-const tabGroup = document.getElementById('tab-group');
-const printBtn = document.getElementById('print-btn');
-const levelSelect = document.getElementById('level-select');
-const classSelect = document.getElementById('class-select');
+$(document).ready(function() {
+    const term = <?= json_encode($term) ?>;
+    const pee = <?= json_encode($pee) ?>;
+    let currentTab = 'all';
 
-const majorSelect = document.getElementById('major-select');
-const roomSelect = document.getElementById('room-select');
-const term = typeof window.term !== 'undefined' ? window.term : <?= isset($term) ? json_encode($term) : '1' ?>;
-const pee = typeof window.pee !== 'undefined' ? window.pee : <?= isset($pee) ? json_encode($pee) : '2567' ?>;
+    const $tbody = $('#group-table-body');
+    const $emptyState = $('#table-empty-state');
+    const $groupSelect = $('#group-select');
+    const $printBtn = $('#print-btn');
 
-let currentTab = 'all';
-
-function getGroupText(val) {
-    switch (val) {
-        case "1": return "คะแนนพฤติกรรมต่ำกว่า 50 คะแนน";
-        case "2": return "คะแนนพฤติกรรมอยู่ระหว่าง 50 - 70 คะแนน";
-        case "3": return "คะแนนพฤติกรรมอยู่ระหว่าง 71 - 99 คะแนน";
-        default: return "";
-    }
-}
-function updateSelectVisibility() {
-    if (currentTab === 'level') {
-        levelSelect.classList.remove('hidden');
-        classSelect.classList.add('hidden');
-        majorSelect.classList.add('hidden');
-        roomSelect.classList.add('hidden');
-    } else if (currentTab === 'class') {
-        classSelect.classList.remove('hidden');
-        levelSelect.classList.add('hidden');
-        majorSelect.classList.add('hidden');
-        roomSelect.classList.add('hidden');
-    } else if (currentTab === 'room') {
-        majorSelect.classList.remove('hidden');
-        roomSelect.classList.remove('hidden');
-        levelSelect.classList.add('hidden');
-        classSelect.classList.add('hidden');
-    } else {
-        levelSelect.classList.add('hidden');
-        classSelect.classList.add('hidden');
-        majorSelect.classList.add('hidden');
-        roomSelect.classList.add('hidden');
-    }
-}
-
-// เปลี่ยน tab
-        tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        tabGroup.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('bg-blue-100','text-blue-700','border-blue-300');
-            b.classList.remove('bg-gray-100','text-gray-700','border-gray-300');
-            b.classList.add('bg-gray-100','text-gray-700','border-gray-300');
-        });
-        this.classList.remove('bg-gray-100','text-gray-700','border-gray-300');
-        this.classList.add('bg-blue-100','text-blue-700','border-blue-300');
-        currentTab = this.getAttribute('data-type');
-        updateSelectVisibility();
+    function updateFilters() {
+        $('#filter-level, #filter-class, #filter-room').addClass('hidden');
+        $('.group-selector').toggle(currentTab !== 'all');
+        
+        if (currentTab === 'level') $('#filter-level').removeClass('hidden');
+        else if (currentTab === 'class') $('#filter-class').removeClass('hidden');
+        else if (currentTab === 'room') $('#filter-room').removeClass('hidden');
+        
         fetchAndRender();
+    }
+
+    $('.tab-btn').on('click', function() {
+        $('.tab-btn').removeClass('bg-rose-500 text-white shadow-lg shadow-rose-500/20')
+                    .addClass('bg-white dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 shadow-sm');
+        $(this).removeClass('bg-white dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 shadow-sm')
+               .addClass('bg-rose-500 text-white shadow-lg shadow-rose-500/20');
+               
+        currentTab = $(this).data('type');
+        updateFilters();
+    });
+
+    $('select').on('change', fetchAndRender);
+
+    function fetchAndRender() {
+        const groupVal = $groupSelect.val();
+        const levelVal = $('#level-select').val();
+        const classVal = $('#class-select').val();
+        const majorVal = $('#major-select').val();
+        const roomVal = $('#room-select').val();
+
+        if (currentTab !== 'all' && !groupVal) {
+            $tbody.empty();
+            $emptyState.show();
+            return;
+        }
+
+        if (currentTab === 'level' && !levelVal) return;
+        if (currentTab === 'class' && !classVal) return;
+        if (currentTab === 'room' && (!majorVal || !roomVal)) return;
+
+        $tbody.empty();
+        $emptyState.html(`
+            <div class="flex flex-col items-center gap-4 py-10">
+                <div class="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-sm font-bold text-slate-500 italic">กำลังรวบรวมข้อมูลตามกลุ่ม...</p>
+            </div>
+        `).show();
+
+        let url = `api/get_deduct_group_tab.php?group=${groupVal}&type=${currentTab}&term=${term}&pee=${pee}`;
+        if (currentTab === 'level') url += `&level=${levelVal}`;
+        if (currentTab === 'class') url += `&class=${classVal}`;
+        if (currentTab === 'room') url += `&major=${majorVal}&room=${roomVal}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+                if (res.success && res.data && res.data.length > 0) {
+                    $tbody.empty();
+                    $emptyState.hide();
+                    
+                    res.data.forEach((stu, idx) => {
+                        const count = parseInt(stu.behavior_count) || 0;
+                        const score = 100 - count;
+                        
+                        let barColor = 'emerald';
+                        if (score < 50) barColor = 'rose';
+                        else if (score <= 70) barColor = 'amber';
+                        
+                        const html = `
+                            <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                                <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="ลำดับ / นักเรียน">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-[10px] font-black italic">
+                                            ${idx + 1}
+                                        </div>
+                                        <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.FullName}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">ID: ${stu.Stu_id}</span>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ชั้น / ห้อง / เลขที่">
+                                    <span class="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-black italic">
+                                        ${stu.ClassRoom} (${stu.Stu_no})
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
+                                    <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70">✂️</span></span>
+                                </td>
+                                <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="ความสมบูรณ์คะแนน">
+                                    <div class="flex flex-col items-center gap-1.5">
+                                        <div class="w-24 bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                                            <div class="bg-${barColor}-500 h-full transition-all duration-1000" style="width: ${score}%"></div>
+                                        </div>
+                                        <span class="text-[9px] font-black text-${barColor}-600 dark:text-${barColor}-400 italic">${score} / 100</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        $tbody.append(html);
+                    });
+                    
+                    if (typeof updateMobileLabels === 'function') updateMobileLabels();
+                } else {
+                    $tbody.empty();
+                    $emptyState.html(`
+                        <div class="flex flex-col items-center justify-center py-20 text-center">
+                            <div class="w-20 h-20 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-500 mb-6 group-hover:rotate-12 transition-transform">
+                                <i class="fas fa-triangle-exclamation text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 dark:text-white">ไม่พบข้อมูลตามเงื่อนไข</h3>
+                            <p class="text-sm text-slate-400 mt-2 font-bold italic">ลองปรับเปลี่ยนตัวเลือกในการค้นหาอีกครั้ง</p>
+                        </div>
+                    `).show();
+                }
+            });
+    }
+
+    $printBtn.on('click', function() {
+        if (typeof window.printReport === 'function') window.printReport();
+        else window.print();
     });
 });
-
-groupSelect.addEventListener('change', fetchAndRender);
-levelSelect.addEventListener('change', fetchAndRender);
-classSelect.addEventListener('change', fetchAndRender);
-majorSelect.addEventListener('change', fetchAndRender);
-roomSelect.addEventListener('change', fetchAndRender);
-
-function fetchAndRender() {
-    const groupVal = groupSelect.value;
-    let levelVal = levelSelect.value;
-    let classVal = classSelect.value;
-    let majorVal = majorSelect.value;
-    let roomVal = roomSelect.value;
-    if (!groupVal) {
-        groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">กรุณาเลือกกลุ่มคะแนน</td></tr>';
-        return;
-    }
-    if (currentTab === 'level' && !levelVal) {
-        groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">กรุณาเลือกช่วงชั้น</td></tr>';
-        return;
-    }
-    if (currentTab === 'class' && !classVal) {
-        groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">กรุณาเลือกระดับชั้น</td></tr>';
-        return;
-    }
-    if (currentTab === 'room' && (!majorVal || !roomVal)) {
-        groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
-        return;
-    }
-    groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>';
-    let url = `api/get_deduct_group_tab.php?group=${groupVal}&type=${currentTab}&term=${term}&pee=${pee}`;
-    if (currentTab === 'level') url += `&level=${levelVal}`;
-    if (currentTab === 'class') url += `&class=${classVal}`;
-    if (currentTab === 'room') url += `&major=${majorVal}&room=${roomVal}`;
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.html && data.html.trim() !== '') {
-                groupTableBody.innerHTML = data.html;
-            } else {
-                groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-            }
-        })
-        .catch(err => {
-            console.error('fetch error', err);
-            groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-        });
-}
-
-// พิมพ์เฉพาะข้อมูลที่แสดง
-printBtn.addEventListener('click', function() {
-    const groupVal = groupSelect.value;
-    const groupText = getGroupText(groupVal);
-    let typeText = "";
-    if (currentTab === "all") typeText = "รวมทั้งหมด";
-    else if (currentTab === "level") {
-        typeText = "แยกช่วงชั้น (" + (levelSelect.value === "lower" ? "ม.ต้น" : levelSelect.value === "upper" ? "ม.ปลาย" : "-") + ")";
-    }
-    else if (currentTab === "class") typeText = "แยกตามระดับชั้น (" + (classSelect.value ? "ม." + classSelect.value : "-") + ")";
-    else if (currentTab === "room") typeText = "แยกตามชั้น/ห้อง (" + (majorSelect.value ? "ม."+majorSelect.value : "-") + " / " + (roomSelect.value ? roomSelect.value : "-") + ")";
-    let printContent = `
-        <div style="text-align:center; font-family:Tahoma;">
-            <h2 style="font-size:1.5em; margin-bottom:0.5em;">รายงานสถิติการหักคะแนนนักเรียนจำแนกตามกลุ่ม</h2>
-            <div style="margin-bottom:0.5em;">ประเภทของกลุ่ม: <strong>${groupText || '-'}</strong></div>
-            <div style="margin-bottom:0.5em;">${typeText}</div>
-            <div style="margin-bottom:1em;">ภาคเรียนที่ <strong>${term}</strong> ปีการศึกษา <strong>${pee}</strong></div>
-        </div>
-    `;
-    const tableHtml = document.getElementById('group-table').outerHTML;
-    const printWindow = window.open('', '', 'width=900,height=700');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print</title>
-            <style>
-                body { font-family: Tahoma, Arial, sans-serif; margin: 30px; }
-                table { border-collapse: collapse; width: 100%; margin: 0 auto; }
-                th, td { border: 1px solid #888; padding: 8px; text-align: center; }
-                th { background: #f9c; color: #900; }
-                h2 { margin-bottom: 0.5em; }
-            </style>
-        </head>
-        <body>
-            ${printContent}
-            ${tableHtml}
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 500);
-});
-
-// โหลดข้อมูลเริ่มต้น
-updateSelectVisibility();
-const groupVal = groupSelect.value;
-if (groupVal) {
-    groupTableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>';
-    fetchAndRender();
-}
 </script>

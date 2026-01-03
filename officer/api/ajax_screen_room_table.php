@@ -1,23 +1,27 @@
 <?php
+/**
+ * API: Screening 11 Result Table by Room
+ * Modern UI with Tailwind CSS & Glassmorphism
+ */
 include_once("../../config/Database.php");
 include_once("../../class/Screeningdata.php");
+include_once("../../class/UserLogin.php");
+
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 $screen = new ScreeningData($db);
+$user = new UserLogin($db);
 
 $class = $_GET['class'] ?? '';
 $room = $_GET['room'] ?? '';
-include_once("../../class/UserLogin.php");
-$user = new UserLogin($db);
 $term = $user->getTerm();
 $pee = $user->getPee();
 
 $students = [];
-if ($class && $room && $pee) {
+if ($class && $room) {
     $students = $screen->getScreenByClassAndRoom($class, $room, $pee);
 }
 
-// 11 ด้าน
 $screenFields = [
     'special_ability' => 'ความสามารถพิเศษ',
     'study' => 'การเรียน',
@@ -32,142 +36,144 @@ $screenFields = [
     'it' => 'เทคโนโลยี'
 ];
 
-// --- รายห้อง: สรุปผลแต่ละด้าน (interpretation) ---
 $summary = $screen->getScreeningSummaryByClassRoom($class, $room, $pee);
 $totalStudents = count($students);
 
-// Helper for showing array or string
+function interpretStatus($status) {
+    if ($status === 'ปกติ' || $status == 1 || $status === '1') return ['text' => 'ปกติ', 'color' => 'emerald', 'bg' => 'emerald-500/10'];
+    if ($status === 'เสี่ยง' || $status == 2 || $status === '2') return ['text' => 'เสี่ยง', 'color' => 'amber', 'bg' => 'amber-500/10'];
+    if ($status === 'มีปัญหา' || $status == 3 || $status === '3') return ['text' => 'มีปัญหา', 'color' => 'rose', 'bg' => 'rose-500/10'];
+    return ['text' => '-', 'color' => 'slate', 'bg' => 'slate-100'];
+}
+
 function showValue($val) {
-    if (is_array($val)) {
-        return implode('<br>', array_map('htmlspecialchars', $val));
-    }
+    if (is_array($val)) return implode(', ', array_map('htmlspecialchars', $val));
     return htmlspecialchars($val ?? '-');
 }
-function interpretStatus($status) {
-    if ($status === 'ปกติ' || $status == 1 || $status === '1') return '<span class="text-green-600 font-bold">ปกติ</span>';
-    if ($status === 'เสี่ยง' || $status == 2 || $status === '2') return '<span class="text-yellow-600 font-bold">เสี่ยง</span>';
-    if ($status === 'มีปัญหา' || $status == 3 || $status === '3') return '<span class="text-red-600 font-bold">มีปัญหา</span>';
-    return '<span class="text-gray-500">-</span>';
-}
+
 function showSpecialAbilityDetail($val) {
-    if (is_array($val)) {
-        $subjects = [
-            'special_0' => '🧮 คณิตศาสตร์',
-            'special_1' => '📚 ภาษาไทย',
-            'special_2' => '🌏 ภาษาต่างประเทศ',
-            'special_3' => '🔬 วิทยาศาสตร์',
-            'special_4' => '🎨 ศิลปะ',
-            'special_5' => '🛠️ การงานอาชีพและเทคโนโลยี',
-            'special_6' => '🏃‍♂️ สุขศึกษา และพลศึกษา',
-            'special_7' => '🕌 สังคมศึกษา ศาสนา และวัฒนธรรม'
-        ];
-        $html = '';
-        foreach ($val as $key => $details) {
-            if (empty($details) || (is_array($details) && count(array_filter($details, fn($d) => trim($d) !== '')) === 0)) continue;
-            $subject = $subjects[$key] ?? $key;
-            $html .= "<div class='mb-1 flex items-start gap-2'><span class='font-semibold'>{$subject}:</span> ";
-            if (is_array($details)) {
-                $html .= "<span class='text-gray-700'>" . implode(', ', array_filter(array_map('htmlspecialchars', $details), fn($d) => trim($d) !== '')) . "</span>";
-            } else {
-                $html .= "<span class='text-gray-700'>" . htmlspecialchars($details) . "</span>";
-            }
-            $html .= "</div>";
-        }
-        return $html ?: '<span class="text-gray-400">-</span>';
+    if (!is_array($val)) return '';
+    $subjects = [
+        'special_0' => '🧮 คณิต', 'special_1' => '📚 ไทย', 'special_2' => '🌏 ต่างประเทศ',
+        'special_3' => '🔬 วิทย์', 'special_4' => '🎨 ศิลปะ', 'special_5' => '🛠️ กอท.',
+        'special_6' => '🏃‍♂️ พละ', 'special_7' => '🕌 สังคม'
+    ];
+    $html = '<div class="mt-2 text-[10px] space-y-1 text-left text-slate-500">';
+    foreach ($val as $key => $details) {
+        if (empty($details)) continue;
+        $subj = $subjects[$key] ?? $key;
+        $detailStr = is_array($details) ? implode(', ', array_filter($details)) : $details;
+        if (!empty($detailStr)) $html .= "<div><span class='font-black text-indigo-500'>$subj:</span> $detailStr</div>";
     }
-    return '<span class="text-gray-400">-</span>';
+    $html .= '</div>';
+    return $html;
 }
 ?>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg shadow p-6 flex flex-col items-center border border-blue-200 w-full">
-        <div class="font-bold text-2xl mb-2 flex items-center gap-2">👩‍🎓 สรุปผลการคัดกรอง 11 ด้าน (รายห้อง)</div>
-        <div class="text-lg text-blue-700 mb-2">นักเรียนในห้องนี้: <span class="font-bold"><?= $totalStudents ?></span> คน</div>
-        <div class="w-full overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-xs mb-2">
-                <thead>
-                    <tr class="bg-blue-100 text-gray-700">
-                        <th class="py-1 px-2 border-b text-center">ด้าน</th>
-                        <th class="py-1 px-2 border-b text-center text-green-700">ปกติ</th>
-                        <th class="py-1 px-2 border-b text-center text-yellow-700">เสี่ยง</th>
-                        <th class="py-1 px-2 border-b text-center text-red-700">มีปัญหา</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($screenFields as $key => $label): ?>
-                    <tr>
-                        <td class="px-2 py-1 text-left font-semibold"><?= $label ?></td>
-                        <td class="px-2 py-1 text-center text-green-700"><?= $summary[$key]['normal'] ?? 0 ?></td>
-                        <td class="px-2 py-1 text-center text-yellow-700"><?= $summary[$key]['risk'] ?? 0 ?></td>
-                        <td class="px-2 py-1 text-center text-red-700"><?= $summary[$key]['problem'] ?? 0 ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+
+<!-- Premium Stats Dashboard -->
+<div class="mb-10 animate-fadeIn overflow-x-auto">
+    <div class="min-w-[800px] glass-effect rounded-[2.5rem] p-8 border border-white/40 shadow-xl shadow-indigo-500/5">
+        <div class="flex items-center gap-6 mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
+            <div class="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">คัดกรอง 11 ด้าน: สรุปภาพรวมห้อง <?= "$class/$room" ?></h3>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Total Students: <?= $totalStudents ?></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-11 gap-2">
+            <?php foreach ($screenFields as $key => $label): 
+                $sum = $summary[$key] ?? ['normal' => 0, 'risk' => 0, 'problem' => 0];
+                $totalS = array_sum($sum);
+                $problemCount = ($sum['risk'] ?? 0) + ($sum['problem'] ?? 0);
+                $problemPercent = $totalS > 0 ? round(($problemCount / $totalS) * 100) : 0;
+            ?>
+            <div class="flex flex-col items-center group">
+                <div class="relative w-full aspect-square flex items-center justify-center mb-3">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="50%" cy="50%" r="40%" stroke="currentColor" stroke-width="4" fill="transparent" class="text-slate-100 dark:text-slate-800" />
+                        <circle cx="50%" cy="50%" r="40%" stroke="currentColor" stroke-width="6" fill="transparent" stroke-dasharray="100" stroke-dashoffset="<?= 100 - $problemPercent ?>" class="text-rose-500 transition-all duration-1000" stroke-linecap="round" />
+                    </svg>
+                    <span class="absolute text-[10px] font-black text-slate-700 dark:text-white"><?= $problemPercent ?>%</span>
+                </div>
+                <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter text-center h-8 leading-none"><?= $label ?></span>
+            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
 
-<!-- ตารางรายบุคคล -->
+<!-- Results Table -->
 <div class="overflow-x-auto">
-<table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm animate-fade-in">
-    <thead>
-        <tr class="bg-blue-100 text-gray-700">
-            <th class="py-2 px-3 border-b text-center">🆔 เลขประจำตัว</th>
-            <th class="py-2 px-3 border-b text-center">👨‍🎓 ชื่อนักเรียน</th>
-            <th class="py-2 px-3 border-b text-center">🔢 เลขที่</th>
-            <?php foreach ($screenFields as $key => $label): ?>
-                <th class="py-2 px-3 border-b text-center"><?= $label ?></th>
-            <?php endforeach; ?>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (count($students) > 0): ?>
-            <?php foreach ($students as $stu):
-                $data = $screen->getScreeningDataByStudentId($stu['Stu_id'], $pee);
-            ?>
-            <tr class="hover:bg-blue-50 transition-colors duration-150">
-                <td class="px-3 py-2 text-center"><?= htmlspecialchars($stu['Stu_id']) ?></td>
-                <td class="px-3 py-2"><?= htmlspecialchars($stu['full_name']) ?></td>
-                <td class="px-3 py-2 text-center"><?= htmlspecialchars($stu['Stu_no']) ?></td>
-                <?php foreach ($screenFields as $key => $label): ?>
-                    <td class="px-3 py-2 text-center">
-                        <?php
-                        // แสดงผลแบบ interpret_screen11_self
-                        if ($key === 'special_ability') {
-                            echo htmlspecialchars($data['special_ability'] ?? '-');
-                            if (!empty($data['special_ability_detail'])) {
-                                echo '<div class="mt-1">' . showSpecialAbilityDetail($data['special_ability_detail']) . '</div>';
-                            }
-                        } elseif ($key === 'special_need') {
-                            echo interpretStatus($data['special_need_status'] ?? null);
-                            if (!empty($data['special_need_type'])) {
-                                echo '<div class="mt-1 text-blue-700">' . showValue($data['special_need_type']) . '</div>';
-                            }
-                        } else {
-                            echo interpretStatus($data[$key . '_status'] ?? null);
-                            if (($data[$key . '_status'] ?? null) === 'เสี่ยง' && !empty($data[$key . '_risk'])) {
-                                echo '<div class="text-yellow-700">' . showValue($data[$key . '_risk']) . '</div>';
-                            } elseif (($data[$key . '_status'] ?? null) === 'มีปัญหา' && !empty($data[$key . '_problem'])) {
-                                echo '<div class="text-red-700">' . showValue($data[$key . '_problem']) . '</div>';
-                            }
-                        }
-                        ?>
-                    </td>
+    <table class="w-full text-left border-separate border-spacing-y-2">
+        <thead>
+            <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">นักเรียน</th>
+                <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัส/เลขที่</th>
+                <?php foreach ($screenFields as $label): ?>
+                    <th class="px-2 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest italic text-center"><?= $label ?></th>
                 <?php endforeach; ?>
             </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="<?= 4 + count($screenFields) ?>" class="text-center text-gray-400 py-6">ไม่พบข้อมูลการคัดกรองสำหรับห้องนี้</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody class="font-bold text-slate-700 dark:text-slate-300">
+            <?php if ($totalStudents > 0): ?>
+                <?php foreach ($students as $stu):
+                    $data = $screen->getScreeningDataByStudentId($stu['Stu_id'], $pee);
+                ?>
+                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                    <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="นักเรียน">
+                        <div class="text-[13px] font-black text-slate-800 dark:text-white"><?= $stu['full_name'] ?></div>
+                    </td>
+                    <td class="px-4 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัส/เลขที่">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] font-black text-slate-400">ID: <?= $stu['Stu_id'] ?></span>
+                            <span class="text-[10px] font-black text-indigo-500 italic">No. <?= $stu['Stu_no'] ?></span>
+                        </div>
+                    </td>
+                    <?php foreach ($screenFields as $key => $label): 
+                        $val = '-';
+                        $color = 'slate';
+                        $bg = 'slate-50';
+                        $subText = '';
+
+                        if ($key === 'special_ability') {
+                            $val = $data['special_ability'] ?? '-';
+                            $color = 'indigo';
+                            $subText = !empty($data['special_ability_detail']) ? showSpecialAbilityDetail($data['special_ability_detail']) : '';
+                        } elseif ($key === 'special_need') {
+                            $st = interpretStatus($data['special_need_status'] ?? null);
+                            $val = $st['text'];
+                            $color = $st['color'];
+                            if (!empty($data['special_need_type'])) $subText = '<div class="mt-1 text-[9px] text-blue-500">' . showValue($data['special_need_type']) . '</div>';
+                        } else {
+                            $st = interpretStatus($data[$key . '_status'] ?? null);
+                            $val = $st['text'];
+                            $color = $st['color'];
+                            if (($data[$key . '_status'] ?? null) === 'เสี่ยง' && !empty($data[$key . '_risk'])) {
+                                $subText = '<div class="text-[9px] text-amber-500">' . showValue($data[$key . '_risk']) . '</div>';
+                            } elseif (($data[$key . '_status'] ?? null) === 'มีปัญหา' && !empty($data[$key . '_problem'])) {
+                                $subText = '<div class="text-[9px] text-rose-500">' . showValue($data[$key . '_problem']) . '</div>';
+                            }
+                        }
+                    ?>
+                    <td class="px-2 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="<?= $label ?>">
+                        <div class="flex flex-col items-center min-w-[80px]">
+                            <span class="text-[10px] font-black text-<?= $color ?>-600 uppercase tracking-widest italic"><?= $val ?></span>
+                            <?= $subText ?>
+                        </div>
+                    </td>
+                    <?php endforeach; ?>
+                </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="13" class="px-6 py-20 text-center bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <p class="text-sm font-bold text-slate-400 italic">ไม่พบข้อมูลการคัดกรองสำหรับห้องนี้</p>
+                    </td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 </div>
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.animate-fade-in { animation: fadeIn 0.7s; }
-</style>

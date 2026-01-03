@@ -1,212 +1,259 @@
 <?php
-// ดึงค่า term และ pee จาก session หรือค่าที่กำหนดไว้
-// Fetch terms and pee
+/**
+ * Sub-View: Deduct Point Report by Room (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ * Included in officer/report.php
+ */
 $term = $user->getTerm();
 $pee = $user->getPee();
-
 ?>
-<div>
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        🏫 รายงานการหักคะแนน (รายห้อง)
-    </h2>
-    <div class="flex flex-wrap gap-4 mb-6">
+
+<div class="animate-fadeIn">
+    <!-- Header Area -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
         <div>
-            <label class="block mb-1 font-medium">ชั้น</label>
-            <select id="select-class" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">-- เลือกชั้น --</option>
-            </select>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-school"></i>
+                </span>
+                ประวัติการหักคะแนน <span class="text-indigo-600 italic">รายห้องเรียน</span>
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Score Deduction Report by Classroom</p>
         </div>
-        <div>
-            <label class="block mb-1 font-medium">ห้อง</label>
-            <select id="select-room" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
-                <option value="">-- เลือกห้อง --</option>
-            </select>
+        
+        <div class="flex gap-2 no-print">
+            <button id="print-btn" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 hidden">
+                <i class="fas fa-print"></i> พิมพ์ข้อมูล
+            </button>
         </div>
     </div>
-    <button
-        id="print-btn"
-        class="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
-        style="display:none"
-    >
-        🖨️ พิมพ์ข้อมูล
-    </button>
-    <div class="overflow-x-auto" id="print-area-wrapper">
-        <div id="print-header" style="display:none;">
-            <div class="flex flex-col items-center justify-center">
-                <div class="mb-2 font-bold text-lg text-center">รายงานสถิติการหักคะแนนนักเรียนจำแนกตามห้องเรียน</div>
-                <div class="mb-1 text-center" id="print-class-title"></div>
-                <div class="mb-4 text-center" id="print-term-title"></div>
+
+    <!-- Enhanced Filters -->
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกระดับชั้น</label>
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400"></i>
+                    <select id="select-class" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <option value="">-- เลือกชั้น --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกห้องเรียน</label>
+                <div class="relative">
+                    <i class="fas fa-door-open absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400"></i>
+                    <select id="select-room" disabled class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none disabled:opacity-50">
+                        <option value="">-- เลือกห้อง --</option>
+                    </select>
+                </div>
             </div>
         </div>
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow" id="deduct-table">
+    </div>
+
+    <!-- Summary Stats -->
+    <div id="stat-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden animate-fadeIn">
+        <div class="bg-indigo-50/50 dark:bg-indigo-900/20 px-6 py-5 rounded-[2rem] border border-indigo-100/50 dark:border-indigo-800/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-users text-xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-indigo-600/60 dark:text-indigo-400 uppercase tracking-widest italic">นักเรียนทั้งหมด</p>
+                <p id="stat-total" class="text-2xl font-black text-slate-800 dark:text-white">0 คน</p>
+            </div>
+        </div>
+        <div class="bg-rose-50/50 dark:bg-rose-900/20 px-6 py-5 rounded-[2rem] border border-rose-100/50 dark:border-rose-800/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-minus-circle text-xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-rose-600/60 dark:text-rose-400 uppercase tracking-widest italic">นักเรียนที่ถูกหักคะแนน</p>
+                <p id="stat-deducted" class="text-2xl font-black text-slate-800 dark:text-white">0 คน</p>
+            </div>
+        </div>
+        <div class="bg-emerald-50/50 dark:bg-emerald-900/20 px-6 py-5 rounded-[2rem] border border-emerald-100/50 dark:border-emerald-800/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-check-double text-xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-emerald-600/60 dark:text-emerald-400 uppercase tracking-widest italic">คะแนนพฤติกรรมปกติ</p>
+                <p id="stat-normal" class="text-2xl font-black text-slate-800 dark:text-white">0 คน</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="overflow-x-auto overflow-y-visible">
+        <table class="w-full text-left border-separate border-spacing-y-2" id="deduct-table">
             <thead>
-                <tr class="bg-blue-100 text-blue-900">
-                    <th class="py-3 px-4 text-center">เลขที่</th>
-                    <th class="py-3 px-4 text-center">เลขประจำตัว</th>
-                    <th class="py-3 px-4 text-left">👤 ชื่อ - สกุล</th>
-                    <th class="py-3 px-4 text-center">ชั้น</th>
-                    <th class="py-3 px-4 text-center">✂️ คะแนนที่ถูกหัก</th>
-                    <th class="py-3 px-4 text-center">กลุ่ม</th>
+                <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">เลขที่ / นักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่ถูกหัก</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">สถานะคะแนน</th>
                 </tr>
             </thead>
-            <tbody id="deduct-table-body">
-                <tr>
-                    <td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td>
-                </tr>
+            <tbody id="deduct-table-body" class="font-bold text-slate-700 dark:text-slate-300">
+                <!-- Loaded via JS -->
             </tbody>
         </table>
+        
+        <!-- Empty/Loading State -->
+        <div id="table-empty-state" class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-300 mb-6 transition-transform hover:rotate-12">
+                <i class="fas fa-layer-group text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 dark:text-white">กรุณาเลือกระดับชั้นและห้องเรียน</h3>
+            <p class="text-sm text-slate-400 mt-2 font-bold italic">เลือกพารามิเตอร์ด้านบนเพื่อตรวจสอบข้อมูล</p>
+        </div>
     </div>
 </div>
-<script>
-const selectClass = document.getElementById('select-class');
-const selectRoom = document.getElementById('select-room');
-const tableBody = document.getElementById('deduct-table-body');
-const term = <?= json_encode($term) ?>;
-const pee = <?= json_encode($pee) ?>;
-const printBtn = document.getElementById('print-btn');
-const printHeader = document.getElementById('print-header');
-const printClassTitle = document.getElementById('print-class-title');
-const printTermTitle = document.getElementById('print-term-title');
-const printAreaWrapper = document.getElementById('print-area-wrapper');
 
-// โหลดชั้นเรียน
-fetch('api/get_classes.php')
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            data.classes.forEach(cls => {
-                const opt = document.createElement('option');
-                opt.value = cls.Stu_major;
-                opt.textContent = cls.Stu_major;
-                selectClass.appendChild(opt);
-            });
+<script>
+$(document).ready(function() {
+    const $selectClass = $('#select-class');
+    const $selectRoom = $('#select-room');
+    const $tbody = $('#deduct-table-body');
+    const $emptyState = $('#table-empty-state');
+    const $statContainer = $('#stat-container');
+    const $printBtn = $('#print-btn');
+    
+    const term = <?= json_encode($term) ?>;
+    const pee = <?= json_encode($pee) ?>;
+
+    // Load Classes
+    fetch('api/get_classes.php')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                data.classes.forEach(cls => {
+                    $selectClass.append(`<option value="${cls.Stu_major}">${cls.Stu_major}</option>`);
+                });
+            }
+        });
+
+    // Class Change
+    $selectClass.on('change', function() {
+        $selectRoom.html('<option value="">-- เลือกห้อง --</option>').prop('disabled', true);
+        $tbody.empty();
+        $emptyState.show();
+        $statContainer.addClass('hidden');
+        $printBtn.addClass('hidden');
+
+        if (this.value) {
+            fetch('api/get_rooms.php?class=' + encodeURIComponent(this.value))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        data.rooms.forEach(room => {
+                            $selectRoom.append(`<option value="${room.Stu_room}">${room.Stu_room}</option>`);
+                        });
+                        $selectRoom.prop('disabled', false);
+                    }
+                });
         }
     });
 
-// เมื่อเลือกชั้น ให้โหลดห้อง
-selectClass.addEventListener('change', function() {
-    selectRoom.innerHTML = '<option value="">-- เลือกห้อง --</option>';
-    selectRoom.disabled = true;
-    tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
-    if (this.value) {
-        fetch('api/get_rooms.php?class=' + encodeURIComponent(this.value))
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    data.rooms.forEach(room => {
-                        const opt = document.createElement('option');
-                        opt.value = room.Stu_room;
-                        opt.textContent = room.Stu_room;
-                        selectRoom.appendChild(opt);
-                    });
-                    selectRoom.disabled = false;
-                }
-            });
-    }
-});
+    // Room Change
+    $selectRoom.on('change', function() {
+        if ($selectClass.val() && this.value) {
+            $tbody.empty();
+            $emptyState.html(`
+                <div class="flex flex-col items-center gap-4 py-10">
+                    <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-sm font-bold text-slate-500 italic">กำลังดึงข้อมูลคะแนน...</p>
+                </div>
+            `).show();
+            
+            fetch(`api/get_deduct_room.php?class=${encodeURIComponent($selectClass.val())}&room=${encodeURIComponent(this.value)}&term=${term}&pee=${pee}`)
+                .then(res => res.json())
+                .then(data => {
+                    $tbody.empty();
+                    if (data.success && data.students.length > 0) {
+                        $emptyState.hide();
+                        $statContainer.removeClass('hidden');
+                        $printBtn.removeClass('hidden');
+                        
+                        let totalCount = data.students.length;
+                        let deductedCount = 0;
+                        
+                        data.students.forEach(stu => {
+                            const count = parseInt(stu.behavior_count) || 0;
+                            const score = 100 - count;
+                            if (count > 0) deductedCount++;
+                            
+                            let statusBadge = '';
+                            if (score < 50) {
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full border border-rose-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">🚨 ต่ำกว่า 50 คะแนน</span></div>`;
+                            } else if (score <= 70) {
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">⚠️ 50 - 70 คะแนน</span></div>`;
+                            } else if (score < 100) {
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">✅ 71 - 99 คะแนน</span></div>`;
+                            } else {
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">✨ ปกติ</span></div>`;
+                            }
 
-// เมื่อเลือกห้อง ให้โหลดข้อมูลตาราง
-selectRoom.addEventListener('change', function() {
-    if (selectClass.value && this.value) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>';
-        fetch(`api/get_deduct_room.php?class=${encodeURIComponent(selectClass.value)}&room=${encodeURIComponent(this.value)}&term=${term}&pee=${pee}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.students.length > 0) {
-                    tableBody.innerHTML = '';
-                    data.students.forEach((stu, idx) => {
-                        // กำหนดกลุ่มตามคะแนน
-                        let groupText = '';
-                        let groupClass = '';
-                        let groupEmoji = '';
-                        const score = 100 - parseInt(stu.behavior_count, 10);
+                            const html = `
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                                    <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="เลขที่ / นักเรียน">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-indigo-500 text-[10px] font-black italic">
+                                                ${stu.Stu_no}
+                                            </div>
+                                            <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.Stu_pre}${stu.Stu_name} ${stu.Stu_sur}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
+                                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest font-mono italic">ID: ${stu.Stu_id}</span>
+                                    </td>
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ชั้น / ห้อง">
+                                        <span class="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-black italic">
+                                            ม.${stu.Stu_major}/${stu.Stu_room}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
+                                        <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70">✂️</span></span>
+                                    </td>
+                                    <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="สถานะคะแนน">
+                                        ${statusBadge}
+                                    </td>
+                                </tr>
+                            `;
+                            $tbody.append(html);
+                        });
+                        
+                        $('#stat-total').text(totalCount + ' คน');
+                        $('#stat-deducted').text(deductedCount + ' คน');
+                        $('#stat-normal').text((totalCount - deductedCount) + ' คน');
+                        
+                        if (typeof updateMobileLabels === 'function') updateMobileLabels();
+                        
+                    } else {
+                        $tbody.empty();
+                        $emptyState.html(`
+                            <div class="flex flex-col items-center justify-center py-20 text-center">
+                                <div class="w-20 h-20 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-500 mb-6 group-hover:rotate-12 transition-transform">
+                                    <i class="fas fa-triangle-exclamation text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-black text-slate-800 dark:text-white">ไม่พบข้อมูล</h3>
+                                <p class="text-sm text-slate-400 mt-2 font-bold italic">ไม่พบประวัติการหักคะแนนในห้องที่เลือก</p>
+                            </div>
+                        `).show();
+                        $printBtn.addClass('hidden');
+                    }
+                });
+        }
+    });
 
-                        if (score < 50) {
-                            groupText = 'ต่ำกว่า 50 คะแนน';
-                            groupClass = 'text-red-600 font-bold';
-                            groupEmoji = '🚨';
-                        } else if (score >= 50 && score <= 70) {
-                            groupText = 'อยู่ระหว่าง 50 - 70 คะแนน';
-                            groupClass = 'text-yellow-500 font-semibold';
-                            groupEmoji = '⚠️';
-                        } else if (score >= 71 && score <= 99) {
-                            groupText = 'อยู่ระหว่าง 71 - 99 คะแนน';
-                            groupClass = 'text-green-600 font-semibold';
-                            groupEmoji = '✅';
-                        } else {
-                            groupText = '';
-                            groupClass = '';
-                            groupEmoji = '';
-                        }
-
-                        tableBody.innerHTML += `
-                            <tr class="border-b hover:bg-blue-50 transition">
-                                <td class="py-2 px-4 text-center">${stu.Stu_no}</td>
-                                <td class="py-2 px-4 text-center">${stu.Stu_id}</td>
-                                <td class="py-2 px-4">${stu.Stu_pre}${stu.Stu_name} ${stu.Stu_sur}</td>
-                                <td class="py-2 px-4 text-center">ม.${stu.Stu_major}/${stu.Stu_room}</td>
-                                <td class="py-2 px-4 text-center text-red-600 font-semibold">${stu.behavior_count} ✂️</td>
-                                <td class="py-2 px-4 text-center ${groupClass}">${groupText} ${groupEmoji}</td>
-                            </tr>
-                        `;
-                    });
-                    // แสดงปุ่มพิมพ์
-                    printBtn.style.display = '';
-                    // ตั้งค่าหัวข้อรายงาน
-                    printClassTitle.textContent = `รายงานสถิติการหักคะแนนของนักเรียน ชั้นมัธยมศึกษาปีที่ ${selectClass.value}/${selectRoom.value}`;
-                    printTermTitle.textContent = `ภาคเรียนที่ ${term} ปีการศึกษา ${pee}`;
-                } else {
-                    tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">ไม่พบข้อมูล</td></tr>';
-                    printBtn.style.display = 'none';
-                }
-            });
-    } else {
-        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500">กรุณาเลือกชั้นและห้อง</td></tr>';
-    }
-});
-
-// ปุ่มพิมพ์
-printBtn.addEventListener('click', function() {
-    // แสดงหัวกระดาษสำหรับพิมพ์
-    printHeader.style.display = '';
-    // ซ่อนปุ่มพิมพ์ขณะพิมพ์
-    printBtn.style.display = 'none';
-    // สร้าง window สำหรับพิมพ์
-    const printContents = printHeader.outerHTML + document.getElementById('deduct-table').outerHTML;
-    const printWindow = window.open('', '', 'height=800,width=1200');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>รายงานสถิติการหักคะแนนนักเรียนจำแนกตามห้องเรียน</title>
-            <style>
-                @page { size: A4; margin: 10mm; }
-                body { font-family: Tahoma, Arial, sans-serif; margin: 10mm; }
-                /* reduce sizes to help fit one A4 page */
-                table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 11px; }
-                th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-                th { background: #e0e7ff; }
-                .text-red-600 { color: #dc2626; }
-                .text-yellow-500 { color: #eab308; }
-                .text-green-600 { color: #16a34a; }
-                .no-break { page-break-inside: avoid; }
-                @media print {
-                    html, body { width:210mm; height:297mm; }
-                    body { margin: 0; }
-                    table { font-size: 10px; }
-                }
-            </style>
-        </head>
-        <body>
-            ${printContents}
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-    // ซ่อนหัวกระดาษหลังพิมพ์
-    printHeader.style.display = 'none';
-    printBtn.style.display = '';
+    // Integrated Print
+    $printBtn.on('click', function() {
+        if (typeof window.printReport === 'function') {
+            window.printReport();
+        } else {
+            window.print();
+        }
+    });
 });
 </script>

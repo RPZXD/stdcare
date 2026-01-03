@@ -20,7 +20,7 @@ class Attendance {
      */
     public function getStudentsWithAttendance($date, $class = null, $room = null, $term = null, $pee = null) {
         $query = "SELECT 
-                    s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_status,
+                    s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_status, s.Stu_picture,
                     a.id AS attendance_id, a.attendance_date, a.attendance_status, a.term, a.year, a.checked_by, a.device_id, a.reason, a.attendance_time,
                     (SELECT TIME(scan_timestamp) FROM attendance_log WHERE student_id = s.Stu_id AND DATE(scan_timestamp) = :date_arr AND scan_type = 'arrival' ORDER BY scan_timestamp ASC LIMIT 1) AS arrival_time,
                     (SELECT TIME(scan_timestamp) FROM attendance_log WHERE student_id = s.Stu_id AND DATE(scan_timestamp) = :date_lv AND scan_type = 'leave' ORDER BY scan_timestamp DESC LIMIT 1) AS leave_time
@@ -58,6 +58,40 @@ class Attendance {
         }
 
         return $result;
+    }
+
+    /**
+     * ดึงข้อมูลการเข้าเรียนแบบช่วงวันที่ (Date Range)
+     * @param string $startDate วันที่เริ่มต้น (Y-m-d)
+     * @param string $endDate วันที่สิ้นสุด (Y-m-d)
+     * @param int|null $class เลขชั้น
+     * @param int|null $room เลขห้อง
+     * @return array
+     */
+    public function getStudentsWithAttendanceRange($startDate, $endDate, $class = null, $room = null) {
+        $query = "SELECT 
+                    s.Stu_id, s.Stu_no, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture,
+                    a.attendance_date, a.attendance_status, a.reason, a.attendance_time
+                  FROM {$this->table_student} s
+                  INNER JOIN {$this->table_attendance} a ON s.Stu_id = a.student_id
+                  WHERE a.attendance_date BETWEEN :start_date AND :end_date";
+        
+        $params = [':start_date' => $startDate, ':end_date' => $endDate];
+
+        if (!is_null($class)) {
+            $query .= " AND s.Stu_major = :class";
+            $params[':class'] = $class;
+        }
+        if (!is_null($room)) {
+            $query .= " AND s.Stu_room = :room";
+            $params[':room'] = $room;
+        }
+
+        $query .= " ORDER BY a.attendance_date DESC, s.Stu_no ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

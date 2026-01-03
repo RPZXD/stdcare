@@ -35,11 +35,14 @@ if ($type === 'student') {
             'Stu_id'      => $row['Stu_id'],
             'Stu_pre'     => $row['Stu_pre'],
             'Stu_name'    => $row['Stu_name'],
+            'Stu_sur'     => $row['Stu_sur'],
             'Stu_no'      => $row['Stu_no'],
             'Stu_nick'    => $row['Stu_nick'],
             'Stu_phone'   => $row['Stu_phone'],
             'Par_phone'   => $row['Par_phone'],
             'Stu_picture' => $row['Stu_picture'],
+            'Stu_major'   => $row['Stu_major'],
+            'Stu_room'    => $row['Stu_room'],
         ];
     }
     echo json_encode($results);

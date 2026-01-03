@@ -132,7 +132,7 @@ class EQ {
         ];
         for ($i = 1; $i <= 52; $i++) {
             $set[] = "EQ$i = :EQ$i";
-            $params[":EQ$i"] = $answers["eq$i"] ?? null;
+            $params[":EQ$i"] = $answers["q$i"] ?? null;
         }
         $setStr = implode(', ', $set);
 

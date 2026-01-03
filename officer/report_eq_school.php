@@ -1,5 +1,9 @@
 <?php
-// ตัวอย่าง: ดึงข้อมูล EQ ของนักเรียน (สมมติว่ามีตารางชื่อ EQ_results)
+/**
+ * Sub-View: School EQ Overall Report (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ * Included in officer/report.php
+ */
 include_once("../config/Database.php");
 include_once("../class/EQ.php");
 require_once("../class/Utils.php");
@@ -12,65 +16,56 @@ $user = new UserLogin($db);
 
 $term = $user->getTerm();
 $pee = $user->getPee();
-
-// ดึงชั้นเรียนทั้งหมด
-$stmt = $db->prepare("SELECT DISTINCT Stu_major FROM student WHERE Stu_status = 1 ORDER BY Stu_major ASC");
-$stmt->execute();
-$classList = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-// ไม่ต้องเลือกชั้น/ห้อง
 ?>
-<div class="mb-6">
-    <h2 class="text-xl font-bold text-red-600 flex items-center gap-2 mb-4">
-        🧠 รายงานผล EQ (ภาพรวมทั้งโรงเรียน)
-    </h2>
-    <div class="mb-4 flex justify-end">
-        <button onclick="printEQSchoolTable()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow font-semibold print:hidden">
-            🖨️ พิมพ์รายงาน
-        </button>
-    </div>
-    <div id="EQ-table-container">
-        <div class="text-center text-gray-400 py-6">กำลังโหลด...</div>
-    </div>
-    <script>
-    function loadEQSchoolTable() {
-        document.getElementById('EQ-table-container').innerHTML = '<div class="text-center text-gray-400 py-6">กำลังโหลด...</div>';
-        fetch('api/ajax_EQ_school_table.php')
-            .then(response => response.text())
-            .then(html => {
-                // เพิ่มหัวกระดาษตอน print
-                let header = `
-                    <div id="print-header" class="mb-4 text-center">
-                        <div class="font-bold text-xl">รายงานผล EQ (ภาพรวมทั้งโรงเรียน)</div>
-                        <div class="text-lg">
-                            ปีการศึกษา <?= htmlspecialchars($pee) ?> ภาคเรียนที่ <?= htmlspecialchars($term) ?>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('EQ-table-container').innerHTML = `<div id="print-area">${header}${html}</div>`;
-            });
-    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        loadEQSchoolTable();
-    });
+<div class="animate-fadeIn">
+    <!-- Header Area -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-lightbulb"></i>
+                </span>
+                สรุปผลการประเมิน <span class="text-amber-600 italic">EQ</span> (ภาพรวมโรงเรียน)
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">School-wide Emotional Quotient Summary • <?= htmlspecialchars($pee) ?></p>
+        </div>
+        
+        <div class="flex gap-2 no-print">
+            <button onclick="loadEQSchoolTable()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2">
+                <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
+            </button>
+        </div>
+    </div>
 
-    function printEQSchoolTable() {
-        let printContents = document.getElementById('print-area').innerHTML;
-        let win = window.open('', '', 'width=900,height=700');
-        win.document.write('<html><head><title>รายงานผล EQ (โรงเรียน)</title>');
-        win.document.write('<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">');
-        win.document.write('<style>@media print{.print\\:hidden{display:none !important;} body{background:#fff !important;}}</style>');
-        win.document.write('</head><body onload="window.print();setTimeout(function(){window.close()},100);">');
-        win.document.write(printContents);
-        win.document.write('</body></html>');
-        win.document.close();
-    }
-    </script>
-    <style>
-    @media print {
-        .print\:hidden { display: none !important; }
-        body { background: #fff !important; }
-    }
-    </style>
+    <!-- Content Container -->
+    <div id="EQ-table-container" class="space-y-10">
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 italic mt-4">กำลังประมวลผลสถิติภาพรวม...</p>
+        </div>
+    </div>
 </div>
+
+<script>
+function loadEQSchoolTable() {
+    const $container = $('#EQ-table-container');
+    $container.html(`
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 italic mt-4">กำลังประมวลผลสถิติภาพรวม...</p>
+        </div>
+    `);
+    
+    fetch('api/ajax_EQ_school_table.php')
+        .then(res => res.text())
+        .then(html => {
+            $container.hide().html(html).fadeIn(500);
+            if (typeof updateMobileLabels === 'function') updateMobileLabels();
+        });
+}
+
+$(document).ready(function() {
+    loadEQSchoolTable();
+});
+</script>

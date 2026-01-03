@@ -1,4 +1,8 @@
 <?php
+/**
+ * EQ Assessment Edit Form Template
+ * Modern UI with Tailwind CSS
+ */
 require_once "../../config/Database.php";
 require_once "../../class/EQ.php";
 
@@ -19,15 +23,14 @@ $eqData = $eq->getEQData($student_id, $pee, $term);
 
 // Map EQ data keys to match form input names
 $mappedEqData = [];
-foreach ($eqData as $key => $value) {
-    $mappedKey = strtolower(str_replace('EQ', 'q', $key)); // Convert "EQ1" to "q1"
-    $mappedEqData[$mappedKey] = $value;
+if ($eqData) {
+    foreach ($eqData as $key => $value) {
+        $mappedKey = strtolower(str_replace('EQ', 'q', $key)); // Convert "EQ1" to "q1"
+        $mappedEqData[$mappedKey] = $value;
+    }
 }
 
-// Add console.log for debugging
-// echo "<script>console.log(" . json_encode($mappedEqData) . ");</script>";
-
-// List of EQ questions
+// Questions List (Same as form_eq.php)
 $questions = [
     ['q1', 'เข้าใจความรู้สึกของตัวเองเวลาที่โกรธ เสียใจ หรือดีใจ', 'รู้จักและเข้าใจตนเอง'],
     ['q2', 'สามารถบอกความรู้สึกของตัวเองได้เมื่อมีอารมณ์ต่าง ๆ', 'รู้จักและเข้าใจตนเอง'],
@@ -48,7 +51,7 @@ $questions = [
     ['q17', 'สามารถแสดงความเห็นใจเมื่อเพื่อนมีปัญหา', 'การเห็นอกเห็นใจผู้อื่น'],
     ['q18', 'ช่วยเหลือผู้อื่นโดยไม่หวังผลตอบแทน', 'การเห็นอกเห็นใจผู้อื่น'],
     ['q19', 'เสียใจเมื่อเห็นผู้อื่นเดือดร้อน', 'การเห็นอกเห็นใจผู้อื่น'],
-    ['q20', 'ยินดีช่วยเหลือเพื่อนที่อ่อนแอกว่า', 'การเห็นอกเห็นใจผู้อื่น'],
+    ['q20', 'ยินดีช่วยเหลือเพื่อนที่อ่อนแอกกว่า', 'การเห็นอกเห็นใจผู้อื่น'],
     ['q21', 'พูดจาสุภาพกับผู้อื่น', 'ทักษะทางสังคม'],
     ['q22', 'มีน้ำใจและแบ่งปันสิ่งของกับเพื่อน', 'ทักษะทางสังคม'],
     ['q23', 'ทำงานร่วมกับผู้อื่นได้ดี', 'ทักษะทางสังคม'],
@@ -83,58 +86,91 @@ $questions = [
     ['q52', 'สามารถปรับอารมณ์ให้กลับมาสงบได้เร็ว', 'การควบคุมอารมณ์'],
 ];
 
-// Answer choices
 $choices = [
-    '0' => '❌ ไม่จริง',
-    '1' => '😐 จริงบางครั้ง',
-    '2' => '🙂 ค่อนข้างจริง',
-    '3' => '✅ จริงมาก',
+    '0' => ['label' => 'ไม่จริง', 'icon' => 'fa-times', 'color' => 'text-rose-500', 'bg' => 'peer-checked:bg-rose-50 peer-checked:border-rose-200'],
+    '1' => ['label' => 'จริงบางครั้ง', 'icon' => 'fa-meh', 'color' => 'text-amber-500', 'bg' => 'peer-checked:bg-amber-50 peer-checked:border-amber-200'],
+    '2' => ['label' => 'ค่อนข้างจริง', 'icon' => 'fa-smile', 'color' => 'text-blue-500', 'bg' => 'peer-checked:bg-blue-50 peer-checked:border-blue-200'],
+    '3' => ['label' => 'จริงมาก', 'icon' => 'fa-check-double', 'color' => 'text-emerald-500', 'bg' => 'peer-checked:bg-emerald-50 peer-checked:border-emerald-200'],
 ];
 ?>
 
-<form id="eqEditForm" class="space-y-6">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-
-    <div class="bg-green-500 border rounded-lg shadow-sm p-4 mb-4 text-white">
-        <h2 class="text-lg font-semibold">🎓 ข้อมูลนักเรียน</h2>
-        <p>ชื่อ: <?= htmlspecialchars($student_name) ?> เลขที่: <?= htmlspecialchars($student_no) ?> ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?></p>
-        <p>บันทึกข้อมูลของ ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?></p>
+<div class="space-y-6">
+    <!-- Student Profile Header (Amber for Edit Mode) -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-amber-500 to-orange-500 rounded-3xl p-6 text-white shadow-lg">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black">แก้ไขข้อมูล EQ: <?= htmlspecialchars($student_name) ?></h3>
+                    <div class="flex flex-wrap gap-2 mt-1 opacity-90">
+                        <span class="px-2 py-0.5 bg-white/20 rounded-lg text-xs font-bold">เลขประจำตัว: <?= htmlspecialchars($student_id) ?></span>
+                        <span class="px-2 py-0.5 bg-white/20 rounded-lg text-xs font-bold">เลขที่: <?= htmlspecialchars($student_no) ?></span>
+                        <span class="px-2 py-0.5 bg-white/20 rounded-lg text-xs font-bold">ชั้น: ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?></span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-black/10 backdrop-blur rounded-2xl p-3 text-center border border-white/10">
+                <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">ปีการศึกษา / ภาคเรียน</p>
+                <p class="text-lg font-black"><?= htmlspecialchars($pee) ?> / <?= htmlspecialchars($term) ?></p>
+            </div>
+        </div>
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-black/10 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md">
-        📋 <strong>คำชี้แจง:</strong> กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา
+    <!-- Info Box -->
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 rounded-2xl p-4 flex gap-4 items-start">
+        <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-amber-900 dark:text-amber-200">โหมดแก้ไขข้อมูล</h4>
+            <p class="text-sm text-amber-800 dark:text-amber-300">คุณกำลังทำการแก้ไขข้อมูลที่ได้บันทึกไว้ก่อนหน้านี้ กรุณาตรวจสอบและปรับปรุงข้อมูลให้ถูกต้อง</p>
+        </div>
     </div>
 
-    <table class="w-full border-collapse border border-gray-300">
-        <thead>
-            <tr class="bg-blue-500 text-white text-center">
-                <th class="border px-4 py-2">ข้อ</th>
-                <th class="border px-4 py-2">รายการประเมิน</th>
-                <th class="border px-4 py-2">คำตอบ</th>
-            </tr>
-        </thead>
-        <tbody>
+    <form id="eqEditForm" class="space-y-4">
+        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
+        <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
+        <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
+
+        <div class="grid grid-cols-1 gap-4">
             <?php foreach ($questions as $index => [$id, $text, $category]): ?>
-                <tr class="hover:bg-gray-50">
-                    <td class="border px-4 py-2 text-center"><?= $index + 1 ?></td>
-                    <td class="border px-4 py-2">
-                        <?= htmlspecialchars($text) ?> <span class="text-sm text-gray-500">[<?= $category ?>]</span>
-                    </td>
-                    <td class="border px-4 py-2">
-                        <div class="flex flex-col sm:flex-row gap-3">
-                        <?php foreach ($choices as $value => $label): ?>
-                            <label class="inline-flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="<?= $id ?>" value="<?= $value ?>" <?= isset($mappedEqData[$id]) && $mappedEqData[$id] == $value ? 'checked' : '' ?> required class="form-radio text-blue-600">
-                                <span><?= $label ?></span>
-                            </label>
-                        <?php endforeach; ?>
+            <div class="glass-card rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-xs font-black group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                            <?= $index + 1 ?>
+                        </span>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="mb-4">
+                            <h4 class="text-slate-800 dark:text-white font-bold text-base leading-relaxed"><?= htmlspecialchars($text) ?></h4>
+                            <span class="inline-block mt-1 px-2 py-0.5 bg-slate-50 dark:bg-slate-900 text-slate-400 text-[10px] font-bold uppercase tracking-wider rounded border border-slate-100 dark:border-slate-800">
+                                <i class="fas fa-tag mr-1 text-[8px]"></i> ด้าน<?= $category ?>
+                            </span>
                         </div>
-                    </td>
-                </tr>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                            <?php foreach ($choices as $value => $info): 
+                                $checked = (isset($mappedEqData[$id]) && $mappedEqData[$id] == $value) ? 'checked' : '';
+                            ?>
+                            <div class="relative">
+                                <input type="radio" name="<?= $id ?>" id="<?= $id . '_' . $value ?>" value="<?= $value ?>" <?= $checked ?> required class="peer absolute opacity-0 invisible">
+                                <label for="<?= $id . '_' . $value ?>" 
+                                    class="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 cursor-pointer transition-all hover:border-slate-200 dark:hover:border-slate-700 <?= $info['bg'] ?> peer-checked:scale-[0.98]">
+                                    <i class="fas <?= $info['icon'] ?> mb-1 text-sm <?= $info['color'] ?>"></i>
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 peer-checked:text-slate-800 dark:peer-checked:text-white"><?= $info['label'] ?></span>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <?php endforeach; ?>
-        </tbody>
-    </table>
-    <input type="hidden" name="pee" value="<?= htmlspecialchars($pee) ?>">
-    <input type="hidden" name="term" value="<?= htmlspecialchars($term) ?>">
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-</form>
+        </div>
+    </form>
+</div>

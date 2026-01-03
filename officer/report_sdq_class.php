@@ -1,5 +1,9 @@
 <?php
-// ตัวอย่าง: ดึงข้อมูล SDQ ของนักเรียน (สมมติว่ามีตารางชื่อ sdq_results)
+/**
+ * Sub-View: SDQ Report by Class Level (Officer)
+ * Modern UI with Tailwind CSS & Responsive Design
+ * Included in officer/report.php
+ */
 include_once("../config/Database.php");
 include_once("../class/SDQ.php");
 require_once("../class/Utils.php");
@@ -18,98 +22,80 @@ $stmt = $db->prepare("SELECT DISTINCT Stu_major FROM student WHERE Stu_status = 
 $stmt->execute();
 $classList = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-// ดึงห้องเรียน (ถ้ามีการเลือกชั้น)
 $class = $_GET['class'] ?? ($classList[0] ?? '');
-$room = $_GET['room'] ?? '';
-// $pee, $term มาจากระบบ
-
-// ห้องเรียนอัตโนมัติ
-$roomOptions = [];
-if ($class) {
-    $stmt = $db->prepare("SELECT DISTINCT Stu_room FROM student WHERE Stu_major = :class AND Stu_status = 1 ORDER BY Stu_room ASC");
-    $stmt->bindParam(':class', $class);
-    $stmt->execute();
-    $roomOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    if (!$room && count($roomOptions) > 0) {
-        $room = $roomOptions[0];
-    }
-}
-
-
-
 ?>
-<div class="mb-6">
-    <h2 class="text-xl font-bold text-red-600 flex items-center gap-2 mb-4">
-        🧠 รายงานผล SDQ (รายระดับชั้น)
-    </h2>
-    <form method="get" id="sdq-filter-form" class="mb-4 flex flex-wrap gap-2 items-end" onsubmit="return false;">
+
+<div class="animate-fadeIn">
+    <!-- Header Area -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
         <div>
-            <label class="block text-sm text-gray-600">ชั้น</label>
-            <select name="class" id="class-select" class="border rounded px-2 py-1 min-w-[80px]">
-                <?php foreach ($classList as $c): ?>
-                    <option value="<?= htmlspecialchars($c) ?>" <?= $c == $class ? 'selected' : '' ?>><?= htmlspecialchars($c) ?></option>
-                <?php endforeach; ?>
-            </select>
+            <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
+                    <i class="fas fa-brain"></i>
+                </span>
+                รายงานผล <span class="text-rose-600 italic">SDQ</span> รายระดับชั้น
+            </h2>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Strengths & Difficulties Questionnaire • By Grade Level</p>
         </div>
-    </form>
-    <div class="mb-4 flex justify-end">
-        <button onclick="printSDQClassTable()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow font-semibold print:hidden">
-            🖨️ พิมพ์รายงาน
-        </button>
     </div>
-    <div id="sdq-table-container">
-        <div class="text-center text-gray-400 py-6">กรุณาเลือกชั้น</div>
+
+    <!-- Filter Section -->
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-6 space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกระดับชั้น</label>
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-rose-400"></i>
+                    <select id="class-select" class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-bold text-slate-700 dark:text-white text-sm appearance-none">
+                        <?php foreach ($classList as $c): ?>
+                            <option value="<?= htmlspecialchars($c) ?>" <?= $c == $class ? 'selected' : '' ?>>มัธยมศึกษาปีที่ <?= htmlspecialchars($c) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="md:col-span-3 md:col-start-10">
+                <button onclick="window.printReport ? window.printReport() : window.print()" class="w-full py-3.5 bg-rose-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-rose-600/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 no-print">
+                    <i class="fas fa-print"></i> พิมพ์รายงาน
+                </button>
+            </div>
+        </div>
     </div>
-    <script>
+
+    <!-- Content Container -->
+    <div id="sdq-table-container" class="space-y-8">
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 italic mt-4">กำลังโหลดข้อมูล SDQ...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    const $classSelect = $('#class-select');
+    const $container = $('#sdq-table-container');
+
     function loadSDQTable() {
-        var classValue = document.getElementById('class-select').value;
-        if (classValue) {
-            document.getElementById('sdq-table-container').innerHTML = '<div class="text-center text-gray-400 py-6">กำลังโหลด...</div>';
-            fetch('api/ajax_sdq_class_table.php?class=' + encodeURIComponent(classValue))
-                .then(response => response.text())
+        const classVal = $classSelect.val();
+        
+        if (classVal) {
+            $container.html(`
+                <div class="flex flex-col items-center justify-center py-20 text-center">
+                    <div class="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-sm font-bold text-slate-500 italic mt-4">กำลังโหลดข้อมูล SDQ...</p>
+                </div>
+            `);
+            
+            fetch('api/ajax_sdq_class_table.php?class=' + encodeURIComponent(classVal))
+                .then(res => res.text())
                 .then(html => {
-                    // เพิ่มหัวกระดาษตอน print
-                    let header = `
-                        <div id="print-header" class="mb-4 text-center">
-                            <div class="font-bold text-xl">รายงานผล SDQ (รายชั้น)</div>
-                            <div class="text-lg">
-                                ชั้นมัธยมศึกษาปีที่ ${classValue}
-                            </div>
-                            <div class="text-lg">
-                                ปีการศึกษา <?= htmlspecialchars($pee) ?> ภาคเรียนที่ <?= htmlspecialchars($term) ?>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('sdq-table-container').innerHTML = `<div id="print-area">${header}${html}</div>`;
+                    $container.hide().html(html).fadeIn(300);
+                    if (typeof updateMobileLabels === 'function') updateMobileLabels();
                 });
-        } else {
-            document.getElementById('sdq-table-container').innerHTML = '<div class="text-center text-gray-400 py-6">กรุณาเลือกชั้น</div>';
         }
     }
 
-    document.getElementById('class-select').addEventListener('change', function() {
-        loadSDQTable();
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-        loadSDQTable();
-    });
-
-    function printSDQClassTable() {
-        let printContents = document.getElementById('print-area').innerHTML;
-        let win = window.open('', '', 'width=900,height=700');
-        win.document.write('<html><head><title>รายงานผล SDQ (รายชั้น)</title>');
-        win.document.write('<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">');
-        win.document.write('<style>@media print{.print\\:hidden{display:none !important;} body{background:#fff !important;}}</style>');
-        win.document.write('</head><body onload="window.print();setTimeout(function(){window.close()},100);">');
-        win.document.write(printContents);
-        win.document.write('</body></html>');
-        win.document.close();
-    }
-    </script>
-    <style>
-    @media print {
-        .print\:hidden { display: none !important; }
-        body { background: #fff !important; }
-    }
-    </style>
-</div>
+    $classSelect.on('change', loadSDQTable);
+    loadSDQTable();
+});
+</script>

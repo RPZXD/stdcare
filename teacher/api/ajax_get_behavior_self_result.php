@@ -54,20 +54,46 @@ if ($behaviorList && count($behaviorList) > 0) {
     }
 }
 
-// คำนวณคะแนนคงเหลือ
-$total_score = 100;
-if ($behaviorList && is_array($behaviorList)) {
-    $sum = 0;
-    foreach ($behaviorList as $b) {
-        $sum += (int)$b['behavior_score'];
-    }
-    $total_score -= $sum;
+// ดึงคะแนนเพิ่มจากกิจกรรมจิตอาสา (จาก phichaia_eventstd)
+$bonus_points = 0;
+try {
+    include_once("../../classes/DatabaseEventstd.php");
+    $eventDb = new \App\DatabaseEventstd();
+    $eventPdo = $eventDb->getPDO();
+    
+    $sqlBonus = "SELECT COALESCE(SUM(a.hours), 0) AS bonus_hours
+                 FROM student_activity_logs sal
+                 INNER JOIN activities a ON sal.activity_id = a.id
+                 WHERE sal.student_id = :stu_id 
+                   AND a.category = 'จิตอาสา'
+                   AND a.term = :term 
+                   AND a.pee = :pee";
+    $stmtBonus = $eventPdo->prepare($sqlBonus);
+    $stmtBonus->execute(['stu_id' => $stu_id, 'term' => $term, 'pee' => $pee]);
+    $resBonus = $stmtBonus->fetch();
+    $bonus_points = (int)($resBonus['bonus_hours'] ?? 0);
+} catch (Exception $e) {
+    // กรณีไม่มีฐานข้อมูลหรือตารางนี้ให้เป็น 0
+    $bonus_points = 0;
 }
+
+// คำนวณคะแนนคงเหลือ
+$total_deduction = 0;
+if ($behaviorList && is_array($behaviorList)) {
+    foreach ($behaviorList as $b) {
+        $total_deduction += (int)$b['behavior_score'];
+    }
+}
+$net_score = 100 - $total_deduction + $bonus_points;
+if($net_score < 0) $net_score = 0;
+if($net_score > 100) $net_score = 100;
 
 // เตรียมข้อมูลสำหรับ frontend
 echo json_encode([
     'success' => true,
     'studentInfo' => $studentInfo,
-    'total_score' => $total_score,
+    'total_score' => $net_score,
+    'total_deduction' => $total_deduction,
+    'bonus_points' => $bonus_points,
     'behaviorList' => $behaviorList ? $behaviorList : []
 ]);

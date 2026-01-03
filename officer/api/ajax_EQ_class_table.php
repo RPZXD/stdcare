@@ -1,7 +1,11 @@
 <?php
+/**
+ * API: EQ Result Summary by Class Level
+ * Modern UI with Tailwind CSS & Glassmorphism
+ */
 include_once("../../config/Database.php");
 include_once("../../class/EQ.php");
-require_once("../../class/UserLogin.php");
+include_once("../../class/UserLogin.php");
 
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
@@ -28,138 +32,131 @@ foreach ($roomList as $room) {
 // สรุปรวมทั้งชั้น
 $classSummary = $EQ->getEQClassRoomSummary($class, '', $pee, $term);
 
-// โครงสร้างการแปลผล (เหมือน form_eq_result.php)
-$eqStructure = [
-    'ดี' => [
-        ['label' => '1.1 ควบคุมตนเอง', 'range' => [13, 17], 'items' => range(1, 6)],
-        ['label' => '1.2 เห็นใจผู้อื่น', 'range' => [16, 20], 'items' => range(7, 12)],
-        ['label' => '1.3 รับผิดชอบ', 'range' => [16, 22], 'items' => range(13, 18)],
-        ['label' => 'รวมองค์ประกอบดี', 'range' => [48, 58], 'items' => range(1, 18)],
-    ],
-    'เก่ง' => [
-        ['label' => '2.1 มีแรงจูงใจ', 'range' => [14, 20], 'items' => range(19, 24)],
-        ['label' => '2.2 ตัดสินใจแก้ปัญหา', 'range' => [13, 19], 'items' => range(25, 30)],
-        ['label' => '2.3 สัมพันธภาพ', 'range' => [14, 20], 'items' => range(31, 36)],
-        ['label' => 'รวมองค์ประกอบเก่ง', 'range' => [45, 57], 'items' => range(19, 36)],
-    ],
-    'สุข' => [
-        ['label' => '3.1 ภูมิใจในตนเอง', 'range' => [9, 13], 'items' => range(37, 40)],
-        ['label' => '3.2 พอใจชีวิต', 'range' => [16, 22], 'items' => range(41, 46)],
-        ['label' => '3.3 สุขสงบทางใจ', 'range' => [15, 21], 'items' => range(47, 52)],
-        ['label' => 'รวมองค์ประกอบสุข', 'range' => [40, 45], 'items' => range(37, 52)],
-    ],
-];
+$cntAll = $classSummary['total'];
+$cntHave = $classSummary['have'];
+$cntVeryGood = $classSummary['verygood'];
+$cntGood = $classSummary['good'];
+$cntMid = $classSummary['mid'];
+$cntLow = $classSummary['low'];
 
-// ฟังก์ชันแปลผล
-function eqResult($score, $range) {
-    if ($score > $range[1]) return 'สูงกว่าปกติ';
-    if ($score >= $range[0]) return 'เกณฑ์ปกติ';
-    return 'ต่ำกว่าปกติ';
-}
-function eqColor($result) {
-    return match($result) {
-        'สูงกว่าปกติ' => 'bg-green-500',
-        'เกณฑ์ปกติ' => 'bg-yellow-500',
-        default => 'bg-red-500'
-    };
-}
-function eqLevel($score) {
-    return match(true) {
-        $score >= 170 => 'EQ ดีมาก',
-        $score >= 140 => 'EQ ดี',
-        $score >= 100 => 'EQ ปานกลาง',
-        default => 'EQ ต้องปรับปรุง'
-    };
-}
+$percentEvaluated = $cntAll > 0 ? round(($cntHave / $cntAll) * 100) : 0;
 ?>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <?php
-    $cntAll = $classSummary['total'];
-    $cntVeryGood = $classSummary['verygood'];
-    $cntGood = $classSummary['good'];
-    $cntMid = $classSummary['mid'];
-    $cntLow = $classSummary['low'];
-    ?>
-    <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg shadow p-6 flex flex-col items-center border border-blue-200">
-        <div class="font-bold text-2xl mb-2 flex items-center gap-2">👩‍🎓 นักเรียนในชั้นนี้</div>
-        <div class="text-5xl font-extrabold text-blue-700 mb-2 animate-bounce"><?= $cntAll ?></div>
-        <div class="flex flex-col gap-1 text-center text-lg">
-            <div class="text-green-700">🌟 ดีมาก <span class="font-bold"><?= $cntVeryGood ?></span> คน</div>
-            <div class="text-yellow-700">👍 ดี <span class="font-bold"><?= $cntGood ?></span> คน</div>
-            <div class="text-blue-700">🙂 ปานกลาง <span class="font-bold"><?= $cntMid ?></span> คน</div>
-            <div class="text-red-700">⚠️ ต้องปรับปรุง <span class="font-bold"><?= $cntLow ?></span> คน</div>
-        </div>
-        <div class="w-full flex flex-col gap-2 mt-4">
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-green-400 flex items-center justify-center text-white text-lg">🌟</span>
-                <div class="flex-1 bg-green-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-green-500 h-4 rounded-full transition-all duration-700" style="width: <?= $cntAll ? round($cntVeryGood/$cntAll*100) : 0 ?>%"></div>
+
+<!-- Premium Stats Dashboard -->
+<div class="mb-10 animate-fadeIn">
+    <div class="xl:col-span-12 glass-effect rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden shadow-2xl border border-white/40 shadow-amber-500/5">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row items-center gap-10">
+            <!-- Overall Circle Performance -->
+            <div class="flex flex-col items-center shrink-0">
+                <div class="relative w-40 h-40 flex items-center justify-center">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-100 dark:text-slate-800" />
+                        <circle cx="80" cy="80" r="70" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="439.8" stroke-dashoffset="<?= 439.8 * (1 - $percentEvaluated/100) ?>" class="text-amber-500 shadow-lg transition-all duration-1000" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span class="text-4xl font-black text-slate-800 dark:text-white"><?= $percentEvaluated ?>%</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Evaluated</span>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-green-700"><?= $cntAll ? round($cntVeryGood/$cntAll*100) : 0 ?>%</span>
+                <div class="mt-4 text-center">
+                    <p class="text-[11px] font-black text-amber-500 uppercase tracking-widest italic">ประเมินแล้ว <?= $cntHave ?> / <?= $cntAll ?> คน</p>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white text-lg">👍</span>
-                <div class="flex-1 bg-yellow-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-yellow-400 h-4 rounded-full transition-all duration-700" style="width: <?= $cntAll ? round($cntGood/$cntAll*100) : 0 ?>%"></div>
+
+            <!-- Detailed Breakdown -->
+            <div class="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-emerald-500 mb-1"><?= $cntVeryGood ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic text-center">ดีมาก</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" style="width: <?= $cntHave > 0 ? ($cntVeryGood/$cntHave)*100 : 0 ?>%"></div>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-yellow-700"><?= $cntAll ? round($cntGood/$cntAll*100) : 0 ?>%</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center text-white text-lg">🙂</span>
-                <div class="flex-1 bg-blue-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-blue-500 h-4 rounded-full transition-all duration-700" style="width: <?= $cntAll ? round($cntMid/$cntAll*100) : 0 ?>%"></div>
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-amber-500 mb-1"><?= $cntGood ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic text-center">ดี</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full transition-all duration-1000" style="width: <?= $cntHave > 0 ? ($cntGood/$cntHave)*100 : 0 ?>%"></div>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-blue-700"><?= $cntAll ? round($cntMid/$cntAll*100) : 0 ?>%</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white text-lg">⚠️</span>
-                <div class="flex-1 bg-red-100 rounded-full h-4 overflow-hidden">
-                    <div class="bg-red-500 h-4 rounded-full transition-all duration-700" style="width: <?= $cntAll ? round($cntLow/$cntAll*100) : 0 ?>%"></div>
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all">
+                    <span class="text-3xl font-black text-blue-500 mb-1"><?= $cntMid ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic text-center">ปานกลาง</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full transition-all duration-1000" style="width: <?= $cntHave > 0 ? ($cntMid/$cntHave)*100 : 0 ?>%"></div>
+                    </div>
                 </div>
-                <span class="ml-2 font-bold text-red-700"><?= $cntAll ? round($cntLow/$cntAll*100) : 0 ?>%</span>
+                <div class="bg-white/50 dark:bg-slate-900/50 p-6 rounded-[2rem] border border-white/50 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-105 transition-all text-center">
+                    <span class="text-3xl font-black text-rose-500 mb-1"><?= $cntLow ?></span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none italic text-center">ปรับปรุง</span>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div class="bg-rose-500 h-full rounded-full transition-all duration-1000" style="width: <?= $cntHave > 0 ? ($cntLow/$cntHave)*100 : 0 ?>%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<table class="min-w-full bg-white border border-gray-200 rounded-lg shadow text-sm mb-2 animate-fade-in">
-    <thead>
-        <tr class="bg-blue-100 text-gray-700">
-            <th class="py-2 px-3 border-b text-center">ห้อง</th>
-            <th class="py-2 px-3 border-b text-center">จำนวนนักเรียน</th>
-            <th class="py-2 px-3 border-b text-center">ส่งแบบประเมิน(คน)</th>
-            <th class="py-2 px-3 border-b text-center text-green-700">ดีมาก</th>
-            <th class="py-2 px-3 border-b text-center text-yellow-700">ดี</th>
-            <th class="py-2 px-3 border-b text-center text-blue-700">ปานกลาง</th>
-            <th class="py-2 px-3 border-b text-center text-red-700">ต้องปรับปรุง</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($roomList as $r): $sum = $roomSummary[$r]; ?>
-        <tr>
-            <td class="px-3 py-2 text-center font-bold">ห้อง <?= htmlspecialchars($r) ?></td>
-            <td class="px-3 py-2 text-center"><?= $sum['total'] ?></td>
-            <td class="px-3 py-2 text-center"><?= $sum['have'] ?></td>
-            <td class="px-3 py-2 text-center text-green-700"><?= $sum['verygood'] ?></td>
-            <td class="px-3 py-2 text-center text-yellow-700"><?= $sum['good'] ?></td>
-            <td class="px-3 py-2 text-center text-blue-700"><?= $sum['mid'] ?></td>
-            <td class="px-3 py-2 text-center text-red-700"><?= $sum['low'] ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <tr class="bg-blue-100 font-bold">
-            <td class="px-3 py-2 text-center">รวม</td>
-            <td class="px-3 py-2 text-center"><?= $classSummary['total'] ?></td>
-            <td class="px-3 py-2 text-center"><?= $classSummary['have'] ?></td>
-            <td class="px-3 py-2 text-center text-green-700"><?= $classSummary['verygood'] ?></td>
-            <td class="px-3 py-2 text-center text-yellow-700"><?= $classSummary['good'] ?></td>
-            <td class="px-3 py-2 text-center text-blue-700"><?= $classSummary['mid'] ?></td>
-            <td class="px-3 py-2 text-center text-red-700"><?= $classSummary['low'] ?></td>
-        </tr>
-    </tbody>
-</table>
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.animate-fade-in { animation: fadeIn 0.7s; }
-</style>
+
+<!-- Results Table -->
+<div class="overflow-x-auto overflow-y-visible">
+    <table class="w-full text-left border-separate border-spacing-y-2">
+        <thead>
+            <tr class="bg-slate-50/50 dark:bg-slate-900/50">
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">ห้องเรียน</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">นักเรียนทั้งหมด</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ประเมินแล้ว</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center text-emerald-600">ดีมาก</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center text-amber-600">ดี</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center text-blue-600">ปานกลาง</th>
+                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center text-rose-600">ปรับปรุง</th>
+            </tr>
+        </thead>
+        <tbody class="font-bold text-slate-700 dark:text-slate-300">
+            <?php foreach ($roomList as $r): $sum = $roomSummary[$r]; ?>
+            <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="ห้องเรียน">
+                    <div class="flex items-center gap-4">
+                        <span class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-amber-500 text-[13px] font-black italic"><?= $r ?></span>
+                        <div class="text-[14px] font-black text-slate-800 dark:text-white">มัธยมศึกษาปีที่ <?= $class ?>/<?= $r ?></div>
+                    </div>
+                </td>
+                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="นักเรียนทั้งหมด">
+                    <span class="text-sm font-black text-slate-400 italic"><?= $sum['total'] ?></span>
+                </td>
+                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ประเมินแล้ว">
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-black text-slate-800 dark:text-white"><?= $sum['have'] ?></span>
+                        <span class="text-[9px] font-black text-amber-500 uppercase tracking-widest italic"><?= $sum['total'] > 0 ? round(($sum['have']/$sum['total'])*100) : 0 ?>%</span>
+                    </div>
+                </td>
+                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center text-emerald-600" data-label="ดีมาก">
+                    <span class="text-sm font-black italic"><?= $sum['verygood'] ?></span>
+                </td>
+                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center text-amber-600" data-label="ดี">
+                    <span class="text-sm font-black italic"><?= $sum['good'] ?></span>
+                </td>
+                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center text-blue-600" data-label="ปานกลาง">
+                    <span class="text-sm font-black italic"><?= $sum['mid'] ?></span>
+                </td>
+                <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center text-rose-600" data-label="ปรับปรุง">
+                    <span class="text-sm font-black italic"><?= $sum['low'] ?></span>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            
+            <!-- Grand Total Row -->
+            <tr class="bg-amber-500 shadow-xl shadow-amber-500/20 text-white animate-pulse">
+                <td class="px-6 py-6 rounded-l-[1.5rem] font-black italic">ภาพรวมระดับชั้น ม.<?= $class ?></td>
+                <td class="px-6 py-6 text-center font-black italic"><?= $cntAll ?></td>
+                <td class="px-6 py-6 text-center font-black italic"><?= $cntHave ?> (<?= $percentEvaluated ?>%)</td>
+                <td class="px-6 py-6 text-center font-black italic"><?= $cntVeryGood ?></td>
+                <td class="px-6 py-6 text-center font-black italic"><?= $cntGood ?></td>
+                <td class="px-6 py-6 text-center font-black italic"><?= $cntMid ?></td>
+                <td class="px-6 py-6 rounded-r-[1.5rem] text-center font-black italic"><?= $cntLow ?></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

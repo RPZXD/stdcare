@@ -15,10 +15,16 @@ $term = $_GET['term'];
 $pee = $_GET['pee'];
 try {
 
-    // Fetch total student count
-    $total = $studentVisit->getTotalVisitCount($class, $room, $term, $pee);
+    // Fetch total student count in class
+    $totalStudents = $studentVisit->getStudentCount($class, $room);
+    
+    // Fetch total visit count (any record)
+    $totalVisitedAny = $studentVisit->getTotalVisitCount($class, $room, $term, $pee);
+    
+    // Fetch total visit with photo count
+    $totalVisitedPhoto = $studentVisit->getTotalVisitWithPhotoCount($class, $room, $term, $pee);
 
-    // Fetch visit home data
+    // Fetch visit home data (stats per question)
     $vh = $studentVisit->fetchVisitHomeData($class, $room, $term, $pee);
 
     // Prepare data for JSON response
@@ -77,7 +83,7 @@ try {
         foreach ($allAnswers as $j => $answer) {
             // Check if we have data for this answer
             $count = isset($vh[$i][$j+1]) ? $vh[$i][$j+1] : 0;
-            $percent = ($total > 0) ? round(($count / $total) * 100, 2) : 0;
+            $percent = ($totalVisitedAny > 0) ? round(($count / $totalVisitedAny) * 100, 2) : 0;
             
             // Add to data array
             $data[] = array(
@@ -93,9 +99,19 @@ try {
         }
     }
 
-    // Output JSON response
+    // Output JSON response as a structured object
     header('Content-Type: application/json');
-    echo json_encode($data);
+    echo json_encode(array(
+        'success' => true,
+        'summary' => array(
+            'total_students' => $totalStudents,
+            'visited_any' => $totalVisitedAny,
+            'visited_photo' => $totalVisitedPhoto,
+            'visited_any_percent' => ($totalStudents > 0) ? round(($totalVisitedAny / $totalStudents) * 100, 2) : 0,
+            'visited_photo_percent' => ($totalStudents > 0) ? round(($totalVisitedPhoto / $totalStudents) * 100, 2) : 0
+        ),
+        'data' => $data
+    ));
 
 } catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
