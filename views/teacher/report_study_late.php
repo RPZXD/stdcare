@@ -382,8 +382,8 @@ function renderResults(data, classVal, roomVal, dateVal, isFiltering = false) {
 
     data.forEach(stu => {
         const info = stu.attendance_status_info;
-        const stuImg = stu.Stu_picture ? `../img/student/${stu.Stu_picture}` : `../dist/img/default-avatar.png`;
-        const onerror = "this.src='../dist/img/default-avatar.png';";
+        const stuImg = stu.Stu_picture ? `../img/student/${stu.Stu_picture}` : `../dist/img/default-avatar.svg`;
+        const onerror = "this.src='../dist/img/default-avatar.svg';";
         
         // Desktop
         const tr = document.createElement('tr');
