@@ -43,7 +43,7 @@ $menuItems = [
                 <div class="absolute inset-0 bg-indigo-500 rounded-full blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
                 <?php 
                 $avatarUrl = (!empty($userData['Teach_photo'])) 
-                    ? '../teacher/uploads/phototeach/' . $userData['Teach_photo'] 
+                    ? 'https://std.phichai.ac.th/teacher/uploads/phototeach/' . $userData['Teach_photo'] 
                     : 'https://ui-avatars.com/api/?name=' . urlencode($userData['Teach_name']) . '&background=6366f1&color=fff';
                 ?>
                 <img src="<?php echo $avatarUrl; ?>" alt="Avatar" class="w-20 h-20 rounded-full border-4 border-white dark:border-slate-800 shadow-xl relative object-cover">
