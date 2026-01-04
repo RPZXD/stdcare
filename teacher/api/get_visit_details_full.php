@@ -94,9 +94,9 @@ try {
         <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
             <div class="relative group">
                 <?php 
-                    $stuImg = !empty($studentData['Stu_picture']) ? "../img/student/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.png";
+                    $stuImg = !empty($studentData['Stu_picture']) ? "../img/student/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.svg";
                 ?>
-                <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.png';" 
+                <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" 
                      class="w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-orange-600 text-white rounded-2xl flex items-center justify-center font-black shadow-lg italic">
                     <?= $studentData['Stu_no'] ?>

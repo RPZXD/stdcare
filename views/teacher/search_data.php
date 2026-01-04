@@ -262,7 +262,7 @@ $(document).ready(function() {
             <div class="result-card glass-card rounded-3xl overflow-hidden border border-slate-100 shadow-xl" style="animation-delay: ${idx * 0.1}s">
                 <div class="p-6">
                     <div class="flex flex-col md:flex-row gap-6 items-center">
-                        <img src="${path}${item.Teach_photo}" class="w-32 h-32 rounded-3xl object-cover shadow-2xl border-4 border-white" onerror="this.src='../dist/img/default-avatar.png'">
+                        <img src="${path}${item.Teach_photo}" class="w-32 h-32 rounded-3xl object-cover shadow-2xl border-4 border-white" onerror="this.src='../dist/img/default-avatar.svg'">
                         <div class="flex-1 text-center md:text-left space-y-2">
                             <h3 class="text-2xl font-black text-slate-800">${item.Teach_name}</h3>
                             <div class="flex flex-wrap gap-2 justify-center md:justify-start">
@@ -288,7 +288,7 @@ $(document).ready(function() {
         return `
             <div class="result-card glass-card rounded-3xl overflow-hidden border border-slate-100 shadow-xl group hover:shadow-2xl transition-all" style="animation-delay: ${idx * 0.05}s">
                 <div class="relative">
-                    <img src="${path}${item.Stu_picture}" class="w-full h-56 object-cover" onerror="this.src='../dist/img/default-avatar.png'">
+                    <img src="${path}${item.Stu_picture}" class="w-full h-56 object-cover" onerror="this.src='../dist/img/default-avatar.svg'">
                     <div class="absolute top-4 left-4 flex gap-2">
                         <span class="px-3 py-1 bg-white/90 backdrop-blur rounded-full text-[10px] font-black shadow-sm">เลขที่ ${item.Stu_no}</span>
                         <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-[10px] font-black shadow-sm">ม.${item.Stu_major}/${item.Stu_room}</span>
