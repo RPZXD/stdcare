@@ -25,7 +25,7 @@ class DatabaseUsers
         if ($is_local) {
             // --- ใช้สำหรับ Localhost (XAMPP) ---
             $username = 'root';
-            $password = '';
+            $password = 'storage';
         } else {
             // --- ใช้สำหรับ Web Hosting (Production) ---
             $username = 'phichaia_stdcare';
