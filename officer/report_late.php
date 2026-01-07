@@ -7,7 +7,7 @@
 ?>
 <div class="animate-fadeIn">
     <!-- Header & Search Form -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10 no-print">
         <div>
             <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
                 <span class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
@@ -17,10 +17,14 @@
             </h2>
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic pl-13">Student Lateness History Report</p>
         </div>
+        
+        <button id="print-late-btn" onclick="window.printReport ? window.printReport() : window.print()" class="px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-xs shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group no-print border border-slate-700 hidden">
+            <i class="fas fa-print text-indigo-400 group-hover:text-indigo-300"></i> พิมพ์รายงานนี้
+        </button>
     </div>
 
     <!-- Enhanced Search Box -->
-    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8 no-print">
         <form id="lateForm" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div class="md:col-span-5 space-y-2">
                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">วันที่เริ่มต้น</label>
@@ -50,7 +54,7 @@
     </div>
 
     <!-- Summary Stats (Loaded via JS) -->
-    <div id="lateStats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 hidden animate-fadeIn">
+    <div id="lateStats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 hidden animate-fadeIn no-print">
         <div class="bg-indigo-50/50 dark:bg-indigo-900/20 px-6 py-5 rounded-[2rem] border border-indigo-100/50 dark:border-indigo-800/30 flex items-center gap-4">
             <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
                 <i class="fas fa-users-viewfinder text-xl"></i>
@@ -135,6 +139,7 @@ $(document).ready(function() {
             </div>
         `);
         $stats.addClass('hidden');
+        $('#print-late-btn').addClass('hidden');
 
         fetch(`api/fetch_checklate.php?start_date=${start}&end_date=${end}`)
             .then(res => res.json())
@@ -143,6 +148,7 @@ $(document).ready(function() {
                 if (Array.isArray(data) && data.length > 0) {
                     $empty.addClass('hidden');
                     $stats.removeClass('hidden');
+                    $('#print-late-btn').removeClass('hidden');
                     
                     let totalLate = 0;
                     data.forEach((row, idx) => {

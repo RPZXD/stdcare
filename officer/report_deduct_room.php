@@ -10,7 +10,7 @@ $pee = $user->getPee();
 
 <div class="animate-fadeIn">
     <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10 no-print">
         <div>
             <h2 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
                 <span class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg text-lg">
@@ -29,7 +29,7 @@ $pee = $user->getPee();
     </div>
 
     <!-- Enhanced Filters -->
-    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8 no-print">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic block">เลือกระดับชั้น</label>
@@ -53,7 +53,7 @@ $pee = $user->getPee();
     </div>
 
     <!-- Summary Stats -->
-    <div id="stat-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden animate-fadeIn">
+    <div id="stat-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 hidden animate-fadeIn no-print">
         <div class="bg-indigo-50/50 dark:bg-indigo-900/20 px-6 py-5 rounded-[2rem] border border-indigo-100/50 dark:border-indigo-800/30 flex items-center gap-4">
             <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
                 <i class="fas fa-users text-xl"></i>

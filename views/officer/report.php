@@ -76,8 +76,8 @@ ob_start();
 
     /* Printing Enhancements */
     @media print {
-        @page { size: auto; margin: 1.5cm; }
-        body { background: white !important; font-size: 12pt; }
+        @page { size: A4 portrait; margin: .5cm; }
+        body { background: white !important; font-size: 11pt; color: #000 !important; }
         .no-print, 
         .tab-transition, 
         button, 
@@ -96,36 +96,75 @@ ob_start();
             margin: 0 !important;
         }
 
+        .max-w-\[1600px\] {
+            max-width: none !important;
+            padding: 0 !important;
+        }
+
         /* Force Table View and reset card styles */
         .report-content table { 
             display: table !important; 
             width: 100% !important; 
             border-collapse: collapse !important;
-            margin-top: 1cm !important;
+            margin-top: 0.5cm !important;
+            page-break-inside: auto;
         }
-        .report-content thead { display: table-header-group !important; }
+        .report-content thead { 
+            display: table-header-group !important; 
+            background: #f8fafc !important;
+            -webkit-print-color-adjust: exact;
+        }
         .report-content tr { 
             display: table-row !important; 
             background: transparent !important; 
             margin: 0 !important; 
             box-shadow: none !important;
-            border-bottom: 1px solid #ddd !important;
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
-        .report-content td, .report-content th { 
+        .report-content th {
+            display: table-cell !important;
+            background: #f1f5f9 !important;
+            color: #000 !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            font-size: 9pt !important;
+            border: 1px solid #cbd5e1 !important;
+            padding: 10px 5px !important;
+            -webkit-print-color-adjust: exact;
+        }
+        .report-content td { 
             display: table-cell !important; 
-            padding: 8px !important; 
+            padding: 8px 5px !important; 
             text-align: inherit !important;
-            border: 1px solid #eee !important;
+            border: 1px solid #e2e8f0 !important;
             font-size: 10pt !important;
+            background: transparent !important;
         }
         .report-content td:before { display: none !important; }
-        .report-content td:last-child { padding-bottom: 8px !important; }
+        
+        /* Specific Fixes for Report Late */
+        .report-content td div { display: inline-flex !important; }
+        .report-content td .rounded-lg, 
+        .report-content td .rounded-full { 
+            border-radius: 0 !important; 
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        .report-content td .text-indigo-600,
+        .report-content td .text-rose-600,
+        .report-content td .text-amber-600 {
+            color: #000 !important;
+            font-weight: bold !important;
+        }
 
         /* Print Header - Visible only when printing */
         #print-header { 
             display: block !important; 
             text-align: center;
-            margin-bottom: 2cm;
+            margin-bottom: 1cm;
             border-bottom: 2px solid #333;
             padding-bottom: 0.5cm;
         }
@@ -156,7 +195,7 @@ ob_start();
     </div>
 
     <!-- Header Section -->
-    <div class="mb-8 animate-fadeIn">
+    <div class="mb-8 animate-fadeIn no-print">
         <div class="glass-effect rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden shadow-2xl border-t border-white/40">
             <div class="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full -mr-40 -mt-40 blur-3xl"></div>
             <div class="absolute bottom-0 left-0 w-80 h-80 bg-rose-500/10 rounded-full -ml-40 -mb-40 blur-3xl"></div>
@@ -179,10 +218,8 @@ ob_start();
                     </div>
                 </div>
 
-                <!-- Print Action -->
-                <button onclick="window.print()" class="px-8 py-3.5 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group no-print">
-                    <i class="fas fa-print text-indigo-400 group-hover:text-indigo-300"></i> พิมพ์รายงาน
-                </button>
+                <!-- Optional: placeholder for tab-specific actions if needed -->
+                <div></div>
             </div>
         </div>
     </div>
