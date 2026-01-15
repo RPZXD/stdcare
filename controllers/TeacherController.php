@@ -25,7 +25,8 @@ try {
 
     switch ($action) {
         case 'list':
-            echo json_encode($teacherModel->getAll());
+            // Admin ดึงข้อมูลครูทุกสถานะ (รวมย้าย, เกษียณ, ลาออก, ฯลฯ)
+            echo json_encode($teacherModel->getAll(true));
             break;
 
         case 'get':

@@ -160,7 +160,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    for ($i = 1; $i <= 3; $i++) {
+    // Validate required images based on term
+    // Term 1: 3 images required, Term 2: only 1 image required
+    $term = intval($data['term']);
+    $requiredImages = ($term == 2) ? 1 : 3;
+    
+    for ($i = 1; $i <= $requiredImages; $i++) {
         $fileKey = "image$i";
         if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
             $errorCode = isset($_FILES[$fileKey]) ? $_FILES[$fileKey]['error'] : UPLOAD_ERR_NO_FILE;

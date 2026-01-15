@@ -40,7 +40,7 @@ $pee = $user->getPee();
  * Helper to generate the visit form HTML
  * This is used for AJAX requests to populate the modal content
  */
-function generateVisitForm($data, $isEdit = false, $currentTerm = null, $currentPee = null) {
+function generateVisitForm($data, $isEdit = false, $currentTerm = null, $currentPee = null, $hasTerm1Data = false) {
     $questions = [
         "1. บ้านที่อยู่อาศัย" => ["บ้านของตนเอง", "บ้านเช่า", "อาศัยอยู่กับผู้อื่น"],
         "2. ระยะทางระหว่างบ้านกับโรงเรียน" => ["1-5 กิโลเมตร", "6-10 กิโลเมตร", "11-15 กิโลเมตร", "16-20 กิโลเมตร", "20 กิโลเมตรขึ้นไป"],
@@ -62,10 +62,13 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
         "18. ทัศนคติ/ความรู้สึกของผู้ปกครองที่มีต่อโรงเรียน" => ["พอใจ", "เฉยๆ", "ไม่พอใจ"],
     ];
 
+    // For Term 2, only 1 image is required; For Term 1, 3 images are required
+    $isTerm2 = (!$isEdit && $currentTerm == 2) || ($isEdit && isset($data['Term']) && $data['Term'] == 2);
+    
     $images = [
         ["id" => "image1", "label" => "รูปภาพที่ 1", "description" => "* ภาพตัวบ้านนักเรียน (ให้เห็นทั้งหลัง)", "required" => true],
-        ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => "* ภาพภายในบ้านนักเรียน", "required" => true],
-        ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", "required" => true],
+        ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => $isTerm2 ? "=> ภาพภายในบ้านนักเรียน" : "* ภาพภายในบ้านนักเรียน", "required" => !$isTerm2],
+        ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => $isTerm2 ? "=> ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง" : "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", "required" => !$isTerm2],
         ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "=> ภาพเพิ่มเติม", "required" => false],
         ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "=> ภาพเพิ่มเติม", "required" => false],
     ];
@@ -100,6 +103,27 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
             <input type="hidden" name="stuId" value="<?= $data['Stu_id']; ?>">
             <input type="hidden" name="term" value="<?= $isEdit ? $data['Term'] : $currentTerm; ?>">
             <input type="hidden" name="pee" value="<?= $isEdit ? $data['Pee'] : $currentPee; ?>">
+
+            <?php if (!$isEdit && $currentTerm == 2 && $hasTerm1Data): ?>
+            <!-- Copy from Term 1 Button -->
+            <div id="copyTerm1Section" class="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-3xl p-6">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-copy text-lg"></i>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h4 class="text-lg font-black text-blue-800 dark:text-blue-300">คัดลอกข้อมูลจากเทอม 1</h4>
+                        <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                            พบข้อมูลเยี่ยมบ้านเทอม 1 แล้ว คุณสามารถคัดลอกข้อมูลมาใช้ได้ <span class="text-rose-500 font-bold">(ยกเว้นรูปภาพ ต้องอัพโหลดใหม่)</span>
+                        </p>
+                    </div>
+                    <button type="button" onclick="copyFromTerm1('<?= $data['Stu_id']; ?>', <?= $currentPee; ?>)" 
+                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2 whitespace-nowrap">
+                        <i class="fas fa-download"></i> ดึงข้อมูลเทอม 1
+                    </button>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <div class="space-y-6">
                 <?php
@@ -202,6 +226,91 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
                 document.getElementById(removeId).value = "0";
             }
         }
+        
+        // Copy data from Term 1 to Term 2 form
+        function copyFromTerm1(stuId, pee) {
+            Swal.fire({
+                title: 'กำลังดึงข้อมูล...',
+                text: 'กำลังโหลดข้อมูลจากเทอม 1',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+            
+            $.ajax({
+                url: '?action=get_term1_data',
+                method: 'GET',
+                data: { stuId: stuId, pee: pee },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const data = response.data;
+                        
+                        // Populate vh1 to vh18 radio buttons
+                        for (let i = 1; i <= 18; i++) {
+                            const fieldName = 'vh' + i;
+                            const value = data[fieldName];
+                            if (value) {
+                                const radio = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                                if (radio) {
+                                    radio.checked = true;
+                                    // Trigger visual update for the label
+                                    radio.dispatchEvent(new Event('change'));
+                                }
+                            }
+                        }
+                        
+                        // Populate vh20 textarea
+                        if (data.vh20) {
+                            const textarea = document.querySelector('textarea[name="vh20"]');
+                            if (textarea) {
+                                textarea.value = data.vh20;
+                            }
+                        }
+                        
+                        // Update the copy section to show success
+                        const copySection = document.getElementById('copyTerm1Section');
+                        if (copySection) {
+                            copySection.innerHTML = `
+                                <div class="flex flex-col md:flex-row items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                        <i class="fas fa-check text-lg"></i>
+                                    </div>
+                                    <div class="flex-1 text-center md:text-left">
+                                        <h4 class="text-lg font-black text-emerald-800 dark:text-emerald-300">คัดลอกข้อมูลสำเร็จ!</h4>
+                                        <p class="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                                            ข้อมูลจากเทอม 1 ถูกกรอกลงฟอร์มแล้ว <span class="text-rose-500 font-bold">กรุณาอัพโหลดรูปภาพใหม่</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                            copySection.classList.remove('from-blue-50', 'to-indigo-50', 'dark:from-blue-900/20', 'dark:to-indigo-900/20', 'border-blue-200', 'dark:border-blue-800');
+                            copySection.classList.add('from-emerald-50', 'to-teal-50', 'dark:from-emerald-900/20', 'dark:to-teal-900/20', 'border-emerald-200', 'dark:border-emerald-800');
+                        }
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ดึงข้อมูลสำเร็จ!',
+                            text: 'ข้อมูลจากเทอม 1 ถูกกรอกลงฟอร์มแล้ว กรุณาตรวจสอบและอัพโหลดรูปภาพใหม่',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ไม่พบข้อมูล',
+                            text: response.message || 'ไม่สามารถดึงข้อมูลจากเทอม 1 ได้'
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                    });
+                }
+            });
+        }
         </script>
     </div>
     <?php
@@ -243,8 +352,48 @@ if (isset($_GET['action'])) {
         $stmt->execute([$stuId]);
         $studentData = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        // Check if Term 1 data exists when adding Term 2
+        $hasTerm1Data = false;
+        if ($term_v == 2) {
+            $sql = "SELECT v.* FROM visithome v WHERE v.Stu_id = ? AND v.Term = 1 AND v.Pee = ?";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$stuId, $pee_v]);
+            $term1Data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $hasTerm1Data = !empty($term1Data);
+        }
+        
         if ($studentData) {
-            echo generateVisitForm($studentData, false, $term_v, $pee_v);
+            echo generateVisitForm($studentData, false, $term_v, $pee_v, $hasTerm1Data);
+        }
+        exit;
+    }
+    
+    // AJAX: Fetch Term 1 data for copying to Term 2
+    if ($_GET['action'] === 'get_term1_data') {
+        $stuId = $_GET['stuId'];
+        $pee_v = $_GET['pee'];
+        
+        header('Content-Type: application/json');
+        
+        // Fetch Term 1 data
+        $sql = "SELECT vh1, vh2, vh3, vh4, vh5, vh6, vh7, vh8, vh9, vh10, 
+                       vh11, vh12, vh13, vh14, vh15, vh16, vh17, vh18, vh20
+                FROM visithome 
+                WHERE Stu_id = ? AND Term = 1 AND Pee = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$stuId, $pee_v]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($data) {
+            echo json_encode([
+                'success' => true,
+                'data' => $data
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ไม่พบข้อมูลเยี่ยมบ้านเทอม 1'
+            ]);
         }
         exit;
     }

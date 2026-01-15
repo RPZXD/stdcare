@@ -20,7 +20,7 @@ class Student
         return $this->pdo;
     }
 
-    public function getAll($filters = []) 
+    public function getAll($filters = [], $allStatuses = false) 
     {
         $sql = "SELECT 
             * 
@@ -45,9 +45,11 @@ class Student
         if (!empty($filters['status'])) {
             $whereClause .= " AND Stu_status = :status";
             $params[':status'] = $filters['status'];
-        } else {
-             $whereClause .= " AND Stu_status = '1'";
+        } else if (!$allStatuses) {
+            // ถ้าไม่ได้ส่ง allStatuses = true จะดึงแค่สถานะปกติ
+            $whereClause .= " AND Stu_status = '1'";
         }
+        // ถ้า $allStatuses = true จะไม่มีการกรองสถานะ (ดึงทั้งหมด)
 
         $sql .= $whereClause;
         $sql .= " ORDER BY Stu_major, Stu_room, Stu_no, Stu_name";

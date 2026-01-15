@@ -26,12 +26,19 @@ class Teacher
         return $this->pdo;
     }
 
-    public function getAll()
+    public function getAll($allStatuses = false)
     {
-    // (KEV: เพิ่ม Teach_class, Teach_room และ Teach_photo เพื่อให้ View แสดงผลได้ถูกต้อง)
-    $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_photo, Teach_status, role_std FROM teacher 
-        WHERE Teach_status = '1' 
-        ORDER BY Teach_major, Teach_name";
+        // (KEV: เพิ่ม Teach_class, Teach_room และ Teach_photo เพื่อให้ View แสดงผลได้ถูกต้อง)
+        if ($allStatuses) {
+            // ดึงทั้งหมด (สำหรับ Admin)
+            $sql = "SELECT Teach_id, Teach_name, Teach_sex, Teach_birth, Teach_addr, Teach_phone, Teach_major, Teach_class, Teach_room, Teach_photo, Teach_status, role_std FROM teacher 
+                ORDER BY Teach_major, Teach_name";
+        } else {
+            // ดึงเฉพาะสถานะปกติ
+            $sql = "SELECT Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_photo, Teach_status, role_std FROM teacher 
+                WHERE Teach_status = '1' 
+                ORDER BY Teach_major, Teach_name";
+        }
         return $this->db->query($sql)->fetchAll();
     }
 

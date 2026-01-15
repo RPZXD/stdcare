@@ -42,6 +42,18 @@ try {
             // (2) ส่ง $filters เข้าไปในเมธอด getAll()
             echo json_encode($studentModel->getAll($filters));
             break;
+            
+        // Action สำหรับ Admin: ดึงข้อมูลนักเรียนทุกสถานะ (รวม จบ, ย้าย, ออกกลางคัน, เสียชีวิต)
+        case 'list_all':
+            $filters = [
+                'class'  => $_GET['class'] ?? null,
+                'room'   => $_GET['room'] ?? null,
+                'status' => $_GET['status'] ?? null
+            ];
+            
+            // ส่ง allStatuses = true เพื่อดึงทุกสถานะ
+            echo json_encode($studentModel->getAll($filters, true));
+            break;
         //
         // !! KEV: สิ้นสุดการแก้ไข !!
         //

@@ -38,7 +38,7 @@ $menuItems = [
     <div class="p-6 border-b border-white/10">
         <div class="flex items-center gap-4">
             <div class="relative">
-                <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($userData['Teach_name'] ?? 'Admin'); ?>&background=random&size=64" 
+                <img src="https://std.phichai.ac.th/teacher/uploads/phototeach/<?php echo $userData['Teach_photo'] ?? 'Admin'; ?>" 
                      alt="Avatar" class="w-14 h-14 rounded-2xl border-2 border-white/20 shadow-lg">
                 <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-400 rounded-full border-2 border-rose-800 dark:border-slate-900"></span>
             </div>
