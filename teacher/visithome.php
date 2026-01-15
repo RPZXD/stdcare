@@ -66,11 +66,11 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
     $isTerm2 = (!$isEdit && $currentTerm == 2) || ($isEdit && isset($data['Term']) && $data['Term'] == 2);
     
     $images = [
-        ["id" => "image1", "label" => "รูปภาพที่ 1", "description" => "* ภาพตัวบ้านนักเรียน (ให้เห็นทั้งหลัง)", "required" => true],
-        ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => $isTerm2 ? "=> ภาพภายในบ้านนักเรียน" : "* ภาพภายในบ้านนักเรียน", "required" => !$isTerm2],
-        ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => $isTerm2 ? "=> ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง" : "* ภาพขณะครูเยี่ยมบ้านกับนักเรียนและผู้ปกครอง", "required" => !$isTerm2],
-        ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "=> ภาพเพิ่มเติม", "required" => false],
-        ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "=> ภาพเพิ่มเติม", "required" => false],
+        ["id" => "image1", "label" => "รูปภาพที่ 1", "description" => "", "required" => true],
+        ["id" => "image2", "label" => "รูปภาพที่ 2", "description" => "", "required" => !$isTerm2],
+        ["id" => "image3", "label" => "รูปภาพที่ 3", "description" => "", "required" => !$isTerm2],
+        ["id" => "image4", "label" => "รูปภาพที่ 4", "description" => "", "required" => false],
+        ["id" => "image5", "label" => "รูปภาพที่ 5", "description" => "", "required" => false],
     ];
 
     $formId = $isEdit ? 'editVisitForm' : 'addVisitForm';

@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validate required images based on term
-    // Term 1: 3 images required, Term 2: only 1 image required
+    // Term 1: images 1-3 required, Term 2: only image 1 required
     $term = intval($data['term']);
     $requiredImages = ($term == 2) ? 1 : 3;
     
