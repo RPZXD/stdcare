@@ -16,9 +16,30 @@ if (!$stu_id) {
     exit;
 }
 
-// Enhanced file validation
-if (!isset($_FILES['profile_pic']) || $_FILES['profile_pic']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['success' => false, 'message' => 'ไม่พบไฟล์หรือเกิดข้อผิดพลาด']);
+// Enhanced file validation with proper error messages
+if (!isset($_FILES['profile_pic'])) {
+    echo json_encode(['success' => false, 'message' => 'กรุณาเลือกรูปโปรไฟล์']);
+    exit;
+}
+
+if ($_FILES['profile_pic']['error'] !== UPLOAD_ERR_OK) {
+    $error = $_FILES['profile_pic']['error'];
+    $errorMsg = '';
+    switch ($error) {
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            $errorMsg = 'รูปภาพมีขนาดใหญ่เกินไป กรุณาลดขนาดไฟล์แล้วลองใหม่';
+            break;
+        case UPLOAD_ERR_PARTIAL:
+            $errorMsg = 'การอัปโหลดไม่สมบูรณ์ กรุณาลองใหม่อีกครั้ง';
+            break;
+        case UPLOAD_ERR_NO_FILE:
+            $errorMsg = 'กรุณาเลือกรูปโปรไฟล์';
+            break;
+        default:
+            $errorMsg = 'เกิดข้อผิดพลาดในการอัปโหลด กรุณาลองใหม่';
+    }
+    echo json_encode(['success' => false, 'message' => $errorMsg]);
     exit;
 }
 

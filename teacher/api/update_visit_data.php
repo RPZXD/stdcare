@@ -236,6 +236,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
+            // ตรวจสอบว่ามีการพยายามอัปโหลดแต่เกิด error หรือไม่
+            if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] !== UPLOAD_ERR_NO_FILE) {
+                $errorCode = $_FILES[$fileKey]['error'];
+                $errorMsg = "";
+                switch ($errorCode) {
+                    case UPLOAD_ERR_INI_SIZE:
+                    case UPLOAD_ERR_FORM_SIZE:
+                        $errorMsg = "รูปภาพที่ $i มีขนาดใหญ่เกินไป (สูงสุด 5MB) กรุณาลดขนาดไฟล์แล้วลองใหม่";
+                        break;
+                    case UPLOAD_ERR_PARTIAL:
+                        $errorMsg = "รูปภาพที่ $i อัปโหลดไม่สมบูรณ์ กรุณาลองใหม่อีกครั้ง";
+                        break;
+                    default:
+                        $errorMsg = "เกิดข้อผิดพลาดในการอัปโหลดรูปภาพที่ $i กรุณาลองใหม่";
+                }
+                echo json_encode(['success' => false, 'message' => $errorMsg]);
+                exit;
+            }
             // ไม่มีการอัปโหลดใหม่และไม่ได้ลบ ให้คงค่าเดิม
             $data[$pictureKey] = $oldData[$pictureKey] ?? "";
         }

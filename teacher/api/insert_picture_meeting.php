@@ -1,6 +1,7 @@
 <?php
 require_once "../../config/Database.php";
 require_once "../../class/Utils.php";
+require_once __DIR__ . "/helpers/upload_helper.php";
 
 $response = ['success' => false, 'message' => ''];
 
@@ -16,13 +17,19 @@ try {
     $pee = $_POST['pee'] ?? null;
 
     if (!$class || !$room || !$term || !$pee) {
-        throw new Exception('ข้อมูลไม่ครบถ้วน');
+        throw new Exception('กรุณากรอกข้อมูลชั้น ห้อง เทอม และปีการศึกษาให้ครบถ้วน');
     }
 
     // Handle file uploads
     $uploadedFiles = $_FILES['uploadImage'] ?? null;
     if (!$uploadedFiles || !is_array($uploadedFiles['name'])) {
-        throw new Exception('ไม่มีไฟล์ที่อัปโหลด');
+        throw new Exception('กรุณาเลือกรูปภาพที่ต้องการอัปโหลด');
+    }
+
+    // Validate uploaded files using helper
+    $uploadError = validateMultipleFileUploads('uploadImage', 'รูปภาพ', 1, 4, 5 * 1024 * 1024);
+    if ($uploadError) {
+        throw new Exception($uploadError['message']);
     }
 
     $uploadDir = '../uploads/picmeeting' . $term . $pee . '/';
@@ -33,15 +40,35 @@ try {
     // Prepare file names for up to 4 images
     $fileNames = array_fill(0, 4, null);
     foreach ($uploadedFiles['name'] as $key => $name) {
-        if ($key < 4 && $uploadedFiles['error'][$key] === UPLOAD_ERR_OK) {
+        if ($key < 4) {
+            $error = $uploadedFiles['error'][$key];
+            
+            // Skip empty file slots
+            if ($error === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            
+            // Check for upload errors with proper message
+            if ($error !== UPLOAD_ERR_OK) {
+                $fileNum = $key + 1;
+                throw new Exception(getUploadErrorMessage($error, "รูปภาพที่ $fileNum"));
+            }
+            
+            // Check file size
+            if ($uploadedFiles['size'][$key] > 5 * 1024 * 1024) {
+                $fileNum = $key + 1;
+                throw new Exception("รูปภาพที่ $fileNum มีขนาดใหญ่เกินไป (สูงสุด 5MB)");
+            }
+            
             $tmpName = $uploadedFiles['tmp_name'][$key];
             $fileName = "{$class}{$room}{$term}{$pee}_pic" . ($key + 1) . '.' . pathinfo($name, PATHINFO_EXTENSION);
             $filePath = $uploadDir . $fileName;
 
             if (move_uploaded_file($tmpName, $filePath)) {
-                $fileNames[$key] = $fileName; // Store only the file name
+                $fileNames[$key] = $fileName;
             } else {
-                throw new Exception('ไม่สามารถอัปโหลดไฟล์: ' . $name);
+                $fileNum = $key + 1;
+                throw new Exception("ไม่สามารถบันทึกรูปภาพที่ $fileNum ได้ กรุณาลองใหม่");
             }
         }
     }

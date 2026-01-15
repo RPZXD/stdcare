@@ -141,10 +141,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Helper function to get upload error message
+    function getUploadErrorMessage($errorCode, $fieldNum) {
+        switch ($errorCode) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return "รูปภาพที่ $fieldNum มีขนาดใหญ่เกินไป (สูงสุด 5MB) กรุณาลดขนาดไฟล์แล้วลองใหม่";
+            case UPLOAD_ERR_PARTIAL:
+                return "รูปภาพที่ $fieldNum อัปโหลดไม่สมบูรณ์ กรุณาลองใหม่อีกครั้ง";
+            case UPLOAD_ERR_NO_FILE:
+                return "กรุณาเลือกรูปภาพที่ $fieldNum";
+            case UPLOAD_ERR_NO_TMP_DIR:
+            case UPLOAD_ERR_CANT_WRITE:
+            case UPLOAD_ERR_EXTENSION:
+                return "เกิดข้อผิดพลาดในการอัปโหลดรูปภาพที่ $fieldNum กรุณาติดต่อผู้ดูแลระบบ";
+            default:
+                return "ไม่สามารถอัปโหลดรูปภาพที่ $fieldNum ได้ กรุณาลองใหม่";
+        }
+    }
+
     for ($i = 1; $i <= 3; $i++) {
         $fileKey = "image$i";
         if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(['success' => false, 'message' => "ไฟล์ที่ $i ไม่สามารถเว้นว่างได้"]);
+            $errorCode = isset($_FILES[$fileKey]) ? $_FILES[$fileKey]['error'] : UPLOAD_ERR_NO_FILE;
+            echo json_encode(['success' => false, 'message' => getUploadErrorMessage($errorCode, $i)]);
             exit;
         }
     }    // Handle file uploads with enhanced image processing
