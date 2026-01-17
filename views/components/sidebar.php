@@ -125,7 +125,7 @@ if ($isTeacher) {
             'key' => 'eventstd',
             'name' => 'ระบบกิจกรรมนักเรียน',
             'url' => 'https://eventstd.phichai.ac.th',
-            'icon' => 'fa-chart-pie',
+            'icon' => 'fa-calendar',
             'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
         ],
     ];
