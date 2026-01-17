@@ -121,6 +121,13 @@ if ($isTeacher) {
             'icon' => 'fa-bullhorn',
             'gradient' => ['from' => 'orange-500', 'to' => 'amber-600'],
         ],
+        [
+            'key' => 'eventstd',
+            'name' => 'ระบบกิจกรรมนักเรียน',
+            'url' => 'https://eventstd.phichai.ac.th',
+            'icon' => 'fa-chart-pie',
+            'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
+        ],
     ];
 }
 
