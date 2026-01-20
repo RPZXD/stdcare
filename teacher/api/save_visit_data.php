@@ -210,28 +210,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Generate filename
-            $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . ".jpg";
+            $ext = pathinfo($originalName, PATHINFO_EXTENSION) ?: 'jpg';
+            $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . "." . strtolower($ext);
             $filePath = $uploadDir . $fileName;
             
-            // Process image: resize and convert to JPEG
+            // Process image: try resize, then convert, then direct move as fallback
             $processed = false;
+            $errorDetails = [];
             
             // First try to resize and convert
-            if (resizeImage($tempPath, $filePath, 800, 600, 85)) {
-                $processed = true;
-            } 
-            // If resize fails, try direct conversion
-            elseif (convertImageToJpeg($tempPath, $filePath, 85)) {
-                $processed = true;
+            try {
+                if (resizeImage($tempPath, $filePath, 800, 600, 85)) {
+                    $processed = true;
+                } else {
+                    $errorDetails[] = "resizeImage failed";
+                }
+            } catch (Exception $e) {
+                $errorDetails[] = "resizeImage exception: " . $e->getMessage();
             }
-            // Fallback: direct copy for JPEG files
-            elseif ($imageInfo['mime'] === 'image/jpeg' && move_uploaded_file($tempPath, $filePath)) {
-                $processed = true;
+            
+            // If resize fails, try direct conversion
+            if (!$processed) {
+                try {
+                    if (convertImageToJpeg($tempPath, $filePath, 85)) {
+                        $processed = true;
+                    } else {
+                        $errorDetails[] = "convertImageToJpeg failed";
+                    }
+                } catch (Exception $e) {
+                    $errorDetails[] = "convertImageToJpeg exception: " . $e->getMessage();
+                }
+            }
+            
+            // Final fallback: just move the file directly without processing
+            if (!$processed) {
+                // Use original extension for direct move
+                $fileName = "{$data['stuId']}_term{$data['term']}_image{$i}_" . uniqid() . "." . strtolower($ext);
+                $filePath = $uploadDir . $fileName;
+                
+                if (move_uploaded_file($tempPath, $filePath)) {
+                    $processed = true;
+                    error_log("VISITHOME SAVE: Used direct move fallback for $fileKey (GD processing failed: " . implode(", ", $errorDetails) . ")");
+                } else {
+                    $errorDetails[] = "move_uploaded_file failed: " . (is_uploaded_file($tempPath) ? "valid upload" : "invalid upload") . ", target: $filePath, dir writable: " . (is_writable($uploadDir) ? "yes" : "no");
+                }
             }
             
             if ($processed) {
                 $data["picture$i"] = $fileName;
             } else {
+                error_log("VISITHOME SAVE ERROR: " . implode(", ", $errorDetails));
                 echo json_encode(['success' => false, 'message' => "ไม่สามารถประมวลผลไฟล์ $fileKey ได้"]);
                 exit;
             }
