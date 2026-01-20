@@ -167,7 +167,7 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
                             $id = $img['id'];
                             $num = substr($id, -1);
                             $oldImg = ($isEdit && !empty($data['picture'.$num])) ? $data['picture'.$num] : '';
-                            $imgUrl = $oldImg ? "/stdcare/teacher/uploads/visithome" . ($data['Pee'] - 543) . "/" . $oldImg . "?t=" . time() : '';
+                            $imgUrl = $oldImg ? "uploads/visithome" . ($data['Pee'] - 543) . "/" . $oldImg . "?t=" . time() : '';
                         ?>
                         <div class="space-y-3">
                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest px-2"><?= $img['label'] ?> <?= $img['required'] ? '<span class="text-rose-500">*</span>' : '' ?></p>
