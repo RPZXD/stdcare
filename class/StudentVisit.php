@@ -201,7 +201,7 @@ class StudentVisit {
         $query = "
             UPDATE {$this->table_visithome}
             SET " . implode(', ', $fieldsToUpdate) . "
-            WHERE Stu_id = :stuId AND Term = :term
+            WHERE Stu_id = :stuId AND Term = :term AND Pee = :pee
         ";
 
         $stmt = $this->conn->prepare($query);
@@ -212,6 +212,7 @@ class StudentVisit {
         }
         $stmt->bindValue(':stuId', $data['stuId'], PDO::PARAM_STR);
         $stmt->bindValue(':term', $data['term'], PDO::PARAM_INT);
+        $stmt->bindValue(':pee', $data['pee'], PDO::PARAM_INT);
 
         // Execute the query
         return $stmt->execute();

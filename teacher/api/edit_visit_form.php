@@ -138,7 +138,7 @@ $images = [
                     
                     <?php if ($imagePath): ?>
                     <div class="mb-2 rounded-lg overflow-hidden">
-                        <img src="../teacher/uploads/visithome<?= $yearImg ?>/<?= $imagePath ?>" 
+                        <img src="/stdcare/teacher/uploads/visithome<?= $yearImg ?>/<?= $imagePath ?>?t=<?= time() ?>" 
                              alt="<?= $image['label'] ?>" 
                              class="w-full h-24 object-cover rounded-lg">
                     </div>
