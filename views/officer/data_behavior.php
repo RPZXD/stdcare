@@ -61,6 +61,12 @@ ob_start();
     .dark .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
         background: #1e293b !important;
     }
+
+    /* Smooth input typing */
+    .smooth-input {
+        will-change: transform;
+        -webkit-font-smoothing: antialiased;
+    }
 </style>
 
 <div class="max-w-[1600px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -104,10 +110,16 @@ ob_start();
             <div class="flex-1 w-full relative group">
                 <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
                 <input type="text" id="behaviorSearch" placeholder="ค้นหาด้วยชื่อนักเรียน, รหัส, หรือรายการพฤติกรรม..." 
-                    class="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900/20 outline-none transition-all font-bold text-slate-700 dark:text-white">
+                    class="smooth-input w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900/20 outline-none font-bold text-slate-700 dark:text-white">
             </div>
             
             <div class="flex items-center gap-3 w-full lg:w-auto no-print">
+                <button id="btnSearch" class="flex-1 lg:flex-none h-[58px] px-8 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fas fa-search"></i> ค้นหา
+                </button>
+                <button id="btnClearSearch" class="flex-1 lg:flex-none h-[58px] px-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fas fa-times"></i> ล้าง
+                </button>
                 <button id="btnRefresh" class="flex-1 lg:flex-none h-[58px] px-8 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-sync-alt"></i> รีเฟรช
                 </button>
@@ -175,14 +187,19 @@ ob_start();
                     <!-- Student Search Section (Only for Create mode) -->
                     <div id="searchSection" class="relative group">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic group-focus-within:text-indigo-500 transition-colors mb-2 block">ค้นหานักเรียน</label>
-                        <div class="relative">
-                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                            <input type="text" id="studentSearchInput" autocomplete="off"
-                                class="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-black text-slate-700 dark:text-white"
-                                placeholder="พิมพ์ชื่อ นามสกุล หรือเลขประจำตัว...">
+                        <div class="relative flex gap-2">
+                            <div class="flex-1 relative">
+                                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                                <input type="text" id="studentSearchInput" autocomplete="off"
+                                    class="smooth-input w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-black text-slate-700 dark:text-white"
+                                    placeholder="พิมพ์ชื่อ นามสกุล หรือเลขประจำตัว...">
+                            </div>
+                            <button type="button" id="btnSearchStudent" class="px-6 py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-95">
+                                <i class="fas fa-search"></i>
+                            </button>
                             
                             <!-- Search Loading -->
-                            <div id="searchLoading" class="absolute right-5 top-1/2 -translate-y-1/2 hidden">
+                            <div id="searchLoading" class="absolute right-20 top-1/2 -translate-y-1/2 hidden">
                                 <div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                         </div>
@@ -479,9 +496,18 @@ window.clearSelectedStudent = function() {
         };
     }
 
-    $('#studentSearchInput').on('input', debounce(function() {
-        searchStudentsLive(this.value);
-    }, 400));
+    // Search student when button clicked
+    $('#btnSearchStudent').on('click', function() {
+        searchStudentsLive($('#studentSearchInput').val());
+    });
+
+    // Search student when Enter pressed
+    $('#studentSearchInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            searchStudentsLive(this.value);
+        }
+    });
 
     // Close search results when clicking outside
     $(document).on('click', function(e) {
@@ -630,9 +656,23 @@ window.clearSelectedStudent = function() {
         }
     });
 
-    // Custom Search
-    $('#behaviorSearch').on('input', function() {
-        behaviorTable.search(this.value).draw();
+    // Button-based Search
+    $('#btnSearch').on('click', function() {
+        behaviorTable.search($('#behaviorSearch').val()).draw();
+    });
+
+    // Search when Enter pressed
+    $('#behaviorSearch').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            behaviorTable.search(this.value).draw();
+        }
+    });
+
+    // Clear search
+    $('#btnClearSearch').on('click', function() {
+        $('#behaviorSearch').val('');
+        behaviorTable.search('').draw();
     });
 
     // Mobile Rendering

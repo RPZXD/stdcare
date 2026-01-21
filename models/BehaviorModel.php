@@ -56,10 +56,13 @@ class BehaviorModel {
     }
 
     /**
-     * ดึงข้อมูลพฤติกรรม 1 รายการด้วย ID
+     * ดึงข้อมูลพฤติกรรม 1 รายการด้วย ID พร้อมข้อมูลนักเรียน
      */
     public function getBehaviorById($id) {
-        $sql = "SELECT * FROM behavior WHERE id = :id";
+        $sql = "SELECT b.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture
+                FROM behavior b
+                JOIN student s ON b.stu_id = s.Stu_id
+                WHERE b.id = :id";
         return $this->db->query($sql, ['id' => $id])->fetch();
     }
     
