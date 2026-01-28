@@ -207,7 +207,7 @@ ob_start();
 <div id="behaviorModal" class="fixed inset-0 z-[60] hidden overflow-y-auto no-print">
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal()"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn scale-95 opacity-0 transition-all duration-300"
+        <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn scale-95 opacity-0 transition-all duration-300 my-8"
             id="modalContent">
             <!-- Modal Header -->
             <div
@@ -237,7 +237,7 @@ ob_start();
                 <input type="hidden" name="id" id="behavior_id">
                 <input type="hidden" name="stu_id" id="modalStu_id" required>
 
-                <div class="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+                <div class="p-8 space-y-8 max-h-[50vh] overflow-y-auto">
                     <!-- Student Search Section (Only for Create mode) -->
                     <div id="searchSection" class="relative group">
                         <label
