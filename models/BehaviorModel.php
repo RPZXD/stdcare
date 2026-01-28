@@ -1,14 +1,16 @@
 <?php
 namespace App\Models;
 
-class BehaviorModel {
+class BehaviorModel
+{
     private $db;
     private $pdo;
 
     /**
      * @param \App\DatabaseUsers $db การเชื่อมต่อฐานข้อมูล
      */
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
         $this->pdo = $db->getPDO();
     }
@@ -17,7 +19,8 @@ class BehaviorModel {
      * คืนค่าสรุปคะแนนพฤติกรรมของนักเรียนในชั้น/ห้อง (รวมคะแนน)
      * ใช้สำหรับหน้าแสดงผลของครูที่ปรึกษา
      */
-    public function getBehaviorSummaryByClass($class, $room, $term, $pee) {
+    public function getBehaviorSummaryByClass($class, $room, $term, $pee)
+    {
         $sql = "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_picture, s.Stu_no,
                        COALESCE(SUM(b.behavior_score),0) AS total_behavior_score,
                        GROUP_CONCAT(DISTINCT CONCAT(t.Teach_name) SEPARATOR ', ') AS teacher_names
@@ -38,14 +41,16 @@ class BehaviorModel {
         return $this->db->query($sql, $params)->fetchAll();
     }
 
-    public function getPDO() {
+    public function getPDO()
+    {
         return $this->pdo;
     }
 
     /**
      * ดึงข้อมูลพฤติกรรมทั้งหมดในเทอมปัจจุบัน
      */
-    public function getAllBehaviors($term, $pee) {
+    public function getAllBehaviors($term, $pee)
+    {
         // (เพิ่ม JOIN ตาราง student)
         $sql = "SELECT b.*, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_no
                 FROM behavior b
@@ -56,20 +61,76 @@ class BehaviorModel {
     }
 
     /**
+     * ดึงข้อมูลพฤติกรรมแบบ Server-side สำหรับ DataTables
+     */
+    public function getBehaviorsServerSide($term, $pee, $start = 0, $length = 10, $search = '', $orderIdx = 0, $orderDir = 'DESC')
+    {
+        $allowedColumns = ['behavior_date', 'Stu_name', 'behavior_type', 'behavior_name', 'behavior_score'];
+        $orderCol = $allowedColumns[$orderIdx] ?? 'behavior_date';
+
+        // Base Query
+        $sql = "SELECT b.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_no
+                FROM behavior b
+                JOIN student s ON b.stu_id = s.Stu_id
+                WHERE b.behavior_term = :term AND b.behavior_pee = :pee";
+
+        $params = [':term' => $term, ':pee' => $pee];
+
+        // Search
+        if (!empty($search)) {
+            $sql .= " AND (
+                s.Stu_name LIKE :search OR 
+                s.Stu_sur LIKE :search OR 
+                b.stu_id LIKE :search OR 
+                b.behavior_name LIKE :search OR 
+                b.behavior_type LIKE :search OR
+                CONCAT(s.Stu_name, ' ', s.Stu_sur) LIKE :search
+            )";
+            $params[':search'] = "%$search%";
+        }
+
+        // Final counts for filtered records
+        $countSql = "SELECT COUNT(*) FROM (" . $sql . ") as filtered";
+        $filteredCount = $this->db->query($countSql, $params)->fetchColumn();
+
+        // Order and Limit
+        $sql .= " ORDER BY " . $orderCol . " " . $orderDir;
+        $sql .= " LIMIT " . intval($length) . " OFFSET " . intval($start);
+
+        $data = $this->db->query($sql, $params)->fetchAll();
+
+        return [
+            'data' => $data,
+            'filtered' => $filteredCount
+        ];
+    }
+
+    /**
+     * นับจำนวนรายการพฤติกรรมทั้งหมดในเทอมปัจจุบัน
+     */
+    public function countAllBehaviors($term, $pee)
+    {
+        $sql = "SELECT COUNT(*) FROM behavior WHERE behavior_term = :term AND behavior_pee = :pee";
+        return $this->db->query($sql, ['term' => $term, 'pee' => $pee])->fetchColumn();
+    }
+
+    /**
      * ดึงข้อมูลพฤติกรรม 1 รายการด้วย ID พร้อมข้อมูลนักเรียน
      */
-    public function getBehaviorById($id) {
+    public function getBehaviorById($id)
+    {
         $sql = "SELECT b.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture
                 FROM behavior b
                 JOIN student s ON b.stu_id = s.Stu_id
                 WHERE b.id = :id";
         return $this->db->query($sql, ['id' => $id])->fetch();
     }
-    
+
     /**
      * (เพิ่ม) ดึงข้อมูลนักเรียนสำหรับแสดง Preview
      */
-    public function getStudentPreview($stu_id) {
+    public function getStudentPreview($stu_id)
+    {
         $sql = "SELECT Stu_id, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_picture 
                 FROM student 
                 WHERE Stu_id = :id AND Stu_status = '1'";
@@ -80,7 +141,8 @@ class BehaviorModel {
      * ค้นหานักเรียนแบบ fuzzy search (รหัส, ชื่อ, นามสกุล)
      * คืนค่าเป็น array ของนักเรียน (จำกัดผลลัพธ์)
      */
-    public function searchStudents($q, $limit = 10) {
+    public function searchStudents($q, $limit = 10)
+    {
         $pattern = '%' . $q . '%';
         $sql = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_picture
                 FROM student
@@ -95,7 +157,8 @@ class BehaviorModel {
     /**
      * สร้างรายการพฤติกรรมใหม่
      */
-    public function createBehavior($data, $teach_id, $term, $pee) {
+    public function createBehavior($data, $teach_id, $term, $pee)
+    {
         $sql = "INSERT INTO behavior 
                     (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
                 VALUES 
@@ -116,7 +179,7 @@ class BehaviorModel {
             ':term' => $term,
             ':pee' => $pee
         ];
-        
+
         $stmt = $this->db->query($sql, $params);
         return $stmt->rowCount() > 0;
     }
@@ -124,8 +187,9 @@ class BehaviorModel {
     /**
      * อัปเดตรายการพฤติกรรม
      */
-    public function updateBehavior($id, $data, $teach_id, $term, $pee) {
-         $sql = "UPDATE behavior SET
+    public function updateBehavior($id, $data, $teach_id, $term, $pee)
+    {
+        $sql = "UPDATE behavior SET
                     stu_id = :stu_id,
                     behavior_date = :behavior_date,
                     behavior_type = :behavior_type,
@@ -135,7 +199,7 @@ class BehaviorModel {
                     behavior_term = :term,
                     behavior_pee = :pee
                 WHERE id = :id";
-        
+
         // Compute score from selected type. If mapping not found, fall back to provided score or 0.
         $score = $this->getScoreForType($data['editBehavior_type'] ?? '');
         if ($score === null) {
@@ -153,9 +217,9 @@ class BehaviorModel {
             ':pee' => $pee,
             ':id' => $id
         ];
-        
+
         $this->db->query($sql, $params);
-        return true; 
+        return true;
     }
 
     /**
@@ -163,9 +227,10 @@ class BehaviorModel {
      * @param string $type
      * @return int|null
      */
-    public function getScoreForType($type) {
+    public function getScoreForType($type)
+    {
         // Normalize input
-        $t = trim((string)$type);
+        $t = trim((string) $type);
         switch ($t) {
             case "หนีเรียนหรือออกนอกสถานศึกษา":
                 return 10;
@@ -204,7 +269,8 @@ class BehaviorModel {
     /**
      * ลบรายการพฤติกรรม
      */
-    public function deleteBehavior($id) {
+    public function deleteBehavior($id)
+    {
         $sql = "DELETE FROM behavior WHERE id = :id";
         $stmt = $this->db->query($sql, ['id' => $id]);
         return $stmt->rowCount() > 0;
@@ -213,7 +279,8 @@ class BehaviorModel {
     /**
      * ดึงรายละเอียดการถูกหักคะแนนของนักเรียนคนหนึ่งในเทอมปัจจุบัน
      */
-    public function getStudentBehaviorDetails($stu_id, $term, $pee) {
+    public function getStudentBehaviorDetails($stu_id, $term, $pee)
+    {
         $sql = "SELECT b.id, b.behavior_date, b.behavior_type, b.behavior_name, b.behavior_score,
                        t.Teach_name
                 FROM behavior b
@@ -233,7 +300,8 @@ class BehaviorModel {
     /**
      * ดึงข้อมูลพฤติกรรมทั้งหมดของครูคนหนึ่งในเทอมปัจจุบัน
      */
-    public function getBehaviorsByTeacherId($teacher_id, $term, $pee) {
+    public function getBehaviorsByTeacherId($teacher_id, $term, $pee)
+    {
         $sql = "SELECT b.*, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room
                 FROM behavior b
                 INNER JOIN student s ON b.stu_id = s.Stu_id
