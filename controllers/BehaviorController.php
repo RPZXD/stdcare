@@ -5,9 +5,9 @@ header('Content-Type: application/json');
 
 // (1) เรียกใช้คลาสหลัก
 require_once __DIR__ . '/../classes/DatabaseUsers.php';
-require_once __DIR__ . '/DatabaseLogger.php'; 
+require_once __DIR__ . '/DatabaseLogger.php';
 require_once __DIR__ . '/../models/BehaviorModel.php';
-require_once __DIR__ . '/../class/UserLogin.php'; 
+require_once __DIR__ . '/../class/UserLogin.php';
 
 use App\DatabaseUsers;
 use App\Models\BehaviorModel;
@@ -18,7 +18,7 @@ try {
     $pdo = $db->getPDO();
     $logger = new DatabaseLogger($pdo);
     $model = new BehaviorModel($db);
-    $userLogin = new UserLogin($pdo); 
+    $userLogin = new UserLogin($pdo);
 
     // (3) ดึงข้อมูล Admin/User/Officer สำหรับ Log
     if (!isset($_SESSION['Admin_login']) && !isset($_SESSION['Teacher_login']) && !isset($_SESSION['Officer_login'])) {
@@ -45,8 +45,29 @@ try {
 
     switch ($action) {
         case 'list':
-            $data = $model->getAllBehaviors($term, $pee);
-            echo json_encode($data ?: []);
+            // Check if server-side processing is requested
+            if (isset($_GET['draw'])) {
+                $draw = intval($_GET['draw']);
+                $start = intval($_GET['start'] ?? 0);
+                $length = intval($_GET['length'] ?? 10);
+                $search = $_GET['search']['value'] ?? '';
+                $orderIdx = intval($_GET['order'][0]['column'] ?? 0);
+                $orderDir = $_GET['order'][0]['dir'] ?? 'DESC';
+
+                $result = $model->getBehaviorsServerSide($term, $pee, $start, $length, $search, $orderIdx, $orderDir);
+                $totalRecords = $model->countAllBehaviors($term, $pee);
+
+                echo json_encode([
+                    "draw" => $draw,
+                    "recordsTotal" => intval($totalRecords),
+                    "recordsFiltered" => intval($result['filtered']),
+                    "data" => $result['data']
+                ]);
+            } else {
+                // Fallback for any legacy code
+                $data = $model->getAllBehaviors($term, $pee);
+                echo json_encode($data ?: []);
+            }
             break;
 
         case 'get':
@@ -54,7 +75,7 @@ try {
             $data = $model->getBehaviorById($id);
             echo json_encode($data ?: []);
             break;
-            
+
         // (เพิ่ม) Action สำหรับค้นหานักเรียน
         case 'search_student':
             $id = $_GET['id'] ?? '';
@@ -106,18 +127,23 @@ try {
                 }
 
                 $success = $model->createBehavior($_POST, $teach_id, $term, $pee);
-                if (!$success) throw new Exception('Model returned false');
+                if (!$success)
+                    throw new Exception('Model returned false');
 
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_create_success', 'status_code' => 200,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_create_success',
+                    'status_code' => 200,
                     'message' => "User created behavior for Stu_id: $stu_id. Score: " . $computedScore
                 ]);
                 echo json_encode(['success' => true]);
             } catch (\Exception $e) {
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_create_fail', 'status_code' => 500,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_create_fail',
+                    'status_code' => 500,
                     'message' => "Failed to create behavior for Stu_id: $stu_id. Error: " . $e->getMessage()
                 ]);
                 http_response_code(500);
@@ -137,15 +163,19 @@ try {
 
                 $model->updateBehavior($id, $_POST, $teach_id, $term, $pee);
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_update_success', 'status_code' => 200,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_update_success',
+                    'status_code' => 200,
                     'message' => "User updated behavior ID: $id for Stu_id: $stu_id. Score: " . $computedScore
                 ]);
                 echo json_encode(['success' => true]);
             } catch (\Exception $e) {
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_update_fail', 'status_code' => 500,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_update_fail',
+                    'status_code' => 500,
                     'message' => "Failed to update behavior ID: $id. Error: " . $e->getMessage()
                 ]);
                 http_response_code(500);
@@ -167,20 +197,26 @@ try {
             }
 
             try {
-                if (empty($id)) throw new Exception('ID is empty');
+                if (empty($id))
+                    throw new Exception('ID is empty');
                 $success = $model->deleteBehavior($id);
-                if (!$success) throw new Exception('Model returned false');
-                
+                if (!$success)
+                    throw new Exception('Model returned false');
+
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_delete_success', 'status_code' => 200,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_delete_success',
+                    'status_code' => 200,
                     'message' => "User deleted behavior ID: $id"
                 ]);
                 echo json_encode(['success' => true]);
             } catch (\Exception $e) {
                 $logger->log([
-                    'user_id' => $admin_id, 'role' => $admin_role,
-                    'action_type' => 'behavior_delete_fail', 'status_code' => 500,
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'behavior_delete_fail',
+                    'status_code' => 500,
                     'message' => "Failed to delete behavior ID: $id. Error: " . $e->getMessage()
                 ]);
                 http_response_code(500);
@@ -230,7 +266,7 @@ try {
                 require_once __DIR__ . '/../classes/DatabaseEventstd.php';
                 $eventDb = new \App\DatabaseEventstd(); // This connects to phichaia_eventstd
                 $eventPdo = $eventDb->getPDO();
-                
+
                 if (!empty($stu_id)) {
                     // Get bonus for single student
                     $sql = "SELECT COALESCE(SUM(a.hours), 0) AS bonus_hours
@@ -243,7 +279,7 @@ try {
                     $stmt = $eventPdo->prepare($sql);
                     $stmt->execute(['stu_id' => $stu_id, 'term' => $term, 'pee' => $pee]);
                     $result = $stmt->fetch();
-                    $bonusPoints = (int)($result['bonus_hours'] ?? 0);
+                    $bonusPoints = (int) ($result['bonus_hours'] ?? 0);
                     echo json_encode(['success' => true, 'bonus_points' => $bonusPoints]);
                 } elseif (!empty($classReq) && !empty($roomReq)) {
                     // Get bonus for all students in class/room
@@ -252,7 +288,7 @@ try {
                     $studentsStmt = $pdo->prepare($studentsSql);
                     $studentsStmt->execute(['class' => $classReq, 'room' => $roomReq]);
                     $students = $studentsStmt->fetchAll(\PDO::FETCH_COLUMN);
-                    
+
                     $bonusData = [];
                     if (!empty($students)) {
                         $placeholders = implode(',', array_fill(0, count($students), '?'));
@@ -269,7 +305,7 @@ try {
                         $stmt->execute($params);
                         $rows = $stmt->fetchAll();
                         foreach ($rows as $row) {
-                            $bonusData[$row['student_id']] = (int)$row['bonus_hours'];
+                            $bonusData[$row['student_id']] = (int) $row['bonus_hours'];
                         }
                     }
                     echo json_encode(['success' => true, 'data' => $bonusData]);
@@ -289,7 +325,7 @@ try {
                 require_once __DIR__ . '/../classes/DatabaseEventstd.php';
                 $eventDb = new \App\DatabaseEventstd();
                 $eventPdo = $eventDb->getPDO();
-                
+
                 if (empty($stu_id)) {
                     echo json_encode(['success' => false, 'message' => 'Missing stu_id']);
                     break;
@@ -306,7 +342,7 @@ try {
                 $stmt = $eventPdo->prepare($sql);
                 $stmt->execute(['stu_id' => $stu_id, 'term' => $term, 'pee' => $pee]);
                 $rows = $stmt->fetchAll();
-                
+
                 echo json_encode(['success' => true, 'data' => $rows]);
             } catch (\Throwable $e) {
                 http_response_code(500);

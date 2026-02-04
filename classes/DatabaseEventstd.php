@@ -14,24 +14,24 @@ class DatabaseEventstd
         $username_param = null, // --- CHANGED ---
         $password_param = null  // --- CHANGED ---
     ) {
-        
+
         // --- ADDED: Auto-detect environment ---
         // ตรวจสอบว่าเรากำลังรันบน localhost (XAMPP) หรือไม่
         $is_local = in_array(
-            $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost', 
+            $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost',
             ['localhost', '127.0.0.1']
         ) || php_sapi_name() === 'cli'; // Also consider CLI as local
 
         if ($is_local) {
             // --- ใช้สำหรับ Localhost (XAMPP) ---
             $username = 'root';
-            $password = 'storage';
+            $password = '';
         } else {
             // --- ใช้สำหรับ Web Hosting (Production) ---
             $username = 'phichaia_stdcare';
             $password = '48dv_m64N';
         }
-        
+
         // ถ้ามีการส่งค่า username/password มาใน constructor (ซึ่งปกติเราไม่ส่ง) ให้ใช้ค่านั้น
         // แต่ถ้าไม่ส่งมา (เป็น null) ให้ใช้ค่าที่เราเพิ่งตั้งค่าด้านบน
         $username = $username_param ?? $username;
