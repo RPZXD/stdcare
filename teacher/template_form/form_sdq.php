@@ -62,18 +62,18 @@ if ($mode === 'edit') {
 
 // Check for Term 1 data if currently in Term 2
 $term1DataStr = null;
+$hasTerm1Data = false;
 if ($term == '2') {
     $term1Data = $sdq->$method($student_id, $pee, '1');
     if (!empty($term1Data['answers'])) {
         // filter out null values to check if really answered
-        $hasAnswers = false;
         foreach ($term1Data['answers'] as $ans) {
             if ($ans !== null) {
-                $hasAnswers = true;
+                $hasTerm1Data = true;
                 break;
             }
         }
-        if ($hasAnswers) {
+        if ($hasTerm1Data) {
             $term1DataStr = json_encode($term1Data);
         }
     }
@@ -137,12 +137,19 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             </div>
         </div>
 
-        <?php if ($term1DataStr !== null): ?>
+        <?php if ($term == '2'): ?>
             <div>
-                <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataStr, ENT_QUOTES, "UTF-8") ?>)'
-                    class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg">
-                    <i class="fas fa-file-download"></i> คัดลอกข้อมูลเทอม 1
-                </button>
+                <?php if ($hasTerm1Data && $term1DataStr !== null): ?>
+                    <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataStr, ENT_QUOTES, "UTF-8") ?>)'
+                        class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-file-download"></i> คัดลอกข้อมูลเทอม 1
+                    </button>
+                <?php else: ?>
+                    <button type="button" onclick="Swal.fire('ไม่มีข้อมูล', 'นักเรียนคนนี้ยังไม่ได้ประเมิน / ตรวจสอบในเทอม 1', 'warning')" 
+                        class="px-4 py-2 bg-white/10 opacity-70 backdrop-blur border border-white/30 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-not-allowed">
+                        <i class="fas fa-info-circle"></i> ไม่มีข้อมูลเทอม 1 ให้คัดลอก
+                    </button>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
