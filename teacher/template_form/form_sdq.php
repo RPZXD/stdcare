@@ -45,18 +45,38 @@ $typeConfig = [
 
 $config = $typeConfig[$type] ?? $typeConfig['self'];
 
+// Common DB Connection
+$connectDB = new Database("phichaia_student");
+$db = $connectDB->getConnection();
+$sdq = new SDQ($db);
+$method = $config['getMethod'];
+
 // If edit mode, get existing data
 $answers = [];
 $memo = '';
 if ($mode === 'edit') {
-    $connectDB = new Database("phichaia_student");
-    $db = $connectDB->getConnection();
-    $sdq = new SDQ($db);
-    
-    $method = $config['getMethod'];
     $existingData = $sdq->$method($student_id, $pee, $term);
     $answers = $existingData['answers'] ?? [];
     $memo = $existingData['memo'] ?? '';
+}
+
+// Check for Term 1 data if currently in Term 2
+$term1DataStr = null;
+if ($term == '2') {
+    $term1Data = $sdq->$method($student_id, $pee, '1');
+    if (!empty($term1Data['answers'])) {
+        // filter out null values to check if really answered
+        $hasAnswers = false;
+        foreach ($term1Data['answers'] as $ans) {
+            if ($ans !== null) {
+                $hasAnswers = true;
+                break;
+            }
+        }
+        if ($hasAnswers) {
+            $term1DataStr = json_encode($term1Data);
+        }
+    }
 }
 
 // SDQ Questions (25 items)
@@ -100,7 +120,8 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
     <input type="hidden" name="type" value="<?= htmlspecialchars($type) ?>">
 
     <!-- Student Info Card -->
-    <div class="bg-gradient-to-r <?= $config['color'] ?> rounded-2xl p-5 text-white shadow-lg">
+    <div
+        class="bg-gradient-to-r <?= $config['color'] ?> rounded-2xl p-5 text-white shadow-lg relative flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
                 <i class="fas <?= $config['icon'] ?> text-2xl"></i>
@@ -108,11 +129,22 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             <div>
                 <h2 class="text-lg font-bold">แบบประเมิน SDQ <?= $config['title'] ?></h2>
                 <p class="text-white/80 text-sm">
-                    <?= htmlspecialchars($student_name) ?> | เลขที่ <?= htmlspecialchars($student_no) ?> | ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?>
+                    <?= htmlspecialchars($student_name) ?> | เลขที่ <?= htmlspecialchars($student_no) ?> |
+                    ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?>
                 </p>
-                <p class="text-white/60 text-xs mt-1">ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา <?= htmlspecialchars($pee) ?></p>
+                <p class="text-white/60 text-xs mt-1">ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา
+                    <?= htmlspecialchars($pee) ?></p>
             </div>
         </div>
+
+        <?php if ($term1DataStr !== null): ?>
+            <div>
+                <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataStr, ENT_QUOTES, "UTF-8") ?>)'
+                    class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fas fa-file-download"></i> คัดลอกข้อมูลเทอม 1
+                </button>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Instructions -->
@@ -128,42 +160,48 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
     <!-- Questions List -->
     <div class="space-y-3">
         <?php foreach ($questions as $index => [$id, $text, $category, $color]): ?>
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                     <!-- Question Number & Text -->
                     <div class="flex-1">
                         <div class="flex items-start gap-3">
-                            <span class="flex-shrink-0 w-8 h-8 bg-<?= $color ?>-100 dark:bg-<?= $color ?>-900/30 text-<?= $color ?>-600 rounded-lg flex items-center justify-center font-bold text-sm">
+                            <span
+                                class="flex-shrink-0 w-8 h-8 bg-<?= $color ?>-100 dark:bg-<?= $color ?>-900/30 text-<?= $color ?>-600 rounded-lg flex items-center justify-center font-bold text-sm">
                                 <?= $index + 1 ?>
                             </span>
                             <div>
                                 <p class="text-slate-700 dark:text-slate-300 font-medium"><?= htmlspecialchars($text) ?></p>
-                                <span class="inline-block mt-1 px-2 py-0.5 bg-<?= $color ?>-100 dark:bg-<?= $color ?>-900/30 text-<?= $color ?>-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                <span
+                                    class="inline-block mt-1 px-2 py-0.5 bg-<?= $color ?>-100 dark:bg-<?= $color ?>-900/30 text-<?= $color ?>-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
                                     <?= $category ?>
                                 </span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Answer Options -->
                     <div class="flex flex-wrap gap-2 lg:flex-shrink-0">
                         <label class="cursor-pointer">
                             <input type="radio" name="<?= $id ?>" value="0" <?= isset($answers[$id]) && $answers[$id] == '0' ? 'checked' : '' ?> required class="peer hidden">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:text-red-600 transition-all">
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:text-red-600 transition-all">
                                 <span class="text-lg">❌</span>
                                 <span class="hidden sm:inline">ไม่จริง</span>
                             </span>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="<?= $id ?>" value="1" <?= isset($answers[$id]) && $answers[$id] == '1' ? 'checked' : '' ?> class="peer hidden">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 peer-checked:text-amber-600 transition-all">
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 peer-checked:text-amber-600 transition-all">
                                 <span class="text-lg">😐</span>
                                 <span class="hidden sm:inline">บางส่วน</span>
                             </span>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="<?= $id ?>" value="2" <?= isset($answers[$id]) && $answers[$id] == '2' ? 'checked' : '' ?> class="peer hidden">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 peer-checked:text-emerald-600 transition-all">
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 peer-checked:text-emerald-600 transition-all">
                                 <span class="text-lg">✅</span>
                                 <span class="hidden sm:inline">จริงแน่นอน</span>
                             </span>
@@ -183,8 +221,37 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             </span>
             <span class="text-slate-400 text-xs">(ถ้ามี)</span>
         </label>
-        <textarea name="memo" rows="3" 
+        <textarea name="memo" rows="3"
             class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
             placeholder="กรุณาเขียนข้อความเพิ่มเติมที่นี่..."><?= htmlspecialchars($memo) ?></textarea>
     </div>
 </form>
+
+<script>
+    function importTerm1Data(data) {
+        if (!data || !data.answers) return;
+
+        // Iterate over answers
+        for (let i = 1; i <= 25; i++) {
+            const val = data.answers['q' + i];
+            if (val !== null && val !== undefined && val !== '') {
+                const radio = document.querySelector(`input[name="q${i}"][value="${val}"]`);
+                if (radio) radio.checked = true;
+            }
+        }
+
+        // Set memo
+        if (data.memo) {
+            const memoArea = document.querySelector('textarea[name="memo"]');
+            if (memoArea) memoArea.value = data.memo;
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'ดึงข้อมูลสำเร็จ',
+            text: 'คัดลอกข้อมูลการประเมินจากเทอม 1 เรียบร้อยแล้ว (ตรวจสอบและกดบันทึกได้เลย)',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+</script>
