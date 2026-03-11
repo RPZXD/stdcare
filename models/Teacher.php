@@ -16,7 +16,7 @@ class Teacher
         $this->db = $db;
         $this->pdo = $db->getPDO(); // ดึง PDO connection เก็บไว้
     }
-    
+
     /**
      * สำหรับส่งต่อ PDO ไปให้ Logger
      * @return \PDO
@@ -86,7 +86,7 @@ class Teacher
     {
         // $id_old คือ 'editTeach_id_old'
         // $data_from_controller คือ array 6 ตัวจาก Controller
-        
+
         // (SQL มี 6 placeholders)
         $sql = "UPDATE teacher SET 
                     Teach_id = :Teach_id_new,
@@ -103,14 +103,14 @@ class Teacher
         $roomVal = isset($data_from_controller['Teach_room']) && $data_from_controller['Teach_room'] !== '' ? $data_from_controller['Teach_room'] : null;
 
         $params = [
-            ':Teach_id_new'  => $data_from_controller['Teach_id_new'],
-            ':Teach_name'    => $data_from_controller['Teach_name'],
-            ':Teach_major'   => $data_from_controller['Teach_major'],
-            ':Teach_class'   => $classVal,
-            ':Teach_room'    => $roomVal,
-            ':Teach_status'  => $data_from_controller['Teach_status'],
-            ':role_std'      => $data_from_controller['role_std'],
-            ':Teach_id_old'  => $id_old // (ใช้ $id_old ที่รับเข้ามา)
+            ':Teach_id_new' => $data_from_controller['Teach_id_new'],
+            ':Teach_name' => $data_from_controller['Teach_name'],
+            ':Teach_major' => $data_from_controller['Teach_major'],
+            ':Teach_class' => $classVal,
+            ':Teach_room' => $roomVal,
+            ':Teach_status' => $data_from_controller['Teach_status'],
+            ':role_std' => $data_from_controller['role_std'],
+            ':Teach_id_old' => $id_old // (ใช้ $id_old ที่รับเข้ามา)
         ];
 
         $stmt = $this->db->query($sql, $params);
@@ -131,7 +131,7 @@ class Teacher
     public function resetPassword($id)
     {
         // รีเซ็ตรหัสผ่านเป็น Teach_id (ตั้งค่า Teach_password = Teach_id)
-        $sql = "UPDATE teacher SET Teach_password = Teach_id WHERE Teach_id = :id";
+        $sql = "UPDATE teacher SET Teach_password = Teach_id , password = '' WHERE Teach_id = :id";
         $stmt = $this->db->query($sql, ['id' => $id]);
         return $stmt !== false;
     }
@@ -153,15 +153,15 @@ class Teacher
                   AND Teach_room = :room_number
                   AND Teach_status = '1'
                 ORDER BY Teach_name"; // จัดเรียงตามชื่อ
-        
+
         $params = [
             'class_level' => $class_level,
             'room_number' => $room_number
         ];
-        
+
         // ใช้ fetchAll() เพราะห้องหนึ่งอาจมีครูที่ปรึกษา 2 คน
         return $this->db->query($sql, $params)->fetchAll();
     }
-    
+
 }
 ?>
