@@ -60,6 +60,13 @@ if ($mode === 'edit') {
     $memo = $existingData['memo'] ?? '';
 }
 
+// Fetch classmates who already have data for copying (same type)
+$classmatesRec = $sdq->getSDQByClassAndRoom($student_class, $student_room, $pee, $term);
+$checkCol = $type . '_ishave'; // self_ishave | teach_ishave | par_ishave
+$validClassmates = array_filter($classmatesRec, function($c) use ($student_id, $checkCol) {
+    return isset($c[$checkCol]) && $c[$checkCol] == 1 && $c['Stu_id'] != $student_id;
+});
+
 // Check for Term 1 data if currently in Term 2
 $term1DataStr = null;
 $hasTerm1Data = false;
@@ -133,9 +140,20 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
                     ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?>
                 </p>
                 <p class="text-white/60 text-xs mt-1">ภาคเรียนที่ <?= htmlspecialchars($term) ?> ปีการศึกษา
-                    <?= htmlspecialchars($pee) ?></p>
-            </div>
         </div>
+
+        <div class="flex flex-col md:flex-row gap-4 items-end">
+            <?php if (!empty($validClassmates)): ?>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">คัดลอกข้อมูลเพื่อน:</span>
+                    <select onchange="if(this.value) copyFromClassmate(this.value)" class="w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
+                        <option value="" class="text-slate-800">-- เลือกชื่อเพื่อน --</option>
+                        <?php foreach ($validClassmates as $c): ?>
+                            <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
 
         <?php if ($term == '2'): ?>
             <div>
@@ -265,6 +283,53 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             text: 'คัดลอกข้อมูลการประเมินจากเทอม 1 เรียบร้อยแล้ว (ตรวจสอบและกดบันทึกได้เลย)',
             timer: 3000,
             showConfirmButton: false
+        });
+    function copyFromClassmate(stuId) {
+        Swal.fire({
+            title: 'คัดลอกข้อมูลจากเพื่อน?',
+            text: "ระบบจะดึงข้อมูลการประเมินของเพื่อนมาใส่ในแบบฟอร์มนี้",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'กำลังโหลด...', didOpen: () => Swal.showLoading() });
+                
+                $.ajax({
+                    url: 'api/fetch_student_sdq_answers.php',
+                    method: 'GET',
+                    data: { 
+                        student_id: stuId, 
+                        type: '<?= $type ?>',
+                        pee: '<?= $pee ?>', 
+                        term: '<?= $term ?>' 
+                    },
+                    success: function(res) {
+                        Swal.close();
+                        if (res.status === 'success') {
+                            const data = res.data;
+                            if (data && data.answers) {
+                                for (let i = 1; i <= 25; i++) {
+                                    const val = data.answers['q' + i];
+                                    if (val !== undefined && val !== null && val !== '') {
+                                        const radio = document.querySelector(`input[name="q${i}"][value="${val}"]`);
+                                        if (radio) radio.checked = true;
+                                    }
+                                }
+                                if (data.memo) {
+                                    const memoArea = document.querySelector('textarea[name="memo"]');
+                                    if (memoArea) memoArea.value = data.memo;
+                                }
+                                Swal.fire({ icon: 'success', title: 'คัดลอกข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false });
+                            }
+                        } else {
+                            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                        }
+                    },
+                    error: function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+                });
+            }
         });
     }
 </script>

@@ -47,6 +47,12 @@ if ($term == '2') {
     }
 }
 
+// Fetch classmates who already have data for copying
+$classmatesRec = $eq->getEQByClassAndRoom($student_class, $student_room, $pee, $term);
+$validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
+    return $c['eq_ishave'] == 1 && $c['Stu_id'] != $student_id;
+});
+
 // Questions List (Same as form_eq.php)
 $questions = [
     ['q1', 'เข้าใจความรู้สึกของตัวเองเวลาที่โกรธ เสียใจ หรือดีใจ', 'รู้จักและเข้าใจตนเอง'],
@@ -163,6 +169,46 @@ $choices = [
                 });
             }
         });
+    /**
+     * Copy assessment data from another student in the same room
+     */
+    function copyFromClassmate(stuId) {
+        Swal.fire({
+            title: 'คัดลอกข้อมูลจากเพื่อน?',
+            text: "ระบบจะดึงข้อมูลการประเมินของเพื่อนมาใส่ในแบบฟอร์มนี้",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'กำลังโหลด...', didOpen: () => Swal.showLoading() });
+                
+                $.ajax({
+                    url: 'api/fetch_student_eq_answers.php',
+                    method: 'GET',
+                    data: { student_id: stuId, pee: '<?= $pee ?>', term: '<?= $term ?>' },
+                    success: function(res) {
+                        Swal.close();
+                        if (res.status === 'success') {
+                            const data = res.data;
+                            for (let i = 1; i <= 52; i++) {
+                                const qId = 'q' + i;
+                                const val = data[qId];
+                                if (val !== undefined && val !== null) {
+                                    const radio = document.querySelector(`input[name="${qId}"][value="${val}"]`);
+                                    if (radio) radio.checked = true;
+                                }
+                            }
+                            Swal.fire({ icon: 'success', title: 'คัดลอกข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false });
+                        } else {
+                            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                        }
+                    },
+                    error: function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+                });
+            }
+        });
     }
 </script>
 
@@ -184,6 +230,18 @@ $choices = [
                 </div>
             </div>
             <div class="flex items-center gap-4">
+                <?php if (!empty($validClassmates)): ?>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold uppercase opacity-80 hidden lg:block">คัดลอกข้อมูลเพื่อน:</span>
+                    <select onchange="if(this.value) copyFromClassmate(this.value)" class="w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
+                        <option value="" class="text-slate-800">-- เลือกชื่อเพื่อน --</option>
+                        <?php foreach ($validClassmates as $c): ?>
+                            <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+
                 <?php if ($term == '2'): ?>
                     <?php if ($hasTerm1Data): ?>
                         <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataJson, ENT_QUOTES, "UTF-8") ?>)'
