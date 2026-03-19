@@ -30,6 +30,23 @@ if ($eqData) {
     }
 }
 
+// Check for Term 1 data if currently in Term 2
+$term1DataJson = null;
+$hasTerm1Data = false;
+if ($term == '2') {
+    $term1Data = $eq->getEQData($student_id, $pee, '1');
+    if ($term1Data) {
+        $hasTerm1Data = true;
+        // Map keys for JS
+        $mappedTerm1 = [];
+        foreach ($term1Data as $key => $value) {
+            $mappedKey = strtolower(str_replace('EQ', 'q', $key));
+            $mappedTerm1[$mappedKey] = $value;
+        }
+        $term1DataJson = json_encode($mappedTerm1);
+    }
+}
+
 // Questions List (Same as form_eq.php)
 $questions = [
     ['q1', 'เข้าใจความรู้สึกของตัวเองเวลาที่โกรธ เสียใจ หรือดีใจ', 'รู้จักและเข้าใจตนเอง'],
@@ -94,6 +111,61 @@ $choices = [
 ];
 ?>
 
+<style>
+    .swal2-container {
+        z-index: 99999 !important;
+    }
+</style>
+
+<script>
+    /**
+     * Import Term 1 Data into the current form
+     */
+    function importTerm1Data(data) {
+        if (!data) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่พบข้อมูล',
+                text: 'ไม่พบข้อมูลเทอม 1 ของนักเรียนคนนี้'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'ต้องการคัดลอกข้อมูล?',
+            text: "ข้อมูลปัจจุบันที่คุณกำลังแก้ไข จะถูกแทนที่ด้วยข้อมูลจากเทอม 1 ทั้งหมด",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ตกลง, คัดลอกเลย',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Iterate over all 52 EQ questions
+                for (let i = 1; i <= 52; i++) {
+                    const qId = 'q' + i;
+                    const val = data[qId];
+                    if (val !== undefined && val !== null) {
+                        const radio = document.querySelector(`input[name="${qId}"][value="${val}"]`);
+                        if (radio) {
+                            radio.checked = true;
+                        }
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'คัดลอกสำเร็จ',
+                    text: 'ดึงข้อมูลจากเทอม 1 เรียบร้อยแล้ว กรุณาตรวจสอบและกดบันทึก',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+</script>
+
 <div class="space-y-6">
     <!-- Student Profile Header (Amber for Edit Mode) -->
     <div class="relative overflow-hidden bg-gradient-to-r from-amber-500 to-orange-500 rounded-3xl p-6 text-white shadow-lg">
@@ -111,9 +183,24 @@ $choices = [
                     </div>
                 </div>
             </div>
-            <div class="bg-black/10 backdrop-blur rounded-2xl p-3 text-center border border-white/10">
-                <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">ปีการศึกษา / ภาคเรียน</p>
-                <p class="text-lg font-black"><?= htmlspecialchars($pee) ?> / <?= htmlspecialchars($term) ?></p>
+            <div class="flex items-center gap-4">
+                <?php if ($term == '2'): ?>
+                    <?php if ($hasTerm1Data): ?>
+                        <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataJson, ENT_QUOTES, "UTF-8") ?>)'
+                            class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg hover:-translate-y-0.5">
+                            <i class="fas fa-file-download text-blue-200"></i> คัดลอกข้อมูลเทอม 1
+                        </button>
+                    <?php else: ?>
+                        <div class="px-4 py-2 bg-white/10 backdrop-blur border border-white/10 text-white/50 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                            <i class="fas fa-info-circle"></i> ไม่มีข้อมูลเทอม 1
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <div class="bg-black/10 backdrop-blur rounded-2xl p-3 text-center border border-white/10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">ปีการศึกษา / ภาคเรียน</p>
+                    <p class="text-lg font-black"><?= htmlspecialchars($pee) ?> / <?= htmlspecialchars($term) ?></p>
+                </div>
             </div>
         </div>
         <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>

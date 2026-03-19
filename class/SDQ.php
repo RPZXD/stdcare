@@ -335,5 +335,83 @@ class SDQ {
         ];
     }
 
+    /**
+     * Bulk copy SDQ data from Term 1 to Term 2 for a classroom
+     * @return array statistics per type
+     */
+    public function bulkCopySDQTerm1ToTerm2($class, $room, $pee) {
+        $tables = ['sdq_self', 'sdq_teach', 'sdq_par'];
+        $results = [];
+
+        foreach ($tables as $table) {
+            $success = 0;
+            $skip = 0;
+            $fail = 0;
+
+            $this->db->beginTransaction();
+            try {
+                // 1. Get T1 records
+                $sqlT1 = "
+                    SELECT t.* 
+                    FROM $table t
+                    JOIN student s ON s.Stu_id = t.Stu_id
+                    WHERE s.Stu_major = :class AND s.Stu_room = :room 
+                      AND t.Pee = :pee AND t.Term = 1
+                ";
+                $stmtT1 = $this->db->prepare($sqlT1);
+                $stmtT1->execute([':class' => $class, ':room' => $room, ':pee' => $pee]);
+                $t1Records = $stmtT1->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($t1Records as $record) {
+                    $stuId = $record['Stu_id'];
+
+                    // 2. Check if T2 exists
+                    $sqlCheck = "SELECT COUNT(*) FROM $table WHERE Stu_id = :stu_id AND Pee = :pee AND Term = 2";
+                    $stmtCheck = $this->db->prepare($sqlCheck);
+                    $stmtCheck->execute([':stu_id' => $stuId, ':pee' => $pee]);
+                    
+                    if ($stmtCheck->fetchColumn() > 0) {
+                        $skip++;
+                        continue;
+                    }
+
+                    // 3. Insert T2
+                    $cols = [];
+                    $placeholders = [];
+                    $vals = [];
+
+                    foreach ($record as $col => $val) {
+                        // Skip primary key (ends with _id or is Self_id, etc.)
+                        if (strtolower(substr($col, -3)) == '_id') continue;
+                        
+                        $cols[] = $col;
+                        if ($col == 'Term') {
+                            $placeholders[] = "2";
+                        } else {
+                            $placeholders[] = "?";
+                            $vals[] = $val;
+                        }
+                    }
+
+                    $sqlInsert = "INSERT INTO $table (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
+                    $stmtInsert = $this->db->prepare($sqlInsert);
+                    if ($stmtInsert->execute($vals)) {
+                        $success++;
+                    } else {
+                        $fail++;
+                    }
+                }
+                $this->db->commit();
+            } catch (Exception $e) {
+                $this->db->rollBack();
+                // We continue to next table if one fails
+            }
+
+            $results[$table] = ['success' => $success, 'skip' => $skip, 'fail' => $fail];
+        }
+
+        return $results;
+    }
+
 }
 ?>

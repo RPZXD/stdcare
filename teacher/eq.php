@@ -19,8 +19,8 @@ $user = new UserLogin($db);
 $teacher = new Teacher($db);
 
 // Fetch terms and pee
-$term = $user->getTerm();
-$pee = $user->getPee();
+$term = isset($_GET['term']) ? (int)$_GET['term'] : $user->getTerm();
+$pee = isset($_GET['pee']) ? (int)$_GET['pee'] : $user->getPee();
 
 if (isset($_SESSION['Teacher_login'])) {
     $userid = $_SESSION['Teacher_login'];

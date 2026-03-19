@@ -19,6 +19,12 @@ ob_start();
             <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">แบบประเมินพฤติกรรมนักเรียน SDQ ชั้น ม.<?= $class ?>/<?= $room ?></p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <?php if ($term == 2): ?>
+                <button onclick="bulkCopyTerm1()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold shadow-lg shadow-amber-500/25 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm no-print">
+                    <i class="fas fa-copy"></i>
+                    คัดลอกเทอม 1 ทั้งห้อง
+                </button>
+            <?php endif; ?>
             <a href="report_sdq_all.php" class="px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl font-bold shadow-lg shadow-rose-500/25 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm">
                 <i class="fas fa-chart-bar"></i>
                 รายงานสถิติ
@@ -32,7 +38,7 @@ ob_start();
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <div class="glass-card rounded-2xl p-4 border border-white/50 dark:border-slate-700/50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center">
@@ -76,6 +82,23 @@ ob_start();
                 <p class="text-xl font-black text-slate-800 dark:text-white" id="stat_parent">-</p>
             </div>
         </div>
+    </div>
+    <div class="glass-card rounded-2xl p-4 border border-white/50 dark:border-slate-700/50 flex items-center justify-center no-print">
+        <form method="GET" class="flex items-center gap-3">
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">ภาคเรียน</span>
+                <select name="term" onchange="this.form.submit()" class="bg-transparent border-0 text-slate-800 dark:text-white font-black p-0 focus:ring-0 cursor-pointer text-sm">
+                    <option value="1" <?= $term == 1 ? 'selected' : '' ?>>เทอม 1</option>
+                    <option value="2" <?= $term == 2 ? 'selected' : '' ?>>เทอม 2</option>
+                </select>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">ปีการศึกษา</span>
+                <input type="number" name="pee" value="<?= $pee ?>" onchange="this.form.submit()" 
+                    class="bg-transparent border-0 text-slate-800 dark:text-white font-black p-0 focus:ring-0 w-12 text-sm text-center">
+            </div>
+        </form>
     </div>
 </div>
 
@@ -456,6 +479,62 @@ function renderTable(data) {
     tbody.innerHTML = desktopHtml;
     mobileContainer.innerHTML = mobileHtml;
 }
+
+/**
+ * Bulk copy SDQ data from Term 1 to Term 2 for the entire classroom
+ */
+window.bulkCopyTerm1 = function() {
+    Swal.fire({
+        title: 'ยืนยันคัดลอกข้อมูลทั้งห้อง?',
+        text: "ระบบจะคัดลอกข้อมูล SDQ (นักเรียน, ครู, ผู้ปกครอง) จากเทอม 1 มายังเทอม 2 สำหรับทุกคนที่ยังไม่มีข้อมูล",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ตกลง, คัดลอกเลย',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'กำลังดำเนินการ...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: 'api/bulk_copy_sdq.php',
+                method: 'GET',
+                data: { class: classId, room: roomId, pee: peeId },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        let msg = "";
+                        const details = response.details;
+                        msg += `<b>นักเรียน:</b> สำเร็จ ${details.sdq_self.success}, ข้าม ${details.sdq_self.skip}<br>`;
+                        msg += `<b>ครู:</b> สำเร็จ ${details.sdq_teach.success}, ข้าม ${details.sdq_teach.skip}<br>`;
+                        msg += `<b>ผู้ปกครอง:</b> สำเร็จ ${details.sdq_par.success}, ข้าม ${details.sdq_par.skip}`;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'คัดลอกสำเร็จ',
+                            html: `<div class="text-left text-sm mt-3">${msg}</div>`,
+                            showConfirmButton: true
+                        });
+                        loadStudentData(); // Refresh the list
+                    } else if (response.status === 'warning') {
+                        Swal.fire('แจ้งเตือน', response.message, 'info');
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', response.message || 'เกิดข้อผิดพลาดในการคัดลอก', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+                }
+            });
+        }
+    });
+};
 
 function createActionBtn(hasData, type, item) {
     const method = hasData ? `edit` : `add`;

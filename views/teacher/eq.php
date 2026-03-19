@@ -19,6 +19,12 @@ ob_start();
             <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">แบบประเมิน EQ นักเรียน ชั้น ม.<?= $class ?>/<?= $room ?></p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <?php if ($term == 2): ?>
+                <button onclick="bulkCopyTerm1()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold shadow-lg shadow-amber-500/25 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm no-print">
+                    <i class="fas fa-copy"></i>
+                    คัดลอกเทอม 1 ทั้งห้อง
+                </button>
+            <?php endif; ?>
             <a href="report_eq_all.php" class="px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-teal-500/25 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm">
                 <i class="fas fa-chart-bar"></i>
                 รายงานสถิติ EQ
@@ -66,8 +72,22 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="glass-card rounded-2xl p-4 border border-white/50 dark:border-slate-700/50 text-center flex items-center justify-center">
-        <p class="text-sm font-bold text-slate-400">ปีการศึกษา <?= $pee ?> / เทอม <?= $term ?></p>
+    <div class="glass-card rounded-2xl p-4 border border-white/50 dark:border-slate-700/50 flex items-center justify-center no-print">
+        <form method="GET" class="flex items-center gap-3">
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">ภาคเรียน</span>
+                <select name="term" onchange="this.form.submit()" class="bg-transparent border-0 text-slate-800 dark:text-white font-black p-0 focus:ring-0 cursor-pointer text-sm">
+                    <option value="1" <?= $term == 1 ? 'selected' : '' ?>>เทอม 1</option>
+                    <option value="2" <?= $term == 2 ? 'selected' : '' ?>>เทอม 2</option>
+                </select>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">ปีการศึกษา</span>
+                <input type="number" name="pee" value="<?= $pee ?>" onchange="this.form.submit()" 
+                    class="bg-transparent border-0 text-slate-800 dark:text-white font-black p-0 focus:ring-0 w-12 text-sm text-center">
+            </div>
+        </form>
     </div>
 </div>
 
@@ -254,6 +274,57 @@ document.addEventListener('DOMContentLoaded', function() {
         filterStudents(e.target.value.toLowerCase());
     });
 });
+
+/**
+ * Bulk copy EQ data from Term 1 to Term 2 for the entire classroom
+ */
+window.bulkCopyTerm1 = function() {
+    Swal.fire({
+        title: 'ยืนยันคัดลอกข้อมูลทั้งห้อง?',
+        text: "ระบบจะคัดลอกข้อมูล EQ จากเทอม 1 มายังเทอม 2 สำหรับนักเรียนทุกคนในห้องที่ยังไม่มีข้อมูลในเทอม 2",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ตกลง, คัดลอกเลย',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'กำลังดำเนินการ...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: 'api/bulk_copy_eq.php',
+                method: 'GET',
+                data: { class: classId, room: roomId, pee: peeId },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'คัดลอกสำเร็จ',
+                            html: `คัดลอกสำเร็จ: ${response.success_count} คน<br>ข้าม (มีข้อมูลแล้ว): ${response.skip_count} คน`,
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        loadStudentData(); // Refresh the list
+                    } else if (response.status === 'warning') {
+                        Swal.fire('แจ้งเตือน', response.message, 'info');
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', response.message || 'เกิดข้อผิดพลาดในการคัดลอก', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+                }
+            });
+        }
+    });
+};
 
 async function loadStudentData() {
     try {

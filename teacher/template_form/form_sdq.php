@@ -234,6 +234,12 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
     </div>
 </form>
 
+<style>
+    .swal2-container {
+        z-index: 99999 !important;
+    }
+</style>
+
 <script>
     function importTerm1Data(data) {
         if (!data || !data.answers) return;

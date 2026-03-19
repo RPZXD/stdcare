@@ -194,5 +194,78 @@ class EQ {
         ];
     }
 
+    /**
+     * Bulk copy EQ data from Term 1 to Term 2 for a classroom
+     * @return array [success_count, fail_count, skip_count]
+     */
+    public function bulkCopyEQTerm1ToTerm2($class, $room, $pee) {
+        $this->db->beginTransaction();
+        try {
+            // 1. Get all students in Term 1 who have EQ data for this class/room
+            $sqlT1 = "
+                SELECT eq.* 
+                FROM eq 
+                JOIN student s ON s.Stu_id = eq.Stu_id
+                WHERE s.Stu_major = :class AND s.Stu_room = :room 
+                  AND eq.Pee = :pee AND eq.Term = 1
+            ";
+            $stmtT1 = $this->db->prepare($sqlT1);
+            $stmtT1->execute([':class' => $class, ':room' => $room, ':pee' => $pee]);
+            $t1Records = $stmtT1->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($t1Records)) {
+                return ['success' => 0, 'skip' => 0, 'fail' => 0, 'message' => 'ไม่พบข้อมูลเทอม 1 ในห้องนี้'];
+            }
+
+            $success = 0;
+            $skip = 0;
+            $fail = 0;
+
+            foreach ($t1Records as $record) {
+                $stuId = $record['Stu_id'];
+
+                // 2. Check if Term 2 data already exists
+                $sqlCheck = "SELECT COUNT(*) FROM eq WHERE Stu_id = :stu_id AND Pee = :pee AND Term = 2";
+                $stmtCheck = $this->db->prepare($sqlCheck);
+                $stmtCheck->execute([':stu_id' => $stuId, ':pee' => $pee]);
+                
+                if ($stmtCheck->fetchColumn() > 0) {
+                    $skip++;
+                    continue;
+                }
+
+                // 3. Insert new record for Term 2
+                $cols = [];
+                $placeholders = [];
+                $vals = [];
+
+                foreach ($record as $col => $val) {
+                    if ($col == 'EQ_id') continue; // Skip primary key
+                    $cols[] = $col;
+                    if ($col == 'Term') {
+                        $placeholders[] = "2";
+                    } else {
+                        $placeholders[] = "?";
+                        $vals[] = $val;
+                    }
+                }
+
+                $sqlInsert = "INSERT INTO eq (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
+                $stmtInsert = $this->db->prepare($sqlInsert);
+                if ($stmtInsert->execute($vals)) {
+                    $success++;
+                } else {
+                    $fail++;
+                }
+            }
+
+            $this->db->commit();
+            return ['success' => $success, 'skip' => $skip, 'fail' => $fail];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
 }
 ?>
