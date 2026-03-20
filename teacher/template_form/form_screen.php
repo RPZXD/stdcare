@@ -1,3 +1,4 @@
+<?php
 require_once "../../config/Database.php";
 require_once "../../class/Screeningdata.php";
 
@@ -15,28 +16,77 @@ $screening = new ScreeningData($db);
 
 // Fetch classmates who already have screening data for copying
 $classmatesRec = $screening->getScreenByClassAndRoom($student_class, $student_room, $pee);
-$validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
+$validClassmates = array_filter($classmatesRec, function ($c) use ($student_id) {
     return $c['screen_ishave'] == 1 && $c['Stu_id'] != $student_id;
 });
 ?>
 
 <style>
-.step-card { transition: all 0.3s ease; }
-.step-card:hover { transform: translateY(-2px); }
-.radio-option { transition: all 0.2s ease; }
-.radio-option:hover { background: rgba(99, 102, 241, 0.1); }
-.radio-option input:checked + span { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
-.checkbox-option { transition: all 0.2s ease; }
-.checkbox-option:hover { background: rgba(99, 102, 241, 0.05); }
-.checkbox-option input:checked + span { background: rgba(99, 102, 241, 0.15); border-color: #6366f1; }
-.stepper-btn { transition: all 0.3s ease; }
-.stepper-btn:hover:not(:disabled) { transform: scale(1.05); }
-.stepper-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.progress-step { transition: all 0.3s ease; }
-.progress-step.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
-.progress-step.completed { background: #10b981; color: white; }
-/* Fix SweetAlert2 appearing behind modals */
-.swal2-container { z-index: 99999 !important; }
+    .step-card {
+        transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .radio-option {
+        transition: all 0.2s ease;
+    }
+
+    .radio-option:hover {
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .radio-option input:checked+span {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+    }
+
+    .checkbox-option {
+        transition: all 0.2s ease;
+    }
+
+    .checkbox-option:hover {
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .checkbox-option input:checked+span {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: #6366f1;
+    }
+
+    .stepper-btn {
+        transition: all 0.3s ease;
+    }
+
+    .stepper-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+    }
+
+    .stepper-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .progress-step {
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.active {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+    }
+
+    .progress-step.completed {
+        background: #10b981;
+        color: white;
+    }
+
+    /* Fix SweetAlert2 appearing behind modals */
+    .swal2-container {
+        z-index: 99999 !important;
+    }
 </style>
 
 <script>
@@ -55,28 +105,28 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({ title: 'กำลังโหลด...', didOpen: () => Swal.showLoading(), zIndex: 100000 });
-                
+
                 $.ajax({
                     url: '../teacher/api/fetch_student_screen_answers.php',
                     method: 'GET',
                     data: { student_id: stuId, pee: '<?= $pee ?>' },
-                    success: function(res) {
+                    success: function (res) {
                         Swal.close();
                         if (res.status === 'success') {
                             const data = res.data;
-                            
+
                             // 1. Special Ability
                             const specialAbilityRadio = document.querySelector(`#screenForm input[name="special_ability"][value="${data.special_ability}"]`);
                             if (specialAbilityRadio) {
                                 specialAbilityRadio.checked = true;
                                 specialAbilityRadio.dispatchEvent(new Event('change'));
                             }
-                            
+
                             // Special Ability Detail
                             if (data.special_ability === 'มี' && data.special_ability_detail) {
                                 let details = data.special_ability_detail;
                                 if (typeof details === 'string') details = JSON.parse(details);
-                                
+
                                 // Reset checkboxes and inputs first
                                 document.querySelectorAll('#screenForm .subject-checkbox').forEach(cb => {
                                     cb.checked = false;
@@ -106,11 +156,11 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
                                     if (radio) {
                                         radio.checked = true;
                                         radio.dispatchEvent(new Event('change'));
-                                        
+
                                         // Handle risk/problem checkboxes
                                         const riskName = f + '_risk';
                                         const probName = f + '_problem';
-                                        
+
                                         // Reset checkboxes in these sections
                                         document.querySelectorAll(`#screenForm input[name="${riskName}[]"], #screenForm input[name="${probName}[]"]`).forEach(chk => chk.checked = false);
 
@@ -144,13 +194,13 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
                                     }
                                 }
                             }
-                            
+
                             Swal.fire({ icon: 'success', title: 'คัดลอกข้อมูลสำเร็จ', text: 'กรุณาตรวจสอบข้อมูลและกดบันทึก', timer: 2000, showConfirmButton: false });
                         } else {
                             Swal.fire('ข้อผิดพลาด', res.message, 'error');
                         }
                     },
-                    error: function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+                    error: function () { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
                 });
             }
         });
@@ -172,19 +222,23 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
                 </div>
                 <div>
                     <h2 class="font-bold text-lg"><?= htmlspecialchars($student_name) ?></h2>
-                    <p class="text-sm opacity-90">เลขที่ <?= htmlspecialchars($student_no) ?> | ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?> | ปี <?= htmlspecialchars($pee) ?></p>
+                    <p class="text-sm opacity-90">เลขที่ <?= htmlspecialchars($student_no) ?> |
+                        ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?> | ปี
+                        <?= htmlspecialchars($pee) ?></p>
                 </div>
             </div>
-            
+
             <?php if (!empty($validClassmates)): ?>
-            <div class="flex items-center gap-2">
-                <select onchange="if(this.value) copyFromClassmateScreen(this.value)" class="w-full md:w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
-                    <option value="" class="text-slate-800">-- คัดลอกข้อมูลจาก --</option>
-                    <?php foreach ($validClassmates as $c): ?>
-                        <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+                <div class="flex items-center gap-2">
+                    <select onchange="if(this.value) copyFromClassmateScreen(this.value)"
+                        class="w-full md:w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
+                        <option value="" class="text-slate-800">-- คัดลอกข้อมูลจาก --</option>
+                        <?php foreach ($validClassmates as $c): ?>
+                            <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>.
+                                <?= $c['full_name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -196,16 +250,21 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
             <span id="stepIndicator" class="text-sm font-bold text-indigo-600">ข้อ 1/11</span>
         </div>
         <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-            <div id="progressBarFill" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300" style="width: 9%"></div>
+            <div id="progressBarFill"
+                class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+                style="width: 9%"></div>
         </div>
     </div>
 
     <!-- Navigation Buttons -->
     <div class="flex items-center justify-between gap-3">
-        <button type="button" id="prevStep" class="stepper-btn flex-1 px-4 py-3 bg-slate-200 text-slate-600 font-bold rounded-xl flex items-center justify-center gap-2" disabled>
+        <button type="button" id="prevStep"
+            class="stepper-btn flex-1 px-4 py-3 bg-slate-200 text-slate-600 font-bold rounded-xl flex items-center justify-center gap-2"
+            disabled>
             <i class="fas fa-chevron-left"></i> <span class="hidden sm:inline">ย้อนกลับ</span>
         </button>
-        <button type="button" id="nextStep" class="stepper-btn flex-1 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+        <button type="button" id="nextStep"
+            class="stepper-btn flex-1 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl flex items-center justify-center gap-2">
             <span class="hidden sm:inline">ถัดไป</span> <i class="fas fa-chevron-right"></i>
         </button>
     </div>
@@ -234,7 +293,8 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
         <!-- Step 1: ความสามารถพิเศษ -->
         <div class="step step-card bg-white rounded-2xl p-4 shadow-lg border" data-step="1">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow">
                     <span class="text-xl">⭐</span>
                 </div>
                 <h3 class="font-bold text-slate-800">1. ด้านความสามารถพิเศษ</h3>
@@ -251,16 +311,18 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
             </div>
             <div id="specialAbilityFields" class="hidden space-y-2 mt-3 p-3 bg-slate-50 rounded-xl">
                 <?php foreach ($subjects as $i => $subject): ?>
-                <div class="bg-white rounded-lg p-3 border">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" class="subject-checkbox w-5 h-5 rounded" data-subject="<?= $i ?>">
-                        <span class="font-semibold text-sm"><?= $subject ?></span>
-                    </label>
-                    <div class="subject-inputs hidden mt-2 space-y-2" data-subject="<?= $i ?>">
-                        <input type="text" name="special_<?= $i ?>[]" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="รายละเอียด 1">
-                        <input type="text" name="special_<?= $i ?>[]" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="รายละเอียด 2">
+                    <div class="bg-white rounded-lg p-3 border">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="subject-checkbox w-5 h-5 rounded" data-subject="<?= $i ?>">
+                            <span class="font-semibold text-sm"><?= $subject ?></span>
+                        </label>
+                        <div class="subject-inputs hidden mt-2 space-y-2" data-subject="<?= $i ?>">
+                            <input type="text" name="special_<?= $i ?>[]" class="w-full px-3 py-2 border rounded-lg text-sm"
+                                placeholder="รายละเอียด 1">
+                            <input type="text" name="special_<?= $i ?>[]" class="w-full px-3 py-2 border rounded-lg text-sm"
+                                placeholder="รายละเอียด 2">
+                        </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -278,56 +340,61 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
             9 => ['name' => 'game_status', 'title' => '9. ด้านการติดเกม', 'icon' => '🎮', 'risk' => ['เล่นเกมเกินวันละ 1 ชั่วโมง', 'ขาดจินตนาการและความคิดสร้างสรรค์', 'เก็บตัว แยกตัวจากกลุ่มเพื่อน', 'ใช้จ่ายเงินผิดปกติ', 'อยู่ในกลุ่มเพื่อนเล่นเกม', 'ร้านเกมอยู่ใกล้บ้านหรือโรงเรียน'], 'problem' => ['ใช้เวลาเล่นเกมเกิน 2 ชั่วโมง', 'หงุดหงิด ฉุนเฉียว อารมณ์รุนแรง', 'บุคลิกภาพผิดไปจากเดิม', 'ขาดความรับผิดชอบ', 'หมกมุ่น จริงจังในการเล่นเกม', 'ใช้เงินสิ้นเปลือง โกหก ลักขโมย']],
             11 => ['name' => 'it_status', 'title' => '11. ด้านการใช้เครื่องมือสื่อสาร', 'icon' => '📱', 'risk' => ['ใช้โทรศัพท์ระหว่างเรียนโดยไม่จำเป็น', 'ใช้ Social Media เกินวันละ 1 ชั่วโมง'], 'problem' => ['ใช้โทรศัพท์ระหว่างเรียน 2-3 ครั้ง/วัน', 'ใช้ Social Media เกินวันละ 2 ชั่วโมง']],
         ];
-        
+
         foreach ($stepConfigs as $stepNum => $config):
             $hidden = $stepNum > 1 ? 'hidden' : '';
-        ?>
-        <div class="step step-card bg-white rounded-2xl p-4 shadow-lg border <?= $hidden ?>" data-step="<?= $stepNum ?>">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow">
-                    <span class="text-xl"><?= $config['icon'] ?></span>
+            ?>
+            <div class="step step-card bg-white rounded-2xl p-4 shadow-lg border <?= $hidden ?>"
+                data-step="<?= $stepNum ?>">
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow">
+                        <span class="text-xl"><?= $config['icon'] ?></span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base"><?= $config['title'] ?></h3>
                 </div>
-                <h3 class="font-bold text-slate-800 text-sm md:text-base"><?= $config['title'] ?></h3>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
+                        <input type="radio" name="<?= $config['name'] ?>" value="ปกติ" required class="hidden">
+                        <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">✅ ปกติ</span>
+                    </label>
+                    <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
+                        <input type="radio" name="<?= $config['name'] ?>" value="เสี่ยง" class="hidden">
+                        <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">⚠️ เสี่ยง</span>
+                    </label>
+                    <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
+                        <input type="radio" name="<?= $config['name'] ?>" value="มีปัญหา" class="hidden">
+                        <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">❌ มีปัญหา</span>
+                    </label>
+                </div>
+                <div id="<?= $config['name'] ?>RiskFields" class="hidden p-3 bg-amber-50 rounded-xl space-y-1">
+                    <p class="text-xs font-bold text-amber-700 mb-2">⚠️ เลือกข้อที่เกี่ยวข้อง:</p>
+                    <?php foreach ($config['risk'] as $item): ?>
+                        <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
+                            <input type="checkbox" name="<?= str_replace('_status', '', $config['name']) ?>_risk[]"
+                                value="<?= $item ?>" class="w-4 h-4 rounded">
+                            <span class="text-xs md:text-sm"><?= $item ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <div id="<?= $config['name'] ?>ProblemFields" class="hidden p-3 bg-rose-50 rounded-xl space-y-1">
+                    <p class="text-xs font-bold text-rose-700 mb-2">❌ เลือกข้อที่เกี่ยวข้อง:</p>
+                    <?php foreach ($config['problem'] as $item): ?>
+                        <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
+                            <input type="checkbox" name="<?= str_replace('_status', '', $config['name']) ?>_problem[]"
+                                value="<?= $item ?>" class="w-4 h-4 rounded">
+                            <span class="text-xs md:text-sm"><?= $item ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
             </div>
-            <div class="grid grid-cols-3 gap-2 mb-3">
-                <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
-                    <input type="radio" name="<?= $config['name'] ?>" value="ปกติ" required class="hidden">
-                    <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">✅ ปกติ</span>
-                </label>
-                <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
-                    <input type="radio" name="<?= $config['name'] ?>" value="เสี่ยง" class="hidden">
-                    <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">⚠️ เสี่ยง</span>
-                </label>
-                <label class="radio-option flex items-center p-2 rounded-xl border cursor-pointer">
-                    <input type="radio" name="<?= $config['name'] ?>" value="มีปัญหา" class="hidden">
-                    <span class="flex-1 text-center py-1 rounded-lg font-semibold text-xs md:text-sm">❌ มีปัญหา</span>
-                </label>
-            </div>
-            <div id="<?= $config['name'] ?>RiskFields" class="hidden p-3 bg-amber-50 rounded-xl space-y-1">
-                <p class="text-xs font-bold text-amber-700 mb-2">⚠️ เลือกข้อที่เกี่ยวข้อง:</p>
-                <?php foreach ($config['risk'] as $item): ?>
-                <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
-                    <input type="checkbox" name="<?= str_replace('_status', '', $config['name']) ?>_risk[]" value="<?= $item ?>" class="w-4 h-4 rounded">
-                    <span class="text-xs md:text-sm"><?= $item ?></span>
-                </label>
-                <?php endforeach; ?>
-            </div>
-            <div id="<?= $config['name'] ?>ProblemFields" class="hidden p-3 bg-rose-50 rounded-xl space-y-1">
-                <p class="text-xs font-bold text-rose-700 mb-2">❌ เลือกข้อที่เกี่ยวข้อง:</p>
-                <?php foreach ($config['problem'] as $item): ?>
-                <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
-                    <input type="checkbox" name="<?= str_replace('_status', '', $config['name']) ?>_problem[]" value="<?= $item ?>" class="w-4 h-4 rounded">
-                    <span class="text-xs md:text-sm"><?= $item ?></span>
-                </label>
-                <?php endforeach; ?>
-            </div>
-        </div>
         <?php endforeach; ?>
 
         <!-- Step 10: Special Needs -->
         <div class="step step-card bg-white rounded-2xl p-4 shadow-lg border hidden" data-step="10">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-xl flex items-center justify-center shadow">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-xl flex items-center justify-center shadow">
                     <span class="text-xl">🌟</span>
                 </div>
                 <h3 class="font-bold text-slate-800">10. นักเรียนที่มีความต้องการพิเศษ</h3>
@@ -344,96 +411,97 @@ $validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
             </div>
             <div id="specialNeedFields" class="hidden p-3 bg-indigo-50 rounded-xl space-y-1">
                 <p class="text-xs font-bold text-indigo-700 mb-2">🌟 เลือกประเภท:</p>
-                <?php 
+                <?php
                 $specialNeeds = ['มีความบกพร่องทางการเห็น', 'มีความบกพร่องทางการได้ยิน', 'มีความบกพร่องทางสติปัญญา', 'มีความบกพร่องทางร่างกายและสุขภาพ', 'มีความบกพร่องทางการเรียนรู้', 'มีความบกพร่องทางพฤติกรรมหรืออารมณ์', 'มีความบกพร่องทางการพูดและภาษา', 'ออทิสติก', 'มีสมาธิสั้น', 'พิการซ้ำซ้อน (มีความบกพร่องตั้งแต่ 2 ประเภทขึ้นไป)'];
                 foreach ($specialNeeds as $item): ?>
-                <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
-                    <input type="radio" name="special_need_type" value="<?= $item ?>" class="w-4 h-4">
-                    <span class="text-xs md:text-sm"><?= $item ?></span>
-                </label>
+                    <label class="checkbox-option flex items-center gap-2 p-2 rounded-lg border bg-white cursor-pointer">
+                        <input type="radio" name="special_need_type" value="<?= $item ?>" class="w-4 h-4">
+                        <span class="text-xs md:text-sm"><?= $item ?></span>
+                    </label>
                 <?php endforeach; ?>
             </div>
         </div>
     </div>
 
     <!-- Submit Button -->
-    <button type="submit" id="saveScreen" class="hidden w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+    <button type="submit" id="saveScreen"
+        class="hidden w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all">
         <i class="fas fa-save mr-2"></i> บันทึกข้อมูล
     </button>
 </form>
 
 <script>
-(function() {
-    const screenFormSteps = document.querySelectorAll('#screenForm .step');
-    let screenCurrentStep = 0;
-    const screenPrevBtn = document.getElementById('prevStep');
-    const screenNextBtn = document.getElementById('nextStep');
-    const screenStepIndicator = document.getElementById('stepIndicator');
-    const screenProgressBar = document.getElementById('progressBarFill');
-    const screenSaveBtn = document.getElementById('saveScreen');
+    (function () {
+        const screenFormSteps = document.querySelectorAll('#screenForm .step');
+        let screenCurrentStep = 0;
+        const screenPrevBtn = document.getElementById('prevStep');
+        const screenNextBtn = document.getElementById('nextStep');
+        const screenStepIndicator = document.getElementById('stepIndicator');
+        const screenProgressBar = document.getElementById('progressBarFill');
+        const screenSaveBtn = document.getElementById('saveScreen');
 
-    function showScreenStep(idx) {
-        screenFormSteps.forEach((step, i) => step.classList.toggle('hidden', i !== idx));
-        screenStepIndicator.textContent = `ข้อ ${idx+1}/11`;
-        screenProgressBar.style.width = `${((idx+1)/11)*100}%`;
-        screenPrevBtn.disabled = idx === 0;
-        screenNextBtn.classList.toggle('hidden', idx === screenFormSteps.length-1);
-        screenSaveBtn.classList.toggle('hidden', idx !== screenFormSteps.length-1);
-    }
-
-    screenPrevBtn.onclick = () => { if(screenCurrentStep>0){ screenCurrentStep--; showScreenStep(screenCurrentStep); } };
-    screenNextBtn.onclick = () => {
-        const currentStepDiv = screenFormSteps[screenCurrentStep];
-        const radios = currentStepDiv.querySelectorAll('input[type="radio"][required]');
-        let checked = radios.length === 0 || Array.from(radios).some(r => document.querySelector(`input[name="${r.name}"]:checked`));
-        if (!checked) {
-            Swal.fire({icon: 'warning', title: 'กรุณาเลือกตัวเลือก', confirmButtonColor: '#6366f1'});
-            return;
+        function showScreenStep(idx) {
+            screenFormSteps.forEach((step, i) => step.classList.toggle('hidden', i !== idx));
+            screenStepIndicator.textContent = `ข้อ ${idx + 1}/11`;
+            screenProgressBar.style.width = `${((idx + 1) / 11) * 100}%`;
+            screenPrevBtn.disabled = idx === 0;
+            screenNextBtn.classList.toggle('hidden', idx === screenFormSteps.length - 1);
+            screenSaveBtn.classList.toggle('hidden', idx !== screenFormSteps.length - 1);
         }
-        if(screenCurrentStep<screenFormSteps.length-1){ screenCurrentStep++; showScreenStep(screenCurrentStep); }
-    };
 
-    showScreenStep(screenCurrentStep);
+        screenPrevBtn.onclick = () => { if (screenCurrentStep > 0) { screenCurrentStep--; showScreenStep(screenCurrentStep); } };
+        screenNextBtn.onclick = () => {
+            const currentStepDiv = screenFormSteps[screenCurrentStep];
+            const radios = currentStepDiv.querySelectorAll('input[type="radio"][required]');
+            let checked = radios.length === 0 || Array.from(radios).some(r => document.querySelector(`input[name="${r.name}"]:checked`));
+            if (!checked) {
+                Swal.fire({ icon: 'warning', title: 'กรุณาเลือกตัวเลือก', confirmButtonColor: '#6366f1' });
+                return;
+            }
+            if (screenCurrentStep < screenFormSteps.length - 1) { screenCurrentStep++; showScreenStep(screenCurrentStep); }
+        };
 
-    // Toggle fields for all steps
-    document.querySelectorAll('#screenForm input[name="special_ability"]').forEach(el => {
-        el.addEventListener('change', e => document.getElementById('specialAbilityFields').classList.toggle('hidden', e.target.value !== 'มี'));
-    });
+        showScreenStep(screenCurrentStep);
 
-    document.querySelectorAll('#screenForm .subject-checkbox').forEach(cb => {
-        cb.addEventListener('change', function() {
-            const inputs = document.querySelector(`#screenForm .subject-inputs[data-subject="${this.dataset.subject}"]`);
-            inputs.classList.toggle('hidden', !this.checked);
-            if (!this.checked) inputs.querySelectorAll('input').forEach(i => i.value = '');
+        // Toggle fields for all steps
+        document.querySelectorAll('#screenForm input[name="special_ability"]').forEach(el => {
+            el.addEventListener('change', e => document.getElementById('specialAbilityFields').classList.toggle('hidden', e.target.value !== 'มี'));
         });
-    });
 
-    ['study_status', 'health_status', 'economic_status', 'welfare_status', 'drug_status', 'violence_status', 'sex_status', 'game_status', 'it_status'].forEach(name => {
-        document.querySelectorAll(`#screenForm input[name="${name}"]`).forEach(el => {
-            el.addEventListener('change', e => {
-                document.getElementById(`${name}RiskFields`)?.classList.toggle('hidden', e.target.value !== 'เสี่ยง');
-                document.getElementById(`${name}ProblemFields`)?.classList.toggle('hidden', e.target.value !== 'มีปัญหา');
+        document.querySelectorAll('#screenForm .subject-checkbox').forEach(cb => {
+            cb.addEventListener('change', function () {
+                const inputs = document.querySelector(`#screenForm .subject-inputs[data-subject="${this.dataset.subject}"]`);
+                inputs.classList.toggle('hidden', !this.checked);
+                if (!this.checked) inputs.querySelectorAll('input').forEach(i => i.value = '');
             });
         });
-    });
 
-    document.querySelectorAll('#screenForm input[name="special_need_status"]').forEach(el => {
-        el.addEventListener('change', e => document.getElementById('specialNeedFields').classList.toggle('hidden', e.target.value !== 'มี'));
-    });
-
-    window.collectScreenSpecialAbilityDetail = function() {
-        const result = {};
-        document.querySelectorAll('#screenForm .subject-checkbox:checked').forEach(cb => {
-            const inputs = document.querySelectorAll(`#screenForm .subject-inputs[data-subject="${cb.dataset.subject}"] input`);
-            const details = Array.from(inputs).map(i => i.value.trim()).filter(v => v);
-            if (details.length) result['special_' + cb.dataset.subject] = details;
+        ['study_status', 'health_status', 'economic_status', 'welfare_status', 'drug_status', 'violence_status', 'sex_status', 'game_status', 'it_status'].forEach(name => {
+            document.querySelectorAll(`#screenForm input[name="${name}"]`).forEach(el => {
+                el.addEventListener('change', e => {
+                    document.getElementById(`${name}RiskFields`)?.classList.toggle('hidden', e.target.value !== 'เสี่ยง');
+                    document.getElementById(`${name}ProblemFields`)?.classList.toggle('hidden', e.target.value !== 'มีปัญหา');
+                });
+            });
         });
-        return result;
-    };
 
-    document.getElementById('screenForm').addEventListener('submit', function(e) {
-        const detail = window.collectScreenSpecialAbilityDetail();
-        document.getElementById('special_ability_detail').value = Object.keys(detail).length ? JSON.stringify(detail) : '';
-    });
-})();
+        document.querySelectorAll('#screenForm input[name="special_need_status"]').forEach(el => {
+            el.addEventListener('change', e => document.getElementById('specialNeedFields').classList.toggle('hidden', e.target.value !== 'มี'));
+        });
+
+        window.collectScreenSpecialAbilityDetail = function () {
+            const result = {};
+            document.querySelectorAll('#screenForm .subject-checkbox:checked').forEach(cb => {
+                const inputs = document.querySelectorAll(`#screenForm .subject-inputs[data-subject="${cb.dataset.subject}"] input`);
+                const details = Array.from(inputs).map(i => i.value.trim()).filter(v => v);
+                if (details.length) result['special_' + cb.dataset.subject] = details;
+            });
+            return result;
+        };
+
+        document.getElementById('screenForm').addEventListener('submit', function (e) {
+            const detail = window.collectScreenSpecialAbilityDetail();
+            document.getElementById('special_ability_detail').value = Object.keys(detail).length ? JSON.stringify(detail) : '';
+        });
+    })();
 </script>
