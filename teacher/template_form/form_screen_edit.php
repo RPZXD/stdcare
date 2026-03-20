@@ -15,6 +15,12 @@ $db = $connectDB->getConnection();
 $screening = new ScreeningData($db);
 $screenData = $screening->getScreeningDataByStudentId($student_id, $pee);
 
+// Fetch classmates who already have screening data for copying
+$classmatesRec = $screening->getScreenByClassAndRoom($student_class, $student_room, $pee);
+$validClassmates = array_filter($classmatesRec, function($c) use ($student_id) {
+    return $c['screen_ishave'] == 1 && $c['Stu_id'] != $student_id;
+});
+
 function checked($val, $target) {
     if (is_array($target)) return in_array($val, $target) ? 'checked' : '';
     return $val === $target ? 'checked' : '';
@@ -42,7 +48,128 @@ $special_ability_detail = $screenData['special_ability_detail'] ?? [];
 .checkbox-item { transition: all 0.2s ease; }
 .checkbox-item:hover { background: rgba(99, 102, 241, 0.05); }
 .checkbox-item input:checked + span { background: rgba(99, 102, 241, 0.15); border-color: #6366f1; }
+/* Fix SweetAlert2 appearing behind modals */
+.swal2-container { z-index: 99999 !important; }
 </style>
+
+<script>
+    /**
+     * Copy assessment data from another student in the same room
+     */
+    function copyFromClassmateScreenEdit(stuId) {
+        Swal.fire({
+            title: 'ต้องการคัดลอกข้อมูล?',
+            text: "ระบบจะดึงข้อมูลการประเมินของเพื่อนมาใส่ในแบบฟอร์มนี้ ข้อมูลปัจจุบันจะถูกแทนที่",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#fbbf24',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'กำลังโหลด...', didOpen: () => Swal.showLoading(), zIndex: 100000 });
+                
+                $.ajax({
+                    url: '../teacher/api/fetch_student_screen_answers.php',
+                    method: 'GET',
+                    data: { student_id: stuId, pee: '<?= $pee ?>' },
+                    success: function(res) {
+                        Swal.close();
+                        if (res.status === 'success') {
+                            const data = res.data;
+                            const formId = '#screenEditForm';
+                            
+                            // 1. Special Ability
+                            const specialAbilityRadio = document.querySelector(`${formId} input[name="special_ability"][value="${data.special_ability}"]`);
+                            if (specialAbilityRadio) {
+                                specialAbilityRadio.checked = true;
+                                specialAbilityRadio.dispatchEvent(new Event('change'));
+                            }
+                            
+                            // Special Ability Detail
+                            if (data.special_ability === 'มี' && data.special_ability_detail) {
+                                let details = data.special_ability_detail;
+                                if (typeof details === 'string') details = JSON.parse(details);
+                                
+                                // Reset checkboxes and inputs first
+                                document.querySelectorAll(`${formId} .subject-checkbox`).forEach(cb => {
+                                    cb.checked = false;
+                                    cb.dispatchEvent(new Event('change'));
+                                });
+
+                                Object.keys(details).forEach(key => {
+                                    const subIdx = key.replace('special_', '');
+                                    const cb = document.querySelector(`${formId} .subject-checkbox[data-subject="${subIdx}"]`);
+                                    if (cb) {
+                                        cb.checked = true;
+                                        cb.dispatchEvent(new Event('change'));
+                                        const values = details[key];
+                                        const inputs = document.querySelectorAll(`${formId} .subject-inputs[data-subject="${subIdx}"] input`);
+                                        values.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+                                    }
+                                });
+                            }
+
+                            // 2-9, 11: Standard statuses
+                            const fields = ['study', 'health', 'economic', 'welfare', 'drug', 'violence', 'sex', 'game', 'it'];
+                            fields.forEach(f => {
+                                const statusName = f + '_status';
+                                const statusVal = data[statusName];
+                                if (statusVal) {
+                                    const radio = document.querySelector(`${formId} input[name="${statusName}"][value="${statusVal}"]`);
+                                    if (radio) {
+                                        radio.checked = true;
+                                        radio.dispatchEvent(new Event('change'));
+                                        
+                                        // Handle risk/problem checkboxes
+                                        const riskName = f + '_risk';
+                                        const probName = f + '_problem';
+                                        
+                                        // Reset checkboxes in these sections
+                                        document.querySelectorAll(`${formId} input[name="${riskName}[]"], ${formId} input[name="${probName}[]"]`).forEach(chk => chk.checked = false);
+
+                                        if (statusVal === 'เสี่ยง' && data[riskName]) {
+                                            const vals = Array.isArray(data[riskName]) ? data[riskName] : (typeof data[riskName] === 'string' ? JSON.parse(data[riskName]) : []);
+                                            vals.forEach(v => {
+                                                const chk = document.querySelector(`${formId} input[name="${riskName}[]"][value="${v}"]`);
+                                                if (chk) chk.checked = true;
+                                            });
+                                        } else if (statusVal === 'มีปัญหา' && data[probName]) {
+                                            const vals = Array.isArray(data[probName]) ? data[probName] : (typeof data[probName] === 'string' ? JSON.parse(data[probName]) : []);
+                                            vals.forEach(v => {
+                                                const chk = document.querySelector(`${formId} input[name="${probName}[]"][value="${v}"]`);
+                                                if (chk) chk.checked = true;
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+
+                            // 10: Special Need
+                            const snStatus = data.special_need_status;
+                            if (snStatus) {
+                                const radio = document.querySelector(`${formId} input[name="special_need_status"][value="${snStatus}"]`);
+                                if (radio) {
+                                    radio.checked = true;
+                                    radio.dispatchEvent(new Event('change'));
+                                    if (snStatus === 'มี' && data.special_need_type) {
+                                        const typeRadio = document.querySelector(`${formId} input[name="special_need_type"][value="${data.special_need_type}"]`);
+                                        if (typeRadio) typeRadio.checked = true;
+                                    }
+                                }
+                            }
+                            
+                            Swal.fire({ icon: 'success', title: 'คัดลอกข้อมูลสำเร็จ', text: 'กรุณาตรวจสอบข้อมูลและกดบันทึก', timer: 2000, showConfirmButton: false });
+                        } else {
+                            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                        }
+                    },
+                    error: function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
+                });
+            }
+        });
+    }
+</script>
 
 <form id="screenEditForm" method="POST" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
     <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
@@ -51,14 +178,27 @@ $special_ability_detail = $screenData['special_ability_detail'] ?? [];
 
     <!-- Student Info -->
     <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-lg sticky top-0 z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <span class="text-2xl">✏️</span>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">✏️</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg"><?= htmlspecialchars($student_name) ?></h2>
+                    <p class="text-sm opacity-90">เลขที่ <?= htmlspecialchars($student_no) ?> | ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?> | ปี <?= htmlspecialchars($pee) ?></p>
+                </div>
             </div>
-            <div>
-                <h2 class="font-bold text-lg"><?= htmlspecialchars($student_name) ?></h2>
-                <p class="text-sm opacity-90">เลขที่ <?= htmlspecialchars($student_no) ?> | ม.<?= htmlspecialchars($student_class) ?>/<?= htmlspecialchars($student_room) ?> | ปี <?= htmlspecialchars($pee) ?></p>
+
+            <?php if (!empty($validClassmates)): ?>
+            <div class="flex items-center gap-2">
+                <select onchange="if(this.value) copyFromClassmateScreenEdit(this.value)" class="w-full md:w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
+                    <option value="" class="text-slate-800">-- คัดลอกข้อมูลจาก --</option>
+                    <?php foreach ($validClassmates as $c): ?>
+                        <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
