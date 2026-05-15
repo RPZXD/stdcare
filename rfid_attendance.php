@@ -1,8 +1,37 @@
 <?php 
-require_once('header.php');
-// Other require_once calls as needed
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+$config_json = file_exists(__DIR__ . '/config.json') ? json_decode(file_get_contents(__DIR__ . '/config.json'), true) : [];
+$global = $config_json['global'] ?? [
+    'pageTitle' => 'ระบบดูแลช่วยเหลือนักเรียน',
+    'nameschool' => 'โรงเรียนพิชัย',
+    'logoLink' => 'logo-phicha.png'
+];
 ?>
-<style>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RFID Attendance | <?php echo $global['nameschool']; ?></title>
+    
+    <!-- Google Font: Mali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        * { font-family: 'Mali', sans-serif; }
     body {
         background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
         min-height: 100vh;
@@ -495,6 +524,7 @@ require_once('header.php');
         border-width: 4px;
     }
 </style>
+</head>
 
 <body class="hold-transition sidebar-mini layout-fixed light-mode">
 
@@ -543,8 +573,6 @@ require_once('header.php');
 
  
 
-
-</div>
 
 <?php require_once('script.php'); ?>
 
