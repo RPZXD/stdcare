@@ -21,51 +21,8 @@ $global = $config['global'];
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Tailwind CSS v3 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'mali': ['Mali', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        },
-                    },
-                    animation: {
-                        'bounce-slow': 'bounce 3s infinite',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 3s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'glow': 'glow 2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
-                        glow: {
-                            '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
-                            '50%': { opacity: '0.8', transform: 'scale(1.1)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="../../dist/css/style.css">
     
     <style>
         body { font-family: 'Mali', sans-serif; }

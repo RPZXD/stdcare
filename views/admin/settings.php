@@ -393,7 +393,7 @@ $(document).ready(function() {
         const pe = $('#number_pe').val();
         const room = $('#number_room').val();
         if (!pe || !room) return showError('กรุณาเลือกชั้นและห้อง');
-        window.location.href = `../controllers/SettingController.php?action=download_number_template&pe=${pe}&room=${room}`;
+        window.location.href = `../controllers/SettingController.php?action=download_number_template_by_room&pe=${pe}&room=${room}`;
     });
 
     // 6. Upload Number by Room
@@ -401,7 +401,7 @@ $(document).ready(function() {
         e.preventDefault();
         const file = $('#number_room_csv')[0].files[0];
         if (!file) return showError('กรุณาเลือกไฟล์ CSV');
-        handleFetch('../controllers/SettingController.php?action=upload_number_data', new FormData(this), 'อัปเดตเลขที่สำเร็จ');
+        handleFetch('../controllers/SettingController.php?action=upload_number_data_by_room', new FormData(this), 'อัปเดตเลขที่สำเร็จ');
     });
 
     // 7. New Student Upload
@@ -414,14 +414,14 @@ $(document).ready(function() {
         if (!file) return;
         const formData = new FormData();
         formData.append('new_student_csv', file);
-        handleFetch('../controllers/SettingController.php?action=upload_new_student', formData, 'เพิ่มนักเรียนใหม่สำเร็จ');
+        handleFetch('../controllers/SettingController.php?action=upload_new_student_data', formData, 'เพิ่มนักเรียนใหม่สำเร็จ');
     });
 
     // 8. Download Full Data
     $('#downloadFullDataBtn').click(function() {
         const pe = $('#pe').val();
         const room = $('#room').val();
-        window.location.href = `../controllers/SettingController.php?action=download_student_data&pe=${pe}&room=${room}`;
+        window.location.href = `../controllers/SettingController.php?action=download_full_data_template&pe=${pe}&room=${room}`;
     });
 
     // 9. Upload Full Data
@@ -429,7 +429,7 @@ $(document).ready(function() {
         e.preventDefault();
         const file = $('#student_csv')[0].files[0];
         if (!file) return showError('กรุณาเลือกไฟล์ CSV');
-        handleFetch('../controllers/SettingController.php?action=upload_student_data', new FormData(this), 'อัปเดตข้อมูลนักเรียนสำเร็จ');
+        handleFetch('../controllers/SettingController.php?action=upload_full_data', new FormData(this), 'อัปเดตข้อมูลนักเรียนสำเร็จ');
     });
 });
 </script>

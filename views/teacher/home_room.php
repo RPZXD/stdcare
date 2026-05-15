@@ -1077,7 +1077,7 @@ function printReport() {
         <html>
         <head>
             <title>รายงานกิจกรรมโฮมรูม</title>
-            <script src="https://cdn.tailwindcss.com"><\/script>
+            <link rel="stylesheet" href="../../dist/css/style.css">
             <style>
                 @media print { @page { size: A4 landscape; margin: 10mm; } }
                 body { font-family: 'Sarabun', sans-serif; }

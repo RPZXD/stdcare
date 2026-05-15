@@ -43,26 +43,8 @@ $student = $_SESSION['student_data'] ?? [];
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { 'mali': ['Mali', 'sans-serif'] },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="<?php echo $basePath ?? '..'; ?>/dist/css/style.css">
     
     <link rel="stylesheet" href="<?php echo $basePath ?? '..'; ?>/plugins/sweetalert2/sweetalert2.min.css">
     <script src="<?php echo $basePath ?? '..'; ?>/plugins/sweetalert2/sweetalert2.all.min.js"></script>
