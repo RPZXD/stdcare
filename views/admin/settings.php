@@ -4,27 +4,27 @@
  * Modern UI with Tailwind CSS & Glassmorphism
  */
 ob_start();
+$pageTitle = "ตั้งค่าระบบ";
+$activePage = "settings";
 ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-violet-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl animate-pulse">
-                    <i class="fas fa-cog"></i>
-                </span>
-                ตั้งค่า <span class="text-violet-600 italic">ระบบ</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">System Settings & Configuration</p>
-        </div>
-    </div>
+    <!-- Page Header -->
+    <?php 
+    $headerData = [
+        'title' => 'ตั้งค่า <span class="text-violet-600 italic">ระบบ</span>',
+        'subtitle' => 'System Settings & Configuration',
+        'icon' => 'fa-cog',
+        'color' => 'violet'
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Settings Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
         <!-- Card 1: Academic Year/Term -->
-        <div class="glass-effect rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
             <div class="bg-gradient-to-r from-sky-500 to-cyan-600 p-6 relative">
                 <div class="absolute top-0 right-0 opacity-10 text-8xl">📅</div>
                 <div class="flex items-center gap-4 relative z-10">
@@ -58,7 +58,7 @@ ob_start();
         </div>
 
         <!-- Card 2: Time Settings -->
-        <div class="glass-effect rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
             <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-6 relative">
                 <div class="absolute top-0 right-0 opacity-10 text-8xl">⏰</div>
                 <div class="flex items-center gap-4 relative z-10">
@@ -142,7 +142,7 @@ ob_start();
     </div>
 
     <!-- CSV Upload Section -->
-    <div class="glass-effect rounded-[2rem] overflow-hidden border border-white/50 shadow-xl">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-6 relative">
             <div class="absolute top-0 right-0 opacity-10 text-8xl">📊</div>
             <div class="flex items-center gap-4 relative z-10">

@@ -4,159 +4,112 @@
  * Modern UI with Tailwind CSS & Executive Analytics
  */
 ob_start();
+$pageTitle = "แดชบอร์ดผู้ดูแลระบบ";
+$activePage = "dashboard";
 ?>
 
 <div class="animate-fadeIn">
     <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-gauge-high"></i>
-                </span>
-                Admin <span class="text-rose-600 italic">Dashboard</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">System Control & Analytics Overview</p>
-        </div>
-        
-        <div class="flex items-center gap-3">
-            <div class="px-6 py-2 bg-rose-600 rounded-full flex items-center gap-3 shadow-lg shadow-rose-600/20">
-                <span class="text-[9px] font-black text-rose-100 uppercase tracking-widest">ปีการศึกษา</span>
-                <span class="text-xs font-black text-white"><?php echo $pee; ?></span>
-            </div>
-        </div>
-    </div>
+    <?php 
+    $headerData = [
+        'title' => 'Admin <span class="text-rose-600 italic">Dashboard</span>',
+        'subtitle' => 'System Control & Analytics Overview',
+        'icon' => 'fa-gauge-high',
+        'color' => 'rose',
+        'actions' => [
+            // No global actions for dashboard currently
+        ]
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <!-- Card 1: Students -->
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl relative overflow-hidden group hover:scale-105 transition-all duration-300">
-            <div class="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                    <i class="fas fa-user-graduate text-2xl"></i>
-                </div>
-                <div class="text-right flex-1">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Status</span>
-                    <span class="text-[9px] font-black px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-full border border-emerald-500/20 uppercase">Active</span>
-                </div>
-            </div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 italic">นักเรียนทั้งหมด</p>
-            <h3 class="text-4xl font-black text-slate-800 dark:text-white tabular-nums tracking-tighter"><?php echo number_format($stats['students']); ?></h3>
-        </div>
-
-        <!-- Card 2: Teachers -->
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl relative overflow-hidden group hover:scale-105 transition-all duration-300">
-            <div class="absolute -right-4 -top-4 w-20 h-20 bg-sky-500/10 rounded-full blur-xl group-hover:bg-sky-500/20 transition-all"></div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-sky-600 group-hover:text-white transition-all">
-                    <i class="fas fa-chalkboard-teacher text-2xl"></i>
-                </div>
-                <div class="text-right flex-1">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Status</span>
-                    <span class="text-[9px] font-black px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-full border border-emerald-500/20 uppercase">Active</span>
-                </div>
-            </div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 italic">บุคลากรทั้งหมด</p>
-            <h3 class="text-4xl font-black text-slate-800 dark:text-white tabular-nums tracking-tighter"><?php echo number_format($stats['teachers']); ?></h3>
-        </div>
-
-        <!-- Card 3: Behaviors -->
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl relative overflow-hidden group hover:scale-105 transition-all duration-300">
-            <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition-all"></div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-amber-600 group-hover:text-white transition-all">
-                    <i class="fas fa-clipboard-list text-2xl"></i>
-                </div>
-            </div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 italic">รายการพฤติกรรม</p>
-            <h3 class="text-4xl font-black text-slate-800 dark:text-white tabular-nums tracking-tighter"><?php echo number_format($stats['behavior']); ?></h3>
-        </div>
-
-        <!-- Card 4: Score -->
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl relative overflow-hidden group hover:scale-105 transition-all duration-300">
-            <div class="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-rose-600 group-hover:text-white transition-all">
-                    <i class="fas fa-minus-circle text-2xl"></i>
-                </div>
-            </div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 italic">คะแนนหักรวม</p>
-            <h3 class="text-4xl font-black text-rose-600 dark:text-rose-400 tabular-nums tracking-tighter">-<?php echo number_format($stats['behaviorScore']); ?></h3>
-        </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
+        <?php 
+        $cards = [
+            ['label' => 'นักเรียนทั้งหมด', 'value' => number_format($stats['students']), 'icon' => 'fa-user-graduate', 'color' => 'indigo', 'status' => 'Active'],
+            ['label' => 'บุคลากรทั้งหมด', 'value' => number_format($stats['teachers']), 'icon' => 'fa-chalkboard-teacher', 'color' => 'sky', 'status' => 'Active'],
+            ['label' => 'รายการพฤติกรรม', 'value' => number_format($stats['behavior']), 'icon' => 'fa-clipboard-list', 'color' => 'amber'],
+            ['label' => 'คะแนนหักรวม', 'value' => '-' . number_format($stats['behaviorScore']), 'icon' => 'fa-minus-circle', 'color' => 'rose'],
+        ];
+        foreach ($cards as $card):
+            $statData = $card;
+            include __DIR__ . '/../components/ui_stat_card.php';
+        endforeach;
+        ?>
     </div>
 
     <!-- Chart Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8 lg:mb-10">
         <!-- Behavior Score Groups Chart -->
-        <div class="glass-effect rounded-[2.5rem] p-8 shadow-xl border-t border-white/50">
+        <div class="glass-effect rounded-3xl lg:rounded-[2.5rem] p-5 lg:p-8 shadow-xl border-t border-white/50">
             <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-rose-600 rounded-xl lg:rounded-2xl flex items-center justify-center text-white shadow-lg">
                     <i class="fas fa-chart-bar"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-black text-slate-800 dark:text-white">สรุปกลุ่มคะแนนพฤติกรรม</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Behavior Score Distribution</p>
+                    <h3 class="text-base lg:text-lg font-black text-slate-800 dark:text-white leading-tight">สรุปกลุ่มคะแนนพฤติกรรม</h3>
+                    <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Behavior Score Distribution</p>
                 </div>
             </div>
-            <div class="h-72">
+            <div class="h-64 lg:h-72">
                 <canvas id="scoreChart"></canvas>
             </div>
         </div>
 
         <!-- Quick Actions -->
-        <div class="glass-effect rounded-[2.5rem] p-8 shadow-xl border-t border-white/50">
+        <div class="glass-effect rounded-3xl lg:rounded-[2.5rem] p-5 lg:p-8 shadow-xl border-t border-white/50">
             <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-indigo-600 rounded-xl lg:rounded-2xl flex items-center justify-center text-white shadow-lg">
                     <i class="fas fa-bolt"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-black text-slate-800 dark:text-white">การดำเนินการด่วน</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quick Actions</p>
+                    <h3 class="text-base lg:text-lg font-black text-slate-800 dark:text-white leading-tight">การดำเนินการด่วน</h3>
+                    <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Quick Actions</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <a href="data_student.php" class="p-6 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl transition-all group">
-                    <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+            <div class="grid grid-cols-2 gap-3 lg:gap-4">
+                <a href="data_student.php" class="p-4 lg:p-6 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl transition-all group">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mb-3 lg:mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-user-graduate"></i>
                     </div>
-                    <p class="font-bold text-slate-800 dark:text-white">จัดการนักเรียน</p>
-                    <p class="text-xs text-slate-400">เพิ่ม/แก้ไข/ลบ</p>
+                    <p class="font-bold text-sm lg:text-base text-slate-800 dark:text-white leading-tight">จัดการนักเรียน</p>
+                    <p class="text-[10px] lg:text-xs text-slate-400 mt-1">เพิ่ม/แก้ไข/ลบ</p>
                 </a>
-                <a href="data_teacher.php" class="p-6 bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/40 rounded-2xl transition-all group">
-                    <div class="w-12 h-12 bg-sky-600 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+                <a href="data_teacher.php" class="p-4 lg:p-6 bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/40 rounded-2xl transition-all group">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 bg-sky-600 rounded-xl flex items-center justify-center text-white mb-3 lg:mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
-                    <p class="font-bold text-slate-800 dark:text-white">จัดการบุคลากร</p>
-                    <p class="text-xs text-slate-400">ครู/เจ้าหน้าที่</p>
+                    <p class="font-bold text-sm lg:text-base text-slate-800 dark:text-white leading-tight">จัดการบุคลากร</p>
+                    <p class="text-[10px] lg:text-xs text-slate-400 mt-1">ครู/เจ้าหน้าที่</p>
                 </a>
-                <a href="data_behavior.php" class="p-6 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl transition-all group">
-                    <div class="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+                <a href="data_behavior.php" class="p-4 lg:p-6 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl transition-all group">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 bg-rose-600 rounded-xl flex items-center justify-center text-white mb-3 lg:mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-frown"></i>
                     </div>
-                    <p class="font-bold text-slate-800 dark:text-white">พฤติกรรม</p>
-                    <p class="text-xs text-slate-400">หักคะแนน</p>
+                    <p class="font-bold text-sm lg:text-base text-slate-800 dark:text-white leading-tight">พฤติกรรม</p>
+                    <p class="text-[10px] lg:text-xs text-slate-400 mt-1">หักคะแนน</p>
                 </a>
-                <a href="settings.php" class="p-6 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl transition-all group">
-                    <div class="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+                <a href="settings.php" class="p-4 lg:p-6 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl transition-all group">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 bg-amber-600 rounded-xl flex items-center justify-center text-white mb-3 lg:mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-cog"></i>
                     </div>
-                    <p class="font-bold text-slate-800 dark:text-white">ตั้งค่าระบบ</p>
-                    <p class="text-xs text-slate-400">Configuration</p>
+                    <p class="font-bold text-sm lg:text-base text-slate-800 dark:text-white leading-tight">ตั้งค่าระบบ</p>
+                    <p class="text-[10px] lg:text-xs text-slate-400 mt-1">Config</p>
                 </a>
             </div>
         </div>
     </div>
 
     <!-- Score Groups Table -->
-    <div class="glass-effect rounded-[2.5rem] p-8 shadow-xl border-t border-white/50">
+    <div class="glass-effect rounded-3xl lg:rounded-[2.5rem] p-5 lg:p-8 shadow-xl border-t border-white/50">
         <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+            <div class="w-10 h-10 lg:w-12 lg:h-12 bg-amber-500 rounded-xl lg:rounded-2xl flex items-center justify-center text-white shadow-lg">
                 <i class="fas fa-table"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black text-slate-800 dark:text-white">รายละเอียดกลุ่มคะแนน</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Score Group Details</p>
+                <h3 class="text-base lg:text-lg font-black text-slate-800 dark:text-white leading-tight">รายละเอียดกลุ่มคะแนน</h3>
+                <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Score Group Details</p>
             </div>
         </div>
         <div class="overflow-x-auto">

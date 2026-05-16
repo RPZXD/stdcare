@@ -8,6 +8,9 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Get active page from view, fallback to home
+$currentActive = $activePage ?? 'home';
+
 $configPath = __DIR__ . '/../../config.json';
 $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
 $global = $config['global'] ?? ['logoLink' => 'logo-phicha.png', 'nameTitle' => 'StdCare', 'nameschool' => 'โรงเรียนพิชัย'];
@@ -149,7 +152,7 @@ $menuItems = [
                 <?php foreach ($menuItems as $menu):
                     $fromColor = $menu['gradient']['from'];
                     $toColor = $menu['gradient']['to'];
-                    $isActive = basename($_SERVER['PHP_SELF']) == basename($menu['url']);
+                    $isActive = ($currentActive === $menu['key']);
                     $colorName = explode('-', $fromColor)[0];
                     ?>
                     <li>

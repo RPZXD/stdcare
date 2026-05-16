@@ -24,9 +24,20 @@ $loginController = new LoginController($logger);
 
 // Handle Logout Logic
 $logoutSuccess = false;
-if (isset($_SESSION['user'])) {
+if (isset($_SESSION['user']) || isset($_SESSION['Admin_login']) || isset($_SESSION['Teacher_login']) || isset($_SESSION['Student_login']) || isset($_SESSION['Officer_login'])) {
     $result = $loginController->logout();
-    $logoutSuccess = $result['success'];
+    
+    // Fallback: Manually clear role-specific sessions if not handled by controller
+    unset($_SESSION['Admin_login']);
+    unset($_SESSION['Teacher_login']);
+    unset($_SESSION['Student_login']);
+    unset($_SESSION['Officer_login']);
+    unset($_SESSION['admin_data']);
+    unset($_SESSION['teacher_data']);
+    unset($_SESSION['student_data']);
+    unset($_SESSION['officer_data']);
+    
+    $logoutSuccess = true; // Assume success if we manually cleared or controller succeeded
 } else {
     // Log attempt without session
     $logger->log([
@@ -37,12 +48,13 @@ if (isset($_SESSION['user'])) {
         "access_time" => date("c"),
         "url" => $_SERVER['REQUEST_URI'],
         "method" => $_SERVER['REQUEST_METHOD'],
-        "status_code" => 400,
+        "status_code" => 200, // Still 200 because we show the logout page anyway
         "referrer" => $_SERVER['HTTP_REFERER'] ?? null,
         "action_type" => "logout_attempt",
         "session_id" => session_id(),
         "message" => "Logout attempted without an active session"
     ]);
+    $logoutSuccess = true; // Still show success UI to the user
 }
 
 // Load the view

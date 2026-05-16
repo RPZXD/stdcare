@@ -4,28 +4,24 @@
  * Modern UI with Tailwind CSS & DataTables
  */
 ob_start();
+$pageTitle = "ประวัติการใช้งานระบบ";
+$activePage = "log";
 ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-history"></i>
-                </span>
-                ประวัติ <span class="text-indigo-600 italic">การใช้งาน</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">System Activity Logs & Audit Trail</p>
-        </div>
-        <div class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><i class="fas fa-clock mr-1"></i>Update</span>
-            <span class="text-sm font-black text-indigo-600"><?php echo date('d/m/Y H:i'); ?></span>
-        </div>
-    </div>
+    <!-- Page Header -->
+    <?php 
+    $headerData = [
+        'title' => 'ประวัติ <span class="text-indigo-600 italic">การใช้งาน</span>',
+        'subtitle' => 'System Activity Logs & Audit Trail',
+        'icon' => 'fa-history',
+        'color' => 'indigo'
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Filter Section -->
-    <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <div class="flex items-center gap-4 mb-6">
             <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-filter"></i>
@@ -36,7 +32,7 @@ ob_start();
             </div>
         </div>
         
-        <form id="logFilterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <form id="logFilterForm" class="grid grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">User ID</label>
                 <input type="text" id="user_id" placeholder="รหัสผู้ใช้" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all">
@@ -73,8 +69,8 @@ ob_start();
         </form>
     </div>
 
-    <!-- Data Table Section -->
-    <div class="glass-effect rounded-[2.5rem] p-8 shadow-xl border-t border-white/50">
+    <!-- Data Table -->
+    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
         <div class="flex items-center gap-4 mb-6">
             <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-table"></i>

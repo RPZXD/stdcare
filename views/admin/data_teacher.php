@@ -4,6 +4,8 @@
  * Modern UI with Tailwind CSS, Glassmorphism & Full CRUD
  */
 ob_start();
+$pageTitle = "จัดการครูและบุคลากร";
+$activePage = "teacher";
 
 // API URL for controller
 $apiUrl = '../controllers/TeacherController.php';
@@ -36,79 +38,45 @@ $statuses = [
 ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-sky-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </span>
-                จัดการ <span class="text-sky-600 italic">ครูและบุคลากร</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">Teacher & Staff Management</p>
-        </div>
-        
-        <div class="flex flex-wrap gap-3">
-            <button id="btnExport" class="px-6 py-3 bg-sky-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-sky-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                <i class="fas fa-file-export"></i> ส่งออกข้อมูล
-            </button>
-            <button id="btnAddTeacher" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                <i class="fas fa-user-plus"></i> เพิ่มข้อมูลครู
-            </button>
-        </div>
-    </div>
+    <!-- Page Header -->
+    <?php 
+    $headerData = [
+        'title' => 'จัดการ <span class="text-sky-600 italic">ครูและบุคลากร</span>',
+        'subtitle' => 'Teacher & Staff Management',
+        'icon' => 'fa-chalkboard-teacher',
+        'color' => 'sky',
+        'actions' => [
+            ['id' => 'btnExport', 'icon' => 'fa-file-export', 'text' => 'ส่งออกข้อมูล', 'color' => 'sky'],
+            ['id' => 'btnAddTeacher', 'icon' => 'fa-user-plus', 'text' => 'เพิ่มข้อมูลครู', 'color' => 'emerald']
+        ]
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-users text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">รวมทั้งหมด</p>
-                    <h3 id="totalTeachers" class="text-3xl font-black text-slate-800 dark:text-white">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-check-circle text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ปกติ</p>
-                    <h3 id="activeTeachers" class="text-3xl font-black text-emerald-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-chalkboard text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ครู</p>
-                    <h3 id="teacherCount" class="text-3xl font-black text-sky-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-6 rounded-[2rem] border border-white/50 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-building text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เจ้าหน้าที่</p>
-                    <h3 id="staffCount" class="text-3xl font-black text-amber-600">0</h3>
-                </div>
-            </div>
-        </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <?php
+        $stats = [
+            ['id' => 'totalTeachers', 'label' => 'รวมทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'indigo'],
+            ['id' => 'activeTeachers', 'label' => 'ปกติ', 'value' => '0', 'icon' => 'fa-check-circle', 'color' => 'emerald'],
+            ['id' => 'teacherCount', 'label' => 'ครู', 'value' => '0', 'icon' => 'fa-chalkboard', 'color' => 'sky'],
+            ['id' => 'staffCount', 'label' => 'เจ้าหน้าที่', 'value' => '0', 'icon' => 'fa-building', 'color' => 'amber']
+        ];
+        foreach ($stats as $stat):
+            $statData = [
+                'label' => $stat['label'],
+                'value' => '<span id="' . $stat['id'] . '">' . $stat['value'] . '</span>',
+                'icon' => $stat['icon'],
+                'color' => $stat['color']
+            ];
+            include __DIR__ . '/../components/ui_stat_card.php';
+        endforeach;
+        ?>
     </div>
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-pie text-sky-500"></i> สถานะ
             </h4>
@@ -116,7 +84,7 @@ $statuses = [
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-layer-group text-indigo-500"></i> กลุ่มสาระ (Top 5)
             </h4>
@@ -124,7 +92,7 @@ $statuses = [
                 <canvas id="majorChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-user-tag text-rose-500"></i> บทบาท
             </h4>
@@ -135,7 +103,7 @@ $statuses = [
     </div>
 
     <!-- Data Table -->
-    <div class="glass-effect rounded-[2.5rem] p-8 shadow-xl border-t border-white/50">
+    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
         <div class="overflow-x-auto">
             <table id="teacherTable" class="w-full text-left border-separate border-spacing-y-2">
                 <thead>

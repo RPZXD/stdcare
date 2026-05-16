@@ -4,24 +4,24 @@
  * Modern UI with Tailwind CSS, Glassmorphism & Full CRUD
  */
 ob_start();
+$pageTitle = "จัดการข้อมูลผู้ปกครอง";
+$activePage = "parent";
 ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-teal-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-users"></i>
-                </span>
-                จัดการ <span class="text-teal-600 italic">ข้อมูลผู้ปกครอง</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">Parent Data Management</p>
-        </div>
-    </div>
+    <!-- Page Header -->
+    <?php 
+    $headerData = [
+        'title' => 'จัดการ <span class="text-teal-600 italic">ข้อมูลผู้ปกครอง</span>',
+        'subtitle' => 'Parent Data Management',
+        'icon' => 'fa-users',
+        'color' => 'teal'
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- CSV Upload Section -->
-    <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
             <i class="fas fa-file-csv text-teal-500"></i> อัปเดตข้อมูลด้วย CSV
         </h4>
@@ -40,7 +40,7 @@ ob_start();
     </div>
 
     <!-- Filter Toolbar -->
-    <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white">
@@ -72,55 +72,22 @@ ob_start();
     </div>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-users text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ทั้งหมด</p>
-                    <h3 id="totalRecords" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-male text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">มีข้อมูลบิดา</p>
-                    <h3 id="fatherCount" class="text-2xl font-black text-sky-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-female text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">มีข้อมูลมารดา</p>
-                    <h3 id="motherCount" class="text-2xl font-black text-pink-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-phone text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">มีเบอร์โทร</p>
-                    <h3 id="phoneCount" class="text-2xl font-black text-amber-600">0</h3>
-                </div>
-            </div>
-        </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <?php
+        $stats = [
+            ['id' => 'totalRecords', 'label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'teal'],
+            ['id' => 'fatherCount', 'label' => 'มีข้อมูลบิดา', 'value' => '0', 'icon' => 'fa-male', 'color' => 'sky'],
+            ['id' => 'motherCount', 'label' => 'มีข้อมูลมารดา', 'value' => '0', 'icon' => 'fa-female', 'color' => 'pink'],
+            ['id' => 'phoneCount', 'label' => 'มีเบอร์โทร', 'value' => '0', 'icon' => 'fa-phone', 'color' => 'amber']
+        ];
+        foreach ($stats as $stat) {
+            include __DIR__ . '/../components/ui_stat_card.php';
+        }
+        ?>
     </div>
 
     <!-- Data Table -->
-    <div class="glass-effect rounded-[2.5rem] p-6 md:p-8 shadow-xl border-t border-white/50">
+    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
         <div class="overflow-x-auto">
             <table id="parentTable" class="w-full text-left border-separate border-spacing-y-2">
                 <thead>

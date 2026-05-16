@@ -4,6 +4,8 @@
  * Modern UI with Tailwind CSS, Glassmorphism & Full CRUD
  */
 ob_start();
+$pageTitle = "จัดการข้อมูลนักเรียน";
+$activePage = "student";
 
 // Status options
 $statuses = [
@@ -19,32 +21,23 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 
 <div class="animate-fadeIn">
     <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-user-graduate"></i>
-                </span>
-                จัดการ <span class="text-indigo-600 italic">ข้อมูลนักเรียน</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">Student Data Management</p>
-        </div>
-        
-        <div class="flex flex-wrap gap-3">
-            <button id="btnSyncRegis" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                <i class="fas fa-sync"></i> ดึงข้อมูลจากระบบรับสมัคร
-            </button>
-            <button id="btnExport" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                <i class="fas fa-file-export"></i> ส่งออกข้อมูล
-            </button>
-            <button id="btnAddStudent" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                <i class="fas fa-user-plus"></i> เพิ่มนักเรียน
-            </button>
-        </div>
-    </div>
+    <?php 
+    $headerData = [
+        'title' => 'จัดการ <span class="text-indigo-600 italic">ข้อมูลนักเรียน</span>',
+        'subtitle' => 'Student Data Management',
+        'icon' => 'fa-user-graduate',
+        'color' => 'indigo',
+        'actions' => [
+            ['id' => 'btnSyncRegis', 'icon' => 'fa-sync', 'text' => 'ดึงข้อมูลจากระบบรับสมัคร', 'color' => 'amber'],
+            ['id' => 'btnExport', 'icon' => 'fa-file-export', 'text' => 'ส่งออกข้อมูล', 'color' => 'indigo'],
+            ['id' => 'btnAddStudent', 'icon' => 'fa-user-plus', 'text' => 'เพิ่มนักเรียน', 'color' => 'emerald']
+        ]
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Filter Toolbar -->
-    <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
@@ -79,55 +72,28 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
     </div>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-users text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ทั้งหมด</p>
-                    <h3 id="totalStudents" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-mars text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ชาย</p>
-                    <h3 id="maleCount" class="text-2xl font-black text-sky-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-venus text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">หญิง</p>
-                    <h3 id="femaleCount" class="text-2xl font-black text-pink-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-check-circle text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">กำลังศึกษา</p>
-                    <h3 id="activeCount" class="text-2xl font-black text-emerald-600">0</h3>
-                </div>
-            </div>
-        </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <?php 
+        $studentStats = [
+            ['id' => 'totalStudents', 'label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'indigo'],
+            ['id' => 'maleCount', 'label' => 'ชาย', 'value' => '0', 'icon' => 'fa-mars', 'color' => 'sky'],
+            ['id' => 'femaleCount', 'label' => 'หญิง', 'value' => '0', 'icon' => 'fa-venus', 'color' => 'pink'],
+            ['id' => 'activeCount', 'label' => 'กำลังศึกษา', 'value' => '0', 'icon' => 'fa-check-circle', 'color' => 'emerald'],
+        ];
+        foreach ($studentStats as $stat):
+            $statData = [
+                'label' => $stat['label'],
+                'value' => '<span id="' . $stat['id'] . '">0</span>',
+                'icon' => $stat['icon'],
+                'color' => $stat['color']
+            ];
+            include __DIR__ . '/../components/ui_stat_card.php';
+        endforeach;
+        ?>
     </div>
 
     <!-- Data Table -->
-    <div class="glass-effect rounded-[2.5rem] p-6 md:p-8 shadow-xl border-t border-white/50">
+    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
         <div class="overflow-x-auto">
             <table id="studentTable" class="w-full text-left border-separate border-spacing-y-2">
                 <thead>

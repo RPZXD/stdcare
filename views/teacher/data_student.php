@@ -306,28 +306,32 @@ ob_start();
 </div>
 
 <!-- View Modal -->
-<div id="viewModal" class="fixed inset-0 z-50 hidden modal-overlay">
+<div id="viewModal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4 md:p-8">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeViewModal()"></div>
-    <div class="modal-content fixed inset-4 md:inset-8 lg:inset-16 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
-        <div class="flex items-center justify-between p-5 border-b dark:border-slate-700 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white">
+    
+    <div class="modal-content relative w-full max-w-6xl h-[90vh] md:h-[85vh] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+        
+        <div class="flex items-center justify-between p-5 pr-6 border-b dark:border-slate-700 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white shrink-0">
             <h3 class="text-xl font-black flex items-center gap-2">
                 <i class="fas fa-user-circle"></i>
                 <span>ข้อมูลนักเรียน</span>
             </h3>
-            <button onclick="closeViewModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition-all hover:scale-110">
+            <button onclick="closeViewModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition-all hover:scale-105 active:scale-95">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto p-5 md:p-8" id="viewModalBody">
-            <!-- Content loaded via AJAX -->
-        </div>
+        
+        <div class="flex-1 overflow-y-auto p-6 md:p-10 pt-8 md:pt-10" id="viewModalBody">
+            </div>
     </div>
 </div>
 
 <!-- Edit Modal -->
-<div id="editModal" class="fixed inset-0 z-50 hidden modal-overlay">
+<div id="editModal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4 md:p-8">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
-    <div class="modal-content fixed inset-4 md:inset-8 lg:inset-16 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+    
+    <div class="modal-content relative w-full max-w-6xl h-[90vh] md:h-[85vh] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+        
         <div class="flex items-center justify-between p-5 border-b dark:border-slate-700 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white">
             <h3 class="text-xl font-black flex items-center gap-2">
                 <i class="fas fa-user-edit"></i>
@@ -354,9 +358,11 @@ ob_start();
 </div>
 
 <!-- Photo Modal -->
-<div id="photoModal" class="fixed inset-0 z-50 hidden modal-overlay">
+<div id="photoModal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4 md:p-8">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closePhotoModal()"></div>
-    <div class="modal-content fixed inset-4 md:inset-20 lg:inset-y-16 lg:inset-x-1/4 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+    
+    <div class="modal-content relative w-full max-w-6xl h-[90vh] md:h-[85vh] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+        
         <div class="flex items-center justify-between p-5 border-b dark:border-slate-700 bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 text-white">
             <h3 class="text-xl font-black flex items-center gap-2">
                 <i class="fas fa-camera-retro"></i>

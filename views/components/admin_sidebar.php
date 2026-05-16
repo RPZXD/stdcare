@@ -57,20 +57,20 @@ $menuItems = [
             $isActive = ($activePage === $item['key']);
         ?>
         <a href="<?php echo $item['href']; ?>" 
-           class="sidebar-item flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 group
+           class="sidebar-item flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl transition-all duration-300 group
                   <?php echo $isActive 
                       ? 'bg-white/15 text-white shadow-lg shadow-rose-900/20' 
                       : 'text-rose-100/70 hover:bg-white/10 hover:text-white'; ?>"
            onclick="closeSidebarOnMobile()">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 
+            <div class="w-9 h-9 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center transition-all duration-300 
                         <?php echo $isActive 
                             ? 'bg-white text-rose-600 shadow-md' 
                             : 'bg-white/10 group-hover:bg-white/20'; ?>">
-                <i class="fas <?php echo $item['icon']; ?> text-sm"></i>
+                <i class="fas <?php echo $item['icon']; ?> text-[13px] lg:text-sm"></i>
             </div>
-            <span class="text-sm font-bold"><?php echo $item['text']; ?></span>
+            <span class="text-xs lg:text-sm font-bold"><?php echo $item['text']; ?></span>
             <?php if ($isActive): ?>
-            <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
             <?php endif; ?>
         </a>
         <?php endforeach; ?>

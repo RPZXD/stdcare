@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Teacher Sidebar Component
  * MVC Pattern - Sidebar navigation for teacher pages (Student Care System)
@@ -7,6 +7,9 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Get active page from view, fallback to home
+$currentActive = $activePage ?? 'home';
 
 $configPath = __DIR__ . '/../../config.json';
 $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
@@ -154,7 +157,7 @@ $menuItems = [
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity duration-300 no-print" onclick="toggleSidebar()"></div>
 
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-0 left-0 z-40 w-72 sm:w-64 h-screen transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+<aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
     <div class="h-full overflow-y-auto bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950">
         
         <!-- Logo Section -->
@@ -202,15 +205,27 @@ $menuItems = [
                 <?php foreach ($menuItems as $menu): 
                     $fromColor = $menu['gradient']['from'];
                     $toColor = $menu['gradient']['to'];
-                    $isActive = basename($_SERVER['PHP_SELF']) == basename($menu['url']);
                     $colorName = explode('-', $fromColor)[0];
                     $hasSubmenu = isset($menu['submenu']) && !empty($menu['submenu']);
+                    
+                    // Logic to check if this menu or its children are active
+                    $isParentActive = false;
+                    if ($hasSubmenu) {
+                        foreach ($menu['submenu'] as $sub) {
+                            if ($currentActive === $sub['key']) {
+                                $isParentActive = true;
+                                break;
+                            }
+                        }
+                    }
+                    $isActive = ($currentActive === $menu['key']) || $isParentActive;
                 ?>
                 <?php if ($hasSubmenu): ?>
-                <li x-data="{ open: false }">
-                    <button @click="open = !open" class="w-full sidebar-item flex items-center justify-between px-4 py-3 text-gray-400 rounded-2xl hover:bg-white/5 hover:text-white group">
+                <li x-data="{ open: <?php echo $isParentActive ? 'true' : 'false'; ?> }">
+                    <button @click="open = !open" 
+                            class="w-full sidebar-item flex items-center justify-between px-4 py-3 rounded-2xl transition-all group no-underline <?php echo $isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
                         <div class="flex items-center">
-                            <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20">
+                            <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
                                 <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
                             </span>
                             <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
@@ -218,10 +233,13 @@ $menuItems = [
                         <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
                     </button>
                     <ul x-show="open" x-collapse class="mt-2 ml-14 space-y-1">
-                        <?php foreach ($menu['submenu'] as $sub): ?>
+                        <?php foreach ($menu['submenu'] as $sub): 
+                            $isSubActive = ($currentActive === $sub['key']);
+                        ?>
                         <li>
-                            <a href="<?php echo htmlspecialchars($sub['url']); ?>" class="flex items-center px-3 py-2 text-sm text-gray-400 hover:text-white rounded-lg hover:bg-white/5">
-                                <i class="fas <?php echo $sub['icon']; ?> text-xs mr-2"></i>
+                            <a href="<?php echo htmlspecialchars($sub['url']); ?>" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg transition-all no-underline <?php echo $isSubActive ? 'text-white font-bold bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'; ?>">
+                                <i class="fas <?php echo $sub['icon']; ?> text-xs mr-2 <?php echo $isSubActive ? 'text-'.explode('-',$fromColor)[0].'-400' : ''; ?>"></i>
                                 <?php echo htmlspecialchars($sub['name']); ?>
                             </a>
                         </li>
@@ -232,7 +250,7 @@ $menuItems = [
                 <li>
                     <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
                        onclick="closeSidebarOnMobile()"
-                       class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
+                       class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
                         <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
                             <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
                         </span>

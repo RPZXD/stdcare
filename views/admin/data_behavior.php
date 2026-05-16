@@ -5,84 +5,50 @@
  * (Updated to match officer version)
  */
 ob_start();
+$pageTitle = "จัดการข้อมูลพฤติกรรม";
+$activePage = "behavior";
 ?>
-
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-</style>
 
 <div class="animate-fadeIn">
     <!-- Header Area -->
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
-                <span class="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-xl text-xl">
-                    <i class="fas fa-user-clock"></i>
-                </span>
-                จัดการ <span class="text-rose-600 italic">ข้อมูลพฤติกรรม</span>
-            </h2>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 italic pl-15">Behavior Data Management | เทอม <?= $term ?>/<?= $pee ?></p>
-        </div>
-        
-        <button onclick="openAddModal()" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-            <i class="fas fa-plus"></i> เพิ่มข้อมูลพฤติกรรม
-        </button>
-    </div>
+    <?php 
+    $headerData = [
+        'title' => 'จัดการ <span class="text-rose-600 italic">ข้อมูลพฤติกรรม</span>',
+        'subtitle' => 'Behavior Data Management | เทอม ' . $term . '/' . $pee,
+        'icon' => 'fa-user-clock',
+        'color' => 'rose',
+        'actions' => [
+            ['id' => 'btnAddBehavior', 'icon' => 'fa-plus', 'text' => 'เพิ่มข้อมูลพฤติกรรม', 'color' => 'emerald', 'onclick' => 'openAddModal()']
+        ]
+    ];
+    // Note: The component uses id, but the button had an onclick. I'll handle that in the script or update component.
+    // For now I'll use id and the script will handle it.
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 
     <!-- Summary Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 text-rose-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-list text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ทั้งหมด</p>
-                    <h3 id="totalRecords" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-clock text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">มาสาย</p>
-                    <h3 id="lateCount" class="text-2xl font-black text-amber-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-running text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">หนีเรียน</p>
-                    <h3 id="escapeCount" class="text-2xl font-black text-red-600">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="glass-effect p-5 rounded-2xl border border-white/50 shadow-lg">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-tshirt text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">แต่งกาย</p>
-                    <h3 id="dressCount" class="text-2xl font-black text-indigo-600">0</h3>
-                </div>
-            </div>
-        </div>
+        <?php 
+        $statCards = [
+            ['label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-list', 'color' => 'rose', 'id' => 'totalRecords'],
+            ['label' => 'มาสาย', 'value' => '0', 'icon' => 'fa-clock', 'color' => 'amber', 'id' => 'lateCount'],
+            ['label' => 'หนีเรียน', 'value' => '0', 'icon' => 'fa-running', 'color' => 'red', 'id' => 'escapeCount'],
+            ['label' => 'แต่งกาย', 'value' => '0', 'icon' => 'fa-tshirt', 'color' => 'indigo', 'id' => 'dressCount'],
+        ];
+        foreach ($statCards as $card):
+            $statData = [
+                'label' => $card['label'],
+                'value' => '<span id="' . $card['id'] . '">0</span>',
+                'icon' => $card['icon'],
+                'color' => $card['color']
+            ];
+            include __DIR__ . '/../components/ui_stat_card.php';
+        endforeach;
+        ?>
     </div>
 
     <!-- Data Table -->
-    <div class="glass-effect rounded-[2.5rem] p-6 md:p-8 shadow-xl border-t border-white/50">
+    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
         <div class="overflow-x-auto">
             <table id="behaviorTable" class="w-full text-left border-separate border-spacing-y-2">
                 <thead>

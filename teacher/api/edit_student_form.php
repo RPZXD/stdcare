@@ -19,421 +19,275 @@ if (!empty($stu_id)) {
         $studentname = $data['Stu_pre'] . $data['Stu_name'] . " " . $data['Stu_sur'];
         ?>
         <style>
-        @keyframes slideInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        .animate-slideInDown { animation: slideInDown 0.6s ease-out; }
-        .animate-fadeIn { animation: fadeIn 0.8s ease-out; }
-        .form-section { 
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            transition: all 0.3s ease;
-        }
-        .form-section:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .form-input {
-            transition: all 0.3s ease;
-            background: linear-gradient(145deg, #ffffff 0%, #f9fafb 100%);
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+        }
+        .dark .form-input {
+            background-color: #0f172a;
+            border-color: #1e293b;
+            color: #f1f5f9;
         }
         .form-input:focus {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            outline: none;
+            border-color: #6366f1;
+            background-color: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
+            transform: translateY(-1px);
+        }
+        .dark .form-input:focus {
+            background-color: #1e293b;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .section-card {
             background: #ffffff;
+            border-radius: 2.5rem;
+            padding: 2rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            transition: all 0.4s ease;
         }
-        .form-label {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 600;
+        .dark .section-card {
+            background: rgba(30, 41, 59, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: none;
         }
-        .section-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .emoji-bounce {
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        .gradient-border {
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            padding: 2px;
-            border-radius: 12px;
-        }
-        .submit-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        .submit-btn:hover {
+        .section-card:hover {
+            border-color: #e0e7ff;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .dark .section-card:hover {
+            border-color: #334155;
+        }
+        .section-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         </style>
 
-        <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-6">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="animate-slideInDown section-header rounded-2xl shadow-2xl p-8 mb-8 text-center">
-                    <h1 class="text-4xl font-bold text-white mb-2">
-                        <span class="emoji-bounce">✏️</span> แก้ไขข้อมูลนักเรียน
-                    </h1>
-                    <p class="text-xl text-purple-100">
-                        <span class="emoji-bounce">👨‍🎓</span> <?= $studentname ?> (<?= $data['Stu_id'] ?>)
-                    </p>
-                </div>
+        <div class="p-4 md:p-8 lg:p-10 space-y-10">
+            <form id="editStudentForm" class="space-y-10">
+                <input type="hidden" name="Stu_id" value="<?= $data['Stu_id'] ?>">
 
-                <form id="editStudentForm" class="space-y-8">
-                    <input type="hidden" name="Stu_id" value="<?= $data['Stu_id'] ?>">
-
-                    <!-- Basic Information Section -->
-                    <div class="animate-fadeIn form-section rounded-2xl shadow-xl p-8" style="animation-delay: 0.2s;">
-                        <div class="flex items-center mb-6">
-                            <span class="text-3xl mr-3 emoji-bounce">📋</span>
-                            <h2 class="text-2xl font-bold text-gray-800">ข้อมูลพื้นฐาน</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_pre" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">📛</span> คำนำหน้า
-                                    </label>
-                                    <input type="text" name="Stu_pre" value="<?= $data['Stu_pre'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z\s]+" required>
-                                </div>
+                <!-- Row 1: Identity & Academic -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Basic Information Card -->
+                    <div class="section-card">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="section-icon bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                                <i class="fas fa-user-circle"></i>
                             </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_name" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">👤</span> ชื่อ
-                                    </label>
-                                    <input type="text" name="Stu_name" value="<?= $data['Stu_name'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z\s]+" required>
-                                </div>
+                            <div>
+                                <h2 class="text-xl font-black text-slate-800 dark:text-white leading-tight">ข้อมูลพื้นฐาน</h2>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Primary Identity</p>
                             </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_sur" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">👤</span> นามสกุล
-                                    </label>
-                                    <input type="text" name="Stu_sur" value="<?= $data['Stu_sur'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z\s]+" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_no" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🔢</span> เลขที่
-                                    </label>
-                                    <input type="number" name="Stu_no" value="<?= $data['Stu_no'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        min="1" max="45" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_password" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🔑</span> รหัสผ่าน
-                                    </label>
-                                    <input type="password" name="Stu_password" value="<?= $data['Stu_password'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_sex" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">⚧️</span> เพศ
-                                    </label>
-                                    <select name="Stu_sex" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                        <option value="1" <?= $data['Stu_sex'] == 1 ? 'selected' : '' ?>>ชาย</option>
-                                        <option value="2" <?= $data['Stu_sex'] == 2 ? 'selected' : '' ?>>หญิง</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Academic Information Section -->
-                    <div class="animate-fadeIn form-section rounded-2xl shadow-xl p-8" style="animation-delay: 0.4s;">
-                        <div class="flex items-center mb-6">
-                            <span class="text-3xl mr-3 emoji-bounce">🏫</span>
-                            <h2 class="text-2xl font-bold text-gray-800">ข้อมูลการศึกษา</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <!-- ...existing form fields with enhanced styling... -->
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_major" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🎓</span> ชั้น
-                                    </label>
-                                    <input type="text" name="Stu_major" value="<?= $data['Stu_major'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z0-9\s]+" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_room" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🚪</span> ห้อง
-                                    </label>
-                                    <input type="text" name="Stu_room" value="<?= $data['Stu_room'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z0-9\s]+" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_nick" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">👶</span> ชื่อเล่น
-                                    </label>
-                                    <input type="text" name="Stu_nick" value="<?= $data['Stu_nick'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z\s]+" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_status" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">📜</span> สถานะ
-                                    </label>
-                                    <select name="Stu_status" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                        <option value="1" <?= $data['Stu_status'] == 1 ? 'selected' : '' ?>>🟢 ปกติ</option>
-                                        <option value="2" <?= $data['Stu_status'] == 2 ? 'selected' : '' ?>>🎓 จบการศึกษา</option>
-                                        <option value="3" <?= $data['Stu_status'] == 3 ? 'selected' : '' ?>>🏫 ย้ายโรงเรียน</option>
-                                        <option value="4" <?= $data['Stu_status'] == 4 ? 'selected' : '' ?>>❌ ออกกลางคัน</option>
-                                        <option value="9" <?= $data['Stu_status'] == 9 ? 'selected' : '' ?>>💔 เสียชีวิต</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Personal Information Section -->
-                    <div class="animate-fadeIn form-section rounded-2xl shadow-xl p-8" style="animation-delay: 0.6s;">
-                        <div class="flex items-center mb-6">
-                            <span class="text-3xl mr-3 emoji-bounce">🆔</span>
-                            <h2 class="text-2xl font-bold text-gray-800">ข้อมูลส่วนตัว</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_birth" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🎂</span> วันเดือนปีเกิด
-                                    </label>
-                                    <input type="date" name="Stu_birth" value="<?= $data['Stu_birth'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_religion" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🛐</span> ศาสนา
-                                    </label>
-                                    <input type="text" name="Stu_religion" value="<?= $data['Stu_religion'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="[ก-๙a-zA-Z\s]+" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_blood" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🩸</span> กรุ๊ปเลือด
-                                    </label>
-                                    <select name="Stu_blood" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                        <option value="" <?= $data['Stu_blood'] == 'null' ? 'selected' : '' ?>>ไม่แสดงกรุ๊ปเลือด</option>
-                                        <option value="A" <?= $data['Stu_blood'] == 'A' ? 'selected' : '' ?>>A</option>
-                                        <option value="B" <?= $data['Stu_blood'] == 'B' ? 'selected' : '' ?>>B</option>
-                                        <option value="AB" <?= $data['Stu_blood'] == 'AB' ? 'selected' : '' ?>>AB</option>
-                                        <option value="O" <?= $data['Stu_blood'] == 'O' ? 'selected' : '' ?>>O</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="gradient-border md:col-span-2">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_addr" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🏠</span> ที่อยู่
-                                    </label>
-                                    <input type="text" name="Stu_addr" value="<?= $data['Stu_addr'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        required>
-                                </div>
-                            </div>
-                            <div class="gradient-border">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_phone" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">📞</span> เบอร์โทรศัพท์
-                                    </label>
-                                    <input type="tel" name="Stu_phone" value="<?= $data['Stu_phone'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="\d{10}" maxlength="10" required>
-                                </div>
-                            </div>
-                            <div class="gradient-border md:col-span-2">
-                                <div class="bg-white rounded-lg p-4">
-                                    <label for="Stu_citizenid" class="block text-sm font-medium form-label mb-2">
-                                        <span class="emoji-bounce">🆔</span> เลขบัตรประชาชน
-                                    </label>
-                                    <input type="text" name="Stu_citizenid" value="<?= $data['Stu_citizenid'] ?>" 
-                                        class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                        pattern="\d{13}" maxlength="13" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Family Information Section -->
-                    <div class="animate-fadeIn form-section rounded-2xl shadow-xl p-8" style="animation-delay: 0.8s;">
-                        <div class="flex items-center mb-6">
-                            <span class="text-3xl mr-3 emoji-bounce">👨‍👩‍👧‍👦</span>
-                            <h2 class="text-2xl font-bold text-gray-800">ข้อมูลครอบครัว</h2>
                         </div>
                         
-                        <!-- Father Information -->
-                        <div class="mb-8">
-                            <h3 class="text-xl font-semibold text-blue-700 mb-4 flex items-center">
-                                <span class="emoji-bounce mr-2">👨‍👦</span> ข้อมูลบิดา
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Father_name" class="block text-sm font-medium form-label mb-2">ชื่อบิดา</label>
-                                        <input type="text" name="Father_name" value="<?= $data['Father_name'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            pattern="[ก-๙a-zA-Z\s]+" required>
-                                    </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="sm:col-span-2 grid grid-cols-3 gap-3">
+                                <div class="col-span-1">
+                                    <label class="form-label">คำนำหน้า</label>
+                                    <input type="text" name="Stu_pre" value="<?= $data['Stu_pre'] ?>" class="form-input" placeholder="นาย/นางสาว">
                                 </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Father_occu" class="block text-sm font-medium form-label mb-2">อาชีพบิดา</label>
-                                        <input type="text" name="Father_occu" value="<?= $data['Father_occu'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Father_income" class="block text-sm font-medium form-label mb-2">รายได้บิดา</label>
-                                        <input type="number" name="Father_income" value="<?= $data['Father_income'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            min="0" required>
-                                    </div>
+                                <div class="col-span-2">
+                                    <label class="form-label">ชื่อจริง</label>
+                                    <input type="text" name="Stu_name" value="<?= $data['Stu_name'] ?>" class="form-input" required>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Mother Information -->
-                        <div class="mb-8">
-                            <h3 class="text-xl font-semibold text-pink-700 mb-4 flex items-center">
-                                <span class="emoji-bounce mr-2">👩‍👦</span> ข้อมูลมารดา
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Mother_name" class="block text-sm font-medium form-label mb-2">ชื่อมารดา</label>
-                                        <input type="text" name="Mother_name" value="<?= $data['Mother_name'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            pattern="[ก-๙a-zA-Z\s]+" required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Mother_occu" class="block text-sm font-medium form-label mb-2">อาชีพมารดา</label>
-                                        <input type="text" name="Mother_occu" value="<?= $data['Mother_occu'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Mother_income" class="block text-sm font-medium form-label mb-2">รายได้มารดา</label>
-                                        <input type="number" name="Mother_income" value="<?= $data['Mother_income'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            min="0" required>
-                                    </div>
-                                </div>
+                            <div class="sm:col-span-2">
+                                <label class="form-label">นามสกุล</label>
+                                <input type="text" name="Stu_sur" value="<?= $data['Stu_sur'] ?>" class="form-input" required>
                             </div>
-                        </div>
-
-                        <!-- Guardian Information -->
-                        <div>
-                            <h3 class="text-xl font-semibold text-green-700 mb-4 flex items-center">
-                                <span class="emoji-bounce mr-2">👨‍👩‍👧</span> ข้อมูลผู้ปกครอง
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_name" class="block text-sm font-medium form-label mb-2">ชื่อผู้ปกครอง</label>
-                                        <input type="text" name="Par_name" value="<?= $data['Par_name'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            pattern="[ก-๙a-zA-Z\s]+" required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_relate" class="block text-sm font-medium form-label mb-2">ความสัมพันธ์</label>
-                                        <input type="text" name="Par_relate" value="<?= $data['Par_relate'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_occu" class="block text-sm font-medium form-label mb-2">อาชีพผู้ปกครอง</label>
-                                        <input type="text" name="Par_occu" value="<?= $data['Par_occu'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_income" class="block text-sm font-medium form-label mb-2">รายได้ผู้ปกครอง</label>
-                                        <input type="number" name="Par_income" value="<?= $data['Par_income'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            min="0" required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_phone" class="block text-sm font-medium form-label mb-2">เบอร์โทรผู้ปกครอง</label>
-                                        <input type="tel" name="Par_phone" value="<?= $data['Par_phone'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            pattern="\d{10}" maxlength="10" required>
-                                    </div>
-                                </div>
-                                <div class="gradient-border md:col-span-2 lg:col-span-1">
-                                    <div class="bg-white rounded-lg p-4">
-                                        <label for="Par_addr" class="block text-sm font-medium form-label mb-2">ที่อยู่ผู้ปกครอง</label>
-                                        <input type="text" name="Par_addr" value="<?= $data['Par_addr'] ?>" 
-                                            class="form-input w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base text-gray-800" 
-                                            required>
-                                    </div>
-                                </div>
+                            <div>
+                                <label class="form-label">ชื่อเล่น</label>
+                                <input type="text" name="Stu_nick" value="<?= $data['Stu_nick'] ?>" class="form-input" placeholder="ระบุชื่อเล่น">
+                            </div>
+                            <div>
+                                <label class="form-label">เพศ</label>
+                                <select name="Stu_sex" class="form-input" required>
+                                    <option value="1" <?= $data['Stu_sex'] == 1 ? 'selected' : '' ?>>👨 ชาย</option>
+                                    <option value="2" <?= $data['Stu_sex'] == 2 ? 'selected' : '' ?>>👩 หญิง</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Academic Details Card -->
+                    <div class="section-card">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="section-icon bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-black text-slate-800 dark:text-white leading-tight">การศึกษา & สถานะ</h2>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Academic Status</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-5">
+                            <div>
+                                <label class="form-label">ชั้นเรียน (ม.)</label>
+                                <input type="text" name="Stu_major" value="<?= $data['Stu_major'] ?>" class="form-input" required>
+                            </div>
+                            <div>
+                                <label class="form-label">ห้อง</label>
+                                <input type="text" name="Stu_room" value="<?= $data['Stu_room'] ?>" class="form-input" required>
+                            </div>
+                            <div>
+                                <label class="form-label">เลขที่</label>
+                                <input type="number" name="Stu_no" value="<?= $data['Stu_no'] ?>" class="form-input" required>
+                            </div>
+                            <div>
+                                <label class="form-label">รหัสผ่าน</label>
+                                <input type="text" name="Stu_password" value="<?= $data['Stu_password'] ?>" class="form-input" required>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">สถานะปัจจุบัน</label>
+                                <select name="Stu_status" class="form-input" required>
+                                    <option value="1" <?= $data['Stu_status'] == 1 ? 'selected' : '' ?>>🟢 ปกติ</option>
+                                    <option value="2" <?= $data['Stu_status'] == 2 ? 'selected' : '' ?>>🎓 จบการศึกษา</option>
+                                    <option value="3" <?= $data['Stu_status'] == 3 ? 'selected' : '' ?>>🏫 ย้ายโรงเรียน</option>
+                                    <option value="4" <?= $data['Stu_status'] == 4 ? 'selected' : '' ?>>❌ ออกกลางคัน</option>
+                                    <option value="9" <?= $data['Stu_status'] == 9 ? 'selected' : '' ?>>💔 เสียชีวิต</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                </form>
-            </div>
+                <!-- Row 2: Personal Details Full Width -->
+                <div class="section-card">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="section-icon bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-slate-800 dark:text-white leading-tight">ข้อมูลส่วนตัวเพิ่มเติม</h2>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Personal Information</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="form-label">เลขบัตรประชาชน</label>
+                            <input type="text" name="Stu_citizenid" value="<?= $data['Stu_citizenid'] ?>" class="form-input" maxlength="13" required>
+                        </div>
+                        <div>
+                            <label class="form-label">วันเดือนปีเกิด</label>
+                            <input type="date" name="Stu_birth" value="<?= $data['Stu_birth'] ?>" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">ศาสนา</label>
+                            <input type="text" name="Stu_religion" value="<?= $data['Stu_religion'] ?>" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">กรุ๊ปเลือด</label>
+                            <select name="Stu_blood" class="form-input">
+                                <option value="" <?= empty($data['Stu_blood']) ? 'selected' : '' ?>>ไม่ระบุ</option>
+                                <option value="A" <?= $data['Stu_blood'] == 'A' ? 'selected' : '' ?>>A</option>
+                                <option value="B" <?= $data['Stu_blood'] == 'B' ? 'selected' : '' ?>>B</option>
+                                <option value="AB" <?= $data['Stu_blood'] == 'AB' ? 'selected' : '' ?>>AB</option>
+                                <option value="O" <?= $data['Stu_blood'] == 'O' ? 'selected' : '' ?>>O</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">เบอร์โทรศัพท์</label>
+                            <input type="tel" name="Stu_phone" value="<?= $data['Stu_phone'] ?>" class="form-input" maxlength="10">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="form-label">ที่อยู่ตามทะเบียนบ้าน</label>
+                            <textarea name="Stu_addr" class="form-input h-[54px] resize-none py-3"><?= $data['Stu_addr'] ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Parent Information -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Father Card -->
+                    <div class="section-card border-l-4 border-l-blue-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center">👨</div>
+                            <h3 class="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm">ข้อมูลบิดา</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="form-label">ชื่อ-นามสกุลบิดา</label>
+                                <input type="text" name="Father_name" value="<?= $data['Father_name'] ?>" class="form-input" placeholder="ระบุชื่อ-นามสกุล">
+                            </div>
+                            <div>
+                                <label class="form-label">อาชีพ</label>
+                                <input type="text" name="Father_occu" value="<?= $data['Father_occu'] ?>" class="form-input" placeholder="ระบุอาชีพ">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mother Card -->
+                    <div class="section-card border-l-4 border-l-pink-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-pink-50 dark:bg-pink-900/30 text-pink-600 rounded-xl flex items-center justify-center">👩</div>
+                            <h3 class="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm">ข้อมูลมารดา</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="form-label">ชื่อ-นามสกุลมารดา</label>
+                                <input type="text" name="Mother_name" value="<?= $data['Mother_name'] ?>" class="form-input" placeholder="ระบุชื่อ-นามสกุล">
+                            </div>
+                            <div>
+                                <label class="form-label">อาชีพ</label>
+                                <input type="text" name="Mother_occu" value="<?= $data['Mother_occu'] ?>" class="form-input" placeholder="ระบุอาชีพ">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guardian Card -->
+                    <div class="section-card border-l-4 border-l-emerald-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex items-center justify-center">👪</div>
+                            <h3 class="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm">ข้อมูลผู้ปกครอง</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="form-label">ชื่อ-นามสกุลผู้ปกครอง</label>
+                                <input type="text" name="Par_name" value="<?= $data['Par_name'] ?>" class="form-input" placeholder="ระบุชื่อ-นามสกุล">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="form-label">ความสัมพันธ์</label>
+                                    <input type="text" name="Par_relate" value="<?= $data['Par_relate'] ?>" class="form-input" placeholder="เช่น ลุง, ป้า">
+                                </div>
+                                <div>
+                                    <label class="form-label">เบอร์โทรศัพท์</label>
+                                    <input type="tel" name="Par_phone" value="<?= $data['Par_phone'] ?>" class="form-input" maxlength="10">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <script>

@@ -4,44 +4,29 @@
  * MVC Pattern - Top navigation bar for teacher pages (Student Care System)
  */
 
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Load config
-$configPath = __DIR__ . '/../../config.json';
-$config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
-$global = $config['global'] ?? ['pageTitle' => 'ระบบดูแลช่วยเหลือนักเรียน'];
-
-// Get teacher data from various sources (priority order)
-$teacherData = $_SESSION['teacher_data'] ?? $userData ?? [];
-
-$userName = 'ครู';
-if (!empty($teacherData['Teach_name'])) {
-    $userName = $teacherData['Teach_name'];
-}
-
-$userClass = $teacherData['Teach_class'] ?? '';
-$userRoom = $teacherData['Teach_room'] ?? '';
+// User info is already passed from layout
+$userName = $userData['Teach_name'] ?? 'ครู';
+$userClass = $userData['Teach_class'] ?? '';
+$userRoom = $userData['Teach_room'] ?? '';
 $userRole = (!empty($userClass) && !empty($userRoom)) ? "ม.{$userClass}/{$userRoom}" : 'ครูที่ปรึกษา';
 ?>
 
 <!-- Mobile Menu Button -->
 <div class="lg:hidden fixed top-4 left-4 z-50 no-print">
     <button onclick="toggleSidebar()" class="p-3 rounded-xl bg-white dark:bg-slate-800 shadow-lg hover:shadow-xl transition-all">
-        <i class="fas fa-bars text-gray-700 dark:text-gray-200"></i>
+        <i class="fas fa-bars text-slate-700 dark:text-slate-200"></i>
     </button>
 </div>
 
 <!-- Top Navbar -->
-<header class="sticky top-0 z-30 glass border-b border-white/10">
-    <div class="flex items-center justify-between px-4 md:px-6 py-4">
+<header class="sticky top-0 z-30 glass-effect border-b border-white/20 dark:border-slate-800">
+    <div class="flex items-center justify-between px-6 py-4">
         <!-- Left: Page Title -->
         <div class="flex items-center space-x-4">
             <div class="hidden lg:block">
-                <h1 class="text-lg font-bold text-gray-800 dark:text-white"><?php echo $global['pageTitle'] ?? 'ระบบดูแลช่วยเหลือนักเรียน'; ?></h1>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    <i class="fas fa-calendar-alt mr-1"></i>
+                <h1 class="text-xl font-black text-slate-800 dark:text-white"><?php echo $pageTitle ?? 'ระบบดูแลช่วยเหลือนักเรียน'; ?></h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    <i class="far fa-calendar-alt mr-1"></i>
                     <?php 
                     $thaiMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
                     echo date('j') . ' ' . $thaiMonths[(int)date('n')] . ' ' . (date('Y') + 543);
@@ -51,21 +36,21 @@ $userRole = (!empty($userClass) && !empty($userRoom)) ? "ม.{$userClass}/{$user
         </div>
         
         <!-- Right: User Menu & Actions -->
-        <div class="flex items-center space-x-3 no-print">
+        <div class="flex items-center space-x-4 no-print">
             <!-- Dark Mode Toggle -->
-            <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
-                <i class="fas fa-sun text-amber-500 dark:hidden"></i>
-                <i class="fas fa-moon text-indigo-400 hidden dark:inline"></i>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all group">
+                <i class="fas fa-sun text-amber-500 dark:hidden group-hover:rotate-45 transition-transform"></i>
+                <i class="fas fa-moon text-indigo-400 hidden dark:inline group-hover:-rotate-12 transition-transform"></i>
             </button>
             
             <!-- User Menu -->
-            <div class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800/50">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
-                    <i class="fas fa-chalkboard-teacher text-white text-sm"></i>
+            <div class="flex items-center space-x-3 pl-4 border-l border-slate-200 dark:border-slate-800">
+                <div class="hidden sm:block text-right">
+                    <p class="text-sm font-black text-slate-800 dark:text-white leading-none"><?php echo htmlspecialchars($userName); ?></p>
+                    <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-1"><?php echo htmlspecialchars($userRole); ?></p>
                 </div>
-                <div class="hidden sm:block">
-                    <p class="text-sm font-semibold text-gray-800 dark:text-white"><?php echo htmlspecialchars($userName); ?></p>
-                    <p class="text-xs text-blue-600 dark:text-blue-400"><?php echo htmlspecialchars($userRole); ?></p>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white dark:ring-slate-800">
+                    <i class="fas fa-chalkboard-teacher text-white text-sm"></i>
                 </div>
             </div>
         </div>
