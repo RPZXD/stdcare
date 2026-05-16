@@ -213,13 +213,13 @@ class SettingModel
     }
 
     /**
-     * เพิ่มนักเรียนใหม่แบบ batch จาก CSV
+     * เพิ่มนักเรียนใหม่แบบ batch จาก CSV (หรืออัปเดตถ้ามีอยู่แล้ว)
      */
     public function batchInsertStudentData(array $data)
     {
-        $report = ['success' => 0, 'failed' => 0, 'errors' => []];
+        $report = ['success' => 0, 'updated' => 0, 'failed' => 0, 'errors' => []];
 
-        $sql = "INSERT INTO student
+        $insert_sql = "INSERT INTO student
                     (Stu_id, Stu_no, Stu_password, Stu_sex, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status,
                      Stu_nick, Stu_birth, Stu_religion, Stu_blood, Stu_addr, Stu_phone,
                      Father_name, Father_occu, Father_income, Mother_name, Mother_occu, Mother_income,
@@ -232,7 +232,40 @@ class SettingModel
                      :Par_name, :Par_relate, :Par_occu, :Par_income, :Par_addr, :Par_phone,
                      :Risk_group, :vehicle, :Stu_citizenid)";
 
-        $stmt = $this->pdo->prepare($sql);
+        $update_sql = "UPDATE student SET 
+                    Stu_no = :Stu_no, 
+                    Stu_sex = :Stu_sex, 
+                    Stu_pre = :Stu_pre, 
+                    Stu_name = :Stu_name, 
+                    Stu_sur = :Stu_sur, 
+                    Stu_major = :Stu_major, 
+                    Stu_room = :Stu_room, 
+                    Stu_status = :Stu_status,
+                    Stu_nick = :Stu_nick, 
+                    Stu_birth = :Stu_birth, 
+                    Stu_religion = :Stu_religion, 
+                    Stu_blood = :Stu_blood, 
+                    Stu_addr = :Stu_addr, 
+                    Stu_phone = :Stu_phone,
+                    Father_name = :Father_name, 
+                    Father_occu = :Father_occu, 
+                    Father_income = :Father_income, 
+                    Mother_name = :Mother_name, 
+                    Mother_occu = :Mother_income, 
+                    Mother_income = :Mother_income,
+                    Par_name = :Par_name, 
+                    Par_relate = :Par_relate, 
+                    Par_occu = :Par_occu, 
+                    Par_income = :Par_income, 
+                    Par_addr = :Par_addr, 
+                    Par_phone = :Par_phone,
+                    Risk_group = :Risk_group, 
+                    vehicle = :vehicle, 
+                    Stu_citizenid = :Stu_citizenid
+                    WHERE Stu_id = :Stu_id";
+
+        $insert_stmt = $this->pdo->prepare($insert_sql);
+        $update_stmt = $this->pdo->prepare($update_sql);
 
         foreach ($data as $rowIndex => $row) {
             $stu_id = trim($row['Stu_id'] ?? '');
@@ -242,7 +275,7 @@ class SettingModel
                 continue;
             }
 
-            // ตรวจสอบข้อมูลพื้นฐาน
+            // ตรวจสอบรหัสนักเรียน
             if (empty($stu_id)) {
                 $report['failed']++;
                 $report['errors'][] = "แถว " . ($rowIndex + 2) . ": Stu_id ว่างเปล่า";
@@ -253,11 +286,7 @@ class SettingModel
             $check_sql = "SELECT Stu_id FROM student WHERE Stu_id = :id";
             $check_stmt = $this->pdo->prepare($check_sql);
             $check_stmt->execute([':id' => $stu_id]);
-            if ($check_stmt->fetch()) {
-                $report['failed']++;
-                $report['errors'][] = "แถว " . ($rowIndex + 2) . ": นักเรียน Stu_id: $stu_id มีอยู่แล้วในระบบ";
-                continue;
-            }
+            $exists = $check_stmt->fetch();
 
             // คำนวณเพศจากคำนำหน้า
             $stu_pre = trim($row['Stu_pre'] ?? '');
@@ -268,14 +297,13 @@ class SettingModel
                 $stu_sex = 2;
             }
 
-            // เตรียมข้อมูล
+            // เตรียมข้อมูลพื้นฐาน
             $stu_password = trim($row['Stu_password'] ?? $stu_id); // รหัสผ่านเริ่มต้น = รหัสนักเรียน
             $stu_status = trim($row['Stu_status'] ?? 1); // สถานะ "ปกติ"
 
             $params = [
                 ':Stu_id' => $stu_id,
                 ':Stu_no' => trim($row['Stu_no'] ?? null),
-                ':Stu_password' => $stu_password,
                 ':Stu_sex' => $stu_sex,
                 ':Stu_pre' => $stu_pre,
                 ':Stu_name' => trim($row['Stu_name'] ?? null),
@@ -307,12 +335,17 @@ class SettingModel
             ];
 
             try {
-                $stmt->execute($params);
-                if ($stmt->rowCount() > 0) {
-                    $report['success']++;
+                if ($exists) {
+                    // (อัปเดตข้อมูลนักเรียนเดิม)
+                    // เราจะไม่ส่ง :Stu_password ไปยัง UPDATE เพื่อป้องกันการทับรหัสผ่านเดิมถ้าเขามีอยู่แล้ว
+                    $update_stmt->execute($params);
+                    $report['updated']++;
                 } else {
-                    $report['failed']++;
-                    $report['errors'][] = "แถว " . ($rowIndex + 2) . ": ไม่สามารถเพิ่มนักเรียน Stu_id: $stu_id";
+                    // (เพิ่มนักเรียนใหม่)
+                    $insert_params = $params;
+                    $insert_params[':Stu_password'] = $stu_password;
+                    $insert_stmt->execute($insert_params);
+                    $report['success']++;
                 }
             } catch (\PDOException $e) {
                 $report['failed']++;
@@ -322,6 +355,7 @@ class SettingModel
 
         return $report;
     }
+
 
     /**
      * อัปเดตข้อมูลนักเรียนทั้งหมด (จาก CSV)

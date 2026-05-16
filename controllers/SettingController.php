@@ -362,8 +362,12 @@ try {
             $logger->log(['user_id' => $admin_id, 'role' => $admin_role, 'action_type' => 'student_csv_insert_new', 'status_code' => 200, 'message' => $logMessage]);
 
             // ส่ง error details กลับไปแสดงใน UI
-            $totalProcessed = $report['success'] + $report['failed'];
+            $totalProcessed = $report['success'] + $report['updated'] + $report['failed'];
             $responseMessage = sprintf('เพิ่มนักเรียนใหม่ ประมวลผลแล้ว: %d รายการ', $totalProcessed);
+            
+            if ($report['success'] > 0 || $report['updated'] > 0) {
+                $responseMessage .= sprintf(' (เพิ่มใหม่: %d, อัปเดตเดิม: %d)', $report['success'], $report['updated']);
+            }
 
             if ($report['failed'] > 0) {
                 $responseMessage .= sprintf(', มีปัญหา: %d รายการ', $report['failed']);
