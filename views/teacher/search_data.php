@@ -45,6 +45,15 @@ ob_start();
         color: white !important;
         border: none !important;
     }
+
+    /* Modal Enhancements */
+    #viewModalBackdrop.show { opacity: 1; }
+    #viewModalContent.show { opacity: 1; transform: scale(1) translateY(0); }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
 </style>
 
 <!-- Page Header -->
@@ -144,21 +153,32 @@ ob_start();
 </div>
 
 <!-- Profile View Modal -->
-<div id="viewModal" class="fixed inset-0 z-[10000] hidden">
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeViewModal()"></div>
-    <div class="fixed inset-4 md:inset-10 lg:inset-x-60 lg:inset-y-20 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col transform transition-all">
-        <div class="flex items-center justify-between p-6 border-b dark:border-slate-700 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-            <h3 class="text-xl font-black flex items-center gap-2">
-                <i class="fas fa-address-card"></i>
-                <span>ข้อมูลโดยละเอียด</span>
-            </h3>
-            <button onclick="closeViewModal()" class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/20 hover:bg-white/30 transition-all hover:rotate-90">
-                <i class="fas fa-times text-xl"></i>
+<div id="viewModal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4 md:p-8">
+    <div id="viewModalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeViewModal()"></div>
+    <div id="viewModalContent" class="modal-content relative w-full max-w-6xl h-[90vh] md:h-[85vh] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
+        <!-- Modern Header -->
+        <div class="relative p-6 md:p-8 flex items-center justify-between z-10">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200 floating-icon">
+                    <i class="fas fa-id-card-alt text-xl md:text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight">ข้อมูลเชิงลึก</h3>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Detailed Analytics</p>
+                </div>
+            </div>
+            <button onclick="closeViewModal()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-500 hover:bg-rose-50 transition-all group">
+                <i class="fas fa-times text-xl group-hover:rotate-90 transition-transform"></i>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto p-6 md:p-10" id="viewModalBody">
-            <!-- ข้อมูลจะถูกโหลดมาใส่ที่นี่ -->
+        
+        <!-- Scrolled Content -->
+        <div class="flex-1 overflow-y-auto px-6 md:px-10 pb-10 custom-scrollbar" id="viewModalBody">
+            <!-- Content will be injected here -->
         </div>
+        
+        <!-- Subtle Footer Accent -->
+        <div class="h-2 w-full bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
     </div>
 </div>
 
@@ -300,8 +320,8 @@ $(document).ready(function() {
                             <h3 class="text-xl font-black text-slate-800">${item.Stu_name} ${item.Stu_sur}</h3>
                             <p class="text-indigo-500 font-bold text-sm">น้อง${item.Stu_nick || '-'}</p>
                         </div>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${addr}" target="_blank" class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 quick-action-btn border border-rose-100 shadow-sm">
-                            <i class="fas fa-map-marker-alt"></i>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${item.latitude && item.longitude ? item.latitude + ',' + item.longitude : addr}" target="_blank" class="w-10 h-10 ${item.latitude && item.longitude ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'} rounded-xl flex items-center justify-center quick-action-btn border shadow-sm" title="${item.latitude && item.longitude ? 'ใช้พิกัด GPS แม่นยำสูง' : 'ค้นหาด้วยที่อยู่'}">
+                            <i class="fas ${item.latitude && item.longitude ? 'fa-crosshairs' : 'fa-map-marker-alt'}"></i>
                         </a>
                     </div>
                     <div class="space-y-2 mb-6">
@@ -344,54 +364,120 @@ $(document).ready(function() {
         });
     }
     window.viewStudentDetail = function(stuId) {
-        $('#viewModal').removeClass('hidden');
-        $('#viewModalBody').html('<div class="text-center py-20"><i class="fas fa-cog fa-spin text-5xl text-indigo-500 mb-4"></i><p class="font-bold text-slate-500">กำลังดึงแฟ้มประวัติ...</p></div>');
+        openModal();
+        $('#viewModalBody').html(`
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+                <div class="relative w-24 h-24 mb-8">
+                    <div class="absolute inset-0 border-8 border-indigo-50 dark:border-slate-800 rounded-full"></div>
+                    <div class="absolute inset-0 border-8 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-fingerprint text-3xl text-indigo-200 animate-pulse"></i>
+                    </div>
+                </div>
+                <h4 class="text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">กำลังยืนยันตัวตน...</h4>
+                <p class="text-slate-500 font-bold">เทคโนโลยีประมวลผลข้อมูลอัจฉริยะ</p>
+            </div>
+        `);
         
         $.get('../teacher/api/view_student.php', { stu_id: stuId }, function(html) {
-            $('#viewModalBody').html(html);
+            $('#viewModalBody').hide().html(html).fadeIn(500);
         });
     }
 
     window.viewTeacherDetail = function(teachId) {
-        $('#viewModal').removeClass('hidden');
-        $('#viewModalBody').html('<div class="text-center py-20"><i class="fas fa-sync fa-spin text-5xl text-purple-500 mb-4"></i><p class="font-bold text-slate-500">กำลังเปิดดูโปรไฟล์...</p></div>');
+        openModal();
+        $('#viewModalBody').html(`
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+                <div class="relative w-24 h-24 mb-8">
+                    <div class="absolute inset-0 border-8 border-purple-50 dark:border-slate-800 rounded-full"></div>
+                    <div class="absolute inset-0 border-8 border-purple-600 rounded-full border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-user-shield text-3xl text-purple-200 animate-pulse"></i>
+                    </div>
+                </div>
+                <h4 class="text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">กำลังเรียกข้อมูลโปรไฟล์...</h4>
+                <p class="text-slate-500 font-bold">ระบบตรวจสอบความปลอดภัยขั้นสูง</p>
+            </div>
+        `);
         
         $.post('../teacher/api/search_data.php', { type: 'teacher', search: teachId }, function(data) {
             if(data && data.length > 0) {
                 const t = data[0];
-                $('#viewModalBody').html(`
-                    <div class="text-center">
-                        <img src="${imgProfileTeacher}${t.Teach_photo}" class="w-48 h-48 rounded-[2.5rem] object-cover mx-auto shadow-2xl border-8 border-white mb-6">
-                        <h2 class="text-3xl font-black text-slate-800">${t.Teach_name}</h2>
-                        <p class="text-indigo-600 font-bold mb-8">เลขประจำตัว: ${t.Teach_id}</p>
+                $('#viewModalBody').hide().html(`
+                    <div class="text-center animate-fadeIn">
+                        <div class="relative inline-block mb-8">
+                            <div class="absolute -inset-4 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-[3rem] blur-xl opacity-20 animate-pulse"></div>
+                            <img src="${imgProfileTeacher}${t.Teach_photo}" class="relative w-48 h-48 rounded-[2.5rem] object-cover shadow-2xl border-8 border-white dark:border-slate-800">
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-black text-slate-800 dark:text-white leading-tight mb-2">${t.Teach_name}</h2>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-black text-xs uppercase tracking-widest mb-10">
+                            ID: ${t.Teach_id}
+                        </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">กลุ่มสาระ</div>
-                                <div class="text-lg font-black text-slate-700">${t.Teach_major}</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
+                            <div class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:border-indigo-200 transition-colors">
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i class="fas fa-book-open text-indigo-500"></i> กลุ่มสาระ
+                                </div>
+                                <div class="text-xl font-black text-slate-700 dark:text-slate-200">${t.Teach_major}</div>
                             </div>
-                            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">ที่ปรึกษาประจำชั้น</div>
-                                <div class="text-lg font-black text-slate-700">ม.${t.Teach_class}/${t.Teach_room}</div>
+                            <div class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:border-purple-200 transition-colors">
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i class="fas fa-chalkboard-teacher text-purple-500"></i> ที่ปรึกษาประจำชั้น
+                                </div>
+                                <div class="text-xl font-black text-slate-700 dark:text-slate-200">ม.${t.Teach_class}/${t.Teach_room}</div>
                             </div>
-                            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">เบอร์โทรศัพท์</div>
-                                <div class="text-lg font-black text-indigo-600">${t.Teach_phone || '-'}</div>
+                            <div class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:border-green-200 transition-colors">
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i class="fas fa-phone-alt text-green-500"></i> เบอร์โทรศัพท์
+                                </div>
+                                <a href="tel:${t.Teach_phone}" class="text-xl font-black text-green-600 hover:underline decoration-2 underline-offset-4">${t.Teach_phone || '-'}</a>
                             </div>
-                             <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">วันเกิด</div>
-                                <div class="text-lg font-black text-slate-700">${t.Teach_birth || '-'}</div>
+                             <div class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:border-rose-200 transition-colors">
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i class="fas fa-birthday-cake text-rose-500"></i> วันเกิด
+                                </div>
+                                <div class="text-xl font-black text-slate-700 dark:text-slate-200">${t.Teach_birth || '-'}</div>
                             </div>
                         </div>
                     </div>
-                `);
+                `).fadeIn(500);
             }
         }, 'json');
     }
 
-    window.closeViewModal = function() {
-        $('#viewModal').addClass('hidden');
+    function openModal() {
+        const modal = $('#viewModal');
+        const backdrop = $('#viewModalBackdrop');
+        const content = $('#viewModalContent');
+        
+        modal.removeClass('hidden').addClass('flex');
+        setTimeout(() => {
+            backdrop.addClass('show');
+            content.addClass('show');
+        }, 10);
+        
+        $('body').addClass('overflow-hidden');
     }
+
+    window.closeViewModal = function() {
+        const modal = $('#viewModal');
+        const backdrop = $('#viewModalBackdrop');
+        const content = $('#viewModalContent');
+        
+        backdrop.removeClass('show');
+        content.removeClass('show');
+        
+        setTimeout(() => {
+            modal.addClass('hidden').removeClass('flex');
+            $('body').removeClass('overflow-hidden');
+        }, 300);
+    }
+
+    // Close on ESC
+    $(document).keyup(function(e) {
+        if (e.key === "Escape") closeViewModal();
+    });
 });
 </script>
 

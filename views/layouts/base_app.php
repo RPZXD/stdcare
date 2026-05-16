@@ -45,9 +45,6 @@ $themeColor = $themeColor ?? 'indigo';
     
     <style>
         * { font-family: 'Mali', sans-serif; }
-        a, a:hover { text-decoration: none !important; }
-        ul, ol { list-style: none; margin: 0; padding: 0; }
-        
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 20px; border: 2px solid transparent; background-clip: content-box; }
@@ -95,7 +92,7 @@ $themeColor = $themeColor ?? 'indigo';
             
             <!-- Page Content -->
             <main class="flex-1 p-4 md:p-8 lg:p-10">
-                <div class="max-w-[1600px] mx-auto animate-fadeIn">
+                <div class="max-w-[1600px] mx-auto animate-slide-up">
                     <?php echo $content ?? ''; ?>
                 </div>
             </main>

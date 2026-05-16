@@ -47,19 +47,21 @@ if ($type === 'teacher') {
         $stmt->bindValue(':major', $major);
         $stmt->bindValue(':room', $room);
     } else {
-        $query = "SELECT * FROM student 
-                  WHERE ( CONCAT(Stu_name, ' ', Stu_sur) LIKE :search 
-                  OR Stu_name LIKE :search 
-                  OR Stu_sur LIKE :search 
-                  OR Stu_id LIKE :search 
-                  OR Stu_nick LIKE :search 
-                  OR Stu_phone LIKE :search 
-                  OR Stu_addr LIKE :search
-                  OR Par_name LIKE :search 
-                  OR Par_phone LIKE :search 
-                  OR Father_name LIKE :search 
-                  OR Mother_name LIKE :search )
-                  AND Stu_status = 1
+        $query = "SELECT s.*, g.latitude, g.longitude 
+                  FROM student s
+                  LEFT JOIN student_gps g ON s.Stu_id = g.Stu_id
+                  WHERE ( CONCAT(s.Stu_name, ' ', s.Stu_sur) LIKE :search 
+                  OR s.Stu_name LIKE :search 
+                  OR s.Stu_sur LIKE :search 
+                  OR s.Stu_id LIKE :search 
+                  OR s.Stu_nick LIKE :search 
+                  OR s.Stu_phone LIKE :search 
+                  OR s.Stu_addr LIKE :search
+                  OR s.Par_name LIKE :search 
+                  OR s.Par_phone LIKE :search 
+                  OR s.Father_name LIKE :search 
+                  OR s.Mother_name LIKE :search )
+                  AND s.Stu_status = 1
                   LIMIT 20";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':search', '%' . $search . '%');

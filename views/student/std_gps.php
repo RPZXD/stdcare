@@ -1,0 +1,325 @@
+<?php
+/**
+ * View: Record GPS (std_gps.php)
+ * UI for recording student home coordinates
+ */
+ob_start();
+$student = $_SESSION['student_data'] ?? [];
+$currentGps = $currentGps ?? null;
+?>
+
+<!-- Leaflet Assets (External) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div class="space-y-6 md:space-y-8 animate-fadeIn">
+    
+    <!-- Hero Section (Dashboard Style) -->
+    <div class="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 md:p-10 shadow-2xl">
+        <!-- Decorative Blobs -->
+        <div class="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -mr-36 -mt-36 blur-2xl"></div>
+        <div class="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full -ml-36 -mb-36 blur-2xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
+            <div class="w-24 h-24 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2rem] bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center text-white shadow-2xl">
+                <i class="fas fa-map-location-dot text-4xl md:text-5xl animate-bounce"></i>
+            </div>
+            <div>
+                <p class="text-blue-200 text-sm font-black uppercase tracking-[0.3em] mb-2">GPS Location Tracking</p>
+                <h1 class="text-2xl md:text-4xl font-black text-white mb-2 tracking-tight">บันทึกพิกัดบ้านนักเรียน</h1>
+                <p class="text-blue-100/80 font-medium text-sm md:text-lg max-w-xl">
+                    ปักหมุดตำแหน่งบ้านของคุณเพื่อให้คุณครูเดินทางไปเยี่ยมบ้านได้อย่างสะดวกและแม่นยำ
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Control Panel -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-lg">
+                        <i class="fas fa-location-crosshairs"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">สถานะตำแหน่ง</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">ความแม่นยำ (Accuracy)</p>
+                        <p id="accuracyValue" class="text-xl font-black text-slate-700 dark:text-slate-200">รอการตรวจสอบ...</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Latitude</p>
+                            <p id="latValue" class="text-md font-black text-blue-600 dark:text-blue-400"><?= $currentGps['latitude'] ?? '-' ?></p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Longitude</p>
+                            <p id="lngValue" class="text-md font-black text-blue-600 dark:text-blue-400"><?= $currentGps['longitude'] ?? '-' ?></p>
+                        </div>
+                    </div>
+
+                    <?php if($currentGps): ?>
+                    <div class="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
+                        <i class="fas fa-history text-emerald-500"></i>
+                        <div>
+                            <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">อัปเดตล่าสุด</p>
+                            <p class="text-xs font-bold text-emerald-700 dark:text-emerald-300"><?= date('j M Y, H:i', strtotime($currentGps['updated_at'])) ?> น.</p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <button onclick="getLocation()" class="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 transition-all flex items-center justify-center gap-3 active:scale-95 group">
+                    <i class="fas fa-crosshairs text-lg group-hover:rotate-90 transition-transform"></i>
+                    ดึงตำแหน่งปัจจุบัน
+                </button>
+            </div>
+
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-800/30">
+                <h3 class="text-sm font-black text-amber-800 dark:text-amber-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-circle-info"></i>
+                    คำแนะนำการใช้งาน
+                </h3>
+                <ul class="space-y-3 text-xs font-bold text-amber-700/80 dark:text-amber-400/60 leading-relaxed">
+                    <li class="flex gap-2"><span>1.</span><span>เปิด GPS ในมือถือก่อนกดปุ่มดึงตำแหน่ง</span></li>
+                    <li class="flex gap-2"><span>2.</span><span>ลากหมุดบนแผนที่เพื่อปรับตำแหน่งบ้านให้ตรงที่สุด</span></li>
+                    <li class="flex gap-2"><span>3.</span><span>กดบันทึกเมื่อเข็มหมุดอยู่ตรงหลังคาบ้านของคุณ</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="lg:col-span-2">
+            <div class="glass-effect rounded-[2rem] p-4 border border-white/50 shadow-xl flex flex-col min-h-[600px] lg:h-full">
+                <div id="map" class="rounded-[1.5rem] overflow-hidden border border-slate-200 dark:border-slate-700 w-full bg-slate-100 relative z-10" style="height: 500px;">
+                    <!-- Loading Indicator -->
+                    <div id="map-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/50 backdrop-blur-sm z-50">
+                        <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                        <p class="text-xs font-black text-slate-500 animate-pulse uppercase tracking-widest">กำลังโหลดแผนที่...</p>
+                    </div>
+                </div>
+                
+                <div class="pt-6 pb-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 text-slate-400">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center animate-bounce">
+                            <i class="fas fa-hand-pointer text-[10px]"></i>
+                        </div>
+                        <p class="text-[12px] font-bold">คุณสามารถลากหมุดเพื่อปรับตำแหน่งได้</p>
+                    </div>
+                    <button id="saveBtn" disabled onclick="saveGps()" class="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-teal-600 hover:to-emerald-500 disabled:from-slate-100 disabled:to-slate-100 dark:disabled:from-slate-800 dark:disabled:to-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-floppy-disk"></i>
+                        บันทึกพิกัดตำแหน่งบ้าน
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let map;
+    let marker;
+    let currentLat = <?= $currentGps['latitude'] ?? '17.6582' ?>;
+    let currentLng = <?= $currentGps['longitude'] ?? '100.1415' ?>;
+    let currentAcc = 0;
+
+    function initMap() {
+        console.log("initMap starting...");
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error("Map container not found");
+            return;
+        }
+
+        if (typeof L === 'undefined') {
+            console.error("Leaflet (L) is undefined. Retrying in 1s...");
+            setTimeout(initMap, 1000);
+            return;
+        }
+
+        try {
+            // Create map
+            map = L.map('map', {
+                center: [currentLat, currentLng],
+                zoom: <?= $currentGps ? '18' : '13' ?>,
+                zoomControl: true,
+                layers: []
+            });
+            console.log("Map object created successfully");
+
+            // Add Tile Layer (Standard OSM)
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            console.log("Tile layer added");
+
+            // Add Marker
+            marker = L.marker([currentLat, currentLng], {
+                draggable: true
+            }).addTo(map);
+
+            marker.on('dragend', function(e) {
+                const pos = marker.getLatLng();
+                updateValues(pos.lat, pos.lng);
+            });
+
+            // Handle map ready
+            map.whenReady(() => {
+                console.log("Map is ready!");
+                document.getElementById('map-loading').style.display = 'none';
+                setTimeout(() => map.invalidateSize(), 300);
+            });
+
+            <?php if($currentGps): ?>
+                updateValues(currentLat, currentLng);
+                $('#saveBtn').prop('disabled', false);
+            <?php endif; ?>
+
+        } catch (e) {
+            console.error("Map Error:", e);
+            document.getElementById('map-loading').innerHTML = '<p class="text-red-500 font-bold">เกิดข้อผิดพลาดในการโหลดแผนที่</p>';
+        }
+    }
+
+    function updateValues(lat, lng, acc = null) {
+        currentLat = lat;
+        currentLng = lng;
+        $('#latValue').text(lat.toFixed(6));
+        $('#lngValue').text(lng.toFixed(6));
+        
+        if (acc !== null) {
+            currentAcc = acc;
+            $('#accuracyValue').text('± ' + acc.toFixed(1) + ' เมตร');
+            
+            const indicator = $('#accuracyValue');
+            indicator.removeClass('text-emerald-500 text-amber-500 text-rose-500 text-slate-700');
+            if (acc < 50) indicator.addClass('text-emerald-500');
+            else if (acc < 200) indicator.addClass('text-amber-500');
+            else indicator.addClass('text-rose-500');
+        }
+        
+        $('#saveBtn').prop('disabled', false);
+    }
+
+    function getLocation() {
+        if (!navigator.geolocation) {
+            Swal.fire('Oops!', 'เบราว์เซอร์ของคุณไม่รองรับการดึงพิกัด GPS', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: 'กำลังดึงพิกัด...',
+            text: 'กรุณารอสักครู่เพื่อให้ระบบค้นหาตำแหน่งที่แม่นยำที่สุด',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const acc = pos.coords.accuracy;
+
+                if (map) {
+                    map.setView([lat, lng], 18);
+                    marker.setLatLng([lat, lng]);
+                    map.invalidateSize();
+                }
+                updateValues(lat, lng, acc);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'พบตำแหน่งแล้ว!',
+                    text: 'ตำแหน่งปัจจุบันของคุณแสดงบนแผนที่แล้ว',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            },
+            (err) => {
+                Swal.fire('Error', 'ไม่สามารถเข้าถึงตำแหน่งได้: ' + err.message, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    function saveGps() {
+        Swal.fire({
+            title: 'ยืนยันการบันทึก?',
+            text: 'พิกัดนี้จะถูกบันทึกเป็นที่ตั้งบ้านของคุณ',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            confirmButtonText: 'ใช่, บันทึกเลย',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: 'api/save_gps.php',
+                    method: 'POST',
+                    data: {
+                        latitude: currentLat,
+                        longitude: currentLng,
+                        accuracy: currentAcc
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('สำเร็จ!', 'บันทึกพิกัดบ้านเรียบร้อยแล้ว', 'success');
+                        } else {
+                            Swal.fire('ผิดพลาด', response.message || 'ไม่สามารถบันทึกได้', 'error');
+                        }
+                    },
+                    error: () => Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error')
+                });
+            }
+        });
+    }
+    // Initialize when everything is loaded
+    $(document).ready(function() {
+        setTimeout(() => {
+            initMap();
+            if (map) {
+                map.invalidateSize();
+                console.log("Map initialized and size invalidated");
+            }
+        }, 300);
+    });
+</script>
+
+<style>
+    .leaflet-container { font-family: inherit; z-index: 10 !important; }
+    .leaflet-bar a { background-color: white !important; border: none !important; color: #64748b !important; border-radius: 12px !important; margin-bottom: 5px !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
+    
+    /* Fix Tailwind CSS conflict with Leaflet Images */
+    .leaflet-pane img,
+    .leaflet-layer img,
+    .leaflet-tile-container img {
+        max-width: none !important;
+        max-height: none !important;
+        width: 256px !important;
+        height: 256px !important;
+    }
+    
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow {
+        max-width: none !important;
+        max-height: none !important;
+        width: auto !important;
+        height: auto !important;
+    }
+</style>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../../views/layouts/student_app.php';
+?>

@@ -11,17 +11,17 @@ $imgPath = isset($student['Stu_picture']) && $student['Stu_picture']
 ?>
 
 <header class="sticky top-0 z-30 glass-effect border-b border-slate-200/50 dark:border-slate-700/50 no-print">
-    <div class="flex items-center justify-between px-4 py-3 md:px-6 lg:px-8">
+    <div class="flex items-center justify-between px-6 py-4 md:px-8 lg:px-10">
         <!-- Left: Mobile Menu Toggle & Breadcrumb -->
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors">
-                <i class="fas fa-bars"></i>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleSidebar()" class="lg:hidden w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all active:scale-90">
+                <i class="fas fa-bars text-lg"></i>
             </button>
             
-            <!-- Page Title (Desktop) -->
-            <div class="hidden md:block">
-                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Student Portal</p>
-                <h1 class="text-lg font-black text-slate-700 dark:text-white"><?= htmlspecialchars($pageTitle ?? 'หน้าหลัก') ?></h1>
+            <!-- Page Title Section -->
+            <div class="flex flex-col">
+                <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-0.5">Student Portal</p>
+                <h1 class="text-xl font-black text-slate-800 dark:text-white leading-tight"><?= htmlspecialchars($pageTitle ?? 'หน้าหลัก') ?></h1>
             </div>
         </div>
         
