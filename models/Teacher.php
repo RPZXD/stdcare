@@ -58,9 +58,9 @@ class Teacher
         $data['Teach_password'] = $data['Teach_id']; // $data ตอนนี้มี 6 items
         // Use NULL for empty class/room and do NOT set Teach_photo here (DB stores filename only)
         $sql = "INSERT INTO teacher 
-                    (Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_status, role_std, Teach_password) 
+                    (Teach_id, Teach_name, Teach_major, Teach_class, Teach_room, Teach_status, role_std, Teach_phone, Teach_birth, Teach_addr, Teach_password) 
                 VALUES 
-                    (:Teach_id, :Teach_name, :Teach_major, :Teach_class, :Teach_room, :Teach_status, :role_std, :Teach_password)";
+                    (:Teach_id, :Teach_name, :Teach_major, :Teach_class, :Teach_room, :Teach_status, :role_std, :Teach_phone, :Teach_birth, :Teach_addr, :Teach_password)";
 
         // Normalize optional values: use NULL for empty
         $data['Teach_class'] = (isset($data['Teach_class']) && $data['Teach_class'] !== '') ? $data['Teach_class'] : null;
@@ -74,6 +74,9 @@ class Teacher
             ':Teach_room' => $data['Teach_room'],
             ':Teach_status' => $data['Teach_status'],
             ':role_std' => $data['role_std'],
+            ':Teach_phone' => $data['Teach_phone'] ?? null,
+            ':Teach_birth' => $data['Teach_birth'] ?? null,
+            ':Teach_addr' => $data['Teach_addr'] ?? null,
             ':Teach_password' => $data['Teach_password']
         ]);
         return $stmt->rowCount() > 0;
@@ -95,7 +98,10 @@ class Teacher
                     Teach_class = :Teach_class,
                     Teach_room = :Teach_room,
                     Teach_status = :Teach_status, 
-                    role_std = :role_std 
+                    role_std = :role_std,
+                    Teach_phone = :Teach_phone,
+                    Teach_birth = :Teach_birth,
+                    Teach_addr = :Teach_addr
                 WHERE Teach_id = :Teach_id_old";
 
         // Normalize optional values: use NULL for empty
@@ -110,6 +116,9 @@ class Teacher
             ':Teach_room' => $roomVal,
             ':Teach_status' => $data_from_controller['Teach_status'],
             ':role_std' => $data_from_controller['role_std'],
+            ':Teach_phone' => $data_from_controller['Teach_phone'] ?? null,
+            ':Teach_birth' => $data_from_controller['Teach_birth'] ?? null,
+            ':Teach_addr' => $data_from_controller['Teach_addr'] ?? null,
             ':Teach_id_old' => $id_old // (ใช้ $id_old ที่รับเข้ามา)
         ];
 

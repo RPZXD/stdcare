@@ -187,6 +187,18 @@ $statuses = [
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">เบอร์โทรศัพท์</label>
+                            <input type="text" name="addTeach_phone" placeholder="08x-xxxxxxx" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันเกิด</label>
+                            <input type="date" name="addTeach_birth" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ที่อยู่</label>
+                            <textarea name="addTeach_addr" rows="2" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
@@ -262,6 +274,18 @@ $statuses = [
                                 <option value="<?= $k ?>"><?= $v ?></option>
                                 <?php endforeach; ?>
                             </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">เบอร์โทรศัพท์</label>
+                            <input type="text" name="editTeach_phone" placeholder="08x-xxxxxxx" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันเกิด</label>
+                            <input type="date" name="editTeach_birth" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ที่อยู่</label>
+                            <textarea name="editTeach_addr" rows="2" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all"></textarea>
                         </div>
                     </div>
                 </div>
@@ -681,6 +705,9 @@ $(document).ready(function() {
             $('[name="editTeach_room"]').val(data.Teach_room);
             $('[name="editTeach_status"]').val(data.Teach_status);
             $('[name="editrole_std"]').val(data.role_std);
+            $('[name="editTeach_phone"]').val(data.Teach_phone || '');
+            $('[name="editTeach_birth"]').val(data.Teach_birth || '');
+            $('[name="editTeach_addr"]').val(data.Teach_addr || '');
             $('#editTeacherModal').modal('show');
         }
     });

@@ -1,13 +1,15 @@
 <?php
 require_once "../../config/Database.php";
 require_once "../../class/Student.php";
+require_once "../../class/Teacher.php";
 
 // Initialize database connection
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
-// Initialize Student class
+// Initialize Student & Teacher class
 $student = new Student($db);
+$teacher = new Teacher($db);
 
 // Get student ID from query parameter
 $stu_id = isset($_GET['stu_id']) ? $_GET['stu_id'] : '';
@@ -156,6 +158,31 @@ if (!empty($stu_id)) {
                         <?php endif; ?>
                     </div>
                 </div>
+                <!-- Advisors -->
+                <?php 
+                $advisors = $teacher->getTeachersByClassAndRoom($data['Stu_major'], $data['Stu_room']);
+                if ($advisors):
+                    foreach ($advisors as $adv):
+                ?>
+                <div class="flex items-center gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                    <div class="w-10 h-10 bg-violet-50 dark:bg-violet-900/20 rounded-xl flex items-center justify-center text-lg shadow-sm">👨‍🏫</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ครูที่ปรึกษา</p>
+                        <p class="font-bold text-slate-700 dark:text-slate-200 truncate mb-1"><?php echo htmlspecialchars($adv['Teach_name']); ?></p>
+                        <?php if (!empty($adv['Teach_phone'])): ?>
+                            <a href="tel:<?php echo htmlspecialchars($adv['Teach_phone']); ?>" class="inline-flex items-center gap-2 text-xs font-black text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1 rounded-full transition-colors border border-violet-100 dark:border-violet-800">
+                                <i class="fas fa-phone-alt scale-75"></i>
+                                <?php echo htmlspecialchars($adv['Teach_phone']); ?>
+                            </a>
+                        <?php else: ?>
+                            <span class="text-[10px] text-slate-400 italic">ไม่มีข้อมูลเบอร์โทร</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php 
+                    endforeach;
+                endif; 
+                ?>
             </div>
         </div>
 

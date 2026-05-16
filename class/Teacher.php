@@ -188,7 +188,7 @@ class Teacher {
     }
 
     public function getTeachersByClassAndRoom($class, $room) {
-        $query = "SELECT Teach_name,Teach_photo FROM {$this->table_name} WHERE Teach_class = :class AND Teach_room = :room AND Teach_status = 1";
+        $query = "SELECT Teach_name, Teach_phone, Teach_photo FROM {$this->table_name} WHERE Teach_class = :class AND Teach_room = :room AND Teach_status = 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':class', $class);

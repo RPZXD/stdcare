@@ -72,7 +72,10 @@ try {
                     'Teach_class' => $teach_class !== '' ? (int)$teach_class : null,
                     'Teach_room' => $teach_room !== '' ? (int)$teach_room : null,
                     'Teach_status' => $teach_status,
-                    'role_std' => $role_std
+                    'role_std' => $role_std,
+                    'Teach_phone' => trim($_POST['addTeach_phone'] ?? ''),
+                    'Teach_birth' => $_POST['addTeach_birth'] ?? null,
+                    'Teach_addr' => trim($_POST['addTeach_addr'] ?? '')
                 ];
 
                 // Do NOT update/upload Teach_photo here — DB stores filename only and external base URL is used.
@@ -135,6 +138,9 @@ try {
                     'Teach_room' => $teach_room !== '' ? (int)$teach_room : null,
                     'Teach_status' => $teach_status,
                     'role_std' => $role_std,
+                    'Teach_phone' => trim($_POST['editTeach_phone'] ?? ''),
+                    'Teach_birth' => $_POST['editTeach_birth'] ?? null,
+                    'Teach_addr' => trim($_POST['editTeach_addr'] ?? ''),
                     // (เพิ่ม 2 field นี้สำหรับ Model)
                     'Teach_id_new' => $teach_id,
                     'Teach_id_old' => $teach_id_old
