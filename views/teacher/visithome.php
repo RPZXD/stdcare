@@ -6,6 +6,8 @@
 ob_start();
 ?>
 
+
+
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <!-- Header Section -->
     <div class="mb-12 text-center fade-in-up">
@@ -28,6 +30,9 @@ ob_start();
                 <div class="flex flex-wrap justify-center gap-3">
                     <a href="visithome_report_class.php" class="px-6 py-3 bg-white dark:bg-slate-700 text-slate-700 dark:text-white font-bold rounded-2xl shadow-md border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center gap-2">
                         <i class="fas fa-chart-pie text-indigo-500"></i> สถิติข้อมูล
+                    </a>
+                    <a href="gps_visithome.php" class="px-6 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition-all flex items-center gap-2">
+                        <i class="fas fa-map-location-dot"></i> แผนที่บ้านนักเรียน
                     </a>
                     <button onclick="printPage()" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all flex items-center gap-2">
                         <i class="fas fa-print"></i> พิมพ์รายงาน
@@ -148,6 +153,8 @@ ob_start();
         </div>
     </div>
 </div>
+
+
 
 <!-- Custom Styles -->
 <style>
@@ -518,6 +525,8 @@ $(document).ready(function() {
             }
         });
     };
+
+
 
     // Save Actions
     $('#saveAddVisit').on('click', function() {

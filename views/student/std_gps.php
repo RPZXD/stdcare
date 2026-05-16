@@ -301,21 +301,9 @@ $currentGps = $currentGps ?? null;
     .leaflet-bar a { background-color: white !important; border: none !important; color: #64748b !important; border-radius: 12px !important; margin-bottom: 5px !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
     
     /* Fix Tailwind CSS conflict with Leaflet Images */
-    .leaflet-pane img,
-    .leaflet-layer img,
-    .leaflet-tile-container img {
+    .leaflet-container img {
         max-width: none !important;
         max-height: none !important;
-        width: 256px !important;
-        height: 256px !important;
-    }
-    
-    .leaflet-marker-icon,
-    .leaflet-marker-shadow {
-        max-width: none !important;
-        max-height: none !important;
-        width: auto !important;
-        height: auto !important;
     }
 </style>
 
