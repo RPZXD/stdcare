@@ -720,6 +720,20 @@ try {
 
         
 
+        case 'sync_from_regis':
+            $result = $studentModel->syncFromRegis();
+            if ($result['success']) {
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_sync_regis_success',
+                    'status_code' => 200,
+                    'message' => 'Admin synced data from phichaia_regis. Rows affected: ' . $result['count']
+                ]);
+            }
+            echo json_encode($result);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);

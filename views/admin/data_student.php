@@ -31,6 +31,9 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
         </div>
         
         <div class="flex flex-wrap gap-3">
+            <button id="btnSyncRegis" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                <i class="fas fa-sync"></i> ดึงข้อมูลจากระบบรับสมัคร
+            </button>
             <button id="btnExport" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                 <i class="fas fa-file-export"></i> ส่งออกข้อมูล
             </button>
@@ -1008,6 +1011,46 @@ $(document).ready(function() {
         }
         return data;
     }
+
+    // Sync from Admission System
+    $('#btnSyncRegis').click(function() {
+        Swal.fire({
+            title: 'ยืนยันการเชื่อมข้อมูล?',
+            text: "ระบบจะดึงข้อมูลผู้ปกครองและเบอร์โทรจากระบบรับสมัคร (phichaia_regis) มาอัปเดตให้นักเรียนที่มีเลขบัตรประชาชนตรงกัน",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '✅ ใช่, เชื่อมข้อมูล',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'กำลังเชื่อมข้อมูล...',
+                    html: '<div class="flex justify-center mt-3"><i class="fas fa-spinner fa-spin text-4xl text-amber-500"></i></div>',
+                    allowOutsideClick: false,
+                    showConfirmButton: false
+                });
+                
+                $.post('../controllers/StudentController.php?action=sync_from_regis', function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'สำเร็จ!',
+                            text: res.message,
+                            confirmButtonText: 'ตกลง'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'ล้มเหลว!', text: res.message });
+                    }
+                }, 'json').fail(function() {
+                    Swal.fire({ icon: 'error', title: 'ล้มเหลว!', text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์' });
+                });
+            }
+        });
+    });
 
     // Do Export
     $('#btnDoExport').click(function() {

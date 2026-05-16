@@ -556,5 +556,70 @@ class Student
         }
     }
     
+    public function syncFromRegis()
+    {
+        try {
+            // ใช้ cross-database JOIN เพื่ออัปเดตข้อมูลจากระบบรับสมัคร
+            // ปรับปรุง: จับคู่ด้วย ชื่อ และ นามสกุล (เนื่องจากนักเรียนใหม่บางคนยังไม่มีเลขบัตรในระบบนี้)
+            $sql = "UPDATE student s
+                    JOIN phichaia_regis.users u ON TRIM(s.Stu_name) = TRIM(u.stu_name) 
+                                                AND TRIM(s.Stu_sur) = TRIM(u.stu_lastname)
+                    SET 
+                        -- อัปเดตเลขบัตรประชาชนหากในระบบเดิมยังเป็นค่าว่างหรือ 0
+                        s.Stu_citizenid = IF(s.Stu_citizenid = '0000000000000' OR s.Stu_citizenid IS NULL OR s.Stu_citizenid = '', u.citizenid, s.Stu_citizenid),
+                        
+                        s.Father_name = TRIM(CONCAT(IFNULL(u.dad_prefix,''), IFNULL(u.dad_name,''), ' ', IFNULL(u.dad_lastname,''))),
+                        s.Father_occu = u.dad_job,
+                        s.Mother_name = TRIM(CONCAT(IFNULL(u.mom_prefix,''), IFNULL(u.mom_name,''), ' ', IFNULL(u.mom_lastname,''))),
+                        s.Mother_occu = u.mom_job,
+                        s.Par_name = TRIM(CONCAT(IFNULL(u.parent_prefix,''), IFNULL(u.parent_name,''), ' ', IFNULL(u.parent_lastname,''))),
+                        s.Par_phone = u.parent_tel,
+                        s.Par_relate = u.parent_relation,
+                        s.Par_occu = u.parent_job,
+                        s.Par_addr = TRIM(CONCAT(
+                            IFNULL(u.now_addr,''), 
+                            IF(u.now_moo != '' AND u.now_moo != '0', CONCAT(' ม.', u.now_moo), ''),
+                            IF(u.now_soy != '' AND u.now_soy != '-', CONCAT(' ซ.', u.now_soy), ''),
+                            IF(u.now_street != '' AND u.now_street != '-', CONCAT(' ถ.', u.now_street), ''),
+                            ' ต.', IFNULL(u.now_subdistrict,''),
+                            ' อ.', IFNULL(u.now_district,''),
+                            ' จ.', IFNULL(u.now_province,''),
+                            ' ', IFNULL(u.now_post,'')
+                        )),
+                        s.Stu_phone = u.now_tel,
+                        s.Stu_addr = TRIM(CONCAT(
+                            IFNULL(u.now_addr,''), 
+                            IF(u.now_moo != '' AND u.now_moo != '0', CONCAT(' ม.', u.now_moo), ''),
+                            IF(u.now_soy != '' AND u.now_soy != '-', CONCAT(' ซ.', u.now_soy), ''),
+                            IF(u.now_street != '' AND u.now_street != '-', CONCAT(' ถ.', u.now_street), ''),
+                            ' ต.', IFNULL(u.now_subdistrict,''),
+                            ' อ.', IFNULL(u.now_district,''),
+                            ' จ.', IFNULL(u.now_province,''),
+                            ' ', IFNULL(u.now_post,'')
+                        )),
+                        s.Stu_religion = u.stu_religion,
+                        s.Stu_blood = u.stu_blood_group,
+                        s.Stu_birth = CASE 
+                            WHEN u.year_birth > 2400 THEN CONCAT(u.year_birth - 543, '-', LPAD(u.month_birth, 2, '0'), '-', LPAD(u.date_birth, 2, '0'))
+                            ELSE s.Stu_birth 
+                        END
+                    WHERE s.Stu_status = '1'";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            
+            $count = $stmt->rowCount();
+            return [
+                'success' => true, 
+                'count' => $count,
+                'message' => "เชื่อมโยงข้อมูลสำเร็จจำนวน $count รายการ (จับคู่ด้วยชื่อ-นามสกุล)"
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'เกิดข้อผิดพลาดในการเชื่อมโยง: ' . $e->getMessage()
+            ];
+        }
+    }
 }
 ?>
