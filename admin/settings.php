@@ -44,9 +44,15 @@ $_SESSION['admin_data'] = $userData;
 $term = $user->getTerm();
 $pee = $user->getPee();
 
-// Get time settings
-$settingsModel = new SettingModel($db);
-$timeSettings = $settingsModel->getAllTimeSettings();
+// Get time settings (wrapped in try-catch for production safety)
+try {
+    $settingsModel = new SettingModel($db);
+    $timeSettings = $settingsModel->getAllTimeSettings();
+} catch (Exception $e) {
+    $settingsModel = null;
+    $timeSettings = [];
+}
+
 $arrival_late_time = $timeSettings['arrival_late_time'] ?? '08:00:00';
 $arrival_absent_time = $timeSettings['arrival_absent_time'] ?? '10:00:00';
 $leave_early_time = $timeSettings['leave_early_time'] ?? '15:40:00';
@@ -55,7 +61,11 @@ $term_start_date = $timeSettings['term_start_date'] ?? date('Y-m-d');
 $term_end_date = $timeSettings['term_end_date'] ?? date('Y-m-d');
 
 // Get school holidays
-$schoolHolidays = $settingsModel->getHolidays();
+try {
+    $schoolHolidays = $settingsModel ? $settingsModel->getHolidays() : [];
+} catch (Exception $e) {
+    $schoolHolidays = [];
+}
 
 // Get class/room options for dropdowns
 try {

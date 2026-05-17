@@ -527,10 +527,14 @@ class SettingModel
      */
     public function getHolidays()
     {
-        $sql = "SELECT * FROM school_holidays ORDER BY holiday_date ASC";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT * FROM school_holidays ORDER BY holiday_date ASC";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
     }
 
     /**

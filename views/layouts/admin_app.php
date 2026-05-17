@@ -20,12 +20,18 @@ $global = $config['global'] ?? ['nameschool' => 'โรงเรียน'];
 
 // Ensure admin data is in session
 if (!isset($_SESSION['admin_data']) || empty($_SESSION['admin_data']['Teach_name'])) {
-    require_once __DIR__ . '/../../config/Database.php';
-    require_once __DIR__ . '/../../class/UserLogin.php';
-    $connectDB = new \Database("phichaia_student");
-    $db = $connectDB->getConnection();
-    $userLogin = new \UserLogin($db);
-    $_SESSION['admin_data'] = $userLogin->userData($_SESSION['Admin_login']);
+    try {
+        require_once __DIR__ . '/../../classes/DatabaseUsers.php';
+        require_once __DIR__ . '/../../class/UserLogin.php';
+        $connectDB = new \App\DatabaseUsers();
+        $db = $connectDB->getPDO();
+        $userLogin = new \UserLogin($db);
+        $_SESSION['admin_data'] = $userLogin->userData($_SESSION['Admin_login']);
+    } catch (Exception $e) {
+        // If DB connection fails, redirect to login
+        header('Location: ../login.php');
+        exit;
+    }
 }
 $userData = $_SESSION['admin_data'];
 
