@@ -91,7 +91,7 @@ $themeColor = $themeColor ?? 'indigo';
             <?php include __DIR__ . '/../components/' . $role . '_navbar.php'; ?>
             
             <!-- Page Content -->
-            <main class="flex-1 p-4 md:p-8 lg:p-10">
+            <main class="flex-1 p-3 md:p-8 lg:p-10">
                 <div class="max-w-[1600px] mx-auto animate-slide-up">
                     <?php echo $content ?? ''; ?>
                 </div>

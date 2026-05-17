@@ -21,23 +21,23 @@ $activePage = "settings";
     ?>
 
     <!-- Settings Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
 
         <!-- Card 1: Academic Year/Term -->
         <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
-            <div class="bg-gradient-to-r from-sky-500 to-cyan-600 p-6 relative">
-                <div class="absolute top-0 right-0 opacity-10 text-8xl">📅</div>
-                <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white">
-                        <i class="fas fa-calendar-alt text-2xl"></i>
+            <div class="bg-gradient-to-r from-sky-500 to-cyan-600 p-4 md:p-6 relative">
+                <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">📅</div>
+                <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white">
+                        <i class="fas fa-calendar-alt text-lg md:text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-black text-white">ปีการศึกษา / เทอม</h3>
-                        <p class="text-sky-100 text-sm">ตั้งค่าปีและภาคเรียนปัจจุบัน</p>
+                        <h3 class="text-base md:text-xl font-black text-white">ปีการศึกษา / เทอม</h3>
+                        <p class="text-sky-100 text-xs md:text-sm">ตั้งค่าปีและภาคเรียนปัจจุบัน</p>
                     </div>
                 </div>
             </div>
-            <form id="termPeeForm" class="p-6 space-y-4">
+            <form id="termPeeForm" class="p-4 md:p-6 space-y-4">
                 <div>
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ปีการศึกษา (พ.ศ.)</label>
                     <input type="number" name="academic_year" value="<?= htmlspecialchars($pee) ?>" required
@@ -59,20 +59,20 @@ $activePage = "settings";
 
         <!-- Card 2: Time Settings -->
         <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
-            <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-6 relative">
-                <div class="absolute top-0 right-0 opacity-10 text-8xl">⏰</div>
-                <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white">
-                        <i class="fas fa-clock text-2xl"></i>
+            <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-4 md:p-6 relative">
+                <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">⏰</div>
+                <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white">
+                        <i class="fas fa-clock text-lg md:text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-black text-white">ตั้งค่าเวลาสแกน</h3>
-                        <p class="text-purple-100 text-sm">กำหนดเวลาเข้า-ออก และสาย-ขาด</p>
+                        <h3 class="text-base md:text-xl font-black text-white">ตั้งค่าเวลาสแกน</h3>
+                        <p class="text-purple-100 text-xs md:text-sm">กำหนดเวลาเข้า-ออก และสาย-ขาด</p>
                     </div>
                 </div>
             </div>
-            <form id="timeSettingsForm" class="p-6">
-                <div class="grid grid-cols-2 gap-4 mb-4">
+            <form id="timeSettingsForm" class="p-4 md:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
                     <div>
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1">
                             <i class="fas fa-user-clock text-amber-500"></i> เวลาเริ่มสาย
@@ -102,8 +102,8 @@ $activePage = "settings";
                             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                    <div class="col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div class="sm:col-span-2">
                         <label class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1">
                             <i class="fas fa-calendar-check text-indigo-500"></i> ระยะเวลาภาคเรียน (สำหรับระบบเช็คขาดอัตโนมัติ)
                         </label>
@@ -126,20 +126,20 @@ $activePage = "settings";
         </div>
 
         <!-- Card 3: Promote Students (Danger Zone) -->
-        <div class="glass-effect rounded-[2rem] overflow-hidden border border-red-200 dark:border-red-900/50 shadow-xl hover:shadow-2xl transition-all lg:col-span-2">
-            <div class="bg-gradient-to-r from-red-500 to-orange-600 p-6 relative">
-                <div class="absolute top-0 right-0 opacity-10 text-8xl">⚠️</div>
-                <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white animate-pulse">
-                        <i class="fas fa-level-up-alt text-2xl"></i>
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-red-200 dark:border-red-900/50 shadow-xl hover:shadow-2xl transition-all lg:col-span-2">
+            <div class="bg-gradient-to-r from-red-500 to-orange-600 p-4 md:p-6 relative">
+                <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">⚠️</div>
+                <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white animate-pulse">
+                        <i class="fas fa-level-up-alt text-lg md:text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-black text-white">⚠️ เลื่อนชั้นปีนักเรียน</h3>
-                        <p class="text-red-100 text-sm">Danger Zone - ควรกระทำเพียงปีละ 1 ครั้ง</p>
+                        <h3 class="text-base md:text-xl font-black text-white">⚠️ เลื่อนชั้นปีนักเรียน</h3>
+                        <p class="text-red-100 text-xs md:text-sm">Danger Zone - ควรกระทำเพียงปีละ 1 ครั้ง</p>
                     </div>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-lg mb-6">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-info-circle text-red-500 mt-1"></i>
@@ -159,20 +159,20 @@ $activePage = "settings";
     </div>
 
     <!-- Card: Holidays Management -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all mb-8">
-        <div class="bg-gradient-to-r from-pink-500 to-rose-600 p-6 relative">
-            <div class="absolute top-0 right-0 opacity-10 text-8xl">🏖️</div>
-            <div class="flex items-center gap-4 relative z-10">
-                <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white">
-                    <i class="fas fa-umbrella-beach text-2xl"></i>
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all mb-6 md:mb-8">
+        <div class="bg-gradient-to-r from-pink-500 to-rose-600 p-4 md:p-6 relative">
+            <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">🏖️</div>
+            <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white">
+                    <i class="fas fa-umbrella-beach text-lg md:text-2xl"></i>
                 </div>
-                <div>
-                    <h3 class="text-xl font-black text-white">วันหยุดโรงเรียน</h3>
-                    <p class="text-pink-100 text-sm">จัดการวันหยุดนักขัตฤกษ์/วันหยุดพิเศษ (ระบบอัตโนมัติจะไม่เช็คขาดเรียนในวันนี้)</p>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-base md:text-xl font-black text-white">วันหยุดโรงเรียน</h3>
+                    <p class="text-pink-100 text-xs md:text-sm leading-relaxed">จัดการวันหยุดนักขัตฤกษ์/วันหยุดพิเศษ</p>
                 </div>
             </div>
         </div>
-        <div class="p-6">
+        <div class="p-4 md:p-6">
             <form id="addHolidayForm" class="flex flex-col md:flex-row gap-4 mb-6 items-end">
                 <div class="flex-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันที่หยุด</label>
@@ -228,31 +228,31 @@ $activePage = "settings";
     </div>
 
     <!-- CSV Upload Section -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
-        <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-6 relative">
-            <div class="absolute top-0 right-0 opacity-10 text-8xl">📊</div>
-            <div class="flex items-center gap-4 relative z-10">
-                <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white">
-                    <i class="fas fa-file-upload text-2xl"></i>
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl mb-6 md:mb-8">
+        <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-4 md:p-6 relative">
+            <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">📊</div>
+            <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white">
+                    <i class="fas fa-file-upload text-lg md:text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-2xl font-black text-white">อัปเดตข้อมูลด้วย CSV</h3>
-                    <p class="text-emerald-100 text-sm">นำเข้าและส่งออกข้อมูลนักเรียน</p>
+                    <h3 class="text-base md:text-2xl font-black text-white">อัปเดตข้อมูลด้วย CSV</h3>
+                    <p class="text-emerald-100 text-xs md:text-sm">นำเข้าและส่งออกข้อมูลนักเรียน</p>
                 </div>
             </div>
         </div>
         
-        <div class="p-6 md:p-8 space-y-6">
+        <div class="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
             
             <!-- Section 1: Update Student Numbers -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
-                        <i class="fas fa-sort-numeric-down text-2xl"></i>
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div class="flex items-start gap-3 md:gap-4">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-blue-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-sort-numeric-down text-lg md:text-2xl"></i>
                     </div>
-                    <div class="flex-1">
-                        <h5 class="text-lg font-black text-slate-800 dark:text-white mb-2">🔢 อัปเดตเลขที่นักเรียน</h5>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">ดาวน์โหลดข้อมูลปัจจุบัน แก้ไขเลขที่ แล้วอัปโหลดกลับ</p>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-base md:text-lg font-black text-slate-800 dark:text-white mb-2">🔢 อัปเดตเลขที่นักเรียน</h5>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs md:text-sm mb-4">ดาวน์โหลดข้อมูลปัจจุบัน แก้ไขเลขที่ แล้วอัปโหลดกลับ</p>
                         
                         <form id="uploadNumberForm" class="space-y-4">
                             <a href="../controllers/SettingController.php?action=download_number_template" 
@@ -282,14 +282,14 @@ $activePage = "settings";
             </div>
 
             <!-- Section 2: Update by Room -->
-            <div class="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border border-cyan-200 dark:border-cyan-800 rounded-2xl p-6">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 bg-cyan-500 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
-                        <i class="fas fa-door-closed text-2xl"></i>
+            <div class="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border border-cyan-200 dark:border-cyan-800 rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div class="flex items-start gap-3 md:gap-4">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-cyan-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-door-closed text-lg md:text-2xl"></i>
                     </div>
-                    <div class="flex-1">
-                        <h5 class="text-lg font-black text-slate-800 dark:text-white mb-2">🏫 อัปเดตเลขที่ (รายห้อง)</h5>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">เลือกชั้นและห้องเพื่อดาวน์โหลดเทมเพลตเฉพาะห้อง</p>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-base md:text-lg font-black text-slate-800 dark:text-white mb-2">🏫 อัปเดตเลขที่ (รายห้อง)</h5>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs md:text-sm mb-4">เลือกชั้นและห้องเพื่อดาวน์โหลดเทมเพลตเฉพาะห้อง</p>
                         
                         <form id="uploadNumberByRoomForm" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -322,14 +322,14 @@ $activePage = "settings";
             </div>
 
             <!-- Section 3: New Student Template -->
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
-                        <i class="fas fa-user-plus text-2xl"></i>
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div class="flex items-start gap-3 md:gap-4">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-green-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-user-plus text-lg md:text-2xl"></i>
                     </div>
-                    <div class="flex-1">
-                        <h5 class="text-lg font-black text-slate-800 dark:text-white mb-2">👨‍🎓 เทมเพลตนักเรียนใหม่</h5>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">สำหรับเพิ่มนักเรียนใหม่เข้าระบบ</p>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-base md:text-lg font-black text-slate-800 dark:text-white mb-2">👨‍🎓 เทมเพลตนักเรียนใหม่</h5>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs md:text-sm mb-4">สำหรับเพิ่มนักเรียนใหม่เข้าระบบ</p>
                         
                         <div class="flex flex-wrap gap-3">
                             <a href="../controllers/SettingController.php?action=download_new_student_template" 
@@ -346,14 +346,14 @@ $activePage = "settings";
             </div>
 
             <!-- Section 4: Full Data Update -->
-            <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-6">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
-                        <i class="fas fa-database text-2xl"></i>
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div class="flex items-start gap-3 md:gap-4">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-purple-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-database text-lg md:text-2xl"></i>
                     </div>
-                    <div class="flex-1">
-                        <h5 class="text-lg font-black text-slate-800 dark:text-white mb-2">📋 อัปเดตข้อมูลนักเรียนทั้งหมด</h5>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">ดาวน์โหลดข้อมูลตามชั้น/ห้อง แก้ไข แล้วอัปโหลดกลับ</p>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-base md:text-lg font-black text-slate-800 dark:text-white mb-2">📋 อัปเดตข้อมูลนักเรียนทั้งหมด</h5>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs md:text-sm mb-4">ดาวน์โหลดข้อมูลตามชั้น/ห้อง แก้ไข แล้วอัปโหลดกลับ</p>
                         
                         <form id="uploadFullDataForm" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
