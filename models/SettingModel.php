@@ -454,7 +454,9 @@ class SettingModel
                 'arrival_late_time', 
                 'arrival_absent_time', 
                 'leave_early_time', 
-                'scan_crossover_time'
+                'scan_crossover_time',
+                'term_start_date',
+                'term_end_date'
             ];
             
             if (in_array($key, $allowed_keys) && !empty($value)) {

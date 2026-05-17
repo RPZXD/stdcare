@@ -15,6 +15,23 @@ try {
     $currentTime = date('H:i:s');
     $today = date('Y-m-d');
     
+    // ดึงการตั้งค่าที่จำเป็นจากฐานข้อมูล
+    $stmtSettings = $conn->prepare("SELECT setting_key, setting_value FROM time_settings WHERE setting_key IN ('arrival_absent_time', 'term_start_date', 'term_end_date')");
+    $stmtSettings->execute();
+    $settings = $stmtSettings->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    $term_start_date = $settings['term_start_date'] ?? null;
+    $term_end_date = $settings['term_end_date'] ?? null;
+    $absentTimeSetting = $settings['arrival_absent_time'] ?? null;
+
+    // เช็คระยะเวลาเปิด-ปิดภาคเรียน
+    if ($term_start_date && $term_end_date) {
+        if ($today < $term_start_date || $today > $term_end_date) {
+            echo "วันนี้อยู่นอกระยะเวลาเปิด-ปิดภาคเรียน ไม่มีการเช็คขาดเรียน\n";
+            exit;
+        }
+    }
+
     // เช็ควันเสาร์-อาทิตย์
     $dayOfWeek = date('N'); // 1 (จันทร์) - 7 (อาทิตย์)
     if ($dayOfWeek >= 6) {
@@ -31,11 +48,6 @@ try {
         echo "วันนี้เป็นวันหยุดพิเศษ: " . $holiday . " (ไม่มีการเช็คขาดเรียน)\n";
         exit;
     }
-
-    // ดึงการตั้งค่าเวลา arrival_absent_time จากฐานข้อมูล
-    $stmtSettings = $conn->prepare("SELECT setting_value FROM time_settings WHERE setting_key = 'arrival_absent_time'");
-    $stmtSettings->execute();
-    $absentTimeSetting = $stmtSettings->fetchColumn();
 
     if (!$absentTimeSetting) {
         $absentTimeSetting = '9:00:00'; // Default ถ้าระบบไม่มีการตั้งค่า

@@ -102,6 +102,23 @@ $activePage = "settings";
                             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div class="col-span-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1">
+                            <i class="fas fa-calendar-check text-indigo-500"></i> ระยะเวลาภาคเรียน (สำหรับระบบเช็คขาดอัตโนมัติ)
+                        </label>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันเปิดเทอม</label>
+                        <input type="date" name="term_start_date" value="<?= htmlspecialchars($term_start_date) ?>" required
+                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันปิดเทอม</label>
+                        <input type="date" name="term_end_date" value="<?= htmlspecialchars($term_end_date) ?>" required
+                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
+                    </div>
+                </div>
                 <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-black rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-save"></i> บันทึกการตั้งค่าเวลา
                 </button>
