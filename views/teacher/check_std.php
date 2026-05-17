@@ -287,7 +287,7 @@ ob_start();
                             <div class="grid grid-cols-6 gap-1 mb-2">
                                 <?php
                                 $options = [
-                                    '1' => ['✅', 'มา', 'from-green-400 to-emerald-500', true],
+                                    '1' => ['✅', 'มา', 'from-green-400 to-emerald-500', false],
                                     '2' => ['❌', 'ขาด', 'from-red-400 to-rose-500', false],
                                     '3' => ['🕒', 'สาย', 'from-yellow-400 to-orange-500', false],
                                     '4' => ['🤒', 'ป่วย', 'from-blue-400 to-cyan-500', false],
@@ -386,7 +386,7 @@ ob_start();
                                             <input type="hidden" name="Stu_id[]" value="<?php echo htmlspecialchars($std['Stu_id']); ?>">
                                             <input type="hidden" name="teach_id[<?php echo htmlspecialchars($std['Stu_id']); ?>]" value="<?php echo htmlspecialchars($_SESSION['Teacher_login'] ?? ''); ?>">
                                             <?php foreach ([
-                                                '1' => ['✅มา', 'from-green-400 to-emerald-500', true],
+                                                '1' => ['✅มา', 'from-green-400 to-emerald-500', false],
                                                 '2' => ['❌ขาด', 'from-red-400 to-rose-500', false],
                                                 '3' => ['🕒สาย', 'from-yellow-400 to-orange-500', false],
                                                 '4' => ['🤒ป่วย', 'from-blue-400 to-cyan-500', false],

@@ -5,16 +5,37 @@ require_once(dirname(__DIR__) . '/class/UserLogin.php');
 
 date_default_timezone_set('Asia/Bangkok');
 
-echo "Starting Absent Marker Cron Job at " . date('Y-m-d H:i:s') . "\n";
+echo "Starting Absent Marker Script at " . date('Y-m-d H:i:s') . "\n";
 
 try {
     $db = new Database("phichaia_student");
     $conn = $db->getConnection();
 
+    // ดึงเวลาปัจจุบัน
+    $currentTime = date('H:i:s');
+    $today = date('Y-m-d');
+
+    // ดึงการตั้งค่าเวลา arrival_absent_time จากฐานข้อมูล
+    $stmtSettings = $conn->prepare("SELECT setting_value FROM time_settings WHERE setting_key = 'arrival_absent_time'");
+    $stmtSettings->execute();
+    $absentTimeSetting = $stmtSettings->fetchColumn();
+
+    if (!$absentTimeSetting) {
+        $absentTimeSetting = '9:00:00'; // Default ถ้าระบบไม่มีการตั้งค่า
+    }
+
+    echo "Current Time: " . $currentTime . "\n";
+    echo "Absent Cut-off Time: " . $absentTimeSetting . "\n";
+
+    // เช็คว่าเลยเวลาตัดขาดเรียนหรือยัง
+    if ($currentTime < $absentTimeSetting) {
+        echo "ยังไม่ถึงเวลาตัดขาดเรียน (รอให้ถึงเวลา " . $absentTimeSetting . ")\n";
+        exit;
+    }
+
     $user = new UserLogin($conn);
     $term = $user->getTerm();
     $year = $user->getPee();
-    $today = date('Y-m-d');
 
     // SQL นี้จะเลือกนักเรียน (s) ที่ "กำลังเรียน" (Stu_status = '1')
     // ที่ยังไม่มีข้อมูล (a.id IS NULL) ในตาราง student_attendance ของวันนี้
@@ -22,14 +43,15 @@ try {
     
     $sql = "
         INSERT INTO student_attendance 
-            (student_id, attendance_date, attendance_status, checked_by, term, year)
+            (student_id, attendance_date, attendance_status, checked_by, term, year, reason)
         SELECT 
             s.Stu_id, 
             :today, 
             '2', -- 2 = สถานะขาดเรียน
             'System', 
             :term, 
-            :year
+            :year,
+            'ระบบตัดขาดเรียนอัตโนมัติ'
         FROM 
             student s
         LEFT JOIN 
@@ -54,5 +76,5 @@ try {
     echo "Error: " . $e->getMessage() . "\n";
 }
 
-echo "Cron Job Finished.\n";
+echo "Script Finished.\n";
 ?>
