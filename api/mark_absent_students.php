@@ -66,10 +66,9 @@ try {
     $term = $user->getTerm();
     $year = $user->getPee();
 
-    // SQL นี้จะเลือกนักเรียน (s) ที่ "กำลังเรียน" (Stu_status = '1')
-    // ที่ยังไม่มีข้อมูล (a.id IS NULL) ในตาราง student_attendance ของวันนี้
-    // และทำการ INSERT สถานะ "ขาดเรียน" (2) ให้
-    
+    // ============================================================
+    // ส่วนที่ 1: ตัดขาดเรียนนักเรียนที่ยังไม่ได้สแกน/เช็คชื่อ
+    // ============================================================
     $sql = "
         INSERT INTO student_attendance 
             (student_id, attendance_date, attendance_status, checked_by, term, year, reason)
@@ -100,10 +99,67 @@ try {
     $count = $stmt->rowCount();
     echo "Marked $count students as absent (Status 2) for $today.\n";
 
+    // ============================================================
+    // ส่วนที่ 2: หักคะแนนพฤติกรรมนักเรียนมาสาย (วันละ 1 ครั้ง)
+    // ============================================================
+    echo "\n--- Processing Late Student Behavior Deduction ---\n";
+
+    // ดึงนักเรียนที่สถานะ "สาย" (3) ของวันนี้ ที่ยังไม่มีบันทึกหักคะแนนในวันนี้
+    $sqlLate = "
+        SELECT sa.student_id
+        FROM student_attendance sa
+        LEFT JOIN behavior b 
+            ON sa.student_id = b.stu_id 
+            AND b.behavior_date = :today_b
+            AND b.behavior_type = 'มาโรงเรียนสาย'
+        WHERE sa.attendance_date = :today_a
+            AND sa.attendance_status = '3'
+            AND b.id IS NULL
+    ";
+
+    $stmtLate = $conn->prepare($sqlLate);
+    $stmtLate->execute([
+        ':today_a' => $today,
+        ':today_b' => $today
+    ]);
+    $lateStudents = $stmtLate->fetchAll(PDO::FETCH_COLUMN);
+
+    if (empty($lateStudents)) {
+        echo "ไม่มีนักเรียนมาสายที่ต้องหักคะแนนวันนี้\n";
+    } else {
+        $insertBehavior = $conn->prepare("
+            INSERT INTO behavior 
+                (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
+            VALUES 
+                (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :term, :pee)
+        ");
+
+        $behaviorCount = 0;
+        foreach ($lateStudents as $stuId) {
+            try {
+                $insertBehavior->execute([
+                    ':stu_id'         => $stuId,
+                    ':behavior_date'  => $today,
+                    ':behavior_type'  => 'มาโรงเรียนสาย',
+                    ':behavior_name'  => 'มาโรงเรียนสาย',
+                    ':behavior_score' => 5,
+                    ':teach_id'       => 'System',
+                    ':term'           => $term,
+                    ':pee'            => $year
+                ]);
+                $behaviorCount++;
+            } catch (PDOException $e) {
+                echo "Error deducting score for $stuId: " . $e->getMessage() . "\n";
+            }
+        }
+
+        echo "หักคะแนนนักเรียนมาสายสำเร็จ: $behaviorCount คน (หักคนละ 5 คะแนน)\n";
+    }
+
 } catch (Exception $e) {
     error_log("Cron Job Failed (mark_absent_students): " . $e->getMessage());
     echo "Error: " . $e->getMessage() . "\n";
 }
 
-echo "Script Finished.\n";
+echo "\nScript Finished.\n";
 ?>

@@ -50,14 +50,12 @@ try {
 
             // Use the school database connection for attendance class
             require_once(__DIR__ . "/../class/Attendance.php");
-            require_once(__DIR__ . "/../class/Behavior.php");
             require_once(__DIR__ . "/../class/Utils.php");
 
             try {
                 $schoolDbObj = new \Database("phichaia_student");
                 $schoolDb = $schoolDbObj->getConnection();
                 $attendanceClass = new Attendance($schoolDb);
-                $behaviorClass = new Behavior($schoolDb);
 
                 // Read POST payload
                 $date = $_POST['date'] ?? date('Y-m-d');
@@ -81,31 +79,8 @@ try {
                 // Save bulk attendance
                 $savedCount = $attendanceClass->saveAttendanceBulk($stu_ids, $statuses, $reasons, $date, $term_post, $year_post, $checked_by);
 
-                // Optionally create behavior records for late students (status == '3')
-                foreach ($stu_ids as $stu_id) {
-                    $status = $statuses[$stu_id] ?? '1';
-                    if ($status == '3') {
-                        $behavior_type = 'มาโรงเรียนสาย';
-                        $behavior_name = $behavior_names[$stu_id] ?? 'มาโรงเรียนสาย';
-                        $behavior_score = !empty($behavior_scores[$stu_id]) && $behavior_scores[$stu_id] != 5 ? $behavior_scores[$stu_id] : 5;
-                        $teach_id = $teach_ids[$stu_id] ?? $checked_by;
-
-                        // avoid duplicate for the same date
-                        $stmt = $schoolDb->prepare("SELECT id FROM behavior WHERE stu_id = :stu_id AND behavior_date = :date AND behavior_type = :behavior_type LIMIT 1");
-                        $stmt->execute([':stu_id' => $stu_id, ':date' => $date, ':behavior_type' => $behavior_type]);
-                        if (!$stmt->fetch()) {
-                            $behaviorClass->stu_id = $stu_id;
-                            $behaviorClass->behavior_date = $date;
-                            $behaviorClass->behavior_type = $behavior_type;
-                            $behaviorClass->behavior_name = $behavior_name;
-                            $behaviorClass->behavior_score = $behavior_score;
-                            $behaviorClass->teach_id = $teach_id;
-                            $behaviorClass->term = $term_post;
-                            $behaviorClass->pee = $year_post;
-                            $behaviorClass->create();
-                        }
-                    }
-                }
+                // NOTE: การหักคะแนนนักเรียนมาสายถูกย้ายไปที่ api/mark_absent_students.php (cron script)
+                // เพื่อป้องกันการหักคะแนนซ้ำ จะทำเพียงวันละ 1 ครั้ง
 
                 // Build per-student result snapshot by querying student_attendance for each student
                 $perResults = [];
