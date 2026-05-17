@@ -75,6 +75,37 @@ try {
                 'message' => "Admin updated time settings"
             ]);
             break;
+
+        // (ใหม่) เพิ่มวันหยุด
+        case 'add_holiday':
+            $date = $_POST['holiday_date'] ?? '';
+            $desc = $_POST['holiday_desc'] ?? '';
+            if (empty($date) || empty($desc)) {
+                throw new Exception('กรุณากรอกวันที่และชื่อวันหยุดให้ครบถ้วน');
+            }
+            $result = $model->addHoliday($date, $desc);
+            if ($result['success']) {
+                $logger->log(['user_id' => $admin_id, 'role' => $admin_role, 'action_type' => 'settings_add_holiday', 'status_code' => 200, 'message' => "Admin added holiday: $date ($desc)"]);
+                echo json_encode(['success' => true, 'message' => 'เพิ่มวันหยุดสำเร็จ']);
+            } else {
+                echo json_encode(['success' => false, 'message' => $result['message']]);
+            }
+            break;
+
+        // (ใหม่) ลบวันหยุด
+        case 'delete_holiday':
+            $id = $_POST['id'] ?? '';
+            if (empty($id)) {
+                throw new Exception('ไม่พบรหัสวันหยุด');
+            }
+            $result = $model->deleteHoliday($id);
+            if ($result['success']) {
+                $logger->log(['user_id' => $admin_id, 'role' => $admin_role, 'action_type' => 'settings_delete_holiday', 'status_code' => 200, 'message' => "Admin deleted holiday ID: $id"]);
+                echo json_encode(['success' => true, 'message' => 'ลบวันหยุดสำเร็จ']);
+            } else {
+                echo json_encode(['success' => false, 'message' => $result['message']]);
+            }
+            break;
         
         // (แทนที่ update_pee_term.php)
         case 'update_term':

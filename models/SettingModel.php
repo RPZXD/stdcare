@@ -519,4 +519,48 @@ class SettingModel
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-}   
+
+    /**
+     * ดึงข้อมูลวันหยุดทั้งหมด
+     */
+    public function getHolidays()
+    {
+        $sql = "SELECT * FROM school_holidays ORDER BY holiday_date ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * เพิ่มวันหยุดใหม่
+     */
+    public function addHoliday($date, $description)
+    {
+        try {
+            $sql = "INSERT INTO school_holidays (holiday_date, description) VALUES (:date, :desc)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':date' => $date, ':desc' => $description]);
+            return ['success' => true];
+        } catch (\PDOException $e) {
+            if ($e->getCode() == 23000) {
+                return ['success' => false, 'message' => 'มีวันหยุดนี้ในระบบแล้ว'];
+            }
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * ลบวันหยุด
+     */
+    public function deleteHoliday($id)
+    {
+        try {
+            $sql = "DELETE FROM school_holidays WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            return ['success' => true];
+        } catch (\PDOException $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+}

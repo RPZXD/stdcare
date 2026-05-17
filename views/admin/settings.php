@@ -141,6 +141,75 @@ $activePage = "settings";
         </div>
     </div>
 
+    <!-- Card: Holidays Management -->
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all mb-8">
+        <div class="bg-gradient-to-r from-pink-500 to-rose-600 p-6 relative">
+            <div class="absolute top-0 right-0 opacity-10 text-8xl">🏖️</div>
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center text-white">
+                    <i class="fas fa-umbrella-beach text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-white">วันหยุดโรงเรียน</h3>
+                    <p class="text-pink-100 text-sm">จัดการวันหยุดนักขัตฤกษ์/วันหยุดพิเศษ (ระบบอัตโนมัติจะไม่เช็คขาดเรียนในวันนี้)</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <form id="addHolidayForm" class="flex flex-col md:flex-row gap-4 mb-6 items-end">
+                <div class="flex-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันที่หยุด</label>
+                    <input type="date" name="holiday_date" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all">
+                </div>
+                <div class="flex-[2]">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">คำอธิบาย / ชื่อวันหยุด</label>
+                    <input type="text" name="holiday_desc" placeholder="เช่น วันขึ้นปีใหม่, วันหยุดชดเชย..." required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all">
+                </div>
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-plus"></i> เพิ่มวันหยุด
+                </button>
+            </form>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="p-4 border-b border-slate-200 dark:border-slate-700">วันที่</th>
+                            <th class="p-4 border-b border-slate-200 dark:border-slate-700">คำอธิบาย</th>
+                            <th class="p-4 border-b border-slate-200 dark:border-slate-700 text-center w-24">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(!empty($schoolHolidays)): ?>
+                            <?php foreach($schoolHolidays as $h): ?>
+                            <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="p-4 font-bold text-slate-700 dark:text-white whitespace-nowrap">
+                                    <i class="fas fa-calendar-day text-pink-500 mr-2"></i> <?= date('d/m/Y', strtotime($h['holiday_date'])) ?>
+                                </td>
+                                <td class="p-4 text-slate-600 dark:text-slate-300">
+                                    <?= htmlspecialchars($h['description']) ?>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <button type="button" class="btn-delete-holiday text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors" data-id="<?= $h['id'] ?>">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="3" class="p-8 text-center text-slate-400">
+                                    <i class="fas fa-calendar-times text-4xl mb-3 block opacity-20"></i>
+                                    ยังไม่มีการตั้งค่าวันหยุด
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- CSV Upload Section -->
     <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
         <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-6 relative">
@@ -350,6 +419,32 @@ $(document).ready(function() {
     $('#timeSettingsForm').submit(function(e) {
         e.preventDefault();
         handleFetch('../controllers/SettingController.php?action=update_times', new FormData(this), 'บันทึกการตั้งค่าเวลาสำเร็จ');
+    });
+
+    // 2.5 Holiday Management Form
+    $('#addHolidayForm').submit(function(e) {
+        e.preventDefault();
+        handleFetch('../controllers/SettingController.php?action=add_holiday', new FormData(this), 'เพิ่มวันหยุดสำเร็จ');
+    });
+
+    $('.btn-delete-holiday').click(function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'ยืนยันการลบ?',
+            text: "คุณต้องการลบวันหยุดนี้ออกจากระบบใช่หรือไม่?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'ลบ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const fd = new FormData();
+                fd.append('id', id);
+                handleFetch('../controllers/SettingController.php?action=delete_holiday', fd, 'ลบวันหยุดสำเร็จ');
+            }
+        });
     });
 
     // 3. Promote Students

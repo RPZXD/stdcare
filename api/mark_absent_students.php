@@ -22,6 +22,16 @@ try {
         exit;
     }
 
+    // เช็ควันหยุดพิเศษจากฐานข้อมูล
+    $stmtHoliday = $conn->prepare("SELECT description FROM school_holidays WHERE holiday_date = :today");
+    $stmtHoliday->execute([':today' => $today]);
+    $holiday = $stmtHoliday->fetchColumn();
+
+    if ($holiday) {
+        echo "วันนี้เป็นวันหยุดพิเศษ: " . $holiday . " (ไม่มีการเช็คขาดเรียน)\n";
+        exit;
+    }
+
     // ดึงการตั้งค่าเวลา arrival_absent_time จากฐานข้อมูล
     $stmtSettings = $conn->prepare("SELECT setting_value FROM time_settings WHERE setting_key = 'arrival_absent_time'");
     $stmtSettings->execute();

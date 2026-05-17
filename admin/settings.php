@@ -52,6 +52,9 @@ $arrival_absent_time = $timeSettings['arrival_absent_time'] ?? '10:00:00';
 $leave_early_time = $timeSettings['leave_early_time'] ?? '15:40:00';
 $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
 
+// Get school holidays
+$schoolHolidays = $settingsModel->getHolidays();
+
 // Get class/room options for dropdowns
 try {
     $studentClass = $db->query("SELECT DISTINCT Stu_major FROM student WHERE Stu_major IS NOT NULL AND Stu_status = '1' ORDER BY Stu_major")->fetchAll(PDO::FETCH_COLUMN);
