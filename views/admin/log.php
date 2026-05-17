@@ -21,18 +21,18 @@ $activePage = "log";
     ?>
 
     <!-- Filter Section -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
-        <div class="flex items-center gap-4 mb-6">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl mb-6 md:mb-8">
+        <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-filter"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black text-slate-800 dark:text-white">ตัวกรองข้อมูล</h3>
+                <h3 class="text-base md:text-lg font-black text-slate-800 dark:text-white">ตัวกรองข้อมูล</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search & Filter Logs</p>
             </div>
         </div>
         
-        <form id="logFilterForm" class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <form id="logFilterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             <div>
                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">User ID</label>
                 <input type="text" id="user_id" placeholder="รหัสผู้ใช้" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all">
@@ -61,7 +61,7 @@ $activePage = "log";
                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ถึงวันที่</label>
                 <input type="date" id="date_to" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all">
             </div>
-            <div class="md:col-span-2 lg:col-span-3 flex justify-center pt-4">
+            <div class="sm:col-span-2 lg:col-span-3 flex justify-center pt-4">
                 <button type="submit" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-black text-sm shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                     <i class="fas fa-search"></i> ค้นหา
                 </button>
@@ -71,12 +71,12 @@ $activePage = "log";
 
     <!-- Data Table -->
     <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
-        <div class="flex items-center gap-4 mb-6">
+        <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-table"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black text-slate-800 dark:text-white">ข้อมูลประวัติการใช้งาน</h3>
+                <h3 class="text-base md:text-lg font-black text-slate-800 dark:text-white">ข้อมูลประวัติการใช้งาน</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Activity Log Records</p>
             </div>
         </div>

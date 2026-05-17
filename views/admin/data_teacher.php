@@ -54,7 +54,7 @@ $statuses = [
     ?>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 md:mb-8">
         <?php
         $stats = [
             ['id' => 'totalTeachers', 'label' => 'รวมทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'indigo'],
@@ -75,8 +75,8 @@ $statuses = [
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-pie text-sky-500"></i> สถานะ
             </h4>
@@ -84,7 +84,7 @@ $statuses = [
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-layer-group text-indigo-500"></i> กลุ่มสาระ (Top 5)
             </h4>
@@ -92,7 +92,7 @@ $statuses = [
                 <canvas id="majorChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl">
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-user-tag text-rose-500"></i> บทบาท
             </h4>
@@ -129,14 +129,14 @@ $statuses = [
 <div class="modal fade" id="addTeacherModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-emerald-500 to-teal-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-emerald-500 to-teal-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-user-plus"></i> เพิ่มข้อมูลครู
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <form id="addTeacherForm">
-                <div class="modal-body p-8 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">รหัสครู *</label>
@@ -201,7 +201,7 @@ $statuses = [
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+                <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                     <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all hover:bg-slate-300" data-dismiss="modal">ยกเลิก</button>
                     <button type="submit" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 hover:scale-105 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> บันทึก
@@ -216,15 +216,15 @@ $statuses = [
 <div class="modal fade" id="editTeacherModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-amber-500 to-orange-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-amber-500 to-orange-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-edit"></i> แก้ไขข้อมูลครู
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <form id="editTeacherForm">
                 <input type="hidden" name="editTeach_id_old">
-                <div class="modal-body p-8 bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-slate-800">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-slate-800">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">รหัสครู</label>
@@ -289,7 +289,7 @@ $statuses = [
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+                <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                     <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all hover:bg-slate-300" data-dismiss="modal">ยกเลิก</button>
                     <button type="submit" class="px-6 py-3 bg-amber-600 text-white rounded-xl font-bold shadow-lg shadow-amber-600/20 hover:scale-105 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง
@@ -318,13 +318,13 @@ $statuses = [
 <div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-sky-500 to-blue-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-sky-500 to-blue-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-file-export"></i> ส่งออกข้อมูลครูและบุคลากร
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body p-8 bg-gradient-to-br from-white to-sky-50 dark:from-slate-900 dark:to-slate-800">
+            <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-sky-50 dark:from-slate-900 dark:to-slate-800">
                 <!-- Export Format Selection -->
                 <div class="mb-6">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">รูปแบบการส่งออก</label>
@@ -455,7 +455,7 @@ $statuses = [
                     </div>
                 </div>
             </div>
-            <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+            <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                 <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all hover:bg-slate-300" data-dismiss="modal">ยกเลิก</button>
                 <button type="button" id="btnDoExport" class="px-6 py-3 bg-sky-600 text-white rounded-xl font-bold shadow-lg shadow-sky-600/20 hover:scale-105 transition-all flex items-center gap-2">
                     <i class="fas fa-download"></i> ดาวน์โหลด

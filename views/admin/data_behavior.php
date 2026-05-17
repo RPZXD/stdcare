@@ -27,7 +27,7 @@ $activePage = "behavior";
     ?>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <?php 
         $statCards = [
             ['label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-list', 'color' => 'rose', 'id' => 'totalRecords'],
@@ -74,14 +74,14 @@ $activePage = "behavior";
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn scale-95 opacity-0 transition-all duration-300" id="modalContent">
             <!-- Modal Header -->
-            <div class="p-8 border-b dark:border-slate-700 bg-gradient-to-r from-rose-600 to-pink-700 text-white">
+            <div class="p-4 md:p-8 border-b dark:border-slate-700 bg-gradient-to-r from-rose-600 to-pink-700 text-white">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <i class="fas fa-edit text-xl" id="modalIcon"></i>
+                    <div class="flex items-center gap-3 md:gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                            <i class="fas fa-edit text-base md:text-xl" id="modalIcon"></i>
                         </div>
                         <div>
-                            <h3 class="text-xl font-black italic tracking-tight" id="modalTitle">จัดการพฤติกรรม</h3>
+                            <h3 class="text-base md:text-xl font-black italic tracking-tight" id="modalTitle">จัดการพฤติกรรม</h3>
                             <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-100 mt-0.5 opacity-80" id="modalSubtitle">บันทึกข้อมูลพฤติกรรมนักเรียน</p>
                         </div>
                     </div>
@@ -96,7 +96,7 @@ $activePage = "behavior";
                 <input type="hidden" name="id" id="behavior_id">
                 <input type="hidden" name="stu_id" id="modalStu_id" required>
                 
-                <div class="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div class="p-4 md:p-8 space-y-4 md:space-y-6 max-h-[70vh] overflow-y-auto">
                     <!-- Student Search Section -->
                     <div id="searchSection" class="relative group">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic group-focus-within:text-rose-500 transition-colors mb-2 block">ค้นหานักเรียน</label>
@@ -195,7 +195,7 @@ $activePage = "behavior";
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-8 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-end gap-3">
+                <div class="p-4 md:p-8 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-end gap-3">
                     <button type="button" onclick="closeModal()" class="px-8 py-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-2xl font-black transition-all active:scale-95">
                         <i class="fas fa-times mr-2"></i> ยกเลิก
                     </button>

@@ -21,7 +21,7 @@ $activePage = "parent";
     ?>
 
     <!-- CSV Upload Section -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl mb-4 md:mb-8">
         <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
             <i class="fas fa-file-csv text-teal-500"></i> อัปเดตข้อมูลด้วย CSV
         </h4>
@@ -40,7 +40,7 @@ $activePage = "parent";
     </div>
 
     <!-- Filter Toolbar -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl mb-4 md:mb-8">
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white">
@@ -72,7 +72,7 @@ $activePage = "parent";
     </div>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         <?php
         $stats = [
             ['id' => 'totalRecords', 'label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'teal'],
@@ -112,15 +112,15 @@ $activePage = "parent";
 <div class="modal fade" id="editParentModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-teal-500 to-cyan-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3" id="editParentModalLabel">
+            <div class="modal-header bg-gradient-to-r from-teal-500 to-cyan-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3" id="editParentModalLabel">
                     <i class="fas fa-edit"></i> แก้ไขข้อมูลผู้ปกครอง
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <form id="editParentForm">
                 <input type="hidden" id="editStu_id" name="editStu_id">
-                <div class="modal-body p-6 md:p-8 bg-gradient-to-br from-white to-teal-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-teal-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
                     
                     <!-- Father Info -->
                     <h6 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2 border-b border-teal-200 pb-2">
@@ -193,7 +193,7 @@ $activePage = "parent";
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+                <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                     <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold" data-dismiss="modal">ยกเลิก</button>
                     <button type="button" id="submitEditParentForm" class="px-6 py-3 bg-teal-600 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> บันทึก

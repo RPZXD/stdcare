@@ -24,7 +24,7 @@ $activePage = "dashboard";
     ?>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-10">
         <?php 
         $cards = [
             ['label' => 'นักเรียนทั้งหมด', 'value' => number_format($stats['students']), 'icon' => 'fa-user-graduate', 'color' => 'indigo', 'status' => 'Active'],
@@ -40,7 +40,7 @@ $activePage = "dashboard";
     </div>
 
     <!-- Chart Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8 lg:mb-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 mb-6 lg:mb-10">
         <!-- Behavior Score Groups Chart -->
         <div class="glass-effect rounded-3xl lg:rounded-[2.5rem] p-5 lg:p-8 shadow-xl border-t border-white/50">
             <div class="flex items-center gap-4 mb-6">

@@ -37,7 +37,7 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
     ?>
 
     <!-- Filter Toolbar -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-5 lg:p-6 border border-white/50 shadow-xl mb-8">
+    <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl mb-4 md:mb-8">
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
@@ -72,7 +72,7 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
     </div>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <?php 
         $studentStats = [
             ['id' => 'totalStudents', 'label' => 'ทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'indigo'],
@@ -117,14 +117,14 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 <div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-emerald-500 to-teal-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-emerald-500 to-teal-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-user-plus"></i> เพิ่มนักเรียนใหม่
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <form id="addStudentForm">
-                <div class="modal-body p-6 md:p-8 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">รหัสนักเรียน *</label>
@@ -178,7 +178,7 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+                <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                     <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold" data-dismiss="modal">ยกเลิก</button>
                     <button type="submit" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> บันทึก
@@ -193,15 +193,15 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 <div class="modal fade" id="editStudentModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-amber-500 to-orange-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-amber-500 to-orange-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-edit"></i> แก้ไขข้อมูลนักเรียน
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <form id="editStudentForm">
                 <input type="hidden" name="editStu_id_old">
-                <div class="modal-body p-6 md:p-8 bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-slate-800 max-h-[70vh] overflow-y-auto">
                     <!-- Basic Info -->
                     <h6 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2 border-b border-amber-200 pb-2">
                         <i class="fas fa-user text-amber-500"></i> ข้อมูลพื้นฐาน
@@ -303,7 +303,7 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+                <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                     <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold" data-dismiss="modal">ยกเลิก</button>
                     <button type="submit" class="px-6 py-3 bg-amber-600 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง
@@ -333,13 +333,13 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 <div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-indigo-500 to-purple-600 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-indigo-500 to-purple-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-file-export"></i> ส่งออกข้อมูลนักเรียน
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body p-8 bg-gradient-to-br from-white to-indigo-50 dark:from-slate-900 dark:to-slate-800">
+            <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-indigo-50 dark:from-slate-900 dark:to-slate-800">
                 <!-- Export Format Selection -->
                 <div class="mb-6">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">รูปแบบการส่งออก</label>
@@ -479,7 +479,7 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
                     </div>
                 </div>
             </div>
-            <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+            <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
                 <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all hover:bg-slate-300" data-dismiss="modal">ยกเลิก</button>
                 <button type="button" id="btnDoExport" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 hover:scale-105 transition-all flex items-center gap-2">
                     <i class="fas fa-download"></i> ดาวน์โหลด
@@ -493,21 +493,21 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 <div class="modal fade" id="viewProfileModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
-            <div class="modal-header bg-gradient-to-r from-indigo-600 to-purple-700 text-white !border-0 p-6">
-                <h5 class="modal-title text-xl font-black flex items-center gap-3">
+            <div class="modal-header bg-gradient-to-r from-indigo-600 to-purple-700 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
                     <i class="fas fa-user-graduate"></i> <span id="profileName">ข้อมูลนักเรียน</span>
                 </h5>
                 <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body p-0 bg-gradient-to-br from-white to-indigo-50 dark:from-slate-900 dark:to-slate-800 max-h-[75vh] overflow-y-auto">
-                <div id="profileContent" class="p-8">
+                <div id="profileContent" class="p-4 md:p-8">
                     <div class="text-center py-12">
                         <i class="fas fa-spinner fa-spin text-4xl text-indigo-600"></i>
                         <p class="mt-4 text-slate-500 font-bold">กำลังโหลดข้อมูล...</p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer !border-0 p-6 bg-slate-50 dark:bg-slate-800">
+            <div class="modal-footer !border-0 p-4 md:p-6 bg-slate-50 dark:bg-slate-800">
                 <button type="button" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold" data-dismiss="modal">ปิด</button>
             </div>
         </div>
