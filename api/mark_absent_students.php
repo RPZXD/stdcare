@@ -14,6 +14,13 @@ try {
     // ดึงเวลาปัจจุบัน
     $currentTime = date('H:i:s');
     $today = date('Y-m-d');
+    
+    // เช็ควันเสาร์-อาทิตย์
+    $dayOfWeek = date('N'); // 1 (จันทร์) - 7 (อาทิตย์)
+    if ($dayOfWeek >= 6) {
+        echo "วันนี้เป็นวันหยุดเสาร์-อาทิตย์ ไม่มีการเช็คขาดเรียน\n";
+        exit;
+    }
 
     // ดึงการตั้งค่าเวลา arrival_absent_time จากฐานข้อมูล
     $stmtSettings = $conn->prepare("SELECT setting_value FROM time_settings WHERE setting_key = 'arrival_absent_time'");
