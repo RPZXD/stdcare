@@ -281,6 +281,43 @@ $activePage = "settings";
                 </div>
             </div>
 
+            <!-- Section 1.5: Update Class, Room, Number -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div class="flex items-start gap-3 md:gap-4">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-amber-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-layer-group text-lg md:text-2xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-base md:text-lg font-black text-slate-800 dark:text-white mb-2">🎓 อัปเดตระดับชั้น ห้อง และเลขที่</h5>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs md:text-sm mb-4">ดาวน์โหลดข้อมูลปัจจุบัน แก้ไขระดับชั้น ห้อง และเลขที่ แล้วอัปโหลดกลับ</p>
+                        
+                        <form id="uploadClassRoomForm" class="space-y-4">
+                            <a href="../controllers/SettingController.php?action=download_class_room_template" 
+                               class="inline-flex items-center px-5 py-3 bg-white dark:bg-slate-800 border-2 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 font-bold rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all">
+                                <i class="fas fa-download mr-2"></i> ดาวน์โหลดเทมเพลต
+                            </a>
+                            
+                            <div class="bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-400 p-4 rounded-lg">
+                                <p class="text-sm text-amber-800 dark:text-amber-300">
+                                    <strong>📝 วิธีการใช้งาน:</strong><br>
+                                    1. ดาวน์โหลดเทมเพลต CSV<br>
+                                    2. เปิดไฟล์ด้วย Excel<br>
+                                    3. <strong class="text-red-600 dark:text-red-400">กรอกข้อมูลใหม่ในคอลัมน์ "_new" (ระดับชั้น ห้อง เลขที่)</strong><br>
+                                    4. บันทึกและอัปโหลดกลับ
+                                </p>
+                            </div>
+                            
+                            <input type="file" name="class_room_csv" id="class_room_csv" accept=".csv" required
+                                class="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-amber-500/20 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-500 file:text-white file:font-bold file:cursor-pointer">
+                            
+                            <button type="submit" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-upload"></i> อัปโหลดและอัปเดตข้อมูล
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <!-- Section 2: Update by Room -->
             <div class="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border border-cyan-200 dark:border-cyan-800 rounded-xl md:rounded-2xl p-4 md:p-6">
                 <div class="flex items-start gap-3 md:gap-4">
@@ -506,6 +543,15 @@ $(document).ready(function() {
         const room = $('#number_room').val();
         if (!pe || !room) return showError('กรุณาเลือกชั้นและห้อง');
         window.location.href = `../controllers/SettingController.php?action=download_number_template_by_room&pe=${pe}&room=${room}`;
+    });
+
+    // 5.5 Upload Class, Room, Number
+    $('#uploadClassRoomForm').submit(function(e) {
+        e.preventDefault();
+        const file = $('#class_room_csv')[0].files[0];
+        if (!file) return showError('กรุณาเลือกไฟล์ CSV');
+        if (file.size > 5 * 1024 * 1024) return showError('ไฟล์ใหญ่เกิน 5MB');
+        handleFetch('../controllers/SettingController.php?action=upload_class_room_data', new FormData(this), 'อัปเดตระดับชั้น ห้อง และเลขที่สำเร็จ');
     });
 
     // 6. Upload Number by Room

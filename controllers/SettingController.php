@@ -229,6 +229,32 @@ try {
             outputCsv("update_number_template_c{$class}_r{$room}.csv", $header, $csv_data);
             exit;
             
+        // (ใหม่) ดาวน์โหลดเทมเพลตสำหรับ อัปเดต ระดับชั้น ห้อง และเลขที่
+        case 'download_class_room_template':
+            $db_data = $model->getStudentsForClassRoomUpdate();
+            $header = ['Stu_id', 'Stu_major_new', 'Stu_room_new', 'Stu_no_new', 'Stu_major_old', 'Stu_room_old', 'Stu_no_old', 'fullname'];
+            $csv_data = [];
+            
+            // เพิ่มแถวตัวอย่าง
+            $csv_data[] = [
+                'ตัวอย่าง', '4', '1', '1', '3', '8', '15', 'เด็กชายสมชาย ใจดี (กรุณากรอกข้อมูลใหม่ในคอลัมน์ *_new)'
+            ];
+            
+            foreach ($db_data as $row) {
+                $csv_data[] = [
+                    $row['Stu_id'], 
+                    '', // Stu_major_new 
+                    '', // Stu_room_new 
+                    '', // Stu_no_new 
+                    $row['Stu_major'], // Stu_major_old
+                    $row['Stu_room'], // Stu_room_old
+                    $row['Stu_no'], // Stu_no_old
+                    $row['fullname']
+                ];
+            }
+            outputCsv('update_class_room_template.csv', $header, $csv_data);
+            exit;
+
         // (แทนที่ update_datastudent_sample_dynamic.php)
         case 'download_full_data_template':
             $class = $_GET['pe'] ?? '';
@@ -332,7 +358,46 @@ try {
             }
 
             echo json_encode(['success' => true, 'message' => $responseMessage]);
-            break;        // (แทนที่ update_data_student_upload.php)
+            break;
+
+        // (API ใหม่ สำหรับฟอร์ม "อัปเดต ระดับชั้น ห้อง และเลขที่")
+        case 'upload_class_room_data':
+            if (!isset($_FILES['class_room_csv']) || $_FILES['class_room_csv']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('กรุณาเลือกไฟล์ CSV สำหรับอัปเดตระดับชั้นและห้อง');
+            }
+            $csv = parseCsv($_FILES['class_room_csv']['tmp_name']);
+            $report = $model->batchUpdateStudentClassRoom($csv['data']);
+
+            $logMessage = sprintf('Admin batch updated class/room/number: Success=%d, Failed=%d', $report['success'], $report['failed']);
+
+            if (!empty($report['errors'])) {
+                $logMessage .= ' | Errors: ' . implode('; ', array_slice($report['errors'], 0, 5));
+                if (count($report['errors']) > 5) {
+                    $logMessage .= ' ...และอีก ' . (count($report['errors']) - 5) . ' รายการ';
+                }
+            }
+
+            $logger->log(['user_id' => $admin_id, 'role' => $admin_role, 'action_type' => 'student_csv_update_class_room', 'status_code' => 200, 'message' => $logMessage]);
+
+            $totalProcessed = $report['success'] + $report['failed'];
+            $responseMessage = sprintf('อัปเดตระดับชั้น/ห้อง/เลขที่ ประมวลผลแล้ว: %d รายการ', $totalProcessed);
+
+            if ($report['failed'] > 0) {
+                $responseMessage .= sprintf(', มีปัญหา: %d รายการ', $report['failed']);
+            }
+
+            if (!empty($report['errors'])) {
+                $responseMessage .= "\n\nรายละเอียดข้อผิดพลาด:\n" . implode("\n", array_slice($report['errors'], 0, 10));
+                if (count($report['errors']) > 10) {
+                    $responseMessage .= "\n...และอีก " . (count($report['errors']) - 10) . " รายการ";
+                }
+            } else {
+                $responseMessage .= "\n\n✅ ไม่พบข้อผิดพลาดใดๆ";
+            }
+
+            echo json_encode(['success' => true, 'message' => $responseMessage]);
+            break;
+        // (แทนที่ update_data_student_upload.php)
         case 'upload_full_data':
              if (!isset($_FILES['student_csv']) || $_FILES['student_csv']['error'] !== UPLOAD_ERR_OK) {
                 throw new Exception('กรุณาเลือกไฟล์ CSV สำหรับอัปเดตข้อมูลนักเรียน');

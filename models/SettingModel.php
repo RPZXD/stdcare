@@ -213,6 +213,87 @@ class SettingModel
     }
 
     /**
+     * ดึงข้อมูลนักเรียนสำหรับอัปเดต ระดับชั้น ห้อง และเลขที่ (CSV Template)
+     */
+    public function getStudentsForClassRoomUpdate()
+    {
+        $sql = "SELECT Stu_id, Stu_major, Stu_room, Stu_no, 
+                CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) as fullname
+                FROM student 
+                WHERE Stu_status = '1'
+                ORDER BY Stu_major, Stu_room, Stu_no";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * อัปเดต ระดับชั้น ห้อง และเลขที่นักเรียน (จาก CSV)
+     */
+    public function batchUpdateStudentClassRoom(array $data)
+    {
+        $report = ['success' => 0, 'failed' => 0, 'errors' => []];
+        $sql = "UPDATE student SET Stu_major = :class, Stu_room = :room, Stu_no = :number WHERE Stu_id = :id AND Stu_status = '1'";
+        $stmt = $this->pdo->prepare($sql);
+
+        foreach ($data as $rowIndex => $row) {
+            $stu_id = trim($row['Stu_id'] ?? '');
+            $stu_major_new = trim($row['Stu_major_new'] ?? '');
+            $stu_room_new = trim($row['Stu_room_new'] ?? '');
+            $stu_no_new = trim($row['Stu_no_new'] ?? '');
+
+            if (empty($stu_id) || $stu_id === 'ตัวอย่าง') {
+                continue; // ข้ามแถวตัวอย่าง
+            }
+
+            if (empty($stu_major_new) || empty($stu_room_new) || empty($stu_no_new)) {
+                $report['failed']++;
+                $report['errors'][] = "แถว " . ($rowIndex + 2) . ": ข้อมูลระดับชั้น, ห้อง หรือเลขที่ ว่างเปล่า (Stu_id: $stu_id)";
+                continue;
+            }
+
+            if (!is_numeric($stu_no_new) || $stu_no_new <= 0) {
+                $report['failed']++;
+                $report['errors'][] = "แถว " . ($rowIndex + 2) . ": Stu_no_new ต้องเป็นตัวเลข (Stu_id: $stu_id)";
+                continue;
+            }
+
+            $check_sql = "SELECT Stu_id, Stu_major, Stu_room, Stu_no FROM student WHERE Stu_id = :id AND Stu_status = '1'";
+            $check_stmt = $this->pdo->prepare($check_sql);
+            $check_stmt->execute([':id' => $stu_id]);
+            $student = $check_stmt->fetch();
+
+            if (!$student) {
+                $report['failed']++;
+                $report['errors'][] = "แถว " . ($rowIndex + 2) . ": ไม่พบนักเรียน Stu_id: $stu_id ในระบบ";
+                continue;
+            }
+
+            try {
+                $stmt->execute([
+                    ':class' => $stu_major_new,
+                    ':room' => $stu_room_new,
+                    ':number' => $stu_no_new,
+                    ':id' => $stu_id
+                ]);
+                if ($stmt->rowCount() > 0) {
+                    $report['success']++;
+                } else {
+                    if ($student['Stu_major'] == $stu_major_new && $student['Stu_room'] == $stu_room_new && $student['Stu_no'] == $stu_no_new) {
+                        $report['success']++; 
+                    } else {
+                        $report['failed']++;
+                        $report['errors'][] = "แถว " . ($rowIndex + 2) . ": ไม่สามารถอัปเดต Stu_id: $stu_id";
+                    }
+                }
+            } catch (\PDOException $e) {
+                $report['failed']++;
+                $report['errors'][] = "แถว " . ($rowIndex + 2) . ": Error at Stu_id $stu_id: " . $e->getMessage();
+            }
+        }
+        return $report;
+    }
+
+    /**
      * เพิ่มนักเรียนใหม่แบบ batch จาก CSV (หรืออัปเดตถ้ามีอยู่แล้ว)
      */
     public function batchInsertStudentData(array $data)

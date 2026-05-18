@@ -26,11 +26,19 @@ $userRole = (!empty($userClass) && !empty($userRoom)) ? "ม.{$userClass}/{$user
 // Menu configuration for Teacher (Student Care System)
 $menuItems = [
     [
+        'is_header' => true,
+        'name' => 'แดชบอร์ด',
+    ],
+    [
         'key' => 'home',
         'name' => 'หน้าหลัก',
         'url' => 'index.php',
         'icon' => 'fa-home',
         'gradient' => ['from' => 'emerald-500', 'to' => 'green-600'],
+    ],
+    [
+        'is_header' => true,
+        'name' => 'งานประจำชั้น',
     ],
     [
         'key' => 'check_std',
@@ -45,6 +53,17 @@ $menuItems = [
         'url' => 'home_room.php',
         'icon' => 'fa-school',
         'gradient' => ['from' => 'sky-500', 'to' => 'blue-600'],
+    ],
+    [
+        'key' => 'behavior',
+        'name' => 'คะแนนพฤติกรรม',
+        'url' => 'behavior.php',
+        'icon' => 'fa-star-half-stroke',
+        'gradient' => ['from' => 'amber-500', 'to' => 'yellow-600'],
+    ],
+    [
+        'is_header' => true,
+        'name' => 'ระบบดูแลช่วยเหลือ',
     ],
     [
         'key' => 'care_system',
@@ -109,11 +128,8 @@ $menuItems = [
         ],
     ],
     [
-        'key' => 'behavior',
-        'name' => 'คะแนนพฤติกรรม',
-        'url' => 'behavior.php',
-        'icon' => 'fa-star-half-stroke',
-        'gradient' => ['from' => 'amber-500', 'to' => 'yellow-600'],
+        'is_header' => true,
+        'name' => 'ข้อมูลและรายงาน',
     ],
     [
         'key' => 'data_student',
@@ -142,6 +158,10 @@ $menuItems = [
         'url' => 'report.php',
         'icon' => 'fa-chart-pie',
         'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
+    ],
+    [
+        'is_header' => true,
+        'name' => 'ผู้ใช้งาน',
     ],
     [
         'key' => 'profile',
@@ -198,11 +218,12 @@ $menuItems = [
         
         <!-- Navigation -->
         <nav class="mt-2 px-3 pb-24">
-            <div class="mb-4 px-4">
-                <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">เมนูหลัก</p>
-            </div>
-            <ul class="space-y-1.5">
+            <ul class="space-y-1.5 pt-2">
                 <?php foreach ($menuItems as $menu): 
+                    if (isset($menu['is_header'])) {
+                        echo '<li class="mt-6 mb-2 px-4 first:mt-0"><p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">' . htmlspecialchars($menu['name']) . '</p></li>';
+                        continue;
+                    }
                     $fromColor = $menu['gradient']['from'];
                     $toColor = $menu['gradient']['to'];
                     $colorName = explode('-', $fromColor)[0];
