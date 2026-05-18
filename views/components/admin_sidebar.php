@@ -9,6 +9,8 @@ $menuItems = [
     ['key' => 'dashboard', 'href' => 'index.php', 'icon' => 'fa-gauge-high', 'text' => 'แดชบอร์ด'],
     ['key' => 'teacher', 'href' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ครูและบุคลากร'],
     ['key' => 'student', 'href' => 'data_student.php', 'icon' => 'fa-user-graduate', 'text' => 'ข้อมูลนักเรียน'],
+    ['key' => 'workspace', 'href' => 'workspace_batch.php', 'icon' => 'fa-google', 'text' => 'จัดการ Workspace (กลุ่ม)'],
+    ['key' => 'workspace_history', 'href' => 'workspace_history.php', 'icon' => 'fa-history', 'text' => 'ประวัติรหัส Workspace'],
     ['key' => 'parent', 'href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง'],
     ['key' => 'behavior', 'href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม'],
     ['key' => 'settings', 'href' => 'settings.php', 'icon' => 'fa-cog', 'text' => 'การตั้งค่า'],

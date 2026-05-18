@@ -596,7 +596,8 @@ $(document).ready(function() {
                         <button class="viewProfileBtn btn-sm" data-id="${data}" title="ดูโปรไฟล์">👁️</button>
                         <button class="editStudentBtn btn-sm" data-id="${data}" title="แก้ไข">✏️</button>
                         <button class="deleteStudentBtn btn-sm" data-id="${data}" title="ลบ">🗑️</button>
-                        <button class="resetPwdBtn btn-sm" data-id="${data}" title="รีเซ็ตรหัส">🔑</button>
+                        <button class="resetPwdBtn btn-sm" data-id="${data}" title="รีเซ็ตรหัสระบบ">🔑</button>
+                        <button class="googleWorkspaceBtn btn-sm" data-id="${data}" data-email="std${data}@phichai.ac.th" title="จัดการ Google Workspace">📧</button>
                     </div>`;
                 },
                 orderable: false,
@@ -929,6 +930,73 @@ $(document).ready(function() {
         } else {
             Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: result.message });
         }
+    });
+
+    // Google Workspace Management
+    $('#studentTable').on('click', '.googleWorkspaceBtn', function() {
+        const id = $(this).data('id');
+        const defaultEmail = $(this).data('email');
+        
+        Swal.fire({
+            title: 'จัดการ Google Workspace',
+            html: `
+                <div class="text-left mt-4">
+                    <label class="text-xs font-bold text-slate-500 uppercase">อีเมล @phichai.ac.th</label>
+                    <input type="email" id="swal-gw-email" class="swal2-input !m-0 !w-full !mt-1" value="${defaultEmail}">
+                    
+                    <label class="text-xs font-bold text-slate-500 uppercase mt-4 block">รหัสผ่านใหม่</label>
+                    <input type="password" id="swal-gw-password" class="swal2-input !m-0 !w-full !mt-1" placeholder="เว้นว่างถ้าไม่ต้องการเปลี่ยน">
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-key"></i> อัปเดตรหัสผ่าน',
+            cancelButtonText: 'ยกเลิก',
+            preConfirm: () => {
+                const email = document.getElementById('swal-gw-email').value;
+                const password = document.getElementById('swal-gw-password').value;
+                if (!email) {
+                    Swal.showValidationMessage('กรุณากรอกอีเมล');
+                    return false;
+                }
+                if (!password) {
+                    Swal.showValidationMessage('กรุณากรอกรหัสผ่านใหม่');
+                    return false;
+                }
+                return { email: email, new_password: password };
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'กำลังเชื่อมต่อ Workspace...',
+                    html: '<div class="flex justify-center mt-3"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i></div>',
+                    allowOutsideClick: false,
+                    showConfirmButton: false
+                });
+
+                try {
+                    const res = await fetch('../api/google_workspace_api.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'reset_password',
+                            stu_id: id,
+                            email: result.value.email,
+                            new_password: result.value.new_password
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'อัปเดตรหัสผ่าน Google Workspace เรียบร้อย' });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: data.message || 'เกิดข้อผิดพลาดจาก Google API' });
+                    }
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: 'ไม่สามารถเชื่อมต่อ API ได้' });
+                }
+            }
+        });
     });
 
     // View Photo

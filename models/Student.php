@@ -371,6 +371,13 @@ class Student
         return true;
     }
     
+    public function updateGooglePassword($id, $google_password)
+    {
+        $sql = "UPDATE student SET google_password = :google_password WHERE Stu_id = :id";
+        $this->db->query($sql, ['google_password' => $google_password, 'id' => $id]);
+        return true;
+    }
+    
     /**
      * ดึงรายชื่อนักเรียนจากระดับชั้นและห้อง (สำหรับหน้าพิมพ์)
      *

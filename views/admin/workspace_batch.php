@@ -1,0 +1,383 @@
+<?php
+/**
+ * View: Admin Workspace Batch Update
+ */
+ob_start();
+$pageTitle = "จัดการ Workspace (แบบกลุ่ม)";
+$activePage = "workspace"; // จะต้องไปเพิ่มใน admin_sidebar.php
+?>
+
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+    <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 mb-3">
+            <i class="fas fa-mail-bulk text-sm"></i>
+            <span class="text-xs font-bold tracking-wide">GOOGLE WORKSPACE BATCH</span>
+        </div>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">อัปเดตแบบกลุ่ม <span class="text-rose-600">ทั้งห้องเรียน</span></h1>
+        <p class="text-slate-500 mt-2 font-medium">เปลี่ยนรหัสผ่าน Google Workspace ให้นักเรียนทั้งห้องพร้อมกัน ด้วยรูปแบบอัตโนมัติ</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Filter Section (Left) -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Step 1: Select Room -->
+        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/30">
+            <h3 class="text-lg font-black text-slate-800 mb-4 border-b border-slate-100 pb-2">
+                <span class="bg-rose-100 text-rose-600 px-2 py-0.5 rounded-lg text-sm mr-2">1</span>เลือกห้องเรียน
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ระดับชั้น</label>
+                    <select id="filterClass" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 p-2.5 transition-all">
+                        <option value="">-- เลือกระดับชั้น --</option>
+                        <option value="1">มัธยมศึกษาปีที่ 1</option>
+                        <option value="2">มัธยมศึกษาปีที่ 2</option>
+                        <option value="3">มัธยมศึกษาปีที่ 3</option>
+                        <option value="4">มัธยมศึกษาปีที่ 4</option>
+                        <option value="5">มัธยมศึกษาปีที่ 5</option>
+                        <option value="6">มัธยมศึกษาปีที่ 6</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ห้อง</label>
+                    <select id="filterRoom" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 p-2.5 transition-all">
+                        <option value="">-- เลือกห้อง --</option>
+                        <?php for($i=1; $i<=15; $i++): ?>
+                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <button id="loadStudentsBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> โหลดรายชื่อ
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Password Pattern -->
+        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/30">
+            <h3 class="text-lg font-black text-slate-800 mb-4 border-b border-slate-100 pb-2">
+                <span class="bg-rose-100 text-rose-600 px-2 py-0.5 rounded-lg text-sm mr-2">2</span>ตั้งค่ารหัสผ่านใหม่
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ข้อความนำหน้า (ตัวเลือก)</label>
+                    <input type="text" id="passPrefix" placeholder="เช่น Std@" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 p-2.5 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ข้อมูลนักเรียน (ไดนามิก)</label>
+                    <select id="passDynamic" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 p-2.5 transition-all">
+                        <option value="Stu_id">รหัสนักเรียน (เช่น 25347)</option>
+                        <option value="Stu_birth_ddmmyyyy">วันเกิด DDMMYYYY (เช่น 15042550)</option>
+                        <option value="Stu_citizenid">เลขบัตรประชาชน (13 หลัก)</option>
+                        <option value="Stu_phone">เบอร์โทรศัพท์</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ข้อความต่อท้าย (ตัวเลือก)</label>
+                    <input type="text" id="passSuffix" placeholder="เช่น !@" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 p-2.5 transition-all">
+                </div>
+                
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mt-2">
+                    <p class="text-xs text-indigo-600 font-bold mb-1">ตัวอย่างรหัสผ่าน:</p>
+                    <p id="passPreview" class="text-sm font-mono font-bold text-indigo-900 bg-white px-2 py-1 rounded border border-indigo-200 inline-block">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table & Process Section (Right) -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/30 flex flex-col h-full">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                <h3 class="text-lg font-black text-slate-800">
+                    <span class="bg-rose-100 text-rose-600 px-2 py-0.5 rounded-lg text-sm mr-2">3</span>รายชื่อนักเรียนและพรีวิว
+                </h3>
+                
+                <button id="startBatchBtn" disabled class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-play"></i> เริ่มดำเนินการทั้งห้อง
+                </button>
+            </div>
+            
+            <!-- Progress Section (Hidden by default) -->
+            <div id="progressSection" class="hidden mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <div class="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                    <span>ความคืบหน้า: <span id="progressText">0/0</span></span>
+                    <span id="progressPercent" class="text-rose-600">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 mb-2 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-rose-500 to-pink-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex gap-4 text-xs font-medium">
+                    <span class="text-emerald-600"><i class="fas fa-check-circle"></i> สำเร็จ: <span id="successCount">0</span></span>
+                    <span class="text-rose-600"><i class="fas fa-times-circle"></i> ล้มเหลว: <span id="failCount">0</span></span>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="flex-1 overflow-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse" id="previewTable">
+                    <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-bold sticky top-0 z-10">
+                        <tr>
+                            <th class="p-3 border-b border-slate-200">#</th>
+                            <th class="p-3 border-b border-slate-200">รหัส</th>
+                            <th class="p-3 border-b border-slate-200">ชื่อ-สกุล</th>
+                            <th class="p-3 border-b border-slate-200">อีเมลเป้าหมาย</th>
+                            <th class="p-3 border-b border-slate-200">รหัสผ่านใหม่</th>
+                            <th class="p-3 border-b border-slate-200 text-center">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentListBody" class="text-sm">
+                        <tr>
+                            <td colspan="6" class="text-center p-8 text-slate-400">
+                                <i class="fas fa-inbox text-4xl mb-3 opacity-50 block"></i>
+                                กรุณาเลือกระดับชั้นและห้องเรียน แล้วกด "โหลดรายชื่อ"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let studentsData = [];
+    let isProcessing = false;
+
+    // โหลดรายชื่อนักเรียน
+    $('#loadStudentsBtn').click(function() {
+        const major = $('#filterClass').val();
+        const room = $('#filterRoom').val();
+        
+        if(!major || !room) {
+            Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกระดับชั้นและห้อง'});
+            return;
+        }
+        
+        const btn = $(this);
+        const originalText = btn.html();
+        btn.html('<i class="fas fa-spinner fa-spin"></i> กำลังโหลด...').prop('disabled', true);
+        
+        $.ajax({
+            url: '../controllers/StudentController.php',
+            type: 'GET',
+            data: {
+                action: 'list_all',
+                class: major,
+                room: room,
+                status: '1' // เฉพาะที่ยังเรียนอยู่
+            },
+            success: function(response) {
+                // response อาจจะมาเป็น array ตรงๆ หรือ ห่อด้วย data
+                let data = response.data || response;
+                if(Array.isArray(data)) {
+                    studentsData = data;
+                    renderTable();
+                    updatePreview();
+                    
+                    if(studentsData.length > 0) {
+                        $('#startBatchBtn').prop('disabled', false);
+                    } else {
+                        $('#startBatchBtn').prop('disabled', true);
+                    }
+                }
+            },
+            error: function() {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+            },
+            complete: function() {
+                btn.html(originalText).prop('disabled', false);
+            }
+        });
+    });
+    
+    // อัปเดตพรีวิวเมื่อมีการเปลี่ยนรูปแบบ
+    $('#passPrefix, #passSuffix, #passDynamic').on('input change', function() {
+        updatePreview();
+        renderTable(); // วาดตารางใหม่เพื่อโชว์รหัสผ่านในแต่ละคน
+    });
+    
+    function generatePassword(student) {
+        const prefix = $('#passPrefix').val() || '';
+        const suffix = $('#passSuffix').val() || '';
+        const dynamicType = $('#passDynamic').val();
+        
+        let dynamicPart = '';
+        
+        // ถ้าเป็น student dummy สำหรับ Preview ตอนแรก
+        if(!student) {
+            if(dynamicType === 'Stu_id') dynamicPart = '25347';
+            else if(dynamicType === 'Stu_birth_ddmmyyyy') dynamicPart = '15042550';
+            else if(dynamicType === 'Stu_citizenid') dynamicPart = '1659900123456';
+            else if(dynamicType === 'Stu_phone') dynamicPart = '0812345678';
+            return prefix + dynamicPart + suffix;
+        }
+        
+        // ถ้าเป็นนักเรียนจริง
+        if(dynamicType === 'Stu_id') {
+            dynamicPart = student.Stu_id || '';
+        } else if (dynamicType === 'Stu_birth_ddmmyyyy') {
+            // วันเกิดที่ดึงมามักจะเป็น YYYY-MM-DD
+            if(student.Stu_birth && student.Stu_birth !== '0000-00-00' && student.Stu_birth !== '') {
+                const parts = student.Stu_birth.split('-');
+                if(parts.length === 3) {
+                    // YYYY-MM-DD -> DDMM(YYYY+543)
+                    const year = parseInt(parts[0]);
+                    const thaiYear = year > 2500 ? year : year + 543; // เผื่อเป็นปี ค.ศ.
+                    dynamicPart = parts[2] + parts[1] + thaiYear;
+                }
+            } else {
+                dynamicPart = 'nodate'; // กรณีไม่มีวันเกิด
+            }
+        } else if (dynamicType === 'Stu_citizenid') {
+            dynamicPart = student.Stu_citizenid || '0000000000000';
+        } else if (dynamicType === 'Stu_phone') {
+            dynamicPart = student.Stu_phone || '0000000000';
+            // ตัดช่องว่างหรือขีดออก
+            dynamicPart = dynamicPart.replace(/[^0-9]/g, '');
+        }
+        
+        return prefix + dynamicPart + suffix;
+    }
+    
+    function updatePreview() {
+        $('#passPreview').text(generatePassword(null));
+    }
+    
+    function renderTable() {
+        const tbody = $('#studentListBody');
+        tbody.empty();
+        
+        if(studentsData.length === 0) {
+            tbody.append('<tr><td colspan="6" class="text-center p-8 text-slate-400">ไม่พบรายชื่อนักเรียน</td></tr>');
+            return;
+        }
+        
+        studentsData.forEach((stu, index) => {
+            const email = `std${stu.Stu_id}@phichai.ac.th`;
+            const pwd = generatePassword(stu);
+            
+            tbody.append(`
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors" id="row-${stu.Stu_id}">
+                    <td class="p-3 text-slate-500">${index + 1}</td>
+                    <td class="p-3 font-medium text-slate-800">${stu.Stu_id}</td>
+                    <td class="p-3">${stu.Stu_pre || ''}${stu.Stu_name || ''} ${stu.Stu_sur || ''}</td>
+                    <td class="p-3 text-indigo-600 font-medium">${email}</td>
+                    <td class="p-3 text-emerald-600 font-mono font-bold">${pwd}</td>
+                    <td class="p-3 text-center" id="status-${stu.Stu_id}">
+                        <span class="text-slate-400 text-xs">รอคิว</span>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    // เริ่มประมวลผล Batch
+    $('#startBatchBtn').click(function() {
+        if(studentsData.length === 0) return;
+        
+        const pwdPreview = $('#passPreview').text();
+        if(pwdPreview.length < 8) {
+            Swal.fire({icon: 'warning', title: 'รหัสผ่านสั้นเกินไป', text: 'รหัสผ่าน Google Workspace ต้องมีอย่างน้อย 8 ตัวอักษรครับ'});
+            return;
+        }
+        
+        Swal.fire({
+            title: 'ยืนยันการดำเนินการ?',
+            html: `ระบบจะทำการเปลี่ยนรหัสผ่าน Google Workspace ให้นักเรียนทั้ง <b>${studentsData.length}</b> คนในห้องนี้<br><br><span class="text-rose-600 text-sm">การดำเนินการนี้ใช้เวลาสักครู่ กรุณาอย่าปิดหน้าจอ</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'ยืนยันอัปเดตทั้งห้อง',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                startBatchProcessing();
+            }
+        });
+    });
+    
+    async function startBatchProcessing() {
+        isProcessing = true;
+        $('#startBatchBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> กำลังทำงาน...');
+        $('#loadStudentsBtn, #filterClass, #filterRoom, #passPrefix, #passSuffix, #passDynamic').prop('disabled', true);
+        
+        $('#progressSection').removeClass('hidden');
+        
+        let success = 0;
+        let fail = 0;
+        const total = studentsData.length;
+        
+        for(let i = 0; i < total; i++) {
+            const stu = studentsData[i];
+            const email = `std${stu.Stu_id}@phichai.ac.th`;
+            const pwd = generatePassword(stu);
+            const statusCell = $(`#status-${stu.Stu_id}`);
+            
+            // Highlight row
+            $(`#row-${stu.Stu_id}`).addClass('bg-rose-50');
+            statusCell.html('<i class="fas fa-spinner fa-spin text-rose-500"></i>');
+            
+            try {
+                const response = await fetch('../api/google_workspace_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=reset_password&stu_id=${encodeURIComponent(stu.Stu_id)}&email=${encodeURIComponent(email)}&new_password=${encodeURIComponent(pwd)}`
+                });
+                
+                const result = await response.json();
+                
+                $(`#row-${stu.Stu_id}`).removeClass('bg-rose-50');
+                
+                if(result.status === 'success') {
+                    statusCell.html('<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold"><i class="fas fa-check"></i> สำเร็จ</span>');
+                    success++;
+                } else {
+                    statusCell.html(`<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold" title="${result.message}"><i class="fas fa-times"></i> ผิดพลาด</span>`);
+                    fail++;
+                }
+            } catch (e) {
+                $(`#row-${stu.Stu_id}`).removeClass('bg-rose-50');
+                statusCell.html('<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold"><i class="fas fa-exclamation-triangle"></i> Network Error</span>');
+                fail++;
+            }
+            
+            // Update Progress
+            const done = success + fail;
+            const percent = Math.round((done / total) * 100);
+            $('#progressText').text(`${done}/${total}`);
+            $('#progressPercent').text(`${percent}%`);
+            $('#progressBar').css('width', `${percent}%`);
+            $('#successCount').text(success);
+            $('#failCount').text(fail);
+            
+            // Wait slightly before next request to not overload GAS
+            await new Promise(r => setTimeout(r, 500));
+        }
+        
+        isProcessing = false;
+        $('#startBatchBtn').html('<i class="fas fa-check-double"></i> เสร็จสิ้นแล้ว');
+        $('#loadStudentsBtn, #filterClass, #filterRoom, #passPrefix, #passSuffix, #passDynamic').prop('disabled', false);
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'เสร็จสิ้น!',
+            html: `ทำการเปลี่ยนรหัสผ่านเรียบร้อยแล้ว<br><br>สำเร็จ: <b class="text-emerald-500">${success}</b><br>ล้มเหลว: <b class="text-rose-500">${fail}</b>`,
+        });
+    }
+    
+    // Initial Preview
+    updatePreview();
+});
+</script>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../layouts/admin_app.php';
+?>

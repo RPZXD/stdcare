@@ -54,6 +54,32 @@ try {
             // ส่ง allStatuses = true เพื่อดึงทุกสถานะ
             echo json_encode($studentModel->getAll($filters, true));
             break;
+        
+        case 'list_workspace_history':
+            $filters = [
+                'class'  => $_GET['class'] ?? null,
+                'room'   => $_GET['room'] ?? null
+            ];
+            
+            $sql = "SELECT Stu_id, Stu_no, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, google_password 
+                    FROM student 
+                    WHERE google_password IS NOT NULL AND google_password != '' AND Stu_status = '1'";
+            $params = [];
+            
+            if (!empty($filters['class'])) {
+                $sql .= " AND Stu_major = :class";
+                $params[':class'] = $filters['class'];
+            }
+            if (!empty($filters['room'])) {
+                $sql .= " AND Stu_room = :room";
+                $params[':room'] = $filters['room'];
+            }
+            
+            $sql .= " ORDER BY Stu_major, Stu_room, Stu_no, Stu_name";
+            
+            echo json_encode(['success' => true, 'data' => $db->query($sql, $params)->fetchAll()]);
+            break;
+            
         //
         // !! KEV: สิ้นสุดการแก้ไข !!
         //
