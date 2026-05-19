@@ -38,9 +38,9 @@ ob_start();
                 
                 <!-- Right Action Buttons -->
                 <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 pt-5 lg:pt-0 border-slate-100 dark:border-slate-700/50">
-                    <button onclick="openGeminiSettings()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white text-sm font-bold rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200/50 dark:border-slate-600" title="ตั้งค่า Gemini API Key">
+                    <!-- <button onclick="openGeminiSettings()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white text-sm font-bold rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200/50 dark:border-slate-600" title="ตั้งค่า Gemini API Key">
                         <i class="fas fa-robot text-purple-600"></i> ตั้งค่า AI
-                    </button>
+                    </button> -->
                     <a href="visithome_report_class.php" class="px-5 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-white text-sm font-bold rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm">
                         <i class="fas fa-chart-pie text-indigo-500"></i> สถิติข้อมูล
                     </a>
