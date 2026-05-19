@@ -11,14 +11,12 @@ $currentPath = $_SERVER['REQUEST_URI'];
 $isTeacher = strpos($currentPath, '/teacher/') !== false;
 $isAdmin = strpos($currentPath, '/admin/') !== false;
 $isDirector = strpos($currentPath, '/director/') !== false;
+$isStudent = strpos($currentPath, '/student/') !== false;
+$isOfficer = strpos($currentPath, '/officer/') !== false;
 
 // Base URL for links
 $baseUrl = '';
-if ($isTeacher) {
-    $baseUrl = '../';
-} elseif ($isAdmin) {
-    $baseUrl = '../';
-} elseif ($isDirector) {
+if ($isTeacher || $isAdmin || $isDirector || $isStudent || $isOfficer) {
     $baseUrl = '../';
 }
 
@@ -107,6 +105,52 @@ if ($isTeacher) {
             'icon' => 'fa-home',
             'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
         ],
+    ];
+
+    // If logged in, add direct link back to their portal/dashboard
+    if (isset($_SESSION['Admin_login'])) {
+        $menuItems[] = [
+            'key' => 'admin_dashboard',
+            'name' => 'กลับสู่ระบบดูแลระบบ',
+            'url' => $baseUrl . 'admin/index.php',
+            'icon' => 'fa-user-shield',
+            'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
+        ];
+    } elseif (isset($_SESSION['Teacher_login'])) {
+        $menuItems[] = [
+            'key' => 'teacher_dashboard',
+            'name' => 'กลับสู่ระบบครูที่ปรึกษา',
+            'url' => $baseUrl . 'teacher/index.php',
+            'icon' => 'fa-user-tie',
+            'gradient' => ['from' => 'emerald-500', 'to' => 'green-600'],
+        ];
+    } elseif (isset($_SESSION['Officer_login'])) {
+        $menuItems[] = [
+            'key' => 'officer_dashboard',
+            'name' => 'กลับสู่ระบบเจ้าหน้าที่',
+            'url' => $baseUrl . 'officer/index.php',
+            'icon' => 'fa-user-cog',
+            'gradient' => ['from' => 'cyan-500', 'to' => 'blue-600'],
+        ];
+    } elseif (isset($_SESSION['Director_login'])) {
+        $menuItems[] = [
+            'key' => 'director_dashboard',
+            'name' => 'กลับสู่ระบบผู้บริหาร',
+            'url' => $baseUrl . 'director/index.php',
+            'icon' => 'fa-chart-line',
+            'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
+        ];
+    } elseif (isset($_SESSION['Student_login'])) {
+        $menuItems[] = [
+            'key' => 'student_dashboard',
+            'name' => 'กลับสู่ระบบนักเรียน',
+            'url' => $baseUrl . 'student/index.php',
+            'icon' => 'fa-user-graduate',
+            'gradient' => ['from' => 'sky-500', 'to' => 'blue-600'],
+        ];
+    }
+
+    $menuItems = array_merge($menuItems, [
         [
             'key' => 'statistics',
             'name' => 'สถิติการมาเรียน',
@@ -128,7 +172,7 @@ if ($isTeacher) {
             'icon' => 'fa-calendar',
             'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
         ],
-    ];
+    ]);
 }
 
 $current_page = basename($_SERVER['PHP_SELF']);

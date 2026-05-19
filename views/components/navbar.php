@@ -35,7 +35,7 @@
         </button>
 
         <!-- User Profile (when logged in) -->
-        <?php if (isset($_SESSION['Teacher_login']) || isset($_SESSION['Student_login']) || isset($_SESSION['Officer_login']) || isset($_SESSION['Admin_login'])): ?>
+        <?php if (isset($_SESSION['Teacher_login']) || isset($_SESSION['Student_login']) || isset($_SESSION['Officer_login']) || isset($_SESSION['Admin_login']) || isset($_SESSION['Director_login'])): ?>
         <div class="relative group">
             <button class="flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-black shadow-lg shadow-primary-500/20">
@@ -52,6 +52,7 @@
                             elseif (isset($_SESSION['Student_login'])) echo 'นักเรียน';
                             elseif (isset($_SESSION['Officer_login'])) echo 'เจ้าหน้าที่';
                             elseif (isset($_SESSION['Admin_login'])) echo 'Admin';
+                            elseif (isset($_SESSION['Director_login'])) echo 'ผู้บริหาร';
                         ?>
                     </p>
                 </div>
@@ -60,7 +61,42 @@
             
             <!-- Dropdown -->
             <div class="absolute right-0 mt-3 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100">
-                <div class="p-2 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800">
+                <div class="p-2 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-1">
+                    <?php 
+                    $dashboardUrl = '';
+                    $dashboardName = '';
+                    $dashboardIcon = '';
+                    if (isset($_SESSION['Admin_login'])) {
+                        $dashboardUrl = 'admin/index.php';
+                        $dashboardName = 'ระบบดูแลระบบ';
+                        $dashboardIcon = 'fa-user-shield text-rose-500';
+                    } elseif (isset($_SESSION['Teacher_login'])) {
+                        $dashboardUrl = 'teacher/index.php';
+                        $dashboardName = 'ระบบครูที่ปรึกษา';
+                        $dashboardIcon = 'fa-user-tie text-emerald-500';
+                    } elseif (isset($_SESSION['Officer_login'])) {
+                        $dashboardUrl = 'officer/index.php';
+                        $dashboardName = 'ระบบเจ้าหน้าที่';
+                        $dashboardIcon = 'fa-user-cog text-cyan-500';
+                    } elseif (isset($_SESSION['Director_login'])) {
+                        $dashboardUrl = 'director/index.php';
+                        $dashboardName = 'ระบบผู้บริหาร';
+                        $dashboardIcon = 'fa-chart-line text-violet-500';
+                    } elseif (isset($_SESSION['Student_login'])) {
+                        $dashboardUrl = 'student/index.php';
+                        $dashboardName = 'ระบบนักเรียน';
+                        $dashboardIcon = 'fa-user-graduate text-sky-500';
+                    }
+                    
+                    if (!empty($dashboardUrl)):
+                    ?>
+                    <a href="<?php echo htmlspecialchars($dashboardUrl); ?>" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-all font-bold">
+                        <i class="fas <?php echo $dashboardIcon; ?>"></i>
+                        <span class="text-sm"><?php echo $dashboardName; ?></span>
+                    </a>
+                    <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
+                    <?php endif; ?>
+                    
                     <a href="logout.php" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 transition-all font-bold">
                         <i class="fas fa-sign-out-alt"></i>
                         <span class="text-sm">ออกจากระบบ</span>
