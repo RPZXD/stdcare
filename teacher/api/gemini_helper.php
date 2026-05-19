@@ -11,7 +11,35 @@ if (!isset($_SESSION['Teacher_login'])) {
 
 require_once "../../config/Database.php";
 
-$teacher_id = $_SESSION['Teacher_login'];
+function callGeminiAPI($apiKey, $model, $prompt, $isJson = false) {
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . $apiKey;
+    $data = [
+        'contents' => [['parts' => [['text' => $prompt]]]]
+    ];
+    if ($isJson) {
+        $data['generationConfig'] = ['responseMimeType' => 'application/json'];
+    }
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    return [
+        'success' => ($response !== false && $httpCode === 200),
+        'response' => $response,
+        'http_code' => $httpCode,
+        'error' => $curlError
+    ];
+}
 
 try {
     $connectDB = new Database("phichaia_student");
@@ -70,8 +98,6 @@ try {
                 exit;
             }
 
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey;
-            
             $prompt = "คุณคือผู้ช่วยครูแนะแนวและครูที่ปรึกษาในการบันทึกกิจกรรมโฮมรูมระดับมัธยมศึกษา\n"
                     . "หัวข้อกิจกรรมคือ: \"{$topic}\"\n"
                     . "ประเภทกิจกรรม: \"{$typeName}\"\n\n"
@@ -81,35 +107,24 @@ try {
                     . "  \"result\": \"ผลที่คาดว่าจะได้รับ (ระบุผลลัพธ์ที่นักเรียนจะได้รับหลังจากทำกิจกรรมเสร็จสิ้น กระชับและวัดผลได้ 1-2 ข้อ)\"\n"
                     . "}";
 
-            $data = [
-                'contents' => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['responseMimeType' => 'application/json']
-            ];
-
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
-
-            if ($response === false) {
-                echo json_encode(['success' => false, 'error' => 'การเชื่อมต่อล้มเหลว: ' . $curlError]);
-                exit;
+            $res = callGeminiAPI($apiKey, 'gemini-2.5-flash', $prompt, true);
+            if (!$res['success']) {
+                $errData = json_decode($res['response'], true);
+                $msg = $errData['error']['message'] ?? '';
+                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false);
+                if ($isTransient) {
+                    $res = callGeminiAPI($apiKey, 'gemini-1.5-flash', $prompt, true);
+                }
             }
 
-            if ($httpCode !== 200) {
-                $errData = json_decode($response, true);
-                $msg = $errData['error']['message'] ?? 'Gemini API Error (HTTP ' . $httpCode . ')';
+            if (!$res['success']) {
+                $errData = json_decode($res['response'], true);
+                $msg = $errData['error']['message'] ?? ($res['error'] ? 'การเชื่อมต่อล้มเหลว: ' . $res['error'] : 'Gemini API Error (HTTP ' . $res['http_code'] . ')');
                 echo json_encode(['success' => false, 'error' => $msg]);
                 exit;
             }
+
+            $response = $res['response'];
 
             $resDecoded = json_decode($response, true);
             $textResult = $resDecoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
@@ -184,8 +199,6 @@ try {
                 }
             }
 
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey;
-            
             $prompt = "คุณคือผู้ช่วยครูที่ปรึกษาในการวิเคราะห์ข้อมูลจากการเยี่ยมบ้านนักเรียนระดับมัธยมศึกษา\n"
                     . "ชื่อนักเรียน: \"{$studentName}\"\n"
                     . "ข้อมูลจากการสังเกตและประเมินในการเยี่ยมบ้าน (ข้อ 1 - 18):\n"
@@ -195,34 +208,24 @@ try {
                     . "ความยาวประมาณ 3-5 ประโยค พร้อมเสนอแนะแนวทางแก้ไขหรือความช่วยเหลือที่สอดคล้องกับสถานการณ์ของนักเรียน (เช่น เสนอแนะให้ทุนการศึกษา, ดูแลใกล้ชิดร่วมกับผู้ปกครอง หรือประสานครูแนะแนว)\n"
                     . "(ห้ามมีคำนำเกริ่นนำหรือเครื่องหมายคำพูด Markdown คลุม ให้ส่งเฉพาะเนื้อหาข้อความสรุปรายงานเท่านั้น)";
 
-            $data = [
-                'contents' => [['parts' => [['text' => $prompt]]]]
-            ];
-
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
-
-            if ($response === false) {
-                echo json_encode(['success' => false, 'error' => 'การเชื่อมต่อล้มเหลว: ' . $curlError]);
-                exit;
+            $res = callGeminiAPI($apiKey, 'gemini-2.5-flash', $prompt, false);
+            if (!$res['success']) {
+                $errData = json_decode($res['response'], true);
+                $msg = $errData['error']['message'] ?? '';
+                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false);
+                if ($isTransient) {
+                    $res = callGeminiAPI($apiKey, 'gemini-1.5-flash', $prompt, false);
+                }
             }
 
-            if ($httpCode !== 200) {
-                $errData = json_decode($response, true);
-                $msg = $errData['error']['message'] ?? 'Gemini API Error (HTTP ' . $httpCode . ')';
+            if (!$res['success']) {
+                $errData = json_decode($res['response'], true);
+                $msg = $errData['error']['message'] ?? ($res['error'] ? 'การเชื่อมต่อล้มเหลว: ' . $res['error'] : 'Gemini API Error (HTTP ' . $res['http_code'] . ')');
                 echo json_encode(['success' => false, 'error' => $msg]);
                 exit;
             }
+
+            $response = $res['response'];
 
             $resDecoded = json_decode($response, true);
             $textResult = $resDecoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
