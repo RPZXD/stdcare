@@ -41,9 +41,23 @@ function callGeminiAPI($apiKey, $model, $prompt, $isJson = false) {
     ];
 }
 
+$session_user = $_SESSION['Teacher_login'] ?? '';
+
 try {
     $connectDB = new Database("phichaia_student");
     $pdo = $connectDB->getConnection();
+
+    // Look up real Teach_id using the session user value (could be Teach_id or Teach_name)
+    $stmt = $pdo->prepare("SELECT * FROM teacher WHERE (Teach_id = ? OR Teach_name = ?) AND Teach_status = '1' LIMIT 1");
+    $stmt->execute([$session_user, $session_user]);
+    $teacherData = $stmt->fetch();
+    
+    if (!$teacherData) {
+        echo json_encode(['success' => false, 'error' => 'ไม่พบข้อมูลอาจารย์ผู้สอนในระบบ']);
+        exit;
+    }
+    
+    $teacher_id = $teacherData['Teach_id'];
 
     $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
