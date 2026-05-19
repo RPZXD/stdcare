@@ -101,6 +101,7 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
 
         <form id="<?= $formId ?>" enctype="multipart/form-data">
             <input type="hidden" name="stuId" value="<?= $data['Stu_id']; ?>">
+            <input type="hidden" id="aiStudentName" value="<?= $data['Stu_pre'] . $data['Stu_name'] . " " . $data['Stu_sur']; ?>">
             <input type="hidden" name="term" value="<?= $isEdit ? $data['Term'] : $currentTerm; ?>">
             <input type="hidden" name="pee" value="<?= $isEdit ? $data['Pee'] : $currentPee; ?>">
 
@@ -198,10 +199,15 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
 
                 <!-- Problem Textarea -->
                 <div class="bg-white dark:bg-slate-800/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700">
-                    <h5 class="text-md font-black text-slate-800 dark:text-white mb-4 flex items-center gap-3">
-                        <span class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center text-sm font-bold">20</span>
-                        ปัญหา อุปสรรค และความต้องการความช่วยเหลือ
-                    </h5>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <h5 class="text-md font-black text-slate-800 dark:text-white flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center text-sm font-bold">20</span>
+                            ปัญหา อุปสรรค และความต้องการความช่วยเหลือ
+                        </h5>
+                        <button type="button" onclick="generateVisitSummaryWithAI(this)" class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 self-start sm:self-auto">
+                            <i class="fas fa-magic"></i> ✨ ช่วยสรุปด้วย AI
+                        </button>
+                    </div>
                     <textarea name="vh20" rows="4" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-700 dark:text-slate-300 font-medium" placeholder="ระบุปัญหา หรือข้อเสนอแนะเพิ่มเติม..."><?= $isEdit ? htmlspecialchars($data['vh20']) : '' ?></textarea>
                 </div>
             </div>

@@ -10,31 +10,44 @@ ob_start();
 
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <!-- Header Section -->
-    <div class="mb-12 text-center fade-in-up">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[2.5rem] p-5 md:p-10 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+    <div class="mb-12 fade-in-up">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 lg:p-10 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 relative overflow-hidden">
             <!-- Decorative Background -->
             <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
             
-            <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 transform transition-transform hover:rotate-6">
-                    <i class="fas fa-house-user text-4xl"></i>
+            <div class="relative z-10 flex flex-col lg:flex-row items-center lg:justify-between gap-6 md:gap-8">
+                <!-- Left Title Section -->
+                <div class="flex flex-col md:flex-row items-center gap-5 md:gap-6 text-center md:text-left flex-1 w-full">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0 transform transition-transform hover:rotate-6">
+                        <i class="fas fa-house-user text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-3xl font-black text-slate-800 dark:text-white mb-2 leading-tight">
+                            แบบฟอร์มบันทึกการเยี่ยมบ้านนักเรียน
+                        </h1>
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full font-bold text-sm">
+                                <i class="fas fa-users-viewfinder"></i> ชั้นมัธยมศึกษาปีที่ <?= htmlspecialchars($class . "/" . $room); ?>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900/40 dark:to-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full font-bold text-sm">
+                                <i class="fas fa-calendar-days"></i> ปีการศึกษา <?= htmlspecialchars($pee); ?>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center md:text-left flex-1">
-                    <h1 class="text-2xl md:text-4xl font-black text-slate-800 dark:text-white mb-2 leading-tight">
-                        แบบฟอร์มบันทึกการเยี่ยมบ้านนักเรียน
-                    </h1>
-                    <p class="text-lg text-slate-500 dark:text-slate-400 font-medium">
-                        ชั้นมัธยมศึกษาปีที่ <span class="text-blue-600 dark:text-blue-400"><?= htmlspecialchars($class . "/" . $room); ?></span> • ปีการศึกษา <?= htmlspecialchars($pee); ?>
-                    </p>
-                </div>
-                <div class="flex flex-wrap justify-center gap-3">
-                    <a href="visithome_report_class.php" class="px-6 py-3 bg-white dark:bg-slate-700 text-slate-700 dark:text-white font-bold rounded-2xl shadow-md border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center gap-2">
+                
+                <!-- Right Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 pt-5 lg:pt-0 border-slate-100 dark:border-slate-700/50">
+                    <button onclick="openGeminiSettings()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white text-sm font-bold rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200/50 dark:border-slate-600" title="ตั้งค่า Gemini API Key">
+                        <i class="fas fa-robot text-purple-600"></i> ตั้งค่า AI
+                    </button>
+                    <a href="visithome_report_class.php" class="px-5 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-white text-sm font-bold rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm">
                         <i class="fas fa-chart-pie text-indigo-500"></i> สถิติข้อมูล
                     </a>
-                    <a href="gps_visithome.php" class="px-6 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition-all flex items-center gap-2">
-                        <i class="fas fa-map-location-dot"></i> แผนที่บ้านนักเรียน
+                    <a href="gps_visithome.php" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-map-location-dot"></i> แผนที่บ้าน
                     </a>
-                    <button onclick="printPage()" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <button onclick="printPage()" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-print"></i> พิมพ์รายงาน
                     </button>
                 </div>
@@ -613,6 +626,179 @@ $(document).ready(function() {
         });
     }
 });
+
+// --- Gemini AI Helper Integration ---
+window.openGeminiSettings = function() {
+    fetch('api/gemini_helper.php?action=get_key')
+        .then(res => res.json())
+        .then(res => {
+            let placeholderText = 'วาง Gemini API Key ของคุณที่นี่ (AIzaSy...)';
+            if (res.success && res.has_key) {
+                placeholderText = 'มี Key บันทึกอยู่แล้ว: ' + res.masked_key;
+            }
+
+            Swal.fire({
+                title: '🔑 ตั้งค่า Gemini API Key ส่วนตัว',
+                html: `
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 text-left">
+                        เพื่อประหยัด Token และแยกการใช้งานของครูแต่ละท่าน คุณครูสามารถใช้ API Key ที่สมัครฟรีจาก Google AI Studio
+                        <br>
+                        <a href="https://aistudio.google.com/" target="_blank" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline inline-flex items-center gap-1 mt-2">
+                            🌐 คลิกที่นี่เพื่อขอรับ Key ฟรีจาก Google AI Studio
+                        </a>
+                    </p>
+                    <input type="password" id="geminiApiKeyInput" class="swal2-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white" placeholder="${placeholderText}">
+                    <p class="text-xs text-rose-500 mt-2 text-left">* หากปล่อยว่างและกดยืนยัน จะเป็นการลบ Key ที่บันทึกไว้ออก</p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '💾 บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#4f46e5',
+                preConfirm: () => {
+                    return document.getElementById('geminiApiKeyInput').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    fetch('api/gemini_helper.php?action=save_key', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gemini_api_key: result.value })
+                    })
+                    .then(res => res.json())
+                    .then(saveRes => {
+                        if (saveRes.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึก Key สำเร็จ!',
+                                text: 'คุณสามารถใช้ฟีเจอร์ช่วยวิเคราะห์ด้วย AI ได้ทันที',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: saveRes.error || 'ไม่สามารถบันทึก Key ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+};
+
+window.generateVisitSummaryWithAI = function(btn) {
+    // Find parent form
+    const form = btn.closest('form');
+    if (!form) return;
+
+    // Get student name
+    const studentNameInput = form.querySelector('#aiStudentName');
+    const studentName = studentNameInput ? studentNameInput.value.trim() : 'นักเรียน';
+
+    // Collect checked radio answers
+    const answers = {};
+    let answeredCount = 0;
+    
+    // There are 18 questions
+    for (let i = 1; i <= 18; i++) {
+        const checkedRadio = form.querySelector(`input[name="vh${i}"]:checked`);
+        if (checkedRadio) {
+            const parentLabel = checkedRadio.closest('label');
+            const optionText = parentLabel ? parentLabel.querySelector('span').textContent.trim() : '';
+            if (optionText) {
+                answers[i] = optionText;
+                answeredCount++;
+            }
+        }
+    }
+
+    if (answeredCount < 5) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ข้อมูลไม่เพียงพอ',
+            text: 'กรุณาประเมินหัวข้อการเยี่ยมบ้านอย่างน้อย 5 ข้อ ก่อนเรียกให้ AI ช่วยวิเคราะห์และสรุปผล'
+        });
+        return;
+    }
+
+    const textarea = form.querySelector('textarea[name="vh20"]');
+    if (!textarea) return;
+
+    // Visual feedback
+    const originalBtnHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังวิเคราะห์...';
+    
+    const originalText = textarea.value;
+    textarea.value = 'กำลังวิเคราะห์ข้อมูลเยี่ยมบ้านด้วย AI เพื่อประมวลผลสรุปรายงาน กรุณารอสักครู่...';
+    textarea.classList.add('animate-pulse');
+
+    fetch('api/gemini_helper.php?action=generate_visithome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            student_name: studentName,
+            answers: answers
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        textarea.classList.remove('animate-pulse');
+
+        if (res.success && res.summary) {
+            textarea.value = '';
+            let i = 0;
+            const txt = res.summary;
+            function typeWriter() {
+                if (i < txt.length) {
+                    textarea.value += txt.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 15);
+                } else {
+                    textarea.classList.add('ring-4', 'ring-violet-500/30');
+                    setTimeout(() => textarea.classList.remove('ring-4', 'ring-violet-500/30'), 1500);
+                }
+            }
+            typeWriter();
+        } else if (res.needs_key) {
+            textarea.value = originalText;
+            Swal.fire({
+                icon: 'info',
+                title: 'ต้องตั้งค่า API Key',
+                text: 'กรุณาตั้งค่า API Key เพื่อเปิดใช้งานฟีเจอร์สรุปด้วย AI',
+                showCancelButton: true,
+                confirmButtonText: 'ตั้งค่าเลย',
+                cancelButtonText: 'ภายหลัง'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openGeminiSettings();
+                }
+            });
+        } else {
+            textarea.value = originalText;
+            Swal.fire({
+                icon: 'error',
+                title: 'ล้มเหลว',
+                text: res.error || 'ไม่สามารถวิเคราะห์ข้อมูลด้วย AI ได้'
+            });
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        textarea.classList.remove('animate-pulse');
+        textarea.value = originalText;
+        Swal.fire({
+            icon: 'error',
+            title: 'ผิดพลาด',
+            text: 'การเชื่อมต่อล้มเหลวหรือเกิดข้อผิดพลาดในการประมวลผล'
+        });
+    });
+};
 </script>
 
 <?php

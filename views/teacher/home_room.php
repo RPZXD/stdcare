@@ -219,6 +219,10 @@ ob_start();
             
             <!-- Action Buttons -->
             <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-3">
+                <button onclick="openGeminiSettings()" class="btn-action bg-white dark:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 flex items-center justify-center gap-2" title="ตั้งค่า Gemini API Key">
+                    <i class="fas fa-robot text-purple-600"></i>
+                    <span>ตั้งค่า AI</span>
+                </button>
                 <button onclick="openAddModal()" class="btn-action bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-sky-500/30 flex items-center justify-center gap-2">
                     <i class="fas fa-plus-circle"></i>
                     <span>เพิ่มกิจกรรม</span>
@@ -405,9 +409,14 @@ ob_start();
                 
                 <!-- Title -->
                 <div class="mb-5">
-                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        <i class="fas fa-heading mr-1 text-sky-500"></i> หัวข้อเรื่อง <span class="text-red-500">*</span>
-                    </label>
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <i class="fas fa-heading mr-1 text-sky-500"></i> หัวข้อเรื่อง <span class="text-red-500">*</span>
+                        </label>
+                        <button type="button" onclick="generateHomeroomWithAI('add')" class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-bold rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1">
+                            <i class="fas fa-magic"></i> ✨ ช่วยเขียนด้วย AI
+                        </button>
+                    </div>
                     <input type="text" name="title" id="addTitle" required placeholder="กรอกหัวข้อเรื่องสั้นๆ"
                            class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white focus:border-sky-400 transition">
                 </div>
@@ -956,21 +965,26 @@ async function editActivity(id) {
                     <input type="hidden" name="id" value="${item.h_id}">
                     <div class="mb-5">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">ประเภท</label>
-                        <select name="type" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
+                        <select name="type" id="editType" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
                             ${typeOptions}
                         </select>
                     </div>
                     <div class="mb-5">
-                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">หัวข้อ</label>
-                        <input type="text" name="title" value="${item.h_topic}" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">หัวข้อ</label>
+                            <button type="button" onclick="generateHomeroomWithAI('edit')" class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-bold rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1">
+                                <i class="fas fa-magic"></i> ✨ ช่วยเขียนด้วย AI
+                            </button>
+                        </div>
+                        <input type="text" name="title" id="editTitle" value="${item.h_topic}" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
                     </div>
                     <div class="mb-5">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">รายละเอียด</label>
-                        <textarea name="detail" rows="4" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">${item.h_detail}</textarea>
+                        <textarea name="detail" id="editDetail" rows="4" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">${item.h_detail}</textarea>
                     </div>
                     <div class="mb-5">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">ผลที่คาดหวัง</label>
-                        <textarea name="result" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">${item.h_result}</textarea>
+                        <textarea name="result" id="editResult" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">${item.h_result}</textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
@@ -1109,6 +1123,189 @@ function printReport() {
         printWindow.close();
     };
 }
+
+// --- Gemini AI Helper Integration ---
+window.openGeminiSettings = function() {
+    fetch('api/gemini_helper.php?action=get_key')
+        .then(res => res.json())
+        .then(res => {
+            let placeholderText = 'วาง Gemini API Key ของคุณที่นี่ (AIzaSy...)';
+            if (res.success && res.has_key) {
+                placeholderText = 'มี Key บันทึกอยู่แล้ว: ' + res.masked_key;
+            }
+
+            Swal.fire({
+                title: '🔑 ตั้งค่า Gemini API Key ส่วนตัว',
+                html: `
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 text-left">
+                        เพื่อประหยัด Token และแยกการใช้งานของครูแต่ละท่าน คุณครูสามารถใช้ API Key ที่สมัครฟรีจาก Google AI Studio
+                        <br>
+                        <a href="https://aistudio.google.com/" target="_blank" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline inline-flex items-center gap-1 mt-2">
+                            🌐 คลิกที่นี่เพื่อขอรับ Key ฟรีจาก Google AI Studio
+                        </a>
+                    </p>
+                    <input type="password" id="geminiApiKeyInput" class="swal2-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white" placeholder="${placeholderText}">
+                    <p class="text-xs text-rose-500 mt-2 text-left">* หากปล่อยว่างและกดยืนยัน จะเป็นการลบ Key ที่บันทึกไว้ออก</p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '💾 บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#4f46e5',
+                preConfirm: () => {
+                    return document.getElementById('geminiApiKeyInput').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    fetch('api/gemini_helper.php?action=save_key', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gemini_api_key: result.value })
+                    })
+                    .then(res => res.json())
+                    .then(saveRes => {
+                        if (saveRes.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึก Key สำเร็จ!',
+                                text: 'คุณสามารถใช้ฟีเจอร์ช่วยเขียนรายงานด้วย AI ได้ทันที',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: saveRes.error || 'ไม่สามารถบันทึก Key ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+};
+
+window.generateHomeroomWithAI = function(mode) {
+    const titleInput = document.getElementById(mode === 'add' ? 'addTitle' : 'editTitle');
+    const typeSelect = document.getElementById(mode === 'add' ? 'addType' : 'editType');
+    
+    const topic = titleInput ? titleInput.value.trim() : '';
+    const typeName = typeSelect && typeSelect.selectedIndex > 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+
+    if (!topic) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'กรอกหัวข้อเรื่อง',
+            text: 'กรุณากรอกหัวข้อเรื่องโฮมรูมก่อน เพื่อให้ AI นำไปใช้วางแผนกิจกรรม'
+        });
+        return;
+    }
+
+    const detailArea = document.getElementById(mode === 'add' ? 'addDetail' : 'editDetail');
+    const resultArea = document.getElementById(mode === 'add' ? 'addResult' : 'editResult');
+
+    if (!detailArea || !resultArea) return;
+
+    // Visual feedback
+    const btn = event.currentTarget;
+    const originalBtnHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังเขียน...';
+
+    const originalDetail = detailArea.value;
+    const originalResult = resultArea.value;
+
+    detailArea.value = 'กำลังวิเคราะห์และจัดทำเนื้อหารายละเอียดกิจกรรมด้วย AI...';
+    resultArea.value = 'กำลังประมวลผลที่คาดว่าจะได้รับ...';
+    detailArea.classList.add('animate-pulse');
+    resultArea.classList.add('animate-pulse');
+
+    fetch('api/gemini_helper.php?action=generate_homeroom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            topic: topic,
+            type_name: typeName
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        detailArea.classList.remove('animate-pulse');
+        resultArea.classList.remove('animate-pulse');
+
+        if (res.success && res.data) {
+            // Write Detail
+            detailArea.value = '';
+            let detailTxt = res.data.detail || '';
+            let detailIdx = 0;
+            function typeDetail() {
+                if (detailIdx < detailTxt.length) {
+                    detailArea.value += detailTxt.charAt(detailIdx);
+                    detailIdx++;
+                    setTimeout(typeDetail, 12);
+                } else {
+                    detailArea.classList.add('ring-4', 'ring-violet-500/30');
+                    setTimeout(() => detailArea.classList.remove('ring-4', 'ring-violet-500/30'), 1500);
+                }
+            }
+            typeDetail();
+
+            // Write Result
+            resultArea.value = '';
+            let resultTxt = res.data.result || '';
+            let resultIdx = 0;
+            function typeResult() {
+                if (resultIdx < resultTxt.length) {
+                    resultArea.value += resultTxt.charAt(resultIdx);
+                    resultIdx++;
+                    setTimeout(typeResult, 12);
+                } else {
+                    resultArea.classList.add('ring-4', 'ring-violet-500/30');
+                    setTimeout(() => resultArea.classList.remove('ring-4', 'ring-violet-500/30'), 1500);
+                }
+            }
+            typeResult();
+        } else if (res.needs_key) {
+            detailArea.value = originalDetail;
+            resultArea.value = originalResult;
+            Swal.fire({
+                icon: 'info',
+                title: 'ต้องตั้งค่า API Key',
+                text: 'กรุณาตั้งค่า API Key เพื่อเปิดใช้งานฟีเจอร์ช่วยเขียนด้วย AI',
+                showCancelButton: true,
+                confirmButtonText: 'ตั้งค่าเลย',
+                cancelButtonText: 'ภายหลัง'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openGeminiSettings();
+                }
+            });
+        } else {
+            detailArea.value = originalDetail;
+            resultArea.value = originalResult;
+            Swal.fire({
+                icon: 'error',
+                title: 'ล้มเหลว',
+                text: res.error || 'ไม่สามารถสร้างเนื้อหาด้วย AI ได้'
+            });
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+        detailArea.classList.remove('animate-pulse');
+        resultArea.classList.remove('animate-pulse');
+        detailArea.value = originalDetail;
+        resultArea.value = originalResult;
+        Swal.fire({
+            icon: 'error',
+            title: 'ผิดพลาด',
+            text: 'การเชื่อมต่อล้มเหลวหรือเกิดข้อผิดพลาดในการประมวลผล'
+        });
+    });
+};
 </script>
 
 <?php
