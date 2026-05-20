@@ -27,6 +27,7 @@ $color = $h['color'] ?? 'indigo';
         <?php foreach ($h['actions'] as $action): ?>
         <button id="<?php echo $action['id']; ?>" 
                 <?php if (!empty($action['onclick'])) echo 'onclick="' . $action['onclick'] . '"'; ?>
+                <?php if (!empty($action['style'])) echo 'style="' . $action['style'] . '"'; ?>
                 class="flex-1 lg:flex-none px-4 lg:px-6 py-2.5 lg:py-3 bg-<?php echo $action['color'] ?? $color; ?>-600 text-white rounded-lg lg:rounded-xl font-bold text-xs lg:text-sm shadow-lg shadow-<?php echo $action['color'] ?? $color; ?>-600/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
             <i class="fas <?php echo $action['icon'] ?? 'fa-plus'; ?>"></i> 
             <span><?php echo $action['text'] ?? ''; ?></span>

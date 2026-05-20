@@ -54,6 +54,33 @@ try {
             // ส่ง allStatuses = true เพื่อดึงทุกสถานะ
             echo json_encode($studentModel->getAll($filters, true));
             break;
+
+        case 'reorder_numbers':
+            $class = $_GET['class'] ?? $_POST['class'] ?? null;
+            $room = $_GET['room'] ?? $_POST['room'] ?? null;
+            
+            $result = $studentModel->reorderStudentNumbers($class, $room);
+            
+            if ($result['success']) {
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_reorder_numbers_success',
+                    'status_code' => 200,
+                    'message' => 'Admin reordered student numbers. Count: ' . $result['count'] . ($class ? " (Class: $class, Room: $room)" : " (All rooms)")
+                ]);
+            } else {
+                $logger->log([
+                    'user_id' => $admin_id,
+                    'role' => $admin_role,
+                    'action_type' => 'student_reorder_numbers_fail',
+                    'status_code' => 500,
+                    'message' => 'Failed to reorder student numbers. Error: ' . $result['message']
+                ]);
+            }
+            
+            echo json_encode($result);
+            break;
         
         case 'list_workspace_history':
             $filters = [

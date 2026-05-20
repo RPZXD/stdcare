@@ -269,6 +269,10 @@ ob_start();
             <i class="fas fa-list-ul"></i>
             <span>พิมพ์รายชื่อ</span>
         </button>
+        <button onclick="window.open('../print_student.php?class=' + classValue + '&room=' + roomValue, '_blank')" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-lg hover:shadow-xl hover:shadow-sky-500/30 transition-all flex items-center justify-center gap-2 hover:scale-[1.02]">
+            <i class="fas fa-table"></i>
+            <span>ตารางเช็คชื่อ/ลงคะแนน</span>
+        </button>
         <button id="printStudentCards" class="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-lg hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 hover:scale-[1.02]">
             <i class="fas fa-id-card"></i>
             <span>พิมพ์บัตร (Card)</span>

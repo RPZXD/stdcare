@@ -410,6 +410,91 @@ class Student
     }
 
     /**
+     * เรียงเลขที่ (Stu_no) ใหม่ สำหรับห้องที่กำหนด หรือทุกห้อง
+     * โดยเรียงลำดับจาก:
+     * 1. เพศ (คำนำหน้า ชาย/หญิง) - ชายขึ้นก่อน หญิงตามหลัง
+     * 2. คำนำหน้า (เด็กชาย/เด็กหญิง มาก่อน นาย/นางสาว)
+     * 3. เลขประจำตัวนักเรียน (Stu_id)
+     *
+     * @param string|null $class ชั้นเรียน (Stu_major)
+     * @param string|null $room ห้องเรียน (Stu_room)
+     * @return array ผลลัพธ์การทำงาน ['success' => bool, 'count' => int, 'message' => string]
+     */
+    public function reorderStudentNumbers($class = null, $room = null)
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = "SELECT Stu_id, Stu_major, Stu_room, Stu_pre, Stu_sex 
+                    FROM student 
+                    WHERE Stu_status = '1' 
+                      AND Stu_major IS NOT NULL AND Stu_major != ''
+                      AND Stu_room IS NOT NULL AND Stu_room != ''";
+            
+            $params = [];
+            if (!empty($class) && !empty($room)) {
+                $sql .= " AND Stu_major = :class AND Stu_room = :room";
+                $params[':class'] = $class;
+                $params[':room'] = $room;
+            }
+
+            // เรียงตาม: 
+            // 1. ระดับชั้น (Stu_major)
+            // 2. ห้อง (Stu_room)
+            // 3. เพศจากคำนำหน้า (เด็กชาย/นาย = 1, เด็กหญิง/นางสาว = 2, อื่นๆ = 3)
+            // 4. ตัวอักษรคำนำหน้า (เช่น เด็กชาย มาก่อน นาย)
+            // 5. รหัสประจำตัวนักเรียน (Stu_id)
+            $sql .= " ORDER BY CAST(Stu_major AS UNSIGNED) ASC, 
+                             CAST(Stu_room AS UNSIGNED) ASC, 
+                             (CASE 
+                                WHEN Stu_pre IN ('เด็กชาย', 'นาย') THEN 1 
+                                WHEN Stu_pre IN ('เด็กหญิง', 'นางสาว') THEN 2 
+                                ELSE 3 
+                              END) ASC,
+                             Stu_pre ASC, 
+                             Stu_id ASC";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            $students = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            $currentClass = null;
+            $currentRoom = null;
+            $counter = 1;
+            
+            $updateSql = "UPDATE student SET Stu_no = :stu_no WHERE Stu_id = :stu_id";
+            $updateStmt = $this->pdo->prepare($updateSql);
+            
+            foreach ($students as $student) {
+                $s_class = $student['Stu_major'];
+                $s_room = $student['Stu_room'];
+                
+                // หากเปลี่ยนห้อง ให้เริ่มนับเลขที่ 1 ใหม่
+                if ($s_class !== $currentClass || $s_room !== $currentRoom) {
+                    $currentClass = $s_class;
+                    $currentRoom = $s_room;
+                    $counter = 1;
+                }
+                
+                $updateStmt->execute([
+                    ':stu_no' => $counter,
+                    ':stu_id' => $student['Stu_id']
+                ]);
+                
+                $counter++;
+            }
+            
+            $this->pdo->commit();
+            return ['success' => true, 'count' => count($students)];
+        } catch (\Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * (เพิ่มใหม่) ดึงข้อมูลนักเรียนที่ยังไม่มี RFID (สำหรับ DataTables SSP ใน rfid.php)
      * @param array $params (ค่าที่ส่งมาจาก DataTables: draw, start, length, search, major, room)
      * @return array

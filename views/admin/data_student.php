@@ -29,6 +29,8 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
         'color' => 'indigo',
         'actions' => [
             ['id' => 'btnSyncRegis', 'icon' => 'fa-sync', 'text' => 'ดึงข้อมูลจากระบบรับสมัคร', 'color' => 'amber'],
+            ['id' => 'btnReorderStuNo', 'icon' => 'fa-sort-numeric-down', 'text' => 'เรียงเลขที่ใหม่', 'color' => 'fuchsia', 'style' => 'background-color: #d946ef !important; box-shadow: 0 10px 15px -3px rgba(217, 70, 239, 0.3) !important;'],
+            ['id' => 'btnOpenPrintChecklist', 'icon' => 'fa-print', 'text' => 'พิมพ์ใบเช็คชื่อ/ลงคะแนน', 'color' => 'sky', 'style' => 'background-color: #0ea5e9 !important; box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3) !important;', 'onclick' => 'window.open(\'../print_student.php\', \'_blank\')'],
             ['id' => 'btnExport', 'icon' => 'fa-file-export', 'text' => 'ส่งออกข้อมูล', 'color' => 'indigo'],
             ['id' => 'btnAddStudent', 'icon' => 'fa-user-plus', 'text' => 'เพิ่มนักเรียน', 'color' => 'emerald']
         ]
@@ -1085,6 +1087,77 @@ $(document).ready(function() {
             }
         });
     });
+
+    // เรียงเลขที่ใหม่ตามเพศ คำนำหน้า และรหัสประจำตัว
+    $('#btnReorderStuNo').click(function() {
+        const cls = $('#filterClass').val();
+        const room = $('#filterRoom').val();
+        
+        let confirmText = "ระบบจะเรียงเลขที่ (Stu_no) ของนักเรียนใหม่ทั้งหมด ทุกระดับชั้นและทุกห้องเรียน โดยเรียงตาม คำนำหน้า (ชาย/หญิง) และเลขประจำตัวนักเรียน";
+        let confirmTitle = "เรียงเลขที่ใหม่ทุกห้องเรียน?";
+        let requestUrl = '../controllers/StudentController.php?action=reorder_numbers';
+        
+        if (cls && room) {
+            confirmTitle = `เรียงเลขที่ใหม่ ห้อง ม.${cls}/${room}?`;
+            confirmText = `ระบบจะเรียงเลขที่ (Stu_no) ของนักเรียนใหม่เฉพาะชั้น ม.${cls} ห้อง ${room} เท่านั้น โดยเรียงตาม คำนำหน้า (ชาย/หญิง) และเลขประจำตัวนักเรียน`;
+            requestUrl += `&class=${encodeURIComponent(cls)}&room=${encodeURIComponent(room)}`;
+        } else if (cls || room) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกทั้งชั้นและห้อง',
+                text: 'หากต้องการเรียงเฉพาะห้อง กรุณาเลือกทั้งชั้นเรียนและห้องเรียนในตัวกรอง หรือไม่เลือกเลยเพื่อเรียงใหม่ทุกห้องเรียน',
+                showCancelButton: true,
+                confirmButtonColor: '#d946ef',
+                confirmButtonText: 'เรียงทุกห้องเรียน',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeReorder('../controllers/StudentController.php?action=reorder_numbers', 'เรียงเลขที่ใหม่ทุกห้องเรียน');
+                }
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: confirmTitle,
+            text: confirmText,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d946ef',
+            confirmButtonText: '✅ ใช่, เริ่มเรียงเลขที่ใหม่',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeReorder(requestUrl, confirmTitle);
+            }
+        });
+    });
+
+    function executeReorder(url, title) {
+        Swal.fire({
+            title: 'กำลังเรียงลำดับข้อมูล...',
+            html: '<div class="flex justify-center mt-3"><i class="fas fa-spinner fa-spin text-4xl text-fuchsia-500"></i></div>',
+            allowOutsideClick: false,
+            showConfirmButton: false
+        });
+        
+        $.post(url, function(res) {
+            if (res.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'เรียงเลขที่สำเร็จ!',
+                    text: `ดำเนินการเรียงเลขที่นักเรียนใหม่เสร็จสิ้นจำนวน ${res.count} รายการ`,
+                    confirmButtonText: 'ตกลง'
+                }).then(() => {
+                    studentTable.ajax.reload();
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'ล้มเหลว!', text: res.message || 'เกิดข้อผิดพลาดในการทำงาน' });
+            }
+        }, 'json').fail(function() {
+            Swal.fire({ icon: 'error', title: 'ล้มเหลว!', text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์' });
+        });
+    }
 
     // Do Export
     $('#btnDoExport').click(function() {
