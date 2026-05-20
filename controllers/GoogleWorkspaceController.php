@@ -4,7 +4,7 @@ namespace Controllers;
 class GoogleWorkspaceController {
     // กำหนด URL ของ GAS Web App และ Token ที่นี่
     // แนะนำให้แอดมินแก้ไขหลังจาก Deploy GAS สำเร็จ
-    private $gasUrl = "https://script.google.com/macros/s/AKfycbw9y282gvnOXz95yrN16PcS4jYOtElEV-lRpWnk_iFaIBbg_b9jP6-pj0aVsRdw3ZO1oQ/exec"; 
+    private $gasUrl = "https://script.google.com/macros/s/AKfycbwxUnHDxqKpGVmaPV34X-d0o7gYp6g-KF1PS5il4-wSP0uOox05EJxYJq2YW-T8zvnV/exec"; 
     private $secretToken = "stdcare_phichai_secret_token_1234";
 
     public function __construct() {
