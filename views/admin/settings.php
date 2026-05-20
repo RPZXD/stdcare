@@ -118,6 +118,14 @@ $activePage = "settings";
                         <input type="date" name="term_end_date" value="<?= htmlspecialchars($term_end_date) ?>" required
                             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
                     </div>
+                    <div class="sm:col-span-2 mt-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1">
+                            <i class="fas fa-ban text-rose-500"></i> ยกเว้นตัดขาดเรียนอัตโนมัติ (ระดับชั้น)
+                        </label>
+                        <input type="text" name="exclude_absent_grades" placeholder="เช่น 1,4 (คั่นด้วยลูกน้ำ) ปล่อยว่างถ้าไม่ต้องการยกเว้น" value="<?= htmlspecialchars($exclude_absent_grades) ?>"
+                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all">
+                        <p class="text-[10px] text-slate-500 mt-1">ตัวอย่าง: ใส่ <strong>1,4</strong> เพื่อไม่ให้สคริปต์ตัดขาดเรียนอัตโนมัติทำงานกับนักเรียน ม.1 และ ม.4 (เหมาะสำหรับกรณีเด็กยังไม่มีบัตรสแกน)</p>
+                    </div>
                 </div>
                 <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-black rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-save"></i> บันทึกการตั้งค่าเวลา

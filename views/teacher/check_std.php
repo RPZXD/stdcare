@@ -171,6 +171,16 @@ ob_start();
     </div>
 </div>
 
+<?php if ($notChecked > 0): ?>
+<!-- Batch Check All Present -->
+<div class="flex justify-end mb-4 px-2 md:px-0">
+    <button type="button" id="btn-check-all-present" class="btn-shine bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+        <i class="fas fa-check-double text-lg"></i>
+        <span>มาเรียนทั้งหมด (<?php echo $notChecked; ?> คนที่เหลือ)</span>
+    </button>
+</div>
+<?php endif; ?>
+
 <!-- Attendance Form -->
 <form id="attendance-form" method="post">
     <input type="hidden" name="date" value="<?php echo htmlspecialchars($date); ?>">
@@ -643,6 +653,27 @@ document.addEventListener('DOMContentLoaded', function() {
             saveBtn.innerHTML = '<i class="fas fa-save text-xl"></i> บันทึกทั้งหมด';
         });
     });
+
+    // Check All Present logic
+    const btnCheckAll = document.getElementById('btn-check-all-present');
+    if (btnCheckAll) {
+        btnCheckAll.addEventListener('click', function() {
+            document.querySelectorAll('input[type="radio"][value="1"]').forEach(radio => {
+                if (radio.name.startsWith('attendance_status[')) {
+                    radio.checked = true;
+                }
+            });
+            Swal.fire({
+                icon: 'success',
+                title: '✅ เลือก "มาเรียน" ทั้งหมดแล้ว',
+                text: 'กรุณากดปุ่ม "บันทึกทั้งหมด" เพื่อยืนยันข้อมูล',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        });
+    }
 });
 </script>
 

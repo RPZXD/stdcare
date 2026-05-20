@@ -59,6 +59,7 @@ $leave_early_time = $timeSettings['leave_early_time'] ?? '15:40:00';
 $scan_crossover_time = $timeSettings['scan_crossover_time'] ?? '12:00:00';
 $term_start_date = $timeSettings['term_start_date'] ?? date('Y-m-d');
 $term_end_date = $timeSettings['term_end_date'] ?? date('Y-m-d');
+$exclude_absent_grades = $timeSettings['exclude_absent_grades'] ?? '';
 
 // Get school holidays
 try {

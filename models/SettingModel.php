@@ -537,7 +537,8 @@ class SettingModel
                 'leave_early_time', 
                 'scan_crossover_time',
                 'term_start_date',
-                'term_end_date'
+                'term_end_date',
+                'exclude_absent_grades'
             ];
             
             if (in_array($key, $allowed_keys) && !empty($value)) {

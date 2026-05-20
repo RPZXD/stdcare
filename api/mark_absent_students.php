@@ -16,13 +16,14 @@ try {
     $today = date('Y-m-d');
     
     // ดึงการตั้งค่าที่จำเป็นจากฐานข้อมูล
-    $stmtSettings = $conn->prepare("SELECT setting_key, setting_value FROM time_settings WHERE setting_key IN ('arrival_absent_time', 'term_start_date', 'term_end_date')");
+    $stmtSettings = $conn->prepare("SELECT setting_key, setting_value FROM time_settings WHERE setting_key IN ('arrival_absent_time', 'term_start_date', 'term_end_date', 'exclude_absent_grades')");
     $stmtSettings->execute();
     $settings = $stmtSettings->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $term_start_date = $settings['term_start_date'] ?? null;
     $term_end_date = $settings['term_end_date'] ?? null;
     $absentTimeSetting = $settings['arrival_absent_time'] ?? null;
+    $exclude_absent_grades = $settings['exclude_absent_grades'] ?? '';
 
     // เช็คระยะเวลาเปิด-ปิดภาคเรียน
     if ($term_start_date && $term_end_date) {
@@ -69,6 +70,19 @@ try {
     // ============================================================
     // ส่วนที่ 1: ตัดขาดเรียนนักเรียนที่ยังไม่ได้สแกน/เช็คชื่อ
     // ============================================================
+    
+    // จัดการเงื่อนไขยกเว้นระดับชั้น
+    $excludeCondition = "";
+    if (!empty(trim($exclude_absent_grades))) {
+        $grades = array_map('intval', explode(',', $exclude_absent_grades));
+        $grades = array_filter($grades, function($val) { return $val > 0; });
+        if (!empty($grades)) {
+            $gradesStr = implode(',', $grades);
+            $excludeCondition = "AND s.Stu_major NOT IN ($gradesStr)";
+            echo "Excluding grades: $gradesStr\n";
+        }
+    }
+
     $sql = "
         INSERT INTO student_attendance 
             (student_id, attendance_date, attendance_status, checked_by, term, year, reason)
@@ -86,6 +100,7 @@ try {
             student_attendance a ON s.Stu_id = a.student_id AND a.attendance_date = :today
         WHERE 
             s.Stu_status = '1' 
+            $excludeCondition
             AND a.id IS NULL;
     ";
 
