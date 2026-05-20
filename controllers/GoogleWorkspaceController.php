@@ -30,6 +30,26 @@ class GoogleWorkspaceController {
     }
 
     /**
+     * อัปเดตชื่อจริงและนามสกุลใน Google Workspace
+     *
+     * @param string $email อีเมลนักเรียน
+     * @param string $firstName ชื่อจริงใหม่
+     * @param string $lastName นามสกุลใหม่
+     * @return array ผลลัพธ์จาก API
+     */
+    public function updateName($email, $firstName, $lastName) {
+        $payload = [
+            "token" => $this->secretToken,
+            "action" => "updateName",
+            "email" => $email,
+            "firstName" => $firstName,
+            "lastName" => $lastName
+        ];
+
+        return $this->sendRequest($payload);
+    }
+
+    /**
      * ดึงข้อมูลบัญชี (ตัวอย่าง)
      */
     public function getUserInfo($email) {

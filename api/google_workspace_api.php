@@ -82,6 +82,25 @@ try {
             echo json_encode($result);
             break;
 
+        case 'update_name':
+            $email = $input['email'] ?? '';
+            $firstName = $input['firstName'] ?? '';
+            $lastName = $input['lastName'] ?? '';
+            
+            if (empty($email) || empty($firstName) || empty($lastName)) {
+                echo json_encode(['status' => 'error', 'message' => 'Email, firstName and lastName are required.']);
+                exit();
+            }
+
+            if (strpos($email, '@phichai.ac.th') === false) {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid email domain. Must be @phichai.ac.th']);
+                exit();
+            }
+
+            $result = $controller->updateName($email, $firstName, $lastName);
+            echo json_encode($result);
+            break;
+
         default:
             echo json_encode(['status' => 'error', 'message' => 'Unknown action.']);
             break;
