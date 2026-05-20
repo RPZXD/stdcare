@@ -122,6 +122,9 @@ $activePage = "workspace"; // จะต้องไปเพิ่มใน admi
                 <table class="w-full text-left border-collapse" id="previewTable">
                     <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-bold sticky top-0 z-10">
                         <tr>
+                            <th class="p-3 border-b border-slate-200 w-10 text-center">
+                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer" checked>
+                            </th>
                             <th class="p-3 border-b border-slate-200">#</th>
                             <th class="p-3 border-b border-slate-200">รหัส</th>
                             <th class="p-3 border-b border-slate-200">ชื่อ-สกุล</th>
@@ -132,7 +135,7 @@ $activePage = "workspace"; // จะต้องไปเพิ่มใน admi
                     </thead>
                     <tbody id="studentListBody" class="text-sm">
                         <tr>
-                            <td colspan="6" class="text-center p-8 text-slate-400">
+                            <td colspan="7" class="text-center p-8 text-slate-400">
                                 <i class="fas fa-inbox text-4xl mb-3 opacity-50 block"></i>
                                 กรุณาเลือกระดับชั้นและห้องเรียน แล้วกด "โหลดรายชื่อ"
                             </td>
@@ -254,9 +257,12 @@ $(document).ready(function() {
         tbody.empty();
         
         if(studentsData.length === 0) {
-            tbody.append('<tr><td colspan="6" class="text-center p-8 text-slate-400">ไม่พบรายชื่อนักเรียน</td></tr>');
+            tbody.append('<tr><td colspan="7" class="text-center p-8 text-slate-400">ไม่พบรายชื่อนักเรียน</td></tr>');
+            updateStartButton();
             return;
         }
+        
+        $('#selectAll').prop('checked', true); // Reset select all
         
         studentsData.forEach((stu, index) => {
             const email = `std${stu.Stu_id}@phichai.ac.th`;
@@ -264,6 +270,9 @@ $(document).ready(function() {
             
             tbody.append(`
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors" id="row-${stu.Stu_id}">
+                    <td class="p-3 text-center">
+                        <input type="checkbox" class="stu-checkbox rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer" value="${stu.Stu_id}" checked>
+                    </td>
                     <td class="p-3 text-slate-500">${index + 1}</td>
                     <td class="p-3 font-medium text-slate-800">${stu.Stu_id}</td>
                     <td class="p-3">${stu.Stu_pre || ''}${stu.Stu_name || ''} ${stu.Stu_sur || ''}</td>
@@ -275,11 +284,39 @@ $(document).ready(function() {
                 </tr>
             `);
         });
+        updateStartButton();
+    }
+
+    // Select All logic
+    $(document).on('change', '#selectAll', function() {
+        $('.stu-checkbox').prop('checked', $(this).prop('checked'));
+        updateStartButton();
+    });
+
+    // Individual Checkbox logic
+    $(document).on('change', '.stu-checkbox', function() {
+        if ($('.stu-checkbox:checked').length === $('.stu-checkbox').length) {
+            $('#selectAll').prop('checked', true);
+        } else {
+            $('#selectAll').prop('checked', false);
+        }
+        updateStartButton();
+    });
+
+    function updateStartButton() {
+        const checkedCount = $('.stu-checkbox:checked').length;
+        const btn = $('#startBatchBtn');
+        if (checkedCount > 0 && studentsData.length > 0) {
+            btn.prop('disabled', false).html(`<i class="fas fa-play"></i> เริ่มดำเนินการ (${checkedCount} รายการ)`);
+        } else {
+            btn.prop('disabled', true).html(`<i class="fas fa-play"></i> เริ่มดำเนินการ (0 รายการ)`);
+        }
     }
 
     // เริ่มประมวลผล Batch
     $('#startBatchBtn').click(function() {
-        if(studentsData.length === 0) return;
+        const selectedIds = $('.stu-checkbox:checked').map(function() { return $(this).val(); }).get();
+        if(selectedIds.length === 0) return;
         
         const pwdPreview = $('#passPreview').text();
         if(pwdPreview.length < 8) {
@@ -289,33 +326,34 @@ $(document).ready(function() {
         
         Swal.fire({
             title: 'ยืนยันการดำเนินการ?',
-            html: `ระบบจะทำการเปลี่ยนรหัสผ่าน Google Workspace ให้นักเรียนทั้ง <b>${studentsData.length}</b> คนในห้องนี้<br><br><span class="text-rose-600 text-sm">การดำเนินการนี้ใช้เวลาสักครู่ กรุณาอย่าปิดหน้าจอ</span>`,
+            html: `ระบบจะทำการเปลี่ยนรหัสผ่าน Google Workspace ให้นักเรียนจำนวน <b>${selectedIds.length}</b> รายการที่เลือก<br><br><span class="text-rose-600 text-sm">การดำเนินการนี้ใช้เวลาสักครู่ กรุณาอย่าปิดหน้าจอ</span>`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
             cancelButtonColor: '#64748b',
-            confirmButtonText: 'ยืนยันอัปเดตทั้งห้อง',
+            confirmButtonText: 'ยืนยันอัปเดต',
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                startBatchProcessing();
+                startBatchProcessing(selectedIds);
             }
         });
     });
     
-    async function startBatchProcessing() {
+    async function startBatchProcessing(selectedIds) {
         isProcessing = true;
         $('#startBatchBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> กำลังทำงาน...');
-        $('#loadStudentsBtn, #filterClass, #filterRoom, #passPrefix, #passSuffix, #passDynamic').prop('disabled', true);
+        $('#loadStudentsBtn, #filterClass, #filterRoom, #passPrefix, #passSuffix, #passDynamic, #selectAll, .stu-checkbox').prop('disabled', true);
         
         $('#progressSection').removeClass('hidden');
         
         let success = 0;
         let fail = 0;
-        const total = studentsData.length;
+        const selectedStudents = studentsData.filter(stu => selectedIds.includes(stu.Stu_id));
+        const total = selectedStudents.length;
         
         for(let i = 0; i < total; i++) {
-            const stu = studentsData[i];
+            const stu = selectedStudents[i];
             const email = `std${stu.Stu_id}@phichai.ac.th`;
             const pwd = generatePassword(stu);
             const statusCell = $(`#status-${stu.Stu_id}`);
