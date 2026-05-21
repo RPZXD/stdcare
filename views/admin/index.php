@@ -112,8 +112,8 @@ $activePage = "dashboard";
                 <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Score Group Details</p>
             </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <div class="admin-table-shell">
+            <table class="admin-responsive-table w-full">
                 <thead>
                     <tr class="bg-rose-50/50 dark:bg-slate-800/50">
                         <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left rounded-l-2xl">กลุ่ม</th>

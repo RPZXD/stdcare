@@ -81,8 +81,8 @@ $activePage = "log";
             </div>
         </div>
         
-        <div class="overflow-x-auto">
-            <table id="logTable" class="w-full text-left border-separate border-spacing-y-2">
+        <div class="admin-table-shell">
+            <table id="logTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
                     <tr class="bg-indigo-50/50 dark:bg-slate-800/50">
                         <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl text-center w-12"></th>

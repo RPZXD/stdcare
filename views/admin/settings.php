@@ -195,8 +195,8 @@ $activePage = "settings";
                 </button>
             </form>
             
-            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-                <table class="w-full text-left border-collapse">
+            <div class="admin-table-shell rounded-xl border border-slate-200 dark:border-slate-700">
+                <table class="admin-responsive-table w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                             <th class="p-4 border-b border-slate-200 dark:border-slate-700">วันที่</th>

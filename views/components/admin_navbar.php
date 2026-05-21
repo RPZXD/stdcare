@@ -17,7 +17,7 @@ $userName = $userData['Teach_name'] ?? 'ผู้ดูแลระบบ';
 
 <!-- Top Navbar -->
 <header class="sticky top-0 z-30 glass-effect border-b border-white/20 dark:border-slate-800 no-print">
-    <div class="flex items-center justify-between px-6 py-4">
+    <div class="admin-navbar-inner flex items-center justify-between px-6 py-4">
         <!-- Left: Page Title -->
         <div class="flex items-center space-x-4">
             <div class="hidden lg:block">

@@ -49,8 +49,8 @@ $activePage = "behavior";
 
     <!-- Data Table -->
     <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
-        <div class="overflow-x-auto">
-            <table id="behaviorTable" class="w-full text-left border-separate border-spacing-y-2">
+        <div class="admin-table-shell">
+            <table id="behaviorTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
                     <tr class="bg-rose-50/50 dark:bg-slate-800/50">
                         <th class="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl text-center w-24">วันที่</th>
@@ -215,8 +215,7 @@ $activePage = "behavior";
 .btn-action:hover { transform: scale(1.15); }
 
 @media (max-width: 768px) {
-    #behaviorTable { font-size: 12px; }
-    #behaviorTable th, #behaviorTable td { padding: 8px 4px; }
+    .btn-action { margin: 2px; }
 }
 </style>
 

@@ -53,7 +53,7 @@ $activePage = "workspace_history";
 
 <div class="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl shadow-xl shadow-slate-200/30 overflow-hidden">
     <div class="p-0">
-        <table id="historyTable" class="w-full text-left border-collapse" style="width:100%">
+        <table id="historyTable" class="admin-responsive-table w-full text-left border-collapse" style="width:100%">
             <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
                     <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">ชั้น/ห้อง</th>

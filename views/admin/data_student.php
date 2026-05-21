@@ -96,8 +96,8 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 
     <!-- Data Table -->
     <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
-        <div class="overflow-x-auto">
-            <table id="studentTable" class="w-full text-left border-separate border-spacing-y-2">
+        <div class="admin-table-shell">
+            <table id="studentTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
                     <tr class="bg-indigo-50/50 dark:bg-slate-800/50">
                         <th class="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl text-center w-14">รูป</th>
@@ -528,8 +528,6 @@ $prefixes = ['เด็กชาย', 'เด็กหญิง', 'นาย', '
 #studentTable .dataTables_wrapper { overflow-x: auto; }
 
 @media (max-width: 768px) {
-    #studentTable { font-size: 12px; }
-    #studentTable th, #studentTable td { padding: 6px 4px; }
     .btn-sm { padding: 4px 5px; font-size: 13px; }
     .action-buttons { gap: 0; }
 }

@@ -88,8 +88,8 @@ $activePage = "parent";
 
     <!-- Data Table -->
     <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
-        <div class="overflow-x-auto">
-            <table id="parentTable" class="w-full text-left border-separate border-spacing-y-2">
+        <div class="admin-table-shell">
+            <table id="parentTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
                     <tr class="bg-teal-50/50 dark:bg-slate-800/50">
                         <th class="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl">รหัส</th>
@@ -209,8 +209,7 @@ $activePage = "parent";
 .btn-edit:hover { transform: scale(1.1); background: #d97706; }
 
 @media (max-width: 768px) {
-    #parentTable { font-size: 12px; }
-    #parentTable th, #parentTable td { padding: 8px 4px; }
+    .btn-edit { width: 100%; }
 }
 </style>
 

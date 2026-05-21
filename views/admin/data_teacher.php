@@ -104,8 +104,8 @@ $statuses = [
 
     <!-- Data Table -->
     <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
-        <div class="overflow-x-auto">
-            <table id="teacherTable" class="w-full text-left border-separate border-spacing-y-2">
+        <div class="admin-table-shell">
+            <table id="teacherTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
                     <tr class="bg-sky-50/50 dark:bg-slate-800/50">
                         <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl text-center w-16">รูป</th>
@@ -470,34 +470,9 @@ $statuses = [
 .avatar-thumb:hover { transform: scale(1.1); }
 .avatar-placeholder { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #64748b; font-size: 20px; }
 
-/* Mobile Card View */
-@media (max-width: 1024px) {
-    #teacherTable thead { display: none; }
-    #teacherTable tbody tr {
-        display: block;
-        background: white;
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .dark #teacherTable tbody tr { background: rgba(30, 41, 59, 0.5); }
-    #teacherTable tbody td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    #teacherTable tbody td:last-child { border-bottom: none; }
-    #teacherTable tbody td::before {
-        content: attr(data-label);
-        font-weight: 800;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #94a3b8;
-    }
+@media (max-width: 767.98px) {
+    #teacherTable .avatar-thumb,
+    #teacherTable .avatar-placeholder { width: 40px; height: 40px; border-radius: 10px; }
 }
 </style>
 

@@ -115,7 +115,7 @@ $activePage = "workspace_name_batch";
 
             <!-- Table -->
             <div class="flex-1 overflow-auto rounded-xl border border-slate-200">
-                <table class="w-full text-left border-collapse" id="previewTable">
+                <table class="admin-responsive-table w-full text-left border-collapse" id="previewTable">
                     <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-bold sticky top-0 z-10">
                         <tr>
                             <th class="p-3 border-b border-slate-200 w-10 text-center">
