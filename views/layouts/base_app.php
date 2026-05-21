@@ -68,6 +68,13 @@ $themeColor = $themeColor ?? 'indigo';
         .modal-footer { border-top: 1px solid rgba(0,0,0,0.05); padding: 1.25rem 1.5rem; }
 
         .admin-table-shell { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .app-content-shell,
+        .app-main-shell,
+        .app-page-shell {
+            min-width: 0;
+            width: 100%;
+        }
+        .app-main-shell { overflow-x: hidden; }
         .admin-page-header h2,
         .admin-page-header p { overflow-wrap: anywhere; }
         .admin-header-actions button span {
@@ -200,13 +207,13 @@ $themeColor = $themeColor ?? 'indigo';
         <?php include __DIR__ . '/../components/' . $role . '_sidebar.php'; ?>
         
         <!-- Content Area -->
-        <div class="flex-1 flex flex-col lg:ml-64">
+        <div class="app-content-shell flex-1 min-w-0 w-full flex flex-col lg:ml-64">
             <!-- Navbar -->
             <?php include __DIR__ . '/../components/' . $role . '_navbar.php'; ?>
             
             <!-- Page Content -->
-            <main class="flex-1 p-3 md:p-8 lg:p-10">
-                <div class="max-w-[1600px] mx-auto animate-slide-up">
+            <main class="app-main-shell flex-1 min-w-0 p-3 md:p-8 lg:p-10">
+                <div class="app-page-shell max-w-[1600px] min-w-0 w-full mx-auto animate-slide-up">
                     <?php echo $content ?? ''; ?>
                 </div>
             </main>

@@ -37,7 +37,7 @@ $statuses = [
 ];
 ?>
 
-<div class="animate-fadeIn">
+<div class="animate-fadeIn teacher-admin-page">
     <!-- Page Header -->
     <?php 
     $headerData = [
@@ -54,7 +54,7 @@ $statuses = [
     ?>
 
     <!-- Summary Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 md:mb-8">
+    <div class="teacher-stats-grid grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 md:mb-8">
         <?php
         $stats = [
             ['id' => 'totalTeachers', 'label' => 'รวมทั้งหมด', 'value' => '0', 'icon' => 'fa-users', 'color' => 'indigo'],
@@ -75,8 +75,8 @@ $statuses = [
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
+    <div class="teacher-charts-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div class="teacher-chart-card glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-pie text-sky-500"></i> สถานะ
             </h4>
@@ -84,7 +84,7 @@ $statuses = [
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
+        <div class="teacher-chart-card glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-layer-group text-indigo-500"></i> กลุ่มสาระ (Top 5)
             </h4>
@@ -92,7 +92,7 @@ $statuses = [
                 <canvas id="majorChart"></canvas>
             </div>
         </div>
-        <div class="glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
+        <div class="teacher-chart-card glass-effect rounded-2xl lg:rounded-[2rem] p-4 lg:p-6 border border-white/50 shadow-xl">
             <h4 class="text-sm font-black text-slate-700 dark:text-white mb-4 flex items-center gap-2">
                 <i class="fas fa-user-tag text-rose-500"></i> บทบาท
             </h4>
@@ -103,7 +103,14 @@ $statuses = [
     </div>
 
     <!-- Data Table -->
-    <div class="glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
+    <div class="teacher-table-panel glass-effect rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8 shadow-xl border-t border-white/50">
+        <div class="teacher-table-heading">
+            <div>
+                <p class="teacher-table-kicker">Teacher Directory</p>
+                <h3>Teacher & Staff Directory</h3>
+            </div>
+            <span id="teacherMobileCount" class="teacher-table-count">0 records</span>
+        </div>
         <div class="admin-table-shell">
             <table id="teacherTable" class="admin-responsive-table w-full text-left border-separate border-spacing-y-2">
                 <thead>
@@ -466,13 +473,186 @@ $statuses = [
 </div>
 
 <style>
+.teacher-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.teacher-table-heading h3 {
+    color: #0f172a;
+    font-size: 1.05rem;
+    font-weight: 900;
+    line-height: 1.25;
+}
+.dark .teacher-table-heading h3 { color: #fff; }
+.teacher-table-kicker {
+    color: #38bdf8;
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+.teacher-table-count {
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, .1);
+    color: #0284c7;
+    font-size: .75rem;
+    font-weight: 800;
+    padding: .45rem .75rem;
+}
+.dark .teacher-table-count {
+    background: rgba(14, 165, 233, .18);
+    color: #7dd3fc;
+}
 .avatar-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: transform 0.2s; }
 .avatar-thumb:hover { transform: scale(1.1); }
 .avatar-placeholder { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #64748b; font-size: 20px; }
 
 @media (max-width: 767.98px) {
+    .teacher-admin-page {
+        margin-top: .25rem;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .teacher-admin-page .admin-page-header {
+        gap: 1rem !important;
+        max-width: 100%;
+    }
+    .teacher-admin-page .admin-page-header > div:first-child {
+        align-items: center !important;
+    }
+    .teacher-admin-page .admin-page-header h2 {
+        font-size: 1.18rem !important;
+        line-height: 1.25 !important;
+    }
+    .teacher-admin-page .admin-page-header p {
+        font-size: .55rem !important;
+        letter-spacing: .12em !important;
+    }
+    .teacher-admin-page .admin-header-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .teacher-admin-page .admin-header-actions button {
+        min-width: 0 !important;
+        width: 100% !important;
+        min-height: 2.6rem;
+        padding: .65rem .5rem !important;
+        border-radius: .8rem !important;
+        box-shadow: 0 10px 22px -16px rgba(2, 132, 199, .75) !important;
+    }
+    .teacher-admin-page .admin-header-actions button span {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap !important;
+    }
+    .teacher-stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+    .teacher-stats-grid > * {
+        min-width: 0;
+        padding: .85rem !important;
+        border-radius: 1rem !important;
+        box-shadow: 0 12px 28px -22px rgba(15, 23, 42, .55) !important;
+    }
+    .teacher-stats-grid > * > .flex {
+        gap: .6rem !important;
+        margin-bottom: .65rem !important;
+    }
+    .teacher-stats-grid h3 {
+        font-size: 1.45rem !important;
+        line-height: 1.1 !important;
+    }
+    .teacher-stats-grid p {
+        font-size: .5rem !important;
+        letter-spacing: .06em !important;
+    }
+    .teacher-charts-grid {
+        display: flex !important;
+        gap: .85rem !important;
+        margin-left: 0;
+        margin-right: 0;
+        max-width: 100%;
+        overflow-x: auto;
+        padding: .15rem .1rem .85rem;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    .teacher-charts-grid::-webkit-scrollbar { display: none; }
+    .teacher-chart-card {
+        flex: 0 0 88%;
+        max-width: 88%;
+        scroll-snap-align: start;
+        border-radius: 1.25rem !important;
+        padding: 1rem !important;
+    }
+    .teacher-chart-card h4 {
+        margin-bottom: .75rem !important;
+        font-size: .85rem !important;
+    }
+    .teacher-chart-card .h-48 { height: 11.5rem; }
+    .teacher-table-panel {
+        border-radius: 1.25rem !important;
+        padding: 1rem .85rem !important;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .teacher-table-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .5rem;
+        margin-bottom: .75rem;
+    }
+    .teacher-table-count {
+        align-self: flex-start;
+        font-size: .7rem;
+        padding: .35rem .65rem;
+    }
     #teacherTable .avatar-thumb,
     #teacherTable .avatar-placeholder { width: 40px; height: 40px; border-radius: 10px; }
+    #teacherTable tbody td {
+        grid-template-columns: minmax(5rem, 34%) minmax(0, 1fr) !important;
+        gap: .6rem !important;
+        font-size: .82rem;
+        line-height: 1.35;
+    }
+    #teacherTable tbody td:nth-child(3) {
+        font-size: .9rem;
+        font-weight: 900;
+    }
+    #teacherTable tbody td:nth-child(5) span {
+        display: block;
+        margin-left: auto;
+        max-width: 11rem;
+    }
+    #teacherTable tbody td:last-child > div {
+        display: grid !important;
+        grid-template-columns: repeat(3, 2.35rem);
+        justify-content: end !important;
+    }
+    #teacherTable tbody td:last-child button {
+        width: 2.35rem !important;
+        height: 2.35rem !important;
+        border-radius: .75rem !important;
+    }
+    #teacherTable_wrapper .row:first-child {
+        align-items: stretch;
+        gap: .65rem;
+    }
+    #teacherTable_filter input {
+        min-height: 2.6rem;
+    }
 }
 </style>
 
@@ -493,6 +673,7 @@ $(document).ready(function() {
             dataSrc: function(json) {
                 allTeachersData = json;
                 updateStats(json);
+                $('#teacherMobileCount').text(json.length + ' records');
                 return json;
             }
         },
@@ -583,6 +764,10 @@ $(document).ready(function() {
                 $(this).find('td').eq(6).attr('data-label', 'บทบาท');
                 $(this).find('td').eq(7).attr('data-label', 'จัดการ');
             });
+            const info = teacherTable ? teacherTable.page.info() : null;
+            if (info) {
+                $('#teacherMobileCount').text(info.recordsDisplay + ' records');
+            }
             renderCharts();
         }
     });
