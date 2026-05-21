@@ -41,5 +41,14 @@ module.exports = {
       },
     },
   },
+  // Keep dynamic color classes used in PHP templates (e.g. from-<?php echo $themeColor; ?>-500)
+  safelist: [
+    {
+      pattern: /(from|to|bg|text|ring|border|shadow|hover:bg|hover:text|group-hover:shadow)-(rose|blue|indigo|emerald|violet|purple|teal|cyan|amber|orange|yellow|slate|gray|green|sky|pink|red)-\d{3}(\/\d{1,3})?/,
+    },
+    {
+      pattern: /(bg|text|border)-(rose|blue|indigo|emerald|violet|purple|teal|cyan|amber|orange|yellow|slate|gray|green|sky|pink|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    }
+  ],
   plugins: [],
 }

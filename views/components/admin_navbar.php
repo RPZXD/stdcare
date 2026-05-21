@@ -16,7 +16,7 @@ $userName = $userData['Teach_name'] ?? 'ผู้ดูแลระบบ';
 </div>
 
 <!-- Top Navbar -->
-<header class="sticky top-0 z-30 glass-effect border-b border-white/20 dark:border-slate-800 no-print">
+<header class="sticky top-0 z-30 glass-effect border-b border-white/20 dark:border-<?php echo $themeColor; ?>-800 no-print">
     <div class="admin-navbar-inner flex items-center justify-between px-6 py-4">
         <!-- Left: Page Title -->
         <div class="flex items-center space-x-4">
@@ -44,9 +44,9 @@ $userName = $userData['Teach_name'] ?? 'ผู้ดูแลระบบ';
             <div class="flex items-center space-x-3 pl-4 border-l border-slate-200 dark:border-slate-800">
                 <div class="hidden sm:block text-right">
                     <p class="text-sm font-black text-slate-800 dark:text-white leading-none"><?php echo htmlspecialchars($userName); ?></p>
-                    <p class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest mt-1">Administrator</p>
+                    <p class="text-[10px] font-bold text-<?php echo $themeColor; ?>-600 dark:text-<?php echo $themeColor; ?>-400 uppercase tracking-widest mt-1">Administrator</p>
                 </div>
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-500/20 ring-2 ring-white dark:ring-slate-800">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-<?php echo $themeColor; ?>-500 to-<?php echo $themeColor; ?>-600 flex items-center justify-center shadow-lg shadow-<?php echo $themeColor; ?>-500/20 ring-2 ring-white dark:ring-slate-800">
                     <i class="fas fa-user-shield text-white text-sm"></i>
                 </div>
             </div>

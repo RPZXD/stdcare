@@ -6,6 +6,10 @@
 $config = json_decode(file_get_contents(__DIR__ . '/../../config.json'), true);
 $global = $config['global'] ?? ['nameschool' => 'โรงเรียน'];
 $themeColor = $themeColor ?? 'indigo';
+// Include theme helpers for class generation
+if (file_exists(__DIR__ . '/theme_helpers.php')) {
+    include_once __DIR__ . '/theme_helpers.php';
+}
 ?>
 <!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
@@ -192,10 +196,10 @@ $themeColor = $themeColor ?? 'indigo';
     <link rel="icon" type="image/png" href="../dist/img/<?php echo $global['logoLink'] ?? 'logo-phicha.png'; ?>">
 </head>
 
-<body class="bg-<?php echo $themeColor; ?>-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-500">
+<body class="bg-<?php echo $themeColor; ?>-50/30 dark:bg-<?php echo $themeColor; ?>-900 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-500">
     
     <!-- Preloader -->
-    <div id="preloader" class="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-slate-950 transition-opacity duration-700">
+    <div id="preloader" class="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-<?php echo $themeColor; ?>-900 transition-opacity duration-700">
         <div class="relative">
             <div class="w-24 h-24 border-4 border-<?php echo $themeColor; ?>-500/10 border-t-<?php echo $themeColor; ?>-600 rounded-full animate-spin"></div>
             <img src="../dist/img/<?php echo $global['logoLink'] ?? 'logo-phicha.png'; ?>" alt="Logo" class="absolute inset-0 m-auto w-12 h-12 animate-pulse">
@@ -242,9 +246,13 @@ $themeColor = $themeColor ?? 'indigo';
             localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
         }
         
-        if (localStorage.getItem('darkMode') === 'true' || 
-            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Only enable dark mode if user explicitly chose it (stored in localStorage).
+        // This prevents system `prefers-color-scheme` from forcing a dark theme
+        // which can override the role theme colors.
+        if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
         
         // Responsive Sidebar Logic
