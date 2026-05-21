@@ -1,88 +1,191 @@
 <?php
 /**
  * Component: Director Sidebar
- * Modern UI with Tailwind CSS & Responsive Design
+ * Matches Teacher Sidebar UX/UI Pattern
+ * Indigo/Violet theme for Director identity
  */
-$sidebarActive = $activePage ?? 'dashboard';
 
-// Menu mapping
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Get active page from view, fallback to dashboard
+$currentActive = $activePage ?? 'dashboard';
+
+$configPath = __DIR__ . '/../../config.json';
+$config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+$global = $config['global'] ?? ['logoLink' => 'logo-phicha.png', 'nameTitle' => 'StdCare', 'nameschool' => 'โรงเรียนพิชัย'];
+
+// Get current user info from various sources
+$teacherData = $_SESSION['teacher_data'] ?? $userData ?? [];
+$userName = $teacherData['Teach_name'] ?? 'ผู้บริหาร';
+$userPhoto = $teacherData['Teach_photo'] ?? '';
+
+// Build avatar URL for use by navbar as well
+$avatarUrl = (!empty($userPhoto)) 
+    ? 'https://std.phichai.ac.th/teacher/uploads/phototeach/' . $userPhoto 
+    : '';
+
+// Menu configuration for Director
 $menuItems = [
-    ['href' => 'index.php', 'icon' => 'fa-home', 'text' => 'หน้าหลัก', 'key' => 'dashboard'],
-    ['href' => 'data_student.php', 'icon' => 'fa-user-graduate', 'text' => 'ข้อมูลนักเรียน', 'key' => 'student'],
-    ['href' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'text' => 'ครูและบุคลากร', 'key' => 'teacher'],
-    ['href' => 'data_parent.php', 'icon' => 'fa-users', 'text' => 'ข้อมูลผู้ปกครอง', 'key' => 'parent'],
-    ['href' => 'data_behavior.php', 'icon' => 'fa-frown', 'text' => 'หักคะแนนพฤติกรรม', 'key' => 'behavior'],
-    ['href' => 'report.php', 'icon' => 'fa-file-alt', 'text' => 'รายงานข้อมูล', 'key' => 'report'],
-    ['href' => 'statistics.php', 'icon' => 'fa-chart-bar', 'text' => 'กราฟสถิติ', 'key' => 'stats'],
+    [
+        'is_header' => true,
+        'name' => 'แดชบอร์ด',
+    ],
+    [
+        'key' => 'dashboard',
+        'name' => 'หน้าหลัก',
+        'url' => 'index.php',
+        'icon' => 'fa-home',
+        'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
+    ],
+    [
+        'is_header' => true,
+        'name' => 'ข้อมูลและรายงาน',
+    ],
+    [
+        'key' => 'student',
+        'name' => 'ข้อมูลนักเรียน',
+        'url' => 'data_student.php',
+        'icon' => 'fa-user-graduate',
+        'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
+    ],
+    [
+        'key' => 'teacher',
+        'name' => 'ครูและบุคลากร',
+        'url' => 'data_teacher.php',
+        'icon' => 'fa-chalkboard-teacher',
+        'gradient' => ['from' => 'emerald-500', 'to' => 'green-600'],
+    ],
+    [
+        'key' => 'parent',
+        'name' => 'ข้อมูลผู้ปกครอง',
+        'url' => 'data_parent.php',
+        'icon' => 'fa-users',
+        'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600'],
+    ],
+    [
+        'key' => 'behavior',
+        'name' => 'หักคะแนนพฤติกรรม',
+        'url' => 'data_behavior.php',
+        'icon' => 'fa-frown',
+        'gradient' => ['from' => 'amber-500', 'to' => 'yellow-600'],
+    ],
+    [
+        'key' => 'report',
+        'name' => 'รายงานข้อมูล',
+        'url' => 'report.php',
+        'icon' => 'fa-file-alt',
+        'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
+    ],
+    [
+        'key' => 'stats',
+        'name' => 'กราฟสถิติ',
+        'url' => 'statistics.php',
+        'icon' => 'fa-chart-bar',
+        'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
+    ],
 ];
 ?>
 
 <!-- Sidebar Overlay (Mobile) -->
-<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity duration-300 no-print" onclick="toggleSidebar()"></div>
 
-<!-- Sidebar Container -->
-<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-indigo-100 dark:border-slate-800 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none">
-    
-    <!-- Sidebar Header -->
-    <div class="h-24 flex items-center justify-center border-b border-indigo-50 dark:border-slate-800">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <i class="fas fa-crown text-xl"></i>
-            </div>
-            <div>
-                <span class="text-lg font-black text-slate-800 dark:text-white block h-5">Director</span>
-                <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic">Management</span>
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+    <div class="h-full overflow-y-auto bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950">
+        
+        <!-- Logo Section -->
+        <div class="px-6 py-8 border-b border-white/5">
+            <div class="flex items-center justify-between">
+                <a href="index.php" class="flex items-center space-x-4 group flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full blur-lg opacity-40 group-hover:opacity-70 transition-opacity"></div>
+                        <img src="../dist/img/<?php echo $global['logoLink'] ?? 'logo-phicha.png'; ?>" class="relative w-12 h-12 rounded-full ring-2 ring-white/10 group-hover:ring-indigo-400/50 transition-all" alt="Logo">
+                    </div>
+                    <div>
+                        <span class="text-xl font-black text-white tracking-tight uppercase"><?php echo $global['nameTitle'] ?? 'ระบบผู้บริหาร'; ?></span>
+                        <p class="text-[10px] font-bold text-indigo-300 tracking-[0.2em] uppercase">Director Panel</p>
+                    </div>
+                </a>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-gray-400 hover:text-white rounded-xl hover:bg-white/5">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
         </div>
-    </div>
-
-    <!-- User Profile Summary (Sidebar) -->
-    <div class="px-6 py-8 border-b border-indigo-50 dark:border-slate-800">
-        <div class="flex flex-col items-center">
-            <div class="relative group">
-                <div class="absolute inset-0 bg-indigo-500 rounded-full blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                <?php 
-                $avatarUrl = (!empty($userData['Teach_photo'])) 
-                    ? 'https://std.phichai.ac.th/teacher/uploads/phototeach/' . $userData['Teach_photo'] 
-                    : 'https://ui-avatars.com/api/?name=' . urlencode($userData['Teach_name']) . '&background=6366f1&color=fff';
-                ?>
-                <img src="<?php echo $avatarUrl; ?>" alt="Avatar" class="w-20 h-20 rounded-full border-4 border-white dark:border-slate-800 shadow-xl relative object-cover">
-            </div>
-            <div class="mt-4 text-center">
-                <h4 class="font-black text-slate-800 dark:text-white text-sm"><?php echo htmlspecialchars($userData['Teach_name'] ?? 'ผู้บริหาร'); ?></h4>
-                <div class="mt-1 flex items-center justify-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">ผู้บริหารสถานศึกษา</span>
+        
+        <!-- User Info -->
+        <div class="px-6 py-4 border-b border-white/5">
+            <div class="flex items-center space-x-3">
+                <?php if (!empty($userPhoto)): ?>
+                <img src="https://std.phichai.ac.th/teacher/uploads/phototeach/<?php echo htmlspecialchars($userPhoto); ?>" class="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-400/50" alt="Profile">
+                <?php else: ?>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                    <i class="fas fa-crown text-white"></i>
+                </div>
+                <?php endif; ?>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-white truncate"><?php echo htmlspecialchars($userName); ?></p>
+                    <p class="text-xs text-indigo-300">ผู้บริหารสถานศึกษา</p>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Navigation Menu -->
-    <nav class="p-4 space-y-1 overflow-y-auto h-[calc(100vh-280px)]">
-        <p class="px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 italic">เมนูหลัก</p>
         
-        <?php foreach ($menuItems as $item): 
-            $isActive = ($sidebarActive === $item['key']);
-        ?>
-        <a href="<?php echo $item['href']; ?>" class="sidebar-item flex items-center gap-4 px-4 py-3.5 rounded-2xl group transition-all <?php echo $isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400'; ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?php echo $isActive ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700'; ?>">
-                <i class="fas <?php echo $item['icon']; ?> <?php echo $isActive ? '' : 'text-slate-400 group-hover:text-indigo-500'; ?>"></i>
+        <!-- Navigation -->
+        <nav class="mt-2 px-3 pb-24">
+            <ul class="space-y-1.5 pt-2">
+                <?php foreach ($menuItems as $menu): 
+                    if (isset($menu['is_header'])) {
+                        echo '<li class="mt-6 mb-2 px-4 first:mt-0"><p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">' . htmlspecialchars($menu['name']) . '</p></li>';
+                        continue;
+                    }
+                    $fromColor = $menu['gradient']['from'];
+                    $toColor = $menu['gradient']['to'];
+                    $colorName = explode('-', $fromColor)[0];
+                    $isActive = ($currentActive === $menu['key']);
+                ?>
+                <li>
+                    <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
+                       onclick="closeSidebarOnMobile()"
+                       class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
+                            <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
+                        </span>
+                        <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
+                        <?php if($isActive): ?>
+                            <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+                
+                <!-- System Divider -->
+                <li class="my-6 px-4">
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                </li>
+                
+                <!-- Logout -->
+                <li>
+                    <a href="../logout.php" class="sidebar-item flex items-center px-4 py-3 text-gray-400 rounded-2xl hover:bg-rose-500/10 hover:text-rose-400 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-rose-500 to-red-600 rounded-xl shadow-lg shadow-rose-500/20 group-hover:shadow-rose-500/40 transition-shadow">
+                            <i class="fas fa-sign-out-alt text-white"></i>
+                        </span>
+                        <span class="ml-4 font-bold text-sm tracking-tight">ออกจากระบบ</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Bottom Credits -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 to-transparent">
+            <div class="text-center">
+                <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest"><?php echo $global['nameschool'] ?? 'โรงเรียน'; ?></p>
+                <p class="text-[8px] text-gray-700 mt-1 font-bold italic opacity-50 uppercase tracking-tighter">Director Panel v2.0</p>
             </div>
-            <span class="font-bold text-sm"><?php echo $item['text']; ?></span>
-            <?php if ($isActive): ?>
-                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
-            <?php endif; ?>
-        </a>
-        <?php endforeach; ?>
-
-        <!-- Logout Special Item -->
-        <hr class="my-6 border-indigo-50 dark:border-slate-800">
-        <a href="../logout.php" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all group">
-            <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-rose-800 transition-colors">
-                <i class="fas fa-sign-out-alt"></i>
-            </div>
-            <span class="font-bold text-sm">ออกจากระบบ</span>
-        </a>
-    </nav>
+        </div>
+    </div>
 </aside>
+
+<!-- Alpine.js Collapse Plugin + Core (plugin must load first) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
