@@ -49,8 +49,18 @@ if (file_exists($jsonFile)) {
     }
 }
 
-// Get profile image path
-$profileImgPath = 'https://std.phichai.ac.th/photo/' . $student['Stu_picture'];
+$studentPicture = $student['Stu_picture'] ?? '';
+$profileImgPath = '../dist/img/default-avatar.svg';
+
+if ($studentPicture) {
+    $localFile = __DIR__ . '/../photo/' . $studentPicture;
+    if (file_exists($localFile)) {
+        $profileImgPath = '../photo/' . $studentPicture;
+    } else {
+        $profileImgPath = 'https://std.phichai.ac.th/photo/' . $studentPicture;
+    }
+}
+
 
 // Thai date function
 function thai_date($strDate) {

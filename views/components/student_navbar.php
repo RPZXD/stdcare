@@ -5,9 +5,17 @@
  */
 $student = $_SESSION['student_data'] ?? [];
 
-$imgPath = isset($student['Stu_picture']) && $student['Stu_picture'] 
-    ? "https://std.phichai.ac.th/photo/{$student['Stu_picture']}" 
-    : '../dist/img/default-avatar.svg';
+$studentPicture = $student['Stu_picture'] ?? '';
+$imgPath = '../dist/img/default-avatar.svg';
+
+if ($studentPicture) {
+    $localFile = __DIR__ . '/../../photo/' . $studentPicture;
+    if (file_exists($localFile)) {
+        $imgPath = '../photo/' . $studentPicture;
+    } else {
+        $imgPath = 'https://std.phichai.ac.th/photo/' . $studentPicture;
+    }
+}
 ?>
 
 <header class="sticky top-0 z-30 glass-effect border-b border-slate-200/50 dark:border-slate-700/50 no-print">

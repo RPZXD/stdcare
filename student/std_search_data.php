@@ -37,7 +37,7 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
 $_SESSION['student_data'] = $student;
 
 // Get image profile paths
-$imgProfileStudent = 'https://std.phichai.ac.th/photo/';
+$imgProfileStudent = '../photo/';
 $imgProfile = $setting->getImgProfile();
 
 // Set page metadata

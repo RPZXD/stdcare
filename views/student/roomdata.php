@@ -99,7 +99,17 @@ ob_start();
                     <?php foreach ($classmates as $item): 
                         $isMale = in_array($item['Stu_pre'], ['นาย', 'เด็กชาย']);
                         $genderColor = $isMale ? 'sky' : 'pink';
-                        $imgUrl = 'https://std.phichai.ac.th/photo/' . $item['Stu_picture'];
+                        
+                        $studentPicture = $item['Stu_picture'] ?? '';
+                        $imgUrl = '../dist/img/default-avatar.svg';
+                        if ($studentPicture) {
+                            $localFile = __DIR__ . '/../../photo/' . $studentPicture;
+                            if (file_exists($localFile)) {
+                                $imgUrl = '../photo/' . $studentPicture;
+                            } else {
+                                $imgUrl = 'https://std.phichai.ac.th/photo/' . $studentPicture;
+                            }
+                        }
                     ?>
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors student-row"
                         data-name="<?= htmlspecialchars(strtolower($item['Stu_pre'] . $item['Stu_name'] . ' ' . $item['Stu_sur'])) ?>"
@@ -148,7 +158,17 @@ ob_start();
                 $borderColor = $isMale ? '#0ea5e9' : '#ec4899';
                 $lightBg = $isMale ? '#e0f2fe' : '#fce7f3';
                 $textColor = $isMale ? '#0369a1' : '#be185d';
-                $imgUrl = 'https://std.phichai.ac.th/photo/' . $item['Stu_picture'];
+                
+                $studentPicture = $item['Stu_picture'] ?? '';
+                $imgUrl = '../dist/img/default-avatar.svg';
+                if ($studentPicture) {
+                    $localFile = __DIR__ . '/../../photo/' . $studentPicture;
+                    if (file_exists($localFile)) {
+                        $imgUrl = '../photo/' . $studentPicture;
+                    } else {
+                        $imgUrl = 'https://std.phichai.ac.th/photo/' . $studentPicture;
+                    }
+                }
             ?>
             <div class="student-card bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border-l-4 transition-all hover:shadow-xl" style="border-color: <?= $borderColor ?>;"
                  data-name="<?= htmlspecialchars(strtolower($item['Stu_pre'] . $item['Stu_name'] . ' ' . $item['Stu_sur'])) ?>"

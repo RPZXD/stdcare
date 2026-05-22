@@ -138,14 +138,16 @@ $(document).ready(function() {
                             const borderColor = isMale ? '#0ea5e9' : '#ec4899';
                             const gradientBg = isMale ? 'from-sky-500 to-blue-600' : 'from-pink-500 to-rose-600';
                             
+                            const studentPic = item.Stu_picture ? `${imgProfileStudent}${item.Stu_picture}` : '../dist/img/default-avatar.svg';
+                            
                             html += `
                                 <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border-t-4 hover:shadow-xl transition-all" style="border-color: ${borderColor};">
                                     <div class="p-4">
                                         <div class="flex items-center gap-4 mb-4">
-                                            <img src="${imgProfileStudent}${item.Stu_picture}" 
+                                            <img src="${studentPic}" 
                                                  class="w-20 h-20 rounded-xl object-cover border-2" 
                                                  style="border-color: ${borderColor};"
-                                                 onerror="this.src='../dist/img/default-avatar.svg'"
+                                                 onerror="if(this.src.indexOf('default-avatar.svg') === -1){ if(!this.dataset.fallback){ this.dataset.fallback='true'; this.src='https://std.phichai.ac.th/photo/' + encodeURIComponent('${item.Stu_picture}'); } else { this.onerror=null; this.src='../dist/img/default-avatar.svg'; } }"
                                                  alt="">
                                             <div class="flex-1 min-w-0">
                                                 <h4 class="font-black text-slate-800 dark:text-white truncate">
