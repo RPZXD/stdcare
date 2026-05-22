@@ -523,10 +523,12 @@ function renderStudents(students) {
         
         card.innerHTML = `
             <div class="relative group">
-                <img src="https://std.phichai.ac.th/photo/${item.Stu_picture || 'default.jpg'}" 
+                <img src="../photo/${item.Stu_picture || 'default.jpg'}" 
+                     data-pic="${item.Stu_picture || 'default.jpg'}"
+                     data-initials="${getInitials(item.Stu_name)}"
                      alt="${item.Stu_name}"
                      class="w-full h-44 md:h-52 object-cover transition-transform duration-500 group-hover:scale-110"
-                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'img-placeholder w-full h-44 md:h-52\\'>${getInitials(item.Stu_name)}</div>'">
+                     onerror="if(!this.dataset.fallback){ this.dataset.fallback='true'; this.src='https://std.phichai.ac.th/photo/' + this.dataset.pic; } else { this.onerror=null; this.parentElement.innerHTML='<div class=\\'img-placeholder w-full h-44 md:h-52\\'>' + this.dataset.initials + '</div>'; }">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div class="absolute top-3 right-3 bg-gradient-to-r ${genderBg} text-white rounded-xl w-10 h-10 flex items-center justify-center text-lg font-black shadow-lg border-2 border-white/30">
                     ${item.Stu_no}
@@ -796,15 +798,15 @@ async function uploadPhoto() {
     if (!file || !currentStudentId) return;
     
     const formData = new FormData();
-    formData.append('stu_id', currentStudentId);
-    formData.append('photo', file);
+    formData.append('Stu_id', currentStudentId);
+    formData.append('profile_pic', file);
     
     const btn = document.getElementById('uploadPhoto');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังอัปโหลด...';
     
     try {
-        const response = await fetch('api/upload_student_photo.php', {
+        const response = await fetch('api/update_profile_pic_std.php', {
             method: 'POST',
             body: formData
         });
@@ -822,7 +824,7 @@ async function uploadPhoto() {
             closePhotoModal();
             loadStudentData();
         } else {
-            Swal.fire({ icon: 'error', title: 'อัปโหลดล้มเหลว', text: result.error || '' });
+            Swal.fire({ icon: 'error', title: 'อัปโหลดล้มเหลว', text: result.message || '' });
         }
     } catch (error) {
         Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด' });

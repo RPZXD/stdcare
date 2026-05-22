@@ -94,9 +94,17 @@ foreach ($oldFiles as $oldFile) {
 
 // Process and optimize image
 try {
-    if (!processAndSaveImage($file['tmp_name'], $targetPath, $mimeType)) {
-        echo json_encode(['success' => false, 'message' => 'ไม่สามารถประมวลผลรูปภาพได้']);
-        exit;
+    if (!extension_loaded('gd') || !function_exists('imagecreatefrompng')) {
+        // Fallback to moving the file directly if GD is not installed/enabled
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            echo json_encode(['success' => false, 'message' => 'ไม่สามารถบันทึกไฟล์รูปภาพได้ (Fallback)']);
+            exit;
+        }
+    } else {
+        if (!processAndSaveImage($file['tmp_name'], $targetPath, $mimeType)) {
+            echo json_encode(['success' => false, 'message' => 'ไม่สามารถประมวลผลรูปภาพได้']);
+            exit;
+        }
     }
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการประมวลผลรูปภาพ: ' . $e->getMessage()]);

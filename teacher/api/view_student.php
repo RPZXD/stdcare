@@ -30,10 +30,11 @@ if (!empty($stu_id)) {
             <div class="relative group w-full max-w-[280px]">
                 <div class="absolute -inset-1.5 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-3xl blur opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
                 <div class="relative bg-white dark:bg-slate-800 rounded-3xl p-3 shadow-2xl overflow-hidden">
-                    <img src="https://std.phichai.ac.th/photo/<?php echo htmlspecialchars($data['Stu_picture'] ?: 'default.jpg'); ?>" 
+                    <img src="../photo/<?php echo htmlspecialchars($data['Stu_picture'] ?: 'default.jpg'); ?>" 
+                         data-pic="<?php echo htmlspecialchars($data['Stu_picture'] ?: 'default.jpg'); ?>"
                          alt="<?php echo htmlspecialchars($studentname); ?>"
                          class="w-full aspect-[3/4] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-110"
-                         onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($data['Stu_name']); ?>&size=256&background=8b5cf6&color=fff&bold=true'">
+                         onerror="if(!this.dataset.fallback){ this.dataset.fallback='true'; this.src='https://std.phichai.ac.th/photo/' + this.dataset.pic; } else { this.onerror=null; this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($data['Stu_name']); ?>&size=256&background=8b5cf6&color=fff&bold=true'; }">
                     
                     <!-- Status Overlay -->
                     <div class="absolute top-6 right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-xl shadow-lg border border-white/50 dark:border-slate-700/50 flex items-center gap-2">
