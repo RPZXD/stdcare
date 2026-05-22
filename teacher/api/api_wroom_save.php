@@ -50,4 +50,11 @@ $wroom = new Wroom($db);
 
 $success = $wroom->saveWroom($major, $room, $pee, $term, $positions, $stdids, $maxim);
 
-echo json_encode(['success' => $success]);
+if ($success) {
+    echo json_encode(['success' => true]);
+} else {
+    echo json_encode([
+        'success' => false,
+        'message' => $wroom->error ?? 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'
+    ]);
+}

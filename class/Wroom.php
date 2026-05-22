@@ -1,8 +1,22 @@
 <?php
 class Wroom {
     private $db;
+    public $error = null;
+
     public function __construct($db) {
         $this->db = $db;
+        // Ensure tb_wroom2 exists (self-healing database setup)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS tb_wroom2 (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                wmajor VARCHAR(10) NULL,
+                wroom VARCHAR(10) NULL,
+                wpee VARCHAR(10) NULL,
+                wkatipot TEXT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+        } catch (\Exception $e) {
+            $this->error = "Table setup error: " . $e->getMessage();
+        }
     }
 
     // ดึงข้อมูลนักเรียนและตำแหน่ง
@@ -84,6 +98,7 @@ class Wroom {
             return true;
         } catch (\Exception $e) {
             $this->db->rollBack();
+            $this->error = $e->getMessage();
             return false;
         }
     }
