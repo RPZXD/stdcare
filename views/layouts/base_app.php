@@ -236,7 +236,8 @@ if (file_exists(__DIR__ . '/theme_helpers.php')) {
             const preloader = document.getElementById('preloader');
             if (preloader) {
                 preloader.classList.add('opacity-0');
-                setTimeout(() => preloader.style.display = 'none', 700);
+                preloader.style.pointerEvents = 'none';
+                setTimeout(() => preloader.style.setProperty('display', 'none', 'important'), 700);
             }
         });
 

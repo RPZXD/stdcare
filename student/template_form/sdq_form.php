@@ -66,11 +66,29 @@ $choiceColors = [0 => 'slate', 1 => 'amber', 2 => 'emerald'];
 
 $typeLabels = ['self' => 'นักเรียนประเมินตนเอง', 'parent' => 'ผู้ปกครองประเมิน'];
 $modeColors = [
-    'add' => ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-400', 'text' => 'text-emerald-600'],
-    'edit' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-400', 'text' => 'text-amber-600'],
-    'view' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-400', 'text' => 'text-blue-600'],
+    'add' => ['bg' => 'bg-emerald-50 dark:bg-emerald-950/20', 'border' => 'border-emerald-400 dark:border-emerald-800/50', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+    'edit' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'border' => 'border-amber-400 dark:border-amber-800/50', 'text' => 'text-amber-600 dark:text-amber-400'],
+    'view' => ['bg' => 'bg-blue-50 dark:bg-blue-950/20', 'border' => 'border-blue-400 dark:border-blue-800/50', 'text' => 'text-blue-600 dark:text-blue-400'],
 ];
 $mc = $modeColors[$mode];
+
+// Border color mapping for Tailwind
+$borderClasses = [
+    'emerald' => 'border-emerald-500',
+    'amber' => 'border-amber-500',
+    'red' => 'border-red-500',
+    'orange' => 'border-orange-500',
+    'sky' => 'border-sky-500',
+];
+
+// Badge gradient mapping for Tailwind
+$badgeClasses = [
+    'emerald' => 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    'amber' => 'bg-gradient-to-br from-amber-500 to-amber-600',
+    'red' => 'bg-gradient-to-br from-red-500 to-red-600',
+    'orange' => 'bg-gradient-to-br from-orange-500 to-orange-600',
+    'sky' => 'bg-gradient-to-br from-sky-500 to-sky-600',
+];
 ?>
 
 <!-- Info Banner -->
@@ -81,7 +99,7 @@ $mc = $modeColors[$mode];
         </div>
         <div>
             <h5 class="font-bold <?= $mc['text'] ?>"><?= $typeLabels[$type] ?></h5>
-            <p class="text-sm text-slate-500">กรุณาเลือกคำตอบที่ตรงกับ<?= $type === 'self' ? 'ตัวเอง' : 'นักเรียน' ?>ในช่วง 6 เดือนที่ผ่านมา</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">กรุณาเลือกคำตอบที่ตรงกับ<?= $type === 'self' ? 'ตัวเอง' : 'นักเรียน' ?>ในช่วง 6 เดือนที่ผ่านมา</p>
         </div>
     </div>
 </div>
@@ -96,10 +114,12 @@ $mc = $modeColors[$mode];
         <?php foreach ($questions as $num => $q): 
             $currentValue = $existingData["q$num"] ?? null;
             $color = $q['color'];
+            $borderClass = $borderClasses[$color] ?? 'border-slate-500';
+            $badgeClass = $badgeClasses[$color] ?? 'bg-indigo-500';
         ?>
-        <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border-l-4" style="border-color: var(--tw-color-<?= $color ?>-500, #64748b);">
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border-l-4 <?= $borderClass ?>">
             <div class="flex items-start gap-3 mb-3">
-                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background: linear-gradient(135deg, var(--tw-color-<?= $color ?>-500, #6366f1), var(--tw-color-<?= $color ?>-600, #4f46e5));">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0 <?= $badgeClass ?>">
                     <?= $num ?>
                 </span>
                 <p class="font-medium text-slate-700 dark:text-slate-300 text-sm md:text-base pt-1">
@@ -116,9 +136,9 @@ $mc = $modeColors[$mode];
                 ?>
                 <label for="<?= $radioId ?>" class="flex items-center gap-2 p-2.5 rounded-lg cursor-pointer transition-all border-2
                     <?php if ($isReadonly): ?>
-                        <?= $isChecked ? "bg-{$cColor}-100 dark:bg-{$cColor}-900/30 border-{$cColor}-400" : 'bg-slate-50 dark:bg-slate-700/50 border-transparent' ?>
+                        <?= $isChecked ? "bg-{$cColor}-100 dark:bg-{$cColor}-950/30 border-{$cColor}-400 dark:border-{$cColor}-500/50" : 'bg-slate-50 dark:bg-slate-700/30 border-transparent dark:border-transparent' ?>
                     <?php else: ?>
-                        hover:bg-slate-50 dark:hover:bg-slate-700/50 border-transparent has-[:checked]:bg-purple-100 has-[:checked]:border-purple-400 dark:has-[:checked]:bg-purple-900/30
+                        hover:bg-slate-50 dark:hover:bg-slate-700/50 border-transparent dark:border-transparent has-[:checked]:bg-purple-100 has-[:checked]:border-purple-400 dark:has-[:checked]:bg-purple-900/30 dark:has-[:checked]:border-purple-500/50
                     <?php endif; ?>">
                     <input type="radio" 
                            id="<?= $radioId ?>" 
@@ -152,26 +172,3 @@ $mc = $modeColors[$mode];
             placeholder="<?= $isReadonly ? '' : 'เขียนข้อความเพิ่มเติมที่นี่...' ?>"><?= htmlspecialchars($existingData['memo'] ?? '') ?></textarea>
     </div>
 </form>
-
-<style>
-/* Color border fallbacks using inline styles */
-<?php
-$colorMap = [
-    'emerald' => '#10b981',
-    'amber' => '#f59e0b',
-    'red' => '#ef4444',
-    'orange' => '#f97316',
-    'sky' => '#0ea5e9',
-];
-foreach ($questions as $num => $q) {
-    echo ".question-{$num} { border-left-color: {$colorMap[$q['color']]}; }\n";
-    echo ".question-{$num} .num-badge { background: linear-gradient(135deg, {$colorMap[$q['color']]}, {$colorMap[$q['color']]}dd); }\n";
-}
-?>
-</style>
-
-<script>
-document.querySelectorAll('#sdqForm .question-card').forEach((card, idx) => {
-    card.classList.add('question-' + (idx + 1));
-});
-</script>

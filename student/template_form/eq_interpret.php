@@ -83,9 +83,9 @@ function getSubResult($score, $range) {
 $totalLevel = getEQLevel($totalEQ);
 
 $levelColors = [
-    'high' => ['bg' => 'bg-emerald-500', 'text' => 'text-emerald-600', 'light' => 'bg-emerald-100'],
-    'normal' => ['bg' => 'bg-amber-500', 'text' => 'text-amber-600', 'light' => 'bg-amber-100'],
-    'low' => ['bg' => 'bg-red-500', 'text' => 'text-red-600', 'light' => 'bg-red-100'],
+    'high' => ['bg' => 'bg-emerald-500', 'text' => 'text-emerald-600 dark:text-emerald-400', 'light' => 'bg-emerald-100 dark:bg-emerald-950/30'],
+    'normal' => ['bg' => 'bg-amber-500', 'text' => 'text-amber-600 dark:text-amber-400', 'light' => 'bg-amber-100 dark:bg-amber-950/30'],
+    'low' => ['bg' => 'bg-red-500', 'text' => 'text-red-600 dark:text-red-400', 'light' => 'bg-red-100 dark:bg-red-950/30'],
 ];
 ?>
 
@@ -178,16 +178,16 @@ $levelColors = [
 <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
     <h5 class="font-bold text-slate-600 dark:text-slate-400 text-sm mb-3">เกณฑ์การแปลผล EQ รวม</h5>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-        <span class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-lg font-bold">
             🌟 ดีมาก (170+)
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 rounded-lg font-bold">
             😊 ดี (140-169)
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 text-amber-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-lg font-bold">
             😐 ปานกลาง (100-139)
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-lg font-bold">
             😔 ควรปรับปรุง (&lt;100)
         </span>
     </div>

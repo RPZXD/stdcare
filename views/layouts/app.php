@@ -174,12 +174,15 @@ $baseUrl = $isSubfolder ? '../' : '';
         // Preloader
         window.addEventListener('load', function() {
             const preloader = document.getElementById('preloader');
-            setTimeout(() => {
-                preloader.style.opacity = '0';
+            if (preloader) {
                 setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 500);
-            }, 800);
+                    preloader.style.opacity = '0';
+                    preloader.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        preloader.style.setProperty('display', 'none', 'important');
+                    }, 500);
+                }, 800);
+            }
         });
         
         // Dark mode toggle

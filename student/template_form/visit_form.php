@@ -62,9 +62,9 @@ $questions = [
 
 $isReadonly = ($mode === 'view');
 $modeColors = [
-    'view' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-400', 'icon' => 'fa-eye', 'text' => 'text-blue-600'],
-    'edit' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-400', 'icon' => 'fa-edit', 'text' => 'text-amber-600'],
-    'add' => ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-400', 'icon' => 'fa-plus-circle', 'text' => 'text-emerald-600'],
+    'view' => ['bg' => 'bg-blue-50 dark:bg-blue-950/20', 'border' => 'border-blue-400 dark:border-blue-800/50', 'icon' => 'fa-eye', 'text' => 'text-blue-600 dark:text-blue-400'],
+    'edit' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'border' => 'border-amber-400 dark:border-amber-800/50', 'icon' => 'fa-edit', 'text' => 'text-amber-600 dark:text-amber-400'],
+    'add' => ['bg' => 'bg-emerald-50 dark:bg-emerald-950/20', 'border' => 'border-emerald-400 dark:border-emerald-800/50', 'icon' => 'fa-plus-circle', 'text' => 'text-emerald-600 dark:text-emerald-400'],
 ];
 $mc = $modeColors[$mode] ?? $modeColors['view'];
 ?>
@@ -123,11 +123,11 @@ $mc = $modeColors[$mode] ?? $modeColors['view'];
                     $radioId = "vh{$num}_{$idx}";
                     $isChecked = ($currentValue == $value);
                 ?>
-                <label for="<?= $radioId ?>" class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all
+                <label for="<?= $radioId ?>" class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border-2
                     <?php if ($isReadonly): ?>
-                        <?= $isChecked ? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-400' : 'bg-slate-50 dark:bg-slate-700/50' ?>
+                        <?= $isChecked ? 'bg-blue-100 dark:bg-blue-950/30 border-blue-400 dark:border-blue-500/50' : 'bg-slate-50 dark:bg-slate-700/30 border-transparent dark:border-transparent' ?>
                     <?php else: ?>
-                        hover:bg-amber-50 dark:hover:bg-amber-900/20 border-2 border-transparent has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400 dark:has-[:checked]:bg-amber-900/30
+                        hover:bg-amber-50 dark:hover:bg-amber-900/20 border-transparent dark:border-transparent has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400 dark:has-[:checked]:bg-amber-900/30 dark:has-[:checked]:border-amber-500/50
                     <?php endif; ?>">
                     <input type="radio" 
                            id="<?= $radioId ?>" 
@@ -175,6 +175,14 @@ label:has(input[type="radio"]:checked) {
 label:has(input[type="radio"]:checked) span.md\\:hidden {
     background-color: #f59e0b !important;
     border-color: #f59e0b !important;
+}
+.dark label:has(input[type="radio"]:checked) {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+    border-color: #d97706 !important;
+}
+.dark label:has(input[type="radio"]:checked) span.md\\:hidden {
+    background-color: #d97706 !important;
+    border-color: #d97706 !important;
 }
 </style>
 <script>

@@ -123,8 +123,11 @@ $student = $_SESSION['student_data'] ?? [];
         // Preloader Logic
         window.addEventListener('load', () => {
             const preloader = document.getElementById('preloader');
-            preloader.classList.add('opacity-0');
-            setTimeout(() => preloader.style.display = 'none', 700);
+            if (preloader) {
+                preloader.classList.add('opacity-0');
+                preloader.style.pointerEvents = 'none';
+                setTimeout(() => preloader.style.setProperty('display', 'none', 'important'), 700);
+            }
         });
 
         // Theme Toggle Logic

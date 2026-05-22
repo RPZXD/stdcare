@@ -83,17 +83,17 @@ if ($problemCount >= 3) {
 
 <!-- Summary Cards -->
 <div class="grid grid-cols-3 gap-3 mb-6">
-    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center border border-emerald-200">
-        <span class="text-3xl font-black text-emerald-600"><?= $normalCount ?></span>
-        <p class="text-xs font-bold text-emerald-700 mt-1">ปกติ</p>
+    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center border border-emerald-200 dark:border-emerald-800/50">
+        <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400"><?= $normalCount ?></span>
+        <p class="text-xs font-bold text-emerald-700 dark:text-emerald-300 mt-1">ปกติ</p>
     </div>
-    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center border border-amber-200">
-        <span class="text-3xl font-black text-amber-600"><?= $riskCount ?></span>
-        <p class="text-xs font-bold text-amber-700 mt-1">เสี่ยง</p>
+    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center border border-amber-200 dark:border-amber-800/50">
+        <span class="text-3xl font-black text-amber-600 dark:text-amber-400"><?= $riskCount ?></span>
+        <p class="text-xs font-bold text-amber-700 dark:text-amber-300 mt-1">เสี่ยง</p>
     </div>
-    <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center border border-red-200">
-        <span class="text-3xl font-black text-red-600"><?= $problemCount ?></span>
-        <p class="text-xs font-bold text-red-700 mt-1">มีปัญหา</p>
+    <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center border border-red-200 dark:border-red-800/50">
+        <span class="text-3xl font-black text-red-600 dark:text-red-400"><?= $problemCount ?></span>
+        <p class="text-xs font-bold text-red-700 dark:text-red-300 mt-1">มีปัญหา</p>
     </div>
 </div>
 
@@ -149,13 +149,13 @@ if ($problemCount >= 3) {
                     }
                     
                     if (!empty($details)): ?>
-                    <p class="text-xs text-<?= $statusColor ?>-600 mt-1">
+                    <p class="text-xs text-<?= $statusColor ?>-600 dark:text-<?= $statusColor ?>-400 mt-1">
                         <?= htmlspecialchars(implode(', ', array_filter($details))) ?>
                     </p>
                     <?php endif; ?>
                 </div>
             </div>
-            <span class="px-3 py-1 text-xs font-bold rounded-full bg-<?= $statusColor ?>-100 text-<?= $statusColor ?>-700">
+            <span class="px-3 py-1 text-xs font-bold rounded-full bg-<?= $statusColor ?>-100 dark:bg-<?= $statusColor ?>-950/30 text-<?= $statusColor ?>-700 dark:text-<?= $statusColor ?>-400">
                 <?= $statusLabel ?>
             </span>
         </div>
@@ -167,13 +167,13 @@ if ($problemCount >= 3) {
 <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
     <h5 class="font-bold text-slate-600 dark:text-slate-400 text-sm mb-3">เกณฑ์การแปลผล</h5>
     <div class="flex flex-wrap gap-2 text-xs">
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-lg font-bold">
             😊 ปกติ
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-lg font-bold">
             😐 เสี่ยง
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-100 text-red-700 rounded-lg font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-lg font-bold">
             😟 มีปัญหา
         </span>
     </div>

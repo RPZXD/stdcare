@@ -107,9 +107,9 @@ $choices = [
 ];
 
 $modeColors = [
-    'add' => ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-400', 'text' => 'text-emerald-600'],
-    'edit' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-400', 'text' => 'text-amber-600'],
-    'view' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-400', 'text' => 'text-blue-600'],
+    'add' => ['bg' => 'bg-emerald-50 dark:bg-emerald-950/20', 'border' => 'border-emerald-400 dark:border-emerald-500', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+    'edit' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'border' => 'border-amber-400 dark:border-amber-500', 'text' => 'text-amber-600 dark:text-amber-400'],
+    'view' => ['bg' => 'bg-blue-50 dark:bg-blue-950/20', 'border' => 'border-blue-400 dark:border-blue-500', 'text' => 'text-blue-600 dark:text-blue-400'],
 ];
 $mc = $modeColors[$mode];
 ?>
@@ -124,7 +124,7 @@ $mc = $modeColors[$mode];
             <h5 class="font-bold <?= $mc['text'] ?>">
                 <?php if ($mode === 'view'): ?>ดูข้อมูลการประเมิน EQ<?php elseif ($mode === 'edit'): ?>แก้ไขข้อมูลการประเมิน EQ<?php else: ?>ทำแบบประเมิน EQ<?php endif; ?>
             </h5>
-            <p class="text-sm text-slate-500">กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">กรุณาเลือกคำตอบที่ตรงกับตัวคุณในช่วง 6 เดือนที่ผ่านมา</p>
         </div>
     </div>
 </div>
@@ -177,9 +177,9 @@ $mc = $modeColors[$mode];
                 ?>
                 <label for="<?= $radioId ?>" class="flex flex-col items-center gap-1 p-2.5 rounded-lg cursor-pointer transition-all border-2 text-center
                     <?php if ($isReadonly): ?>
-                        <?= $isChecked ? 'bg-pink-100 dark:bg-pink-900/30 border-pink-400' : 'bg-slate-50 dark:bg-slate-700/50 border-transparent opacity-50' ?>
+                        <?= $isChecked ? 'bg-pink-100 dark:bg-pink-900/30 border-pink-400 dark:border-pink-500' : 'bg-slate-50 dark:bg-slate-700/50 border-transparent dark:border-slate-700/30 opacity-50' ?>
                     <?php else: ?>
-                        hover:bg-pink-50 dark:hover:bg-pink-900/20 border-transparent has-[:checked]:bg-pink-100 has-[:checked]:border-pink-400 dark:has-[:checked]:bg-pink-900/30
+                        hover:bg-pink-50 dark:hover:bg-pink-900/20 border-transparent dark:border-slate-700/30 has-[:checked]:bg-pink-100 has-[:checked]:border-pink-400 dark:has-[:checked]:bg-pink-900/30 dark:has-[:checked]:border-pink-500
                     <?php endif; ?>">
                     <input type="radio" 
                            id="<?= $radioId ?>" 

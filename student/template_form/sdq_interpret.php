@@ -86,9 +86,9 @@ if ($totalProblemScore >= 20) {
 }
 
 $levelColors = [
-    'normal' => ['bg' => 'bg-emerald-500', 'text' => 'text-emerald-600', 'light' => 'bg-emerald-100'],
-    'warning' => ['bg' => 'bg-amber-500', 'text' => 'text-amber-600', 'light' => 'bg-amber-100'],
-    'danger' => ['bg' => 'bg-red-500', 'text' => 'text-red-600', 'light' => 'bg-red-100'],
+    'normal' => ['bg' => 'bg-emerald-500', 'text' => 'text-emerald-600 dark:text-emerald-400', 'light' => 'bg-emerald-100 dark:bg-emerald-950/30'],
+    'warning' => ['bg' => 'bg-amber-500', 'text' => 'text-amber-600 dark:text-amber-400', 'light' => 'bg-amber-100 dark:bg-amber-950/30'],
+    'danger' => ['bg' => 'bg-red-500', 'text' => 'text-red-600 dark:text-red-400', 'light' => 'bg-red-100 dark:bg-red-950/30'],
 ];
 ?>
 
@@ -192,13 +192,13 @@ $levelColors = [
 <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
     <h5 class="font-bold text-slate-600 dark:text-slate-400 text-sm mb-3">เกณฑ์การแปลผล</h5>
     <div class="flex flex-wrap gap-3">
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-bold">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ปกติ (0-13)
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-bold">
             <span class="w-2 h-2 rounded-full bg-amber-500"></span> ภาวะเสี่ยง (14-19)
         </span>
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-full text-xs font-bold">
             <span class="w-2 h-2 rounded-full bg-red-500"></span> มีปัญหา (20+)
         </span>
     </div>

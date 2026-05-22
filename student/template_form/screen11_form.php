@@ -41,9 +41,9 @@ $subjects = [
 ];
 
 $modeColors = [
-    'add' => ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-400', 'text' => 'text-emerald-600'],
-    'edit' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-400', 'text' => 'text-amber-600'],
-    'view' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-400', 'text' => 'text-blue-600'],
+    'add' => ['bg' => 'bg-emerald-50 dark:bg-emerald-950/20', 'border' => 'border-emerald-400 dark:border-emerald-500', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+    'edit' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'border' => 'border-amber-400 dark:border-amber-500', 'text' => 'text-amber-600 dark:text-amber-400'],
+    'view' => ['bg' => 'bg-blue-50 dark:bg-blue-950/20', 'border' => 'border-blue-400 dark:border-blue-500', 'text' => 'text-blue-600 dark:text-blue-400'],
 ];
 $mc = $modeColors[$mode];
 
@@ -68,7 +68,7 @@ function checkboxChecked($data, $field, $value) {
             <h5 class="font-bold <?= $mc['text'] ?>">
                 <?php if ($mode === 'view'): ?>ดูข้อมูลแบบคัดกรอง 11 ด้าน<?php elseif ($mode === 'edit'): ?>แก้ไขแบบคัดกรอง 11 ด้าน<?php else: ?>ทำแบบคัดกรอง 11 ด้าน<?php endif; ?>
             </h5>
-            <p class="text-sm text-slate-500">กรุณาเลือกคำตอบที่ตรงกับตัวคุณ</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">กรุณาเลือกคำตอบที่ตรงกับตัวคุณ</p>
         </div>
     </div>
 </div>
@@ -104,12 +104,12 @@ function checkboxChecked($data, $field, $value) {
                 </h4>
             </div>
             <div class="flex flex-wrap gap-3 mb-4">
-                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-emerald-50 has-[:checked]:bg-emerald-100 has-[:checked]:border-emerald-400">
-                    <input type="radio" name="special_ability" value="ไม่มี" <?= checked($existingData, 'special_ability', 'ไม่มี') ?> <?= $isReadonly ? 'disabled' : 'required' ?>>
+                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 has-[:checked]:bg-emerald-100 dark:has-[:checked]:bg-emerald-950/30 has-[:checked]:border-emerald-400 dark:has-[:checked]:border-emerald-500">
+                    <input type="radio" name="special_ability" value="ไม่มี" <?= checked($existingData, 'special_ability', 'ไม่มี') ?> <?= $isReadonly ? 'disabled' : 'required' ?> class="w-4 h-4 text-emerald-500 focus:ring-emerald-400">
                     <span class="font-medium">ไม่มี</span>
                 </label>
-                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-emerald-50 has-[:checked]:bg-emerald-100 has-[:checked]:border-emerald-400">
-                    <input type="radio" name="special_ability" value="มี" <?= checked($existingData, 'special_ability', 'มี') ?> <?= $isReadonly ? 'disabled' : '' ?>>
+                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 has-[:checked]:bg-emerald-100 dark:has-[:checked]:bg-emerald-950/30 has-[:checked]:border-emerald-400 dark:has-[:checked]:border-emerald-500">
+                    <input type="radio" name="special_ability" value="มี" <?= checked($existingData, 'special_ability', 'มี') ?> <?= $isReadonly ? 'disabled' : '' ?> class="w-4 h-4 text-emerald-500 focus:ring-emerald-400">
                     <span class="font-medium">มี</span>
                 </label>
             </div>
@@ -127,8 +127,8 @@ function checkboxChecked($data, $field, $value) {
                         <span class="font-medium text-slate-700 dark:text-slate-300"><?= $subject ?></span>
                     </label>
                     <div class="subject-inputs <?= $hasDetail ? '' : 'hidden' ?> mt-2 space-y-2 pl-7" data-subject="<?= $i ?>">
-                        <input type="text" name="special_<?= $i ?>[]" value="<?= htmlspecialchars($details[0] ?? '') ?>" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" placeholder="รายละเอียด 1" <?= $isReadonly ? 'readonly' : '' ?>>
-                        <input type="text" name="special_<?= $i ?>[]" value="<?= htmlspecialchars($details[1] ?? '') ?>" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" placeholder="รายละเอียด 2" <?= $isReadonly ? 'readonly' : '' ?>>
+                        <input type="text" name="special_<?= $i ?>[]" value="<?= htmlspecialchars($details[0] ?? '') ?>" class="w-full px-3 py-2 text-sm rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="รายละเอียด 1" <?= $isReadonly ? 'readonly' : '' ?>>
+                        <input type="text" name="special_<?= $i ?>[]" value="<?= htmlspecialchars($details[1] ?? '') ?>" class="w-full px-3 py-2 text-sm rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="รายละเอียด 2" <?= $isReadonly ? 'readonly' : '' ?>>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -204,37 +204,37 @@ function checkboxChecked($data, $field, $value) {
                 </h4>
             </div>
             <div class="flex flex-wrap gap-2 mb-4">
-                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all hover:bg-emerald-50 has-[:checked]:bg-emerald-100 has-[:checked]:border-emerald-400">
-                    <input type="radio" name="<?= $fieldStatus ?>" value="ปกติ" <?= checked($existingData, $fieldStatus, 'ปกติ') ?> <?= $isReadonly ? 'disabled' : 'required' ?>>
-                    <span class="font-medium text-emerald-700">ปกติ</span>
+                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 has-[:checked]:bg-emerald-100 dark:has-[:checked]:bg-emerald-950/30 has-[:checked]:border-emerald-400 dark:has-[:checked]:border-emerald-500">
+                    <input type="radio" name="<?= $fieldStatus ?>" value="ปกติ" <?= checked($existingData, $fieldStatus, 'ปกติ') ?> <?= $isReadonly ? 'disabled' : 'required' ?> class="w-4 h-4 text-emerald-500 focus:ring-emerald-400">
+                    <span class="font-medium text-emerald-700 dark:text-emerald-400">ปกติ</span>
                 </label>
-                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all hover:bg-amber-50 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400">
-                    <input type="radio" name="<?= $fieldStatus ?>" value="เสี่ยง" <?= checked($existingData, $fieldStatus, 'เสี่ยง') ?> <?= $isReadonly ? 'disabled' : '' ?>>
-                    <span class="font-medium text-amber-700">เสี่ยง</span>
+                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-amber-50 dark:hover:bg-amber-950/20 has-[:checked]:bg-amber-100 dark:has-[:checked]:bg-amber-950/30 has-[:checked]:border-amber-400 dark:has-[:checked]:border-amber-500">
+                    <input type="radio" name="<?= $fieldStatus ?>" value="เสี่ยง" <?= checked($existingData, $fieldStatus, 'เสี่ยง') ?> <?= $isReadonly ? 'disabled' : '' ?> class="w-4 h-4 text-amber-500 focus:ring-amber-400">
+                    <span class="font-medium text-amber-700 dark:text-amber-400">เสี่ยง</span>
                 </label>
-                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all hover:bg-red-50 has-[:checked]:bg-red-100 has-[:checked]:border-red-400">
-                    <input type="radio" name="<?= $fieldStatus ?>" value="มีปัญหา" <?= checked($existingData, $fieldStatus, 'มีปัญหา') ?> <?= $isReadonly ? 'disabled' : '' ?>>
-                    <span class="font-medium text-red-700">มีปัญหา</span>
+                <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-red-50 dark:hover:bg-red-950/20 has-[:checked]:bg-red-100 dark:has-[:checked]:bg-red-950/30 has-[:checked]:border-red-400 dark:has-[:checked]:border-red-500">
+                    <input type="radio" name="<?= $fieldStatus ?>" value="มีปัญหา" <?= checked($existingData, $fieldStatus, 'มีปัญหา') ?> <?= $isReadonly ? 'disabled' : '' ?> class="w-4 h-4 text-red-500 focus:ring-red-400">
+                    <span class="font-medium text-red-700 dark:text-red-400">มีปัญหา</span>
                 </label>
             </div>
             
             <!-- Risk fields -->
-            <div id="<?= $field ?>RiskFields" class="<?= $statusVal === 'เสี่ยง' ? '' : 'hidden' ?> space-y-2 mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                <p class="text-sm font-bold text-amber-700 mb-2">เลือกข้อที่เกี่ยวข้อง (เสี่ยง):</p>
+            <div id="<?= $field ?>RiskFields" class="<?= $statusVal === 'เสี่ยง' ? '' : 'hidden' ?> space-y-2 mb-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <p class="text-sm font-bold text-amber-700 dark:text-amber-400 mb-2">เลือกข้อที่เกี่ยวข้อง (เสี่ยง):</p>
                 <?php foreach ($riskOptions[$field]['risk'] ?? [] as $opt): ?>
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="<?= $fieldRisk ?>[]" value="<?= $opt ?>" class="w-4 h-4 text-amber-500" <?= checkboxChecked($existingData, $fieldRisk, $opt) ?> <?= $isReadonly ? 'disabled' : '' ?>>
+                    <input type="checkbox" name="<?= $fieldRisk ?>[]" value="<?= $opt ?>" class="w-4 h-4 text-amber-500 rounded focus:ring-amber-400" <?= checkboxChecked($existingData, $fieldRisk, $opt) ?> <?= $isReadonly ? 'disabled' : '' ?>>
                     <span><?= $opt ?></span>
                 </label>
                 <?php endforeach; ?>
             </div>
             
             <!-- Problem fields -->
-            <div id="<?= $field ?>ProblemFields" class="<?= $statusVal === 'มีปัญหา' ? '' : 'hidden' ?> space-y-2 mb-4 p-3 bg-red-50 rounded-xl border border-red-200">
-                <p class="text-sm font-bold text-red-700 mb-2">เลือกข้อที่เกี่ยวข้อง (มีปัญหา):</p>
+            <div id="<?= $field ?>ProblemFields" class="<?= $statusVal === 'มีปัญหา' ? '' : 'hidden' ?> space-y-2 mb-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-800/50">
+                <p class="text-sm font-bold text-red-700 dark:text-red-400 mb-2">เลือกข้อที่เกี่ยวข้อง (มีปัญหา):</p>
                 <?php foreach ($riskOptions[$field]['problem'] ?? [] as $opt): ?>
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="<?= $fieldProblem ?>[]" value="<?= $opt ?>" class="w-4 h-4 text-red-500" <?= checkboxChecked($existingData, $fieldProblem, $opt) ?> <?= $isReadonly ? 'disabled' : '' ?>>
+                    <input type="checkbox" name="<?= $fieldProblem ?>[]" value="<?= $opt ?>" class="w-4 h-4 text-red-500 rounded focus:ring-red-400" <?= checkboxChecked($existingData, $fieldProblem, $opt) ?> <?= $isReadonly ? 'disabled' : '' ?>>
                     <span><?= $opt ?></span>
                 </label>
                 <?php endforeach; ?>
@@ -251,17 +251,17 @@ function checkboxChecked($data, $field, $value) {
                 </h4>
             </div>
             <div class="flex flex-wrap gap-3 mb-4">
-                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-emerald-50 has-[:checked]:bg-emerald-100 has-[:checked]:border-emerald-400">
-                    <input type="radio" name="special_need_status" value="ไม่มี" <?= checked($existingData, 'special_need_status', 'ไม่มี') ?> <?= $isReadonly ? 'disabled' : 'required' ?>>
+                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 has-[:checked]:bg-emerald-100 dark:has-[:checked]:bg-emerald-950/30 has-[:checked]:border-emerald-400 dark:has-[:checked]:border-emerald-500">
+                    <input type="radio" name="special_need_status" value="ไม่มี" <?= checked($existingData, 'special_need_status', 'ไม่มี') ?> <?= $isReadonly ? 'disabled' : 'required' ?> class="w-4 h-4 text-emerald-500 focus:ring-emerald-400">
                     <span class="font-medium">ไม่มี</span>
                 </label>
-                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-teal-50 has-[:checked]:bg-teal-100 has-[:checked]:border-teal-400">
-                    <input type="radio" name="special_need_status" value="มี" <?= checked($existingData, 'special_need_status', 'มี') ?> <?= $isReadonly ? 'disabled' : '' ?>>
+                <label class="flex-1 flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all border-transparent dark:border-slate-700/50 hover:bg-teal-50 dark:hover:bg-teal-950/20 has-[:checked]:bg-teal-100 dark:has-[:checked]:bg-teal-950/30 has-[:checked]:border-teal-400 dark:has-[:checked]:border-teal-500">
+                    <input type="radio" name="special_need_status" value="มี" <?= checked($existingData, 'special_need_status', 'มี') ?> <?= $isReadonly ? 'disabled' : '' ?> class="w-4 h-4 text-teal-500 focus:ring-teal-400">
                     <span class="font-medium">มี</span>
                 </label>
             </div>
-            <div id="specialNeedFields" class="<?= $isHaveSpecialNeed ? '' : 'hidden' ?> space-y-2 p-3 bg-teal-50 rounded-xl border border-teal-200">
-                <p class="text-sm font-bold text-teal-700 mb-2">เลือกประเภท:</p>
+            <div id="specialNeedFields" class="<?= $isHaveSpecialNeed ? '' : 'hidden' ?> space-y-2 p-3 bg-teal-50 dark:bg-teal-950/20 rounded-xl border border-teal-200 dark:border-teal-800/50">
+                <p class="text-sm font-bold text-teal-700 dark:text-teal-400 mb-2">เลือกประเภท:</p>
                 <?php 
                 $specialNeedTypes = [
                     'มีความบกพร่องทางการเห็น', 'มีความบกพร่องทางการได้ยิน', 'มีความบกพร่องทางสติปัญญา',
@@ -282,7 +282,7 @@ function checkboxChecked($data, $field, $value) {
     <!-- Navigation -->
     <?php if (!$isReadonly): ?>
     <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <button type="button" id="prevStep" class="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold transition-all disabled:opacity-50" disabled>
+        <button type="button" id="prevStep" class="px-6 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-all disabled:opacity-50" disabled>
             <i class="fas fa-arrow-left mr-2"></i>ย้อนกลับ
         </button>
         <button type="button" id="nextStep" class="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all">
