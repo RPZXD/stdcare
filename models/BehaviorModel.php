@@ -238,6 +238,8 @@ class BehaviorModel
                 return 20;
             case "มาโรงเรียนสาย":
                 return 5;
+            case "ขาดเรียน":
+                return 5;
             case "แต่งกาย/ทรงผมผิดระเบียบ":
                 return 5;
             case "พกพาอาวุธหรือวัตถุระเบิด":

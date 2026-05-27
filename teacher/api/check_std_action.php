@@ -33,10 +33,10 @@ $result = $attendance->saveAttendanceBulk($stu_ids, $statuses, $reasons, $date, 
 
 // หักคะแนน (หรือเพิ่มคะแนน) กรณีมีข้อมูล behavior จากฟอร์มและยังไม่มีการบันทึกในวันนั้น
 foreach ($stu_ids as $stu_id) {
-    if (($statuses[$stu_id] ?? '1') == '3') {
-        // Always use 'มาโรงเรียนสาย' for late
-        $behavior_type = 'มาโรงเรียนสาย';
-        $behavior_name = $behavior_names[$stu_id] ?? 'มาโรงเรียนสาย';
+    $status_val = $statuses[$stu_id] ?? '1';
+    if ($status_val == '3' || $status_val == '2') {
+        $behavior_type = ($status_val == '3') ? 'มาโรงเรียนสาย' : 'ขาดเรียน';
+        $behavior_name = $behavior_names[$stu_id] ?? $behavior_type;
         $behavior_score = !empty($behavior_scores[$stu_id]) && $behavior_scores[$stu_id] != 5 ? $behavior_scores[$stu_id] : 5;
         $teach_id = $teach_ids[$stu_id] ?? ($_SESSION['Teacher_login'] ?? null);
         $this_term = $term;

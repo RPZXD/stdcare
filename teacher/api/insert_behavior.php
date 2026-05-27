@@ -20,6 +20,9 @@ function behaviorscoretype($type)
         case "มาโรงเรียนสาย":
           $results = 5;
           break;
+        case "ขาดเรียน":
+          $results = 5;
+          break;
         case "แต่งกาย/ทรงผมผิดระเบียบ":
           $results = 5;
           break;
@@ -75,8 +78,8 @@ $dateTime = new DateTime($currentDate);
 $dateTime->modify('+543 years');
 $newDate = $dateTime->format('Y-m-d');
 
-// ตรวจสอบเฉพาะ "มาโรงเรียนสาย" ว่ามีซ้ำในวันเดียวกันหรือไม่
-if ($type == 'มาโรงเรียนสาย') {
+// ตรวจสอบเฉพาะ "มาโรงเรียนสาย" หรือ "ขาดเรียน" ว่ามีซ้ำในวันเดียวกันหรือไม่
+if ($type == 'มาโรงเรียนสาย' || $type == 'ขาดเรียน') {
     $select_stmt = $db->prepare("SELECT 1 FROM behavior WHERE stu_id = :stu_id AND behavior_date = :udate AND behavior_type = :utype");
     $select_stmt->execute([
         ':stu_id' => $stu_id,

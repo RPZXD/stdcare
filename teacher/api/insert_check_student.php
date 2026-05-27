@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Prepare the insert statement for the behavior table
         $behaviorStmt = $db->prepare("
             INSERT INTO behavior (Stu_id, Behavior_date, Behavior_type, Behavior_name, Behavior_score, Teach_id, Behavior_term, Behavior_pee)
-            VALUES (:stu_id, :behavior_date, 'มาโรงเรียนสาย', 'มาโรงเรียนสาย', '5', :teach_id, :behavior_term, :behavior_pee)
+            VALUES (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :behavior_term, :behavior_pee)
             ON DUPLICATE KEY UPDATE Behavior_score = VALUES(Behavior_score)
         ");
 
@@ -164,17 +164,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Execute the study insert/update query
             $stmt->execute();
 
-            // If study_status is 3 (Late to school), insert into behavior table
-            if ($status == 3) {
-                // Bind parameters for behavior table
-                $behaviorStmt->bindParam(':stu_id', $stu_id);
-                $behaviorStmt->bindParam(':behavior_date', $attendance_date);
-                $behaviorStmt->bindParam(':teach_id', $teacher_id);
-                $behaviorStmt->bindParam(':behavior_term', $term);
-                $behaviorStmt->bindParam(':behavior_pee', $pee);
-
-                // Execute the behavior insert/update query
-                $behaviorStmt->execute();
+            // If study_status is 3 (Late to school) or 2 (Absent), insert into behavior table
+            if ($status == 3 || $status == 2) {
+                $behaviorStmt->execute([
+                    ':stu_id' => $stu_id,
+                    ':behavior_date' => $attendance_date,
+                    ':behavior_type' => ($status == 3) ? 'มาโรงเรียนสาย' : 'ขาดเรียน',
+                    ':behavior_name' => ($status == 3) ? 'มาโรงเรียนสาย' : 'ขาดเรียน',
+                    ':behavior_score' => 5,
+                    ':teach_id' => $teacher_id,
+                    ':behavior_term' => $term,
+                    ':behavior_pee' => $pee
+                ]);
             }
 
             // Bind parameters for ckstudy table

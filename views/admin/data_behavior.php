@@ -147,6 +147,7 @@ $activePage = "behavior";
                                 class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-rose-100 outline-none transition-all font-black text-slate-700 dark:text-white cursor-pointer">
                                 <optgroup label="⚠️ ความผิด (หักคะแนน)">
                                     <option value="มาโรงเรียนสาย">มาโรงเรียนสาย</option>
+                                    <option value="ขาดเรียน">ขาดเรียน</option>
                                     <option value="แต่งกาย/ทรงผมผิดระเบียบ">แต่งกาย/ทรงผมผิดระเบียบ</option>
                                     <option value="หนีเรียนหรือออกนอกสถานศึกษา">หนีเรียนหรือออกนอกสถานศึกษา</option>
                                     <option value="จอดรถในที่ห้ามจอด">จอดรถในที่ห้ามจอด</option>

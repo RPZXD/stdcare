@@ -18,6 +18,9 @@ function behaviorscoretype($type)
         case "มาโรงเรียนสาย":
           $results = 5;
           break;
+        case "ขาดเรียน":
+          $results = 5;
+          break;
         case "แต่งกาย/ทรงผมผิดระเบียบ":
           $results = 5;
           break;

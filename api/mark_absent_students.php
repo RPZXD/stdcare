@@ -115,6 +115,63 @@ try {
     echo "Marked $count students as absent (Status 2) for $today.\n";
 
     // ============================================================
+    // ส่วนที่ 1.5: หักคะแนนพฤติกรรมนักเรียนขาดเรียน (วันละ 1 ครั้ง)
+    // ============================================================
+    echo "\n--- Processing Absent Student Behavior Deduction ---\n";
+
+    // ดึงนักเรียนที่สถานะ "ขาดเรียน" (2) ของวันนี้ ที่ยังไม่มีบันทึกหักคะแนนในวันนี้
+    $sqlAbsent = "
+        SELECT sa.student_id
+        FROM student_attendance sa
+        LEFT JOIN behavior b 
+            ON sa.student_id = b.stu_id 
+            AND b.behavior_date = :today_b
+            AND b.behavior_type = 'ขาดเรียน'
+        WHERE sa.attendance_date = :today_a
+            AND sa.attendance_status = '2'
+            AND b.id IS NULL
+    ";
+
+    $stmtAbsent = $conn->prepare($sqlAbsent);
+    $stmtAbsent->execute([
+        ':today_a' => $today,
+        ':today_b' => $today
+    ]);
+    $absentStudents = $stmtAbsent->fetchAll(PDO::FETCH_COLUMN);
+
+    if (empty($absentStudents)) {
+        echo "ไม่มีนักเรียนขาดเรียนที่ต้องหักคะแนนวันนี้\n";
+    } else {
+        $insertBehaviorAbsent = $conn->prepare("
+            INSERT INTO behavior 
+                (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
+            VALUES 
+                (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :term, :pee)
+        ");
+
+        $behaviorAbsentCount = 0;
+        foreach ($absentStudents as $stuId) {
+            try {
+                $insertBehaviorAbsent->execute([
+                    ':stu_id'         => $stuId,
+                    ':behavior_date'  => $today,
+                    ':behavior_type'  => 'ขาดเรียน',
+                    ':behavior_name'  => 'ขาดเรียน',
+                    ':behavior_score' => 5,
+                    ':teach_id'       => 'System',
+                    ':term'           => $term,
+                    ':pee'            => $year
+                ]);
+                $behaviorAbsentCount++;
+            } catch (PDOException $e) {
+                echo "Error deducting score for $stuId: " . $e->getMessage() . "\n";
+            }
+        }
+
+        echo "หักคะแนนนักเรียนขาดเรียนสำเร็จ: $behaviorAbsentCount คน (หักคนละ 5 คะแนน)\n";
+    }
+
+    // ============================================================
     // ส่วนที่ 2: หักคะแนนพฤติกรรมนักเรียนมาสาย (วันละ 1 ครั้ง)
     // ============================================================
     echo "\n--- Processing Late Student Behavior Deduction ---\n";
