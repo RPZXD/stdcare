@@ -42,7 +42,7 @@ if ($type === 'teacher') {
     if (preg_match('/ม\.?\s*(\d+)\s*\/\s*(\d+)/u', $search, $matches)) {
         $major = $matches[1];
         $room = $matches[2];
-        $query = "SELECT * FROM student WHERE Stu_major = :major AND Stu_room = :room AND Stu_status = 1 ORDER BY Stu_no ASC";
+        $query = "SELECT * FROM student WHERE Stu_major = :major AND Stu_room = :room ORDER BY Stu_no ASC";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':major', $major);
         $stmt->bindValue(':room', $room);
@@ -61,7 +61,6 @@ if ($type === 'teacher') {
                   OR s.Par_phone LIKE :search 
                   OR s.Father_name LIKE :search 
                   OR s.Mother_name LIKE :search )
-                  AND s.Stu_status = 1
                   LIMIT 20";
         $stmt = $db->prepare($query);
         $stmt->bindValue(':search', '%' . $search . '%');

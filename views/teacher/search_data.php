@@ -305,20 +305,40 @@ $(document).ready(function() {
 
     function renderStudent(item, path, idx) {
         const addr = encodeURIComponent(item.Stu_addr);
+        let statusBadge = '';
+        if (item.Stu_status !== undefined && item.Stu_status !== null) {
+            const status = String(item.Stu_status);
+            if (status === '1') {
+                statusBadge = `<span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-[10px] font-black shadow-sm">🟢 ปกติ</span>`;
+            } else if (status === '2') {
+                statusBadge = `<span class="px-3 py-1 bg-blue-500 text-white rounded-full text-[10px] font-black shadow-sm">🎓 จบการศึกษา</span>`;
+            } else if (status === '3') {
+                statusBadge = `<span class="px-3 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black shadow-sm">🏫 ย้ายโรงเรียน</span>`;
+            } else if (status === '4') {
+                statusBadge = `<span class="px-3 py-1 bg-rose-500 text-white rounded-full text-[10px] font-black shadow-sm">❌ ออกกลางคัน</span>`;
+            } else if (status === '9') {
+                statusBadge = `<span class="px-3 py-1 bg-slate-500 text-white rounded-full text-[10px] font-black shadow-sm">💔 เสียชีวิต</span>`;
+            } else if (status === '0') {
+                statusBadge = `<span class="px-3 py-1 bg-rose-400 text-white rounded-full text-[10px] font-black shadow-sm">ย้าย/จำหน่าย</span>`;
+            } else {
+                statusBadge = `<span class="px-3 py-1 bg-slate-400 text-white rounded-full text-[10px] font-black shadow-sm">สถานะ: ${status}</span>`;
+            }
+        }
         return `
             <div class="result-card glass-card rounded-3xl overflow-hidden border border-slate-100 shadow-xl group hover:shadow-2xl transition-all" style="animation-delay: ${idx * 0.05}s">
                 <div class="relative">
                     <img src="${path}${item.Stu_picture}" class="w-full h-56 object-cover" onerror="this.src='../dist/img/default-avatar.svg'">
-                    <div class="absolute top-4 left-4 flex gap-2">
+                    <div class="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[90%]">
                         <span class="px-3 py-1 bg-white/90 backdrop-blur rounded-full text-[10px] font-black shadow-sm">เลขที่ ${item.Stu_no}</span>
                         <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-[10px] font-black shadow-sm">ม.${item.Stu_major}/${item.Stu_room}</span>
+                        ${statusBadge}
                     </div>
                 </div>
                 <div class="p-5">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-black text-slate-800">${item.Stu_name} ${item.Stu_sur}</h3>
-                            <p class="text-indigo-500 font-bold text-sm">น้อง${item.Stu_nick || '-'}</p>
+                            <p class="text-indigo-500 font-bold text-sm">ชื่อเล่น: ${item.Stu_nick || '-'}</p>
                         </div>
                         <a href="https://www.google.com/maps/search/?api=1&query=${item.latitude && item.longitude ? item.latitude + ',' + item.longitude : addr}" target="_blank" class="w-10 h-10 ${item.latitude && item.longitude ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'} rounded-xl flex items-center justify-center quick-action-btn border shadow-sm" title="${item.latitude && item.longitude ? 'ใช้พิกัด GPS แม่นยำสูง' : 'ค้นหาด้วยที่อยู่'}">
                             <i class="fas ${item.latitude && item.longitude ? 'fa-crosshairs' : 'fa-map-marker-alt'}"></i>

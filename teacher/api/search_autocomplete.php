@@ -32,11 +32,10 @@ if ($type === 'teacher') {
         ];
     }
 } elseif ($type === 'student') {
-    // ค้นหาข้อมูลในตารางนักเรียน - เพิ่ม Stu_major, Stu_room
-    $query = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room 
+    // ค้นหาข้อมูลในตารางนักเรียน - เพิ่ม Stu_major, Stu_room, Stu_status
+    $query = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_status 
               FROM student 
               WHERE (Stu_name LIKE :term OR Stu_sur LIKE :term OR Stu_id LIKE :term) 
-              AND Stu_status = 1 
               LIMIT 10";
     $stmt = $db->prepare($query);
     $stmt->bindValue(':term', '%' . $term . '%');
@@ -46,8 +45,30 @@ if ($type === 'teacher') {
     foreach ($results as $row) {
         $fullName = $row['Stu_pre'] . $row['Stu_name'] . ' ' . $row['Stu_sur'];
         $classRoom = " (ม.{$row['Stu_major']}/{$row['Stu_room']})";
+        
+        $statusText = "";
+        if (isset($row['Stu_status']) && $row['Stu_status'] != 1) {
+            switch ($row['Stu_status']) {
+                case 2:
+                    $statusText = " [จบการศึกษา]";
+                    break;
+                case 3:
+                case 0:
+                    $statusText = " [ย้าย/จำหน่าย]";
+                    break;
+                case 4:
+                    $statusText = " [ออกกลางคัน]";
+                    break;
+                case 9:
+                    $statusText = " [เสียชีวิต]";
+                    break;
+                default:
+                    $statusText = " [สถานะ: " . $row['Stu_status'] . "]";
+            }
+        }
+        
         $data[] = [
-            'label' => $fullName . $classRoom, // ชื่อ (ม.ชั้น/ห้อง)
+            'label' => $fullName . $classRoom . $statusText, // ชื่อ (ม.ชั้น/ห้อง) [สถานะ]
             'value' => $row['Stu_name'] . ' ' . $row['Stu_sur'] // ใช้ชื่อเป็น value สำหรับค้นหา
         ];
     }
