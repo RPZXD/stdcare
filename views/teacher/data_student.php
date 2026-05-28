@@ -9,6 +9,9 @@ $pageTitle = $pageTitle ?? 'ข้อมูลนักเรียน';
 ob_start();
 ?>
 
+<!-- CropperJS CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+
 <!-- Premium Custom Styles -->
 <style>
     /* Glass Card Effect */
@@ -378,7 +381,21 @@ ob_start();
         </div>
         <div class="flex-1 overflow-y-auto p-5 md:p-8" id="photoModalBody">
             <div class="text-center">
-                <div class="mb-6">
+                <!-- Current Photo Option -->
+                <div id="currentPhotoSection" class="hidden mb-6 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <img id="currentPhotoThumb" src="" class="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-white dark:border-slate-700" onerror="this.src='../dist/img/default-avatar.svg'">
+                        <div class="text-left">
+                            <h4 class="text-sm font-black text-slate-700 dark:text-slate-200">รูปภาพปัจจุบันของนักเรียน</h4>
+                            <p class="text-xs text-slate-500">คุณสามารถครอบตัด หรือหมุนรูปภาพปัจจุบันได้โดยไม่ต้องอัปโหลดใหม่</p>
+                        </div>
+                    </div>
+                    <button type="button" id="editCurrentPhotoBtn" class="py-3 px-6 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl font-black text-xs shadow-lg shadow-violet-200 transition-all flex items-center gap-1.5 hover:scale-105">
+                        <i class="fas fa-edit"></i> แก้ไขรูปภาพนี้
+                    </button>
+                </div>
+                
+                <div class="mb-6" id="uploadAreaLabel">
                     <label class="block w-full p-10 border-3 border-dashed border-violet-300 dark:border-slate-600 rounded-3xl cursor-pointer hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-slate-700/50 transition-all group">
                         <input type="file" id="photoInput" accept="image/*" class="hidden">
                         <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">📷</div>
@@ -387,11 +404,65 @@ ob_start();
                         <p class="text-xs text-slate-400 mt-2">รองรับ JPG, PNG, WEBP (ไม่เกิน 5MB)</p>
                     </label>
                 </div>
-                <div id="photoPreview" class="hidden mb-4">
-                    <div class="relative inline-block">
-                        <img id="previewImg" src="" class="max-h-72 mx-auto rounded-2xl shadow-2xl border-4 border-white dark:border-slate-700">
-                        <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-                            ✓ พร้อมอัปโหลด
+                <div id="photoPreview" class="hidden flex flex-col md:flex-row gap-6 items-stretch justify-center mb-6">
+                    <!-- Cropper Container -->
+                    <div class="flex-1 max-w-xl bg-slate-100 dark:bg-slate-900 rounded-2xl p-4 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                        <div class="w-full max-h-[45vh] overflow-hidden rounded-xl">
+                            <img id="previewImg" src="" class="max-w-full block">
+                        </div>
+                    </div>
+                    
+                    <!-- Control Panel -->
+                    <div class="md:w-64 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-5 rounded-2xl flex flex-col justify-between gap-4 text-left">
+                        <div>
+                            <h4 class="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                <i class="fas fa-sliders-h text-rose-500"></i> เครื่องมือภาพ
+                            </h4>
+                            
+                            <!-- Choose new photo button inside control panel -->
+                            <button type="button" onclick="document.getElementById('photoInput').click()" class="w-full py-2.5 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-rose-500 hover:bg-rose-50/20 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all mb-4">
+                                <i class="fas fa-file-image"></i> เลือกไฟล์ใหม่...
+                            </button>
+                            
+                            <!-- Rotation Controls -->
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <button type="button" id="rotateLeft" class="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <i class="fas fa-undo"></i> หมุนซ้าย
+                                </button>
+                                <button type="button" id="rotateRight" class="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <i class="fas fa-redo"></i> หมุนขวา
+                                </button>
+                            </div>
+                            
+                            <!-- Flip Controls -->
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <button type="button" id="flipX" class="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <i class="fas fa-arrows-alt-h"></i> กลับแนวนอน
+                                </button>
+                                <button type="button" id="flipY" class="py-2.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <i class="fas fa-arrows-alt-v"></i> กลับแนวตั้ง
+                                </button>
+                            </div>
+
+                            <!-- Aspect Ratio Select -->
+                            <div class="space-y-1.5 mb-4">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">อัตราส่วนภาพ</label>
+                                <select id="aspectRatioSelect" class="w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-bold focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none cursor-pointer">
+                                    <option value="0.75" selected>3:4 (ภาพถ่ายนักเรียน)</option>
+                                    <option value="1">1:1 (จัตุรัส)</option>
+                                    <option value="NaN">อิสระ (Free)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Reset / Help -->
+                        <div class="space-y-2">
+                            <button type="button" id="resetCropper" class="w-full py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+                                <i class="fas fa-sync-alt"></i> รีเซ็ตค่าเริ่มต้น
+                            </button>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-normal">
+                                * ลากกรอบปรับแต่ง หรือหมุนภาพให้ตรงตามต้องการก่อนกดอัปโหลด
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -410,6 +481,9 @@ ob_start();
     </div>
 </div>
 
+<!-- CropperJS JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
 <!-- Scripts -->
 <script>
 const classValue = <?php echo json_encode($class); ?>;
@@ -417,6 +491,9 @@ const roomValue = <?php echo json_encode($room); ?>;
 const teacherName = <?php echo json_encode($teacher_name); ?>;
 let currentStudentId = null;
 let allStudents = [];
+let cropperInstance = null;
+let scaleX = 1;
+let scaleY = 1;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadStudentData();
@@ -440,6 +517,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Drag and drop for photo
     setupDragAndDrop();
+    
+    // CropperJS controls
+    document.getElementById('rotateLeft').addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(-90);
+    });
+    document.getElementById('rotateRight').addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(90);
+    });
+    document.getElementById('flipX').addEventListener('click', () => {
+        if (cropperInstance) {
+            scaleX = -scaleX;
+            cropperInstance.scaleX(scaleX);
+        }
+    });
+    document.getElementById('flipY').addEventListener('click', () => {
+        if (cropperInstance) {
+            scaleY = -scaleY;
+            cropperInstance.scaleY(scaleY);
+        }
+    });
+    document.getElementById('aspectRatioSelect').addEventListener('change', (e) => {
+        if (cropperInstance) {
+            const ratio = parseFloat(e.target.value);
+            cropperInstance.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+        }
+    });
+    document.getElementById('resetCropper').addEventListener('click', () => {
+        if (cropperInstance) {
+            cropperInstance.reset();
+            scaleX = 1;
+            scaleY = 1;
+            document.getElementById('aspectRatioSelect').value = "0.75";
+            cropperInstance.setAspectRatio(0.75);
+        }
+    });
 });
 
 function debounce(func, wait) {
@@ -761,12 +873,43 @@ function changePhoto(stuId) {
     currentStudentId = stuId;
     document.getElementById('photoInput').value = '';
     document.getElementById('photoPreview').classList.add('hidden');
+    document.getElementById('uploadAreaLabel').classList.remove('hidden');
     document.getElementById('uploadPhoto').disabled = true;
+    
+    // Check if student has current photo
+    const student = allStudents.find(s => s.Stu_id === stuId);
+    const currentPhotoSection = document.getElementById('currentPhotoSection');
+    if (student && student.Stu_picture && student.Stu_picture !== 'default.jpg') {
+        const photoUrl = `../photo/${student.Stu_picture}`;
+        document.getElementById('currentPhotoThumb').src = photoUrl;
+        currentPhotoSection.classList.remove('hidden');
+        
+        // When clicking "Edit Current Photo", load it into the cropper
+        document.getElementById('editCurrentPhotoBtn').onclick = function() {
+            const previewImg = document.getElementById('previewImg');
+            previewImg.removeAttribute('crossOrigin'); // relative local path, safe
+            previewImg.src = photoUrl;
+            
+            document.getElementById('uploadAreaLabel').classList.add('hidden');
+            currentPhotoSection.classList.add('hidden');
+            document.getElementById('photoPreview').classList.remove('hidden');
+            document.getElementById('uploadPhoto').disabled = false;
+            
+            initCropper();
+        };
+    } else {
+        currentPhotoSection.classList.add('hidden');
+    }
+    
     document.getElementById('photoModal').classList.remove('hidden');
 }
 
 function closePhotoModal() {
     document.getElementById('photoModal').classList.add('hidden');
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
     currentStudentId = null;
 }
 
@@ -786,52 +929,109 @@ function handlePhotoSelect(e) {
     
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById('previewImg').src = e.target.result;
+        const previewImg = document.getElementById('previewImg');
+        previewImg.src = e.target.result;
+        
+        // Hide upload area, show preview area
+        document.getElementById('uploadAreaLabel').classList.add('hidden');
         document.getElementById('photoPreview').classList.remove('hidden');
         document.getElementById('uploadPhoto').disabled = false;
+        
+        // Initialize Cropper
+        initCropper();
     };
     reader.readAsDataURL(file);
 }
 
-async function uploadPhoto() {
-    const file = document.getElementById('photoInput').files[0];
-    if (!file || !currentStudentId) return;
+function initCropper() {
+    const image = document.getElementById('previewImg');
     
-    const formData = new FormData();
-    formData.append('Stu_id', currentStudentId);
-    formData.append('profile_pic', file);
+    if (cropperInstance) {
+        cropperInstance.destroy();
+    }
+    
+    scaleX = 1;
+    scaleY = 1;
+    
+    const aspectRatioSelect = document.getElementById('aspectRatioSelect');
+    aspectRatioSelect.value = "0.75"; // Reset default to 3:4 aspect ratio
+    const aspectRatio = 0.75;
+    
+    cropperInstance = new Cropper(image, {
+        aspectRatio: aspectRatio,
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false
+    });
+}
+
+async function uploadPhoto() {
+    if (!cropperInstance || !currentStudentId) return;
+    
+    // Get cropped canvas scaled to 3:4 aspect ratio (600x800)
+    const canvas = cropperInstance.getCroppedCanvas({
+        width: 600,
+        height: 800,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+    });
+    
+    if (!canvas) {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างภาพที่ตัดครอบได้' });
+        return;
+    }
     
     const btn = document.getElementById('uploadPhoto');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังอัปโหลด...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังประมวลผลและอัปโหลด...';
     
-    try {
-        const response = await fetch('api/update_profile_pic_std.php', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            Swal.fire({ 
-                icon: 'success', 
-                title: '✅ อัปโหลดสำเร็จ!', 
-                timer: 1500, 
-                showConfirmButton: false,
-                background: '#10b981',
-                color: '#fff'
-            });
-            closePhotoModal();
-            loadStudentData();
-        } else {
-            Swal.fire({ icon: 'error', title: 'อัปโหลดล้มเหลว', text: result.message || '' });
+    canvas.toBlob(async function(blob) {
+        if (!blob) {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างไฟล์รูปภาพได้' });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> อัปโหลดรูปภาพ';
+            return;
         }
-    } catch (error) {
-        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด' });
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> อัปโหลดรูปภาพ';
-    }
+        
+        const formData = new FormData();
+        formData.append('Stu_id', currentStudentId);
+        formData.append('profile_pic', blob, 'profile_pic.jpg');
+        
+        try {
+            const response = await fetch('api/update_profile_pic_std.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: '✅ อัปโหลดสำเร็จ!', 
+                    timer: 1500, 
+                    showConfirmButton: false,
+                    background: '#10b981',
+                    color: '#fff'
+                });
+                closePhotoModal();
+                loadStudentData();
+            } else {
+                Swal.fire({ icon: 'error', title: 'อัปโหลดล้มเหลว', text: result.message || '' });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้' });
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> อัปโหลดรูปภาพ';
+        }
+    }, 'image/jpeg', 0.9);
 }
 
 function printStudentList() {
