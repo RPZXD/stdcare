@@ -4,6 +4,30 @@
  * Displays a map with all student locations
  */
 ob_start();
+
+// Group students by village
+$groupedStudents = [];
+foreach ($studentGpsList as $std) {
+    $villageName = $std['village'] ?? "ไม่ระบุหมู่บ้าน/ที่อยู่";
+    $groupedStudents[$villageName][] = $std;
+}
+
+// Sort villages by name (so หมู่ 1, หมู่ 2, etc. are ordered)
+uksort($groupedStudents, function($a, $b) {
+    $aEmpty = (strpos($a, 'ไม่ระบุ') !== false);
+    $bEmpty = (strpos($b, 'ไม่ระบุ') !== false);
+    if ($aEmpty && !$bEmpty) return 1;
+    if (!$aEmpty && $bEmpty) return -1;
+    
+    preg_match('/\d+/', $a, $aNum);
+    preg_match('/\d+/', $b, $bNum);
+    if (isset($aNum[0]) && isset($bNum[0])) {
+        if ($aNum[0] != $bNum[0]) {
+            return $aNum[0] - $bNum[0];
+        }
+    }
+    return strcasecmp($a, $b);
+});
 ?>
 
 <!-- Leaflet Assets (External) -->
@@ -53,35 +77,109 @@ ob_start();
                 </div>
             </div>
             
+            <!-- List Mode Tabs Toggle -->
+            <div class="px-5 pb-3 flex border-b border-slate-100 dark:border-slate-700 gap-2 relative z-20">
+                <button id="showFlatList" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all border bg-blue-600 text-white border-blue-600 shadow-md flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                    <i class="fas fa-list"></i> รายชื่อทั้งหมด
+                </button>
+                <button id="showGroupedList" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all border bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                    <i class="fas fa-folder"></i> จัดกลุ่มหมู่บ้าน
+                </button>
+            </div>
+            
             <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50/30 dark:bg-slate-900/20">
-                <?php if (empty($studentGpsList)): ?>
-                    <div class="text-center py-8 text-slate-400">
-                        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-map-marker-alt text-2xl opacity-50"></i>
-                        </div>
-                        <p class="font-medium text-sm">ยังไม่มีนักเรียนบันทึกพิกัด</p>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($studentGpsList as $std): ?>
-                        <div class="student-item-container relative group">
-                            <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
-                                <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>">
+                <!-- Flat List Container -->
+                <div id="flatStudentList" class="space-y-2">
+                    <?php if (empty($studentGpsList)): ?>
+                        <div class="text-center py-8 text-slate-400">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-map-marker-alt text-2xl opacity-50"></i>
                             </div>
-                            
-                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
-                                <div class="flex items-center justify-between">
-                                    <div class="student-info-content transition-transform duration-300">
-                                        <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                            <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
-                                        </p>
-                                        <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
-                                    </div>
-                                    <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
-                                </div>
-                            </button>
+                            <p class="font-medium text-sm">ยังไม่มีนักเรียนบันทึกพิกัด</p>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    <?php else: ?>
+                        <?php foreach ($studentGpsList as $std): ?>
+                            <div class="student-item-container relative group">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
+                                    <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>">
+                                </div>
+                                
+                                <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
+                                    <div class="flex items-center justify-between">
+                                        <div class="student-info-content transition-transform duration-300">
+                                            <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
+                                            </p>
+                                            <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
+                                        </div>
+                                        <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Grouped List Container -->
+                <div id="groupedStudentList" class="hidden space-y-3">
+                    <?php if (empty($groupedStudents)): ?>
+                        <div class="text-center py-8 text-slate-400">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-map-marker-alt text-2xl opacity-50"></i>
+                            </div>
+                            <p class="font-medium text-sm">ยังไม่มีนักเรียนบันทึกพิกัด</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($groupedStudents as $village => $students): ?>
+                            <div class="village-group border border-slate-100 dark:border-slate-700/80 rounded-2xl overflow-hidden bg-white dark:bg-slate-800/40 shadow-sm transition-all duration-200">
+                                <!-- Village Header -->
+                                <div class="village-header p-3 bg-slate-50/80 dark:bg-slate-900/40 flex items-center justify-between cursor-pointer select-none border-b border-slate-100 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-900/60 transition-colors">
+                                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                                        <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 chevron-icon"></i>
+                                        <span class="font-bold text-xs text-slate-700 dark:text-slate-200 truncate">
+                                            <?= htmlspecialchars($village) ?>
+                                        </span>
+                                        <span class="text-[10px] font-bold px-1.5 py-0.5 bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-400 rounded-full">
+                                            <?= count($students) ?>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0" onclick="event.stopPropagation()">
+                                        <!-- Focus Village Bounds Button -->
+                                        <button onclick="focusVillage('<?= htmlspecialchars($village) ?>')" class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors" title="ดูแผนที่หมู่บ้านนี้">
+                                            <i class="fas fa-map-marked-alt text-[11px]"></i>
+                                        </button>
+                                        <!-- Select All in Village Checkbox (Visible only in Route Mode) -->
+                                        <div class="village-checkbox-wrapper hidden flex items-center justify-center">
+                                            <input type="checkbox" class="village-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-4 h-4 cursor-pointer transition-all" data-village="<?= htmlspecialchars($village) ?>" title="เลือกทั้งหมดในหมู่บ้านนี้">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Village Students Container -->
+                                <div class="village-content p-2 space-y-2 bg-slate-50/10 dark:bg-slate-900/10">
+                                    <?php foreach ($students as $std): ?>
+                                        <div class="student-item-container relative group">
+                                            <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
+                                                <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($village) ?>">
+                                            </div>
+                                            
+                                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="student-info-content transition-transform duration-300">
+                                                        <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                            <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
+                                                        </p>
+                                                        <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
+                                                    </div>
+                                                    <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
@@ -177,6 +275,24 @@ ob_start();
         }
     }
 
+    function focusVillage(villageName) {
+        const studentData = <?= json_encode($studentGpsList) ?>;
+        const bounds = [];
+        studentData.forEach(std => {
+            if (std.village === villageName) {
+                const lat = parseFloat(std.latitude);
+                const lng = parseFloat(std.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    bounds.push([lat, lng]);
+                }
+            }
+        });
+        
+        if (bounds.length > 0 && map) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }
+
     // --- Route Mode Logic ---
     let isRouteMode = false;
     
@@ -229,7 +345,7 @@ ob_start();
     }
 
     function generateGoogleRoute() {
-        const checkedBoxes = $('.student-checkbox:checked');
+        const checkedBoxes = $('#flatStudentList .student-checkbox:checked');
         if (checkedBoxes.length === 0) return;
 
         const points = [];
@@ -255,9 +371,46 @@ ob_start();
         window.open(url, '_blank');
     }
 
+    function updateVillageCheckboxes() {
+        $('.village-checkbox').each(function() {
+            const village = $(this).data('village');
+            const total = $(`.student-checkbox[data-village="${village}"]`).length;
+            const checked = $(`.student-checkbox[data-village="${village}"]:checked`).length;
+            $(this).prop('checked', total > 0 && checked === total);
+        });
+    }
+
     $(document).ready(function() {
         initMap();
         
+        // Tab Toggles
+        $('#showFlatList').on('click', function() {
+            $(this).removeClass('bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700')
+                   .addClass('bg-blue-600 text-white border-blue-600 shadow-md');
+            $('#showGroupedList').addClass('bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700')
+                                 .removeClass('bg-blue-600 text-white border-blue-600 shadow-md');
+            $('#flatStudentList').removeClass('hidden');
+            $('#groupedStudentList').addClass('hidden');
+        });
+
+        $('#showGroupedList').on('click', function() {
+            $(this).removeClass('bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700')
+                   .addClass('bg-blue-600 text-white border-blue-600 shadow-md');
+            $('#showFlatList').addClass('bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700')
+                               .removeClass('bg-blue-600 text-white border-blue-600 shadow-md');
+            $('#groupedStudentList').removeClass('hidden');
+            $('#flatStudentList').addClass('hidden');
+        });
+
+        // Toggle Village Accordion
+        $(document).on('click', '.village-header', function() {
+            const content = $(this).next('.village-content');
+            const icon = $(this).find('.chevron-icon');
+            
+            content.slideToggle(200);
+            icon.toggleClass('rotate-[-90deg]');
+        });
+
         // Toggle Route Mode
         $('#toggleRouteMode').on('click', function() {
             isRouteMode = !isRouteMode;
@@ -266,15 +419,18 @@ ob_start();
                 $(this).removeClass('bg-blue-100 text-blue-700').addClass('bg-emerald-600 text-white border-emerald-600');
                 $('#routeToolbar').removeClass('hidden').addClass('flex');
                 $('.checkbox-wrapper').removeClass('hidden');
+                $('.village-checkbox-wrapper').removeClass('hidden');
                 $('.student-info-content').addClass('translate-x-8');
             } else {
                 $(this).addClass('bg-blue-100 text-blue-700').removeClass('bg-emerald-600 text-white border-emerald-600');
                 $('#routeToolbar').addClass('hidden').removeClass('flex');
                 $('.checkbox-wrapper').addClass('hidden');
+                $('.village-checkbox-wrapper').addClass('hidden');
                 $('.student-info-content').removeClass('translate-x-8');
                 
                 // Uncheck all
                 $('.student-checkbox').prop('checked', false);
+                $('.village-checkbox').prop('checked', false);
                 $('#selectAllStudents').prop('checked', false);
             }
             
@@ -282,12 +438,21 @@ ob_start();
         });
 
         // Checkbox events
-        $('.student-checkbox').on('change', function() {
+        $(document).on('change', '.student-checkbox', function() {
+            const stuId = $(this).val();
+            const isChecked = $(this).prop('checked');
+            // Sync with other instance of the student checkbox
+            $(`.student-checkbox[value="${stuId}"]`).not(this).prop('checked', isChecked);
+            
             updateRouteUI();
             
             // Check if all are checked
-            const allChecked = $('.student-checkbox:checked').length === $('.student-checkbox').length;
-            $('#selectAllStudents').prop('checked', allChecked);
+            const total = $('#flatStudentList .student-checkbox').length;
+            const checked = $('#flatStudentList .student-checkbox:checked').length;
+            $('#selectAllStudents').prop('checked', total > 0 && checked === total);
+
+            // Update village checkbox state
+            updateVillageCheckboxes();
         });
 
         // Select All event
@@ -295,6 +460,15 @@ ob_start();
             const isChecked = $(this).prop('checked');
             $('.student-checkbox').prop('checked', isChecked);
             updateRouteUI();
+            updateVillageCheckboxes();
+        });
+
+        // Village Checkbox event
+        $(document).on('change', '.village-checkbox', function() {
+            const village = $(this).data('village');
+            const isChecked = $(this).prop('checked');
+            
+            $(`.student-checkbox[data-village="${village}"]`).prop('checked', isChecked).trigger('change');
         });
         
         // Ensure map resizes correctly
