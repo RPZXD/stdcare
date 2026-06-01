@@ -80,6 +80,50 @@ $currentGps = $currentGps ?? null;
                 </button>
             </div>
 
+            <!-- Manual Coordinates & Google Maps Link Card -->
+            <div class="glass-effect rounded-[2rem] p-6 border border-white/50 shadow-xl space-y-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">กรอกพิกัดด้วยตนเอง</h3>
+                </div>
+
+                <!-- Google Maps Link Input -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest block">วางลิงก์ Google Maps หรือ พิกัดที่คัดลอกมา</label>
+                    <div class="relative">
+                        <input type="text" id="gmapsLinkInput" placeholder="วางลิงก์ เช่น https://www.google.com/maps/..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder-slate-400 pr-10">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i class="fab fa-google"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500 my-2">
+                    <hr class="w-full border-slate-200 dark:border-slate-700">
+                    <span class="px-3">หรือ</span>
+                    <hr class="w-full border-slate-200 dark:border-slate-700">
+                </div>
+
+                <!-- Manual Lat / Lng inputs -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Latitude (ละติจูด)</label>
+                        <input type="number" step="any" id="manualLat" placeholder="17.6582" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Longitude (ลองจิจูด)</label>
+                        <input type="number" step="any" id="manualLng" placeholder="100.1415" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                </div>
+
+                <button onclick="applyManualCoordinates()" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-black rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fas fa-check-circle"></i>
+                    นำไปใช้บนแผนที่
+                </button>
+            </div>
+
             <div class="bg-amber-50 dark:bg-amber-900/20 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-800/30">
                 <h3 class="text-sm font-black text-amber-800 dark:text-amber-400 mb-4 flex items-center gap-2">
                     <i class="fas fa-circle-info"></i>
@@ -252,6 +296,82 @@ $currentGps = $currentGps ?? null;
         );
     }
 
+    function parseGmapsInput(input) {
+        input = input.trim();
+        if (!input) return null;
+
+        // Try matching various coordinate patterns in URL or raw text
+        const urlPatterns = [
+            /@(-?\d+\.\d+),(-?\d+\.\d+)/,                  // @lat,lng
+            /place\/(-?\d+\.\d+),(-?\d+\.\d+)/,            // place/lat,lng
+            /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/,             // q=lat,lng
+            /query=(-?\d+\.\d+),(-?\d+\.\d+)/,             // query=lat,lng
+            /(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/,             // raw lat,lng
+            /(-?\d+\.\d+)\s+(-?\d+\.\d+)/                  // space-separated lat lng
+        ];
+
+        for (let pattern of urlPatterns) {
+            const match = input.match(pattern);
+            if (match) {
+                const lat = parseFloat(match[1]);
+                const lng = parseFloat(match[2]);
+                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                    return { lat, lng };
+                }
+            }
+        }
+        return null;
+    }
+
+    function applyManualCoordinates() {
+        const linkVal = $('#gmapsLinkInput').val().trim();
+        let lat = parseFloat($('#manualLat').val());
+        let lng = parseFloat($('#manualLng').val());
+        
+        if (linkVal) {
+            const parsed = parseGmapsInput(linkVal);
+            if (parsed) {
+                lat = parsed.lat;
+                lng = parsed.lng;
+                $('#manualLat').val(lat.toFixed(6));
+                $('#manualLng').val(lng.toFixed(6));
+            } else if (linkVal.includes('maps.app.goo.gl') || linkVal.includes('goo.gl/maps')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ไม่สามารถแยกพิกัดจากลิงก์ย่อได้',
+                    text: 'หากใช้ลิงก์ย่อ (เช่น maps.app.goo.gl) กรุณาเปิดลิงก์นั้นบนเบราว์เซอร์ก่อน แล้วคัดลอก URL ยาวที่มีตัวเลขพิกัด (เช่น @17.658234,100.141523) หรือคัดลอกเฉพาะพิกัดตัวเลขมาวางโดยตรง',
+                    confirmButtonText: 'รับทราบ'
+                });
+                return;
+            } else {
+                Swal.fire('รูปแบบไม่ถูกต้อง', 'ไม่พบพิกัดในลิงก์หรือข้อความที่กรอก กรุณากรอกพิกัดเป็นตัวเลข เช่น 17.658234, 100.141523', 'error');
+                return;
+            }
+        }
+        
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            Swal.fire('พิกัดไม่ถูกต้อง', 'กรุณาระบุ Latitude (-90 ถึง 90) และ Longitude (-180 ถึง 180) ให้ถูกต้อง', 'error');
+            return;
+        }
+        
+        if (map) {
+            map.setView([lat, lng], 18);
+            marker.setLatLng([lat, lng]);
+            map.invalidateSize();
+        }
+        
+        updateValues(lat, lng, 0);
+        $('#accuracyValue').text('ระบุตำแหน่งด้วยตนเอง');
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'ปรับตำแหน่งบนแผนที่แล้ว!',
+            text: 'ตำแหน่งหมุดถูกปรับตามพิกัดที่คุณระบุแล้ว',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+
     function saveGps() {
         Swal.fire({
             title: 'ยืนยันการบันทึก?',
@@ -293,6 +413,22 @@ $currentGps = $currentGps ?? null;
                 console.log("Map initialized and size invalidated");
             }
         }, 300);
+
+        // Auto-parse Google Maps link/coordinates on input
+        $('#gmapsLinkInput').on('input', function() {
+            const val = $(this).val();
+            const parsed = parseGmapsInput(val);
+            if (parsed) {
+                $('#manualLat').val(parsed.lat.toFixed(6));
+                $('#manualLng').val(parsed.lng.toFixed(6));
+                
+                // Add highlight visual feedback
+                $('#manualLat, #manualLng').addClass('border-indigo-500 ring-2 ring-indigo-500/20').removeClass('border-slate-200 dark:border-slate-700');
+                setTimeout(() => {
+                    $('#manualLat, #manualLng').removeClass('border-indigo-500 ring-2 ring-indigo-500/20').addClass('border-slate-200 dark:border-slate-700');
+                }, 1000);
+            }
+        });
     });
 </script>
 

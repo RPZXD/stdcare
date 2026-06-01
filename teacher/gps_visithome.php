@@ -81,9 +81,26 @@ function getVillageGroup($addr) {
     return $result;
 }
 
-// Add village key to each student
+// Helper function to extract subdistrict name from address
+function getSubdistrictGroup($addr) {
+    if (empty($addr)) {
+        return "ไม่ระบุตำบล";
+    }
+    // Add space before common prefixes if missing (e.g. ต.ในเมืองอ.พิชัย -> ต.ในเมือง อ.พิชัย)
+    $addrClean = preg_replace('/([ก-๙]+)(อ\.|จ\.|อำเภอ|จังหวัด)/u', '$1 $2', $addr);
+    $addrClean = preg_replace('/\s+/', ' ', $addrClean);
+    
+    // Find district (ตำบล / ต. / ต)
+    if (preg_match('/(?:ตำบล|ต\s*\.\s*|ต\s+)\s*([\x{0e00}-\x{0e7f}]+)/u', $addrClean, $matches)) {
+        return "ต." . trim($matches[1]);
+    }
+    return "ไม่ระบุตำบล";
+}
+
+// Add village and subdistrict keys to each student
 foreach ($studentGpsList as &$std) {
     $std['village'] = getVillageGroup($std['Stu_addr']);
+    $std['subdistrict'] = getSubdistrictGroup($std['Stu_addr']);
 }
 unset($std);
 
