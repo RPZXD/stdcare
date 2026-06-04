@@ -1070,7 +1070,7 @@ try {
             // Add students
             loadedStudents.forEach(student => {
                 const fullName = `${student.Stu_pre}${student.Stu_name} ${student.Stu_sur}`;
-                const row = [parseInt(student.Stu_no) || student.Stu_no, student.Stu_id, fullName];
+                const row = [parseInt(student.Stu_no) || student.Stu_no, { v: student.Stu_id || '', t: 's' }, fullName];
                 
                 // Add empty blank values
                 for (let i = 0; i < blankCols; i++) {

@@ -433,15 +433,15 @@ $studentsJson = json_encode(array_map(function($s) {
 
             students.forEach(s => {
                 const row = [s.no];
-                if (controls.colId.checked) row.push(s.id);
+                if (controls.colId.checked) row.push({ v: s.id || '', t: 's' });
                 row.push(`${s.prefix}${s.name} ${s.sur}`);
                 if (controls.colNick.checked) row.push(s.nick);
                 if (controls.colSex.checked) row.push(s.sex);
-                if (controls.colPhone.checked) row.push(s.phone);
-                if (controls.colCitizen.checked) row.push(s.citizen_id);
+                if (controls.colPhone.checked) row.push({ v: s.phone || '', t: 's' });
+                if (controls.colCitizen.checked) row.push({ v: s.citizen_id || '', t: 's' });
                 if (controls.colBirth.checked) row.push(s.birth);
                 if (controls.colBlood.checked) row.push(s.blood);
-                if (controls.colParentPhone.checked) row.push(s.parent_phone);
+                if (controls.colParentPhone.checked) row.push({ v: s.parent_phone || '', t: 's' });
                 if (controls.colAddr.checked) row.push(s.addr);
                 extraHeaders.forEach(() => row.push(''));
                 row.push('');

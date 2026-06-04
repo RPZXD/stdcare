@@ -607,11 +607,11 @@ $studentsJson = json_encode($students);
 
         function buildExcelRow(s, extraHeaders) {
             const row = [s.Stu_no];
-            if (controls.colId.checked) row.push(s.Stu_id);
+            if (controls.colId.checked) row.push({ v: s.Stu_id || '', t: 's' });
             row.push(`${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}`);
             if (controls.colNick.checked) row.push(s.Stu_nick);
-            if (controls.colPhone.checked) row.push(s.Stu_phone);
-            if (controls.colParent.checked) row.push(s.Par_phone);
+            if (controls.colPhone.checked) row.push({ v: s.Stu_phone || '', t: 's' });
+            if (controls.colParent.checked) row.push({ v: s.Par_phone || '', t: 's' });
             if (controls.colSubdistrict.checked) row.push(s.subdistrict);
             if (controls.colVillage.checked) row.push(s.village);
             if (controls.colAddr.checked) row.push(s.Stu_addr);
