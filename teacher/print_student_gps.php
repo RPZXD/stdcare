@@ -266,12 +266,8 @@ $studentsJson = json_encode($students);
                     <span>หมู่บ้าน (ที่อยู่)</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="col-coords" checked class="rounded text-indigo-600 border-slate-300">
-                    <span>พิกัด GPS</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="col-maplink" checked class="rounded text-indigo-600 border-slate-300">
-                    <span>ลิงก์แผนที่</span>
+                    <input type="checkbox" id="col-addr" checked class="rounded text-indigo-600 border-slate-300">
+                    <span>ที่อยู่</span>
                 </label>
             </div>
         </div>
@@ -394,8 +390,7 @@ $studentsJson = json_encode($students);
             colParent: document.getElementById('col-parent'),
             colSubdistrict: document.getElementById('col-subdistrict'),
             colVillage: document.getElementById('col-village'),
-            colCoords: document.getElementById('col-coords'),
-            colMaplink: document.getElementById('col-maplink'),
+            colAddr: document.getElementById('col-addr'),
             customHeaders: document.getElementById('customHeaders'),
             showSignature: document.getElementById('show-signature'),
             showHeadSignature: document.getElementById('show-head-signature')
@@ -437,14 +432,12 @@ $studentsJson = json_encode($students);
             if (controls.colParent.checked) headerHtml += `<th class="w-28 text-center font-bold">เบอร์ผู้ปกครอง</th>`;
             if (controls.colSubdistrict.checked) headerHtml += `<th class="text-left font-bold min-w-[80px]">ตำบล (โซน)</th>`;
             if (controls.colVillage.checked) headerHtml += `<th class="text-left font-bold min-w-[120px]">หมู่บ้าน (ที่อยู่)</th>`;
-            if (controls.colCoords.checked) headerHtml += `<th class="w-36 text-center font-bold">พิกัด GPS</th>`;
-            if (controls.colMaplink.checked) headerHtml += `<th class="w-16 text-center font-bold">แผนที่</th>`;
+            if (controls.colAddr.checked) headerHtml += `<th class="text-left font-bold min-w-[160px]">ที่อยู่</th>`;
             
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
             extraHeaders.forEach(h => {
                 headerHtml += `<th class="text-center font-bold min-w-[50px]">${h}</th>`;
             });
-            headerHtml += `<th class="w-20 text-center font-bold">หมายเหตุ</th>`;
             document.getElementById('tableHeader').innerHTML = headerHtml;
 
             // Group and Render body
@@ -469,15 +462,14 @@ $studentsJson = json_encode($students);
                 });
 
                 Object.keys(grouped).sort().forEach(sub => {
-                    const colCount = 3 + 
+                    const colCount = 2 + 
                         (controls.colId.checked ? 1 : 0) + 
                         (controls.colNick.checked ? 1 : 0) + 
                         (controls.colPhone.checked ? 1 : 0) + 
                         (controls.colParent.checked ? 1 : 0) + 
                         (controls.colSubdistrict.checked ? 1 : 0) + 
                         (controls.colVillage.checked ? 1 : 0) + 
-                        (controls.colCoords.checked ? 1 : 0) + 
-                        (controls.colMaplink.checked ? 1 : 0) + 
+                        (controls.colAddr.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -500,15 +492,14 @@ $studentsJson = json_encode($students);
                 });
 
                 Object.keys(grouped).sort().forEach(vil => {
-                    const colCount = 3 + 
+                    const colCount = 2 + 
                         (controls.colId.checked ? 1 : 0) + 
                         (controls.colNick.checked ? 1 : 0) + 
                         (controls.colPhone.checked ? 1 : 0) + 
                         (controls.colParent.checked ? 1 : 0) + 
                         (controls.colSubdistrict.checked ? 1 : 0) + 
                         (controls.colVillage.checked ? 1 : 0) + 
-                        (controls.colCoords.checked ? 1 : 0) + 
-                        (controls.colMaplink.checked ? 1 : 0) + 
+                        (controls.colAddr.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -545,22 +536,11 @@ $studentsJson = json_encode($students);
             if (controls.colParent.checked) rowHtml += `<td class="text-center font-mono">${s.Par_phone || '-'}</td>`;
             if (controls.colSubdistrict.checked) rowHtml += `<td class="text-left font-bold text-slate-700">${s.subdistrict || '-'}</td>`;
             if (controls.colVillage.checked) rowHtml += `<td class="text-left text-slate-500 truncate text-[10px]" title="${s.Stu_addr}">${s.village || '-'}</td>`;
-            if (controls.colCoords.checked) rowHtml += `<td class="text-center font-mono text-[9px]">${s.latitude}, ${s.longitude}</td>`;
-            if (controls.colMaplink.checked) {
-                const link = `https://www.google.com/maps/search/?api=1&query=${s.latitude},${s.longitude}`;
-                rowHtml += `<td class="text-center no-print">
-                    <a href="${link}" target="_blank" class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded border border-rose-100 hover:bg-rose-100 transition-colors text-[9px] font-bold">
-                        <i class="fas fa-map-marker-alt"></i> แผนที่
-                    </a>
-                </td>`;
-                // Printable version of maps cell
-                rowHtml += `<td class="text-center print:table-cell hidden text-[8px] font-bold text-indigo-600 font-mono">LINK</td>`;
-            }
+            if (controls.colAddr.checked) rowHtml += `<td class="text-left text-slate-600 text-[10px]">${s.Stu_addr || '-'}</td>`;
 
             extraHeaders.forEach(() => {
                 rowHtml += `<td></td>`;
             });
-            rowHtml += `<td></td>`; // remarks
             rowHtml += `</tr>`;
             return rowHtml;
         }
@@ -588,10 +568,8 @@ $studentsJson = json_encode($students);
             if (controls.colParent.checked) headers.push('เบอร์ผู้ปกครอง');
             if (controls.colSubdistrict.checked) headers.push('ตำบล');
             if (controls.colVillage.checked) headers.push('หมู่บ้าน');
-            if (controls.colCoords.checked) headers.push('พิกัด GPS');
-            if (controls.colMaplink.checked) headers.push('ลิงก์แผนที่');
+            if (controls.colAddr.checked) headers.push('ที่อยู่');
             extraHeaders.forEach(h => headers.push(h));
-            headers.push('หมายเหตุ');
             data.push(headers);
 
             // Populate rows
@@ -636,10 +614,8 @@ $studentsJson = json_encode($students);
             if (controls.colParent.checked) row.push(s.Par_phone);
             if (controls.colSubdistrict.checked) row.push(s.subdistrict);
             if (controls.colVillage.checked) row.push(s.village);
-            if (controls.colCoords.checked) row.push(`${s.latitude}, ${s.longitude}`);
-            if (controls.colMaplink.checked) row.push(`https://www.google.com/maps/search/?api=1&query=${s.latitude},${s.longitude}`);
+            if (controls.colAddr.checked) row.push(s.Stu_addr);
             extraHeaders.forEach(() => row.push(''));
-            row.push('');
             return row;
         }
 
