@@ -258,10 +258,6 @@ $studentsJson = json_encode($students);
                     <span>เบอร์ผู้ปกครอง</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="col-subdistrict" checked class="rounded text-indigo-600 border-slate-300">
-                    <span>ตำบล (โซน)</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
                     <input type="checkbox" id="col-village" class="rounded text-indigo-600 border-slate-300">
                     <span>หมู่บ้าน (ที่อยู่)</span>
                 </label>
