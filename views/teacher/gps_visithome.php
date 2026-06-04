@@ -64,12 +64,18 @@ uksort($groupedSubdistricts, function($a, $b) {
                 <p class="text-slate-500 dark:text-slate-400 font-medium">ชั้นมัธยมศึกษาปีที่ <?= htmlspecialchars($class . "/" . $room); ?> • พบพิกัด <?= count($studentGpsList) ?> คน</p>
             </div>
         </div>
+        <!-- Header Actions -->
+        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <a href="print_student_gps.php?class=<?= urlencode($class) ?>&room=<?= urlencode($room) ?>" target="_blank" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-print"></i> พิมพ์รายชื่อและพิกัด (พร้อมพิมพ์)
+            </a>
+        </div>
     </div>
 
     <!-- Map and List Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[800px] max-h-[80vh]">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-auto lg:h-[800px] lg:max-h-[80vh]">
         <!-- Student List Sidebar -->
-        <div class="lg:col-span-1 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl overflow-hidden flex flex-col">
+        <div class="lg:col-span-1 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl overflow-hidden flex flex-col h-[500px] lg:h-full">
             <div class="p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 relative z-20">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i class="fas fa-users text-blue-500"></i> รายชื่อ (มีพิกัด)</h3>
@@ -123,16 +129,37 @@ uksort($groupedSubdistricts, function($a, $b) {
                                     <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($std['village'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                 </div>
                                 
-                                <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
-                                    <div class="flex items-center justify-between">
-                                        <div class="student-info-content transition-transform duration-300">
-                                            <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
-                                            </p>
-                                            <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
-                                        </div>
-                                        <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
+                                <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3.5 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98] flex items-center gap-3 relative">
+                                    <?php 
+                                        $isFemale = (strpos($std['Stu_pre'], 'หญิง') !== false || strpos($std['Stu_pre'], 'นางสาว') !== false || strpos($std['Stu_pre'], 'ด.ญ.') !== false || strpos($std['Stu_pre'], 'น.ส.') !== false);
+                                        $bgGradient = $isFemale ? 'from-rose-400 to-pink-500 dark:from-rose-500/80 dark:to-pink-600/80' : 'from-blue-400 to-indigo-500 dark:from-blue-500/80 dark:to-indigo-600/80';
+                                        $initials = mb_substr($std['Stu_name'], 0, 1, 'UTF-8');
+                                        $photoUrl = !empty($std['Stu_picture']) ? "../photo/" . $std['Stu_picture'] : "https://std.phichai.ac.th/photo/" . $std['Stu_id'] . ".jpg";
+                                    ?>
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr <?= $bgGradient ?> text-white flex items-center justify-center font-black text-sm shadow-inner shrink-0 overflow-hidden relative student-avatar transition-transform duration-300">
+                                        <span class="absolute inset-0 flex items-center justify-center"><?= $initials ?></span>
+                                        <img src="<?= $photoUrl ?>" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">
                                     </div>
+
+                                    <div class="student-info-content transition-transform duration-300 flex-1 min-w-0">
+                                        <p class="font-bold text-slate-800 dark:text-white text-xs group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                            <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
+                                        </p>
+                                        <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                            <span>เลขที่: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_no'] ?></strong></span>
+                                            <span class="text-slate-300">|</span>
+                                            <span>รหัส: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_id'] ?></strong></span>
+                                        </p>
+                                        <?php if (!empty($std['Stu_nick'])): ?>
+                                            <p class="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold mt-0.5">
+                                                ชื่อเล่น: <?= htmlspecialchars($std['Stu_nick']) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                        <p class="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 truncate italic">
+                                            <i class="fas fa-map-marker-alt text-rose-500/80 mr-0.5"></i> <?= htmlspecialchars($std['village'] ?? '') ?>
+                                        </p>
+                                    </div>
+                                    <i class="fas fa-location-crosshairs text-slate-300 group-hover:text-blue-500 transition-colors text-base flex-shrink-0 ml-auto mr-1"></i>
                                 </button>
                             </div>
                         <?php endforeach; ?>
@@ -181,16 +208,37 @@ uksort($groupedSubdistricts, function($a, $b) {
                                                 <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($std['village'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($subdistrict) ?>">
                                             </div>
                                             
-                                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="student-info-content transition-transform duration-300">
-                                                        <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                            <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
-                                                        </p>
-                                                        <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
-                                                    </div>
-                                                    <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
+                                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3.5 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98] flex items-center gap-3 relative">
+                                                <?php 
+                                                    $isFemale = (strpos($std['Stu_pre'], 'หญิง') !== false || strpos($std['Stu_pre'], 'นางสาว') !== false || strpos($std['Stu_pre'], 'ด.ญ.') !== false || strpos($std['Stu_pre'], 'น.ส.') !== false);
+                                                    $bgGradient = $isFemale ? 'from-rose-400 to-pink-500 dark:from-rose-500/80 dark:to-pink-600/80' : 'from-blue-400 to-indigo-500 dark:from-blue-500/80 dark:to-indigo-600/80';
+                                                    $initials = mb_substr($std['Stu_name'], 0, 1, 'UTF-8');
+                                                    $photoUrl = !empty($std['Stu_picture']) ? "../photo/" . $std['Stu_picture'] : "https://std.phichai.ac.th/photo/" . $std['Stu_id'] . ".jpg";
+                                                ?>
+                                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr <?= $bgGradient ?> text-white flex items-center justify-center font-black text-sm shadow-inner shrink-0 overflow-hidden relative student-avatar transition-transform duration-300">
+                                                    <span class="absolute inset-0 flex items-center justify-center"><?= $initials ?></span>
+                                                    <img src="<?= $photoUrl ?>" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">
                                                 </div>
+
+                                                <div class="student-info-content transition-transform duration-300 flex-1 min-w-0">
+                                                    <p class="font-bold text-slate-800 dark:text-white text-xs group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                                        <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                                        <span>เลขที่: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_no'] ?></strong></span>
+                                                        <span class="text-slate-300">|</span>
+                                                        <span>รหัส: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_id'] ?></strong></span>
+                                                    </p>
+                                                    <?php if (!empty($std['Stu_nick'])): ?>
+                                                        <p class="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold mt-0.5">
+                                                            ชื่อเล่น: <?= htmlspecialchars($std['Stu_nick']) ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 truncate italic">
+                                                        <i class="fas fa-map-marker-alt text-rose-500/80 mr-0.5"></i> <?= htmlspecialchars($std['village'] ?? '') ?>
+                                                    </p>
+                                                </div>
+                                                <i class="fas fa-location-crosshairs text-slate-300 group-hover:text-blue-500 transition-colors text-base flex-shrink-0 ml-auto mr-1"></i>
                                             </button>
                                         </div>
                                     <?php endforeach; ?>
@@ -242,16 +290,37 @@ uksort($groupedSubdistricts, function($a, $b) {
                                                 <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($village) ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                             </div>
                                             
-                                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98]">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="student-info-content transition-transform duration-300">
-                                                        <p class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                            <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
-                                                        </p>
-                                                        <p class="text-[11px] font-bold text-slate-400 mt-1">เลขที่: <?= $std['Stu_no'] ?> • รหัส: <?= $std['Stu_id'] ?></p>
-                                                    </div>
-                                                    <i class="fas fa-map-marker-alt text-slate-300 group-hover:text-rose-500 transition-colors text-lg"></i>
+                                            <button onclick="focusMap(<?= $std['latitude'] ?>, <?= $std['longitude'] ?>, '<?= $std['Stu_id'] ?>')" class="student-btn w-full text-left p-3.5 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all bg-white dark:bg-slate-800 shadow-sm active:scale-[0.98] flex items-center gap-3 relative">
+                                                <?php 
+                                                    $isFemale = (strpos($std['Stu_pre'], 'หญิง') !== false || strpos($std['Stu_pre'], 'นางสาว') !== false || strpos($std['Stu_pre'], 'ด.ญ.') !== false || strpos($std['Stu_pre'], 'น.ส.') !== false);
+                                                    $bgGradient = $isFemale ? 'from-rose-400 to-pink-500 dark:from-rose-500/80 dark:to-pink-600/80' : 'from-blue-400 to-indigo-500 dark:from-blue-500/80 dark:to-indigo-600/80';
+                                                    $initials = mb_substr($std['Stu_name'], 0, 1, 'UTF-8');
+                                                    $photoUrl = !empty($std['Stu_picture']) ? "../photo/" . $std['Stu_picture'] : "https://std.phichai.ac.th/photo/" . $std['Stu_id'] . ".jpg";
+                                                ?>
+                                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr <?= $bgGradient ?> text-white flex items-center justify-center font-black text-sm shadow-inner shrink-0 overflow-hidden relative student-avatar transition-transform duration-300">
+                                                    <span class="absolute inset-0 flex items-center justify-center"><?= $initials ?></span>
+                                                    <img src="<?= $photoUrl ?>" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'">
                                                 </div>
+
+                                                <div class="student-info-content transition-transform duration-300 flex-1 min-w-0">
+                                                    <p class="font-bold text-slate-800 dark:text-white text-xs group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                                        <?= $std['Stu_pre'] . $std['Stu_name'] . " " . $std['Stu_sur'] ?>
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                                        <span>เลขที่: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_no'] ?></strong></span>
+                                                        <span class="text-slate-300">|</span>
+                                                        <span>รหัส: <strong class="text-slate-600 dark:text-slate-300"><?= $std['Stu_id'] ?></strong></span>
+                                                    </p>
+                                                    <?php if (!empty($std['Stu_nick'])): ?>
+                                                        <p class="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold mt-0.5">
+                                                            ชื่อเล่น: <?= htmlspecialchars($std['Stu_nick']) ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 truncate italic">
+                                                        <i class="fas fa-map-marker-alt text-rose-500/80 mr-0.5"></i> <?= htmlspecialchars($village) ?>
+                                                    </p>
+                                                </div>
+                                                <i class="fas fa-location-crosshairs text-slate-300 group-hover:text-blue-500 transition-colors text-base flex-shrink-0 ml-auto mr-1"></i>
                                             </button>
                                         </div>
                                     <?php endforeach; ?>
@@ -264,7 +333,7 @@ uksort($groupedSubdistricts, function($a, $b) {
         </div>
 
         <!-- Map Container -->
-        <div class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl overflow-hidden relative">
+        <div class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl overflow-hidden relative h-[500px] lg:h-full">
             <div id="visithomeMap" class="w-full h-full relative z-10" style="min-height: 500px;"></div>
             
             <!-- Floating Map Legend -->
@@ -565,13 +634,13 @@ uksort($groupedSubdistricts, function($a, $b) {
                 $('#routeToolbar').removeClass('hidden').addClass('flex');
                 $('.checkbox-wrapper').removeClass('hidden');
                 $('.village-checkbox-wrapper, .subdistrict-checkbox-wrapper').removeClass('hidden');
-                $('.student-info-content').addClass('translate-x-8');
+                $('.student-btn').addClass('pl-11');
             } else {
                 $(this).addClass('bg-blue-100 text-blue-700').removeClass('bg-emerald-600 text-white border-emerald-600');
                 $('#routeToolbar').addClass('hidden').removeClass('flex');
                 $('.checkbox-wrapper').addClass('hidden');
                 $('.village-checkbox-wrapper, .subdistrict-checkbox-wrapper').addClass('hidden');
-                $('.student-info-content').removeClass('translate-x-8');
+                $('.student-btn').removeClass('pl-11');
                 
                 // Uncheck all
                 $('.student-checkbox').prop('checked', false);

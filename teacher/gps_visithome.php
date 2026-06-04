@@ -37,6 +37,7 @@ $pee = $user->getPee();
 
 // Fetch student GPS data for the class
 $sql = "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_no, s.Stu_addr,
+               s.Stu_nick, s.Stu_phone, s.Par_phone, s.Stu_picture,
                g.latitude, g.longitude, g.updated_at
         FROM student s
         JOIN student_gps g ON s.Stu_id = g.Stu_id
