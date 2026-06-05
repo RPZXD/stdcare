@@ -36,7 +36,7 @@ $room = isset($_GET['room']) ? $_GET['room'] : ($userData['Teach_room'] ?? '');
 // Fetch student GPS data for the class
 $sql = "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_no, s.Stu_addr,
                s.Stu_nick, s.Stu_phone, s.Par_phone, s.Stu_picture,
-               g.latitude, g.longitude, g.updated_at
+               g.latitude, g.longitude, g.updated_at, g.assigned_teacher
         FROM student s
         JOIN student_gps g ON s.Stu_id = g.Stu_id
         WHERE s.Stu_major = ? AND s.Stu_room = ?
@@ -148,6 +148,17 @@ $studentsJson = json_encode($students);
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid black !important; }
             tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .print-select {
+                border: none !important;
+                background: transparent !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-weight: bold;
+                color: black !important;
+            }
         }
 
         .paper {
@@ -269,6 +280,10 @@ $studentsJson = json_encode($students);
                     <input type="checkbox" id="col-addr" checked class="rounded text-indigo-600 border-slate-300">
                     <span>ที่อยู่</span>
                 </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="col-visit" checked class="rounded text-indigo-600 border-slate-300">
+                    <span>ผู้เยี่ยมบ้าน (ครู)</span>
+                </label>
             </div>
         </div>
 
@@ -362,6 +377,17 @@ $studentsJson = json_encode($students);
 
     <script>
         const students = <?php echo $studentsJson; ?>;
+        const teachersList = <?php 
+            $tNames = [];
+            if ($teachers) {
+                foreach ($teachers as $t) {
+                    $tNames[] = $t['Teach_name'];
+                }
+            } else if (isset($userData['Teach_name'])) {
+                $tNames[] = $userData['Teach_name'];
+            }
+            echo json_encode($tNames); 
+        ?>;
 
         const pastelColors = [
             '#f0fdf4', // Soft green (emerald-50)
@@ -391,6 +417,7 @@ $studentsJson = json_encode($students);
             colSubdistrict: document.getElementById('col-subdistrict'),
             colVillage: document.getElementById('col-village'),
             colAddr: document.getElementById('col-addr'),
+            colVisit: document.getElementById('col-visit'),
             customHeaders: document.getElementById('customHeaders'),
             showSignature: document.getElementById('show-signature'),
             showHeadSignature: document.getElementById('show-head-signature')
@@ -433,6 +460,7 @@ $studentsJson = json_encode($students);
             if (controls.colSubdistrict.checked) headerHtml += `<th class="text-left font-bold min-w-[80px]">ตำบล (โซน)</th>`;
             if (controls.colVillage.checked) headerHtml += `<th class="text-left font-bold min-w-[120px]">หมู่บ้าน (ที่อยู่)</th>`;
             if (controls.colAddr.checked) headerHtml += `<th class="text-left font-bold min-w-[160px]">ที่อยู่</th>`;
+            if (controls.colVisit.checked) headerHtml += `<th class="text-left font-bold min-w-[120px]">ครูผู้เยี่ยม</th>`;
             
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
             extraHeaders.forEach(h => {
@@ -470,6 +498,7 @@ $studentsJson = json_encode($students);
                         (controls.colSubdistrict.checked ? 1 : 0) + 
                         (controls.colVillage.checked ? 1 : 0) + 
                         (controls.colAddr.checked ? 1 : 0) + 
+                        (controls.colVisit.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -500,6 +529,7 @@ $studentsJson = json_encode($students);
                         (controls.colSubdistrict.checked ? 1 : 0) + 
                         (controls.colVillage.checked ? 1 : 0) + 
                         (controls.colAddr.checked ? 1 : 0) + 
+                        (controls.colVisit.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -537,12 +567,65 @@ $studentsJson = json_encode($students);
             if (controls.colSubdistrict.checked) rowHtml += `<td class="text-left font-bold text-slate-700">${s.subdistrict || '-'}</td>`;
             if (controls.colVillage.checked) rowHtml += `<td class="text-left text-slate-500 truncate text-[10px]" title="${s.Stu_addr}">${s.village || '-'}</td>`;
             if (controls.colAddr.checked) rowHtml += `<td class="text-left text-slate-600 text-[10px]">${s.Stu_addr || '-'}</td>`;
+            
+            if (controls.colVisit.checked) {
+                let selectHtml = `<td class="text-left"><select onchange="saveAssignedTeacher('${s.Stu_id}', this)" class="print-select border border-slate-300 rounded px-1 py-0.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all">`;
+                selectHtml += `<option value="">- เลือกครู -</option>`;
+                teachersList.forEach(t => {
+                    const selected = s.assigned_teacher === t ? 'selected' : '';
+                    selectHtml += `<option value="${t}" ${selected}>${t}</option>`;
+                });
+                selectHtml += `</select></td>`;
+                rowHtml += selectHtml;
+            }
 
             extraHeaders.forEach(() => {
                 rowHtml += `<td></td>`;
             });
             rowHtml += `</tr>`;
             return rowHtml;
+        }
+
+        function saveAssignedTeacher(stuId, selectEl) {
+            const assignedTeacher = selectEl.value;
+            
+            const student = students.find(s => s.Stu_id === stuId);
+            if (student) {
+                student.assigned_teacher = assignedTeacher;
+            }
+
+            // Visual feedback - saving
+            selectEl.classList.remove('border-slate-300', 'bg-white', 'border-emerald-500', 'bg-emerald-50', 'border-rose-500', 'bg-rose-50');
+            selectEl.classList.add('border-amber-500', 'bg-amber-50');
+
+            fetch('api/assign_visit_teacher.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stuId, assignedTeacher })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    selectEl.classList.remove('border-amber-500', 'bg-amber-50');
+                    selectEl.classList.add('border-emerald-500', 'bg-emerald-50');
+                    setTimeout(() => {
+                        selectEl.classList.remove('border-emerald-500', 'bg-emerald-50');
+                        selectEl.classList.add('border-slate-300', 'bg-white');
+                    }, 1000);
+                } else {
+                    selectEl.classList.remove('border-amber-500', 'bg-amber-50');
+                    selectEl.classList.add('border-rose-500', 'bg-rose-50');
+                    alert('ไม่สามารถบันทึกข้อมูลได้: ' + (data.message || 'ข้อผิดพลาดที่ไม่ทราบสาเหตุ'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                selectEl.classList.remove('border-amber-500', 'bg-amber-50');
+                selectEl.classList.add('border-rose-500', 'bg-rose-50');
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
+            });
         }
 
         // Attach listeners
@@ -569,6 +652,7 @@ $studentsJson = json_encode($students);
             if (controls.colSubdistrict.checked) headers.push('ตำบล');
             if (controls.colVillage.checked) headers.push('หมู่บ้าน');
             if (controls.colAddr.checked) headers.push('ที่อยู่');
+            if (controls.colVisit.checked) headers.push('ครูผู้เยี่ยม');
             extraHeaders.forEach(h => headers.push(h));
             data.push(headers);
 
@@ -615,6 +699,7 @@ $studentsJson = json_encode($students);
             if (controls.colSubdistrict.checked) row.push(s.subdistrict);
             if (controls.colVillage.checked) row.push(s.village);
             if (controls.colAddr.checked) row.push(s.Stu_addr);
+            if (controls.colVisit.checked) row.push(s.assigned_teacher || '');
             extraHeaders.forEach(() => row.push(''));
             return row;
         }
