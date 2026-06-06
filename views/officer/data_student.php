@@ -733,13 +733,63 @@ $(document).ready(function() {
         const roomValue = $('#selectRoom').val();
         const peeValue = "<?php echo $pee; ?>"; 
 
-        if (!classValue || !roomValue) {
-            Swal.fire('⚠️ แจ้งเตือน', 'กรุณาเลือกระดับชั้นและห้องเรียนก่อนสั่งพิมพ์', 'warning');
-            return;
-        }
+        Swal.fire({
+            title: 'เลือกขอบเขตการพิมพ์รายชื่อ',
+            icon: 'info',
+            html: `
+                <div class="flex flex-col gap-3 mt-4 text-left">
+                    <button id="printRoomOpt" class="w-full py-3.5 px-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-black rounded-xl border border-emerald-200 dark:border-emerald-800 text-sm hover:bg-emerald-100 transition duration-150 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs"><i class="fas fa-door-open"></i></span>
+                        <div class="text-left">
+                            <p class="font-bold">1. พิมพ์รายชื่อแยกตามห้องเรียน</p>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400">ม.${classValue || '?'}/${roomValue || '?'} (ตามที่กรอง)</span>
+                        </div>
+                    </button>
+                    <button id="printLevelOpt" class="w-full py-3.5 px-4 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-black rounded-xl border border-blue-200 dark:border-blue-800 text-sm hover:bg-blue-100 transition duration-150 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center text-xs"><i class="fas fa-layer-group"></i></span>
+                        <div class="text-left">
+                            <p class="font-bold">2. พิมพ์รายชื่อทั้งระดับชั้น</p>
+                            <span class="text-[10px] text-blue-600 dark:text-blue-400">ม.${classValue || '?'} ทุกห้อง</span>
+                        </div>
+                    </button>
+                    <button id="printSchoolOpt" class="w-full py-3.5 px-4 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 font-black rounded-xl border border-violet-200 dark:border-violet-800 text-sm hover:bg-violet-100 transition duration-150 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-violet-500 text-white flex items-center justify-center text-xs"><i class="fas fa-school"></i></span>
+                        <div class="text-left">
+                            <p class="font-bold">3. พิมพ์รายชื่อนักเรียนทั้งโรงเรียน</p>
+                            <span class="text-[10px] text-violet-600 dark:text-violet-400">พิมพ์นักเรียนทุกคนในฐานข้อมูล</span>
+                        </div>
+                    </button>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'ยกเลิก',
+            cancelButtonColor: '#64748b',
+            didOpen: () => {
+                $('#printRoomOpt').on('click', function() {
+                    if (!classValue || !roomValue) {
+                        Swal.fire('⚠️ แจ้งเตือน', 'กรุณาเลือกทั้งระดับชั้นและห้องเรียนก่อนสั่งพิมพ์รายห้อง', 'warning');
+                        return;
+                    }
+                    window.open(`print_student_list.php?scope=room&class=${classValue}&room=${roomValue}&year=${peeValue}`, '_blank');
+                    Swal.close();
+                });
 
-        const url = `print_roster.php?level=${classValue}&room=${roomValue}&year=${peeValue}`;
-        window.open(url, '_blank');
+                $('#printLevelOpt').on('click', function() {
+                    if (!classValue) {
+                        Swal.fire('⚠️ แจ้งเตือน', 'กรุณาเลือกระดับชั้นก่อนสั่งพิมพ์ทั้งระดับชั้น', 'warning');
+                        return;
+                    }
+                    window.open(`print_student_list.php?scope=level&class=${classValue}&year=${peeValue}`, '_blank');
+                    Swal.close();
+                });
+
+                $('#printSchoolOpt').on('click', function() {
+                    window.open(`print_student_list.php?scope=school&year=${peeValue}`, '_blank');
+                    Swal.close();
+                });
+            }
+        });
     });
 
     $('#printStudentCards').on('click', function() {
