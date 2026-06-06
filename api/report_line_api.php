@@ -64,7 +64,18 @@ try {
         exit;
     }
 
-    // 5. เช็คเวลาปัจจุบันกับเวลาส่งรายงาน (ถ้าเป็นวันที่ปัจจุบัน)
+    // 5. เช็คว่าส่งวันนี้ไปหรือยัง (เพื่อไม่ให้ส่งซ้ำเมื่อรัน Cron ทุกๆ 5 นาที)
+    $force = isset($_REQUEST['force']) && ($_REQUEST['force'] === 'true' || $_REQUEST['force'] == '1');
+    $last_sent_date = $timeSettings['last_line_report_date'] ?? '';
+    if (!$force && $last_sent_date === $date) {
+        echo json_encode([
+            'status' => 'skip',
+            'message' => 'ส่งรายงานสรุปของวันนี้เรียบร้อยแล้ว'
+        ]);
+        exit;
+    }
+
+    // 6. เช็คเวลาปัจจุบันกับเวลาส่งรายงาน (ถ้าเป็นวันที่ปัจจุบัน)
     if ($date === $today && $currentTime < $line_report_time) {
         echo json_encode([
             'status' => 'skip',
@@ -256,6 +267,14 @@ foreach ($classes as $classKey) {
         'status' => 'ok',
         'line_flex_responses' => $sendResponses
     ];
+}
+
+// --- บันทึกสถานะการส่งสำเร็จในวันนี้ เพื่อไม่ให้รันส่งซ้ำอีกเมื่อกวาดรันตามรอบเวลา ---
+try {
+    $stmtUpdateLastSent = $db->prepare("INSERT INTO time_settings (setting_key, setting_value) VALUES ('last_line_report_date', :today) ON DUPLICATE KEY UPDATE setting_value = :today2");
+    $stmtUpdateLastSent->execute([':today' => $date, ':today2' => $date]);
+} catch (Exception $e) {
+    // Ignore database write errors so it doesn't interrupt the API output
 }
 
 // --- ตอบกลับ ---
