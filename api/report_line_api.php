@@ -1,8 +1,8 @@
 <?php
-require_once("../../config/Database.php");
-require_once("../../class/Attendance.php");
-require_once("../../class/UserLogin.php");
-require_once('../../class/AttendanceSummary.php');
+require_once(dirname(__DIR__) . "/config/Database.php");
+require_once(dirname(__DIR__) . "/class/Attendance.php");
+require_once(dirname(__DIR__) . "/class/UserLogin.php");
+require_once(dirname(__DIR__) . "/class/AttendanceSummary.php");
 
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('Asia/Bangkok');
