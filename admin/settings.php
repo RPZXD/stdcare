@@ -61,6 +61,17 @@ $term_start_date = $timeSettings['term_start_date'] ?? date('Y-m-d');
 $term_end_date = $timeSettings['term_end_date'] ?? date('Y-m-d');
 $exclude_absent_grades = $timeSettings['exclude_absent_grades'] ?? '';
 
+// LINE Settings
+$line_notify_token = $timeSettings['line_notify_token'] ?? '';
+$line_channel_access_token = $timeSettings['line_channel_access_token'] ?? '';
+$line_group_id_1 = $timeSettings['line_group_id_1'] ?? '';
+$line_group_id_2 = $timeSettings['line_group_id_2'] ?? '';
+$line_group_id_3 = $timeSettings['line_group_id_3'] ?? '';
+$line_group_id_4 = $timeSettings['line_group_id_4'] ?? '';
+$line_group_id_5 = $timeSettings['line_group_id_5'] ?? '';
+$line_group_id_6 = $timeSettings['line_group_id_6'] ?? '';
+$line_report_time = $timeSettings['line_report_time'] ?? '08:30:00';
+
 // Get school holidays
 try {
     $schoolHolidays = $settingsModel ? $settingsModel->getHolidays() : [];

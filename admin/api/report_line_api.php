@@ -1,57 +1,90 @@
 <?php
+require_once("../../config/Database.php");
 require_once("../../class/Attendance.php");
 require_once("../../class/UserLogin.php");
+require_once('../../class/AttendanceSummary.php');
 
 header('Content-Type: application/json; charset=utf-8');
+date_default_timezone_set('Asia/Bangkok');
 
-// --- Config ---
-$line_token = 'U9e0d2e5050696fef1168a9fcb9ca5a3f'; // LINE Notify Token
-$channel_access_token = '3K7fh1bhbCn0uPjgNoGQpN3jNgpwpSoMA0QaE6m4dOMJkly+SeGyDyS73+EV6wSVuLoB6M/+FwdbxRWlY6ZGuQymNTYSrFzA5xQ7AhwlwOufu+et60PnAnYK2vpyvUyy3ye0yBe7cTu+PoiFDxsmmgdB04t89/1O/w1cDnyilFU='; // ใส่ Channel Access Token ของ Messaging API
+try {
+    $dbObj = new Database("phichaia_student");
+    $db = $dbObj->getConnection();
+    
+    // 1. ดึงการตั้งค่าที่จำเป็นจากฐานข้อมูล
+    $stmtSettings = $db->query("SELECT setting_key, setting_value FROM time_settings");
+    $timeSettings = $stmtSettings->fetchAll(PDO::FETCH_KEY_PAIR);
+    
+    $line_token = $timeSettings['line_notify_token'] ?? ''; // LINE Notify Token (if needed)
+    $channel_access_token = $timeSettings['line_channel_access_token'] ?? ''; // LINE Messaging API Channel Token
+    $line_report_time = $timeSettings['line_report_time'] ?? '08:30:00';
+    $term_start_date = $timeSettings['term_start_date'] ?? null;
+    $term_end_date = $timeSettings['term_end_date'] ?? null;
+    
+    $date = $_REQUEST['date'] ?? date('Y-m-d');
+    $today = date('Y-m-d');
+    $currentTime = date('H:i:s');
+    
+    // ฟังก์ชันช่วยดึง Group ID ตามระดับชั้น
+    function getGroupIdByClass($class, $timeSettings) {
+        return $timeSettings['line_group_id_' . $class] ?? '';
+    }
 
-// --- ฟังก์ชันสำหรับแมป class ไปยัง groupId77 ---
-function getGroupIdByClass($class) {
-    $map = [
-        '1' => 'C0cf2923dbaf5ca2ff308a336bcaf1642', // invite
-        '2' => 'C905068e97d63ba1ecc46091121735650', // updated groupId
-        '3' => 'Cf28bd4fca19fb6d0d1b1b0f1116912a4',
-        '4' => 'C7d75a57ea9078dd70076d7aee38f6e8a', // invite
-        '5' => 'Cccc2671904450ba9977acd4992e99898', // invite7
-        '6' => 'Ce05c66cecc5b60c51921d722c2825825', // invite
-    ];
-    // $map = [
-    //     '1' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-    //     '2' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // updated groupId7
-    //     '4' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-    //     '5' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-    //     '6' => 'U9e0d2e5050696fef1168a9fcb9ca5a3f', // invite
-    // ];
-    return $map[$class] ?? '';
-}
+    // 2. เช็ควันเสาร์-อาทิตย์
+    $dayOfWeek = date('N', strtotime($date)); // 6=Saturday, 7=Sunday
+    if ($dayOfWeek >= 6) {
+        echo json_encode([
+            'status' => 'skip',
+            'message' => 'ไม่ส่งข้อความในวันเสาร์-อาทิตย์'
+        ]);
+        exit;
+    }
 
-$date = $_REQUEST['date'] ?? date('Y-m-d');
+    // 3. เช็คระยะเวลาเปิด-ปิดภาคเรียน
+    if ($term_start_date && $term_end_date) {
+        if ($date < $term_start_date || $date > $term_end_date) {
+            echo json_encode([
+                'status' => 'skip',
+                'message' => 'อยู่นอกระยะเวลาเปิด-ปิดภาคเรียน ไม่ส่งข้อความสรุป'
+            ]);
+            exit;
+        }
+    }
 
-// เช็คถ้าเป็นวันเสาร์หรืออาทิตย์ ไม่ต้องส่งข้อความ
-$dayOfWeek = date('N', strtotime($date)); // 6=Saturday, 7=Sunday
-if ($dayOfWeek == 6 || $dayOfWeek == 7) {
+    // 4. เช็ควันหยุดพิเศษจากฐานข้อมูล
+    $stmtHoliday = $db->prepare("SELECT description FROM school_holidays WHERE holiday_date = :date");
+    $stmtHoliday->execute([':date' => $date]);
+    $holiday = $stmtHoliday->fetchColumn();
+
+    if ($holiday) {
+        echo json_encode([
+            'status' => 'skip',
+            'message' => 'วันนี้เป็นวันหยุดพิเศษ: ' . $holiday . ' (ไม่ส่งข้อความสรุป)'
+        ]);
+        exit;
+    }
+
+    // 5. เช็คเวลาปัจจุบันกับเวลาส่งรายงาน (ถ้าเป็นวันที่ปัจจุบัน)
+    if ($date === $today && $currentTime < $line_report_time) {
+        echo json_encode([
+            'status' => 'skip',
+            'message' => 'ยังไม่ถึงเวลาส่งข้อความสรุป (รอให้ถึงเวลา ' . $line_report_time . ')'
+        ]);
+        exit;
+    }
+
+    $attendance = new Attendance($db);
+    $user = new UserLogin($db);
+    $term = $user->getTerm();
+    $pee = $user->getPee();
+
+} catch (Exception $e) {
     echo json_encode([
-        'status' => 'skip',
-        'message' => 'ไม่ส่งข้อความในวันเสาร์-อาทิตย์'
+        'status' => 'error',
+        'message' => 'เกิดข้อผิดพลาดในการเริ่มต้นฐานข้อมูล/การตั้งค่า: ' . $e->getMessage()
     ]);
     exit;
 }
-
-// --- เตรียมข้อมูล ---
-require_once("../../config/Database.php");
-$dbObj = new Database("phichaia_student");
-$db = $dbObj->getConnection();
-$attendance = new Attendance($db);
-
-$user = new UserLogin($db);
-$term = $user->getTerm();
-$pee = $user->getPee();
-
-// --- เพิ่ม: include class AttendanceSummary ---
-require_once('../../class/AttendanceSummary.php');
 
 // --- แปลงวันที่ ---
 function convertToBuddhistYear($date) {
@@ -78,85 +111,151 @@ function thaiDateShort($date) {
     return $date;
 }
 
-
-// --- ส่ง flex ของทุก class ทุก room ---
+// --- ส่ง flex สรุปของทุกระดับชั้น ---
 $results = [];
-$classMap = [
-    '1' => getGroupIdByClass('1'),
-    '2' => getGroupIdByClass('2'),
-    '3' => getGroupIdByClass('3'),
-    '4' => getGroupIdByClass('4'),
-    '5' => getGroupIdByClass('5'),
-    '6' => getGroupIdByClass('6'),
-];
-foreach ($classMap as $classKey => $groupId) {
-    // ดึงห้องของแต่ละ class
-    $stmt = $db->prepare("SELECT DISTINCT Stu_room FROM student WHERE Stu_major = :class AND Stu_status = 1 ORDER BY Stu_room ASC");
-    $stmt->execute([':class' => $classKey]);
-    $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
+$classes = ['1', '2', '3', '4', '5', '6'];
 
-    foreach ($rooms as $room) {
-        $students_all = $attendance->getStudentsWithAttendance($date, $classKey, $room, $term, $pee);
-        // Determine whether there is any attendance data recorded for this room
-        $hasAttendanceData = false;
-        if (!empty($students_all) && is_array($students_all)) {
-            foreach ($students_all as $srow) {
-                if (!empty($srow['attendance_id']) || (isset($srow['attendance_status']) && $srow['attendance_status'] !== null && $srow['attendance_status'] !== '')) {
-                    $hasAttendanceData = true;
-                    break;
-                }
+foreach ($classes as $classKey) {
+    $groupId = getGroupIdByClass($classKey, $timeSettings);
+    if (empty($groupId) || empty($channel_access_token)) {
+        $results[] = [
+            'class' => $classKey,
+            'status' => 'skip',
+            'message' => 'ไม่ได้ตั้งค่า Group ID หรือ Channel Access Token'
+        ];
+        continue;
+    }
+
+    // ดึงข้อมูลนักเรียนทั้งหมดในระดับชั้น
+    $students_all = $attendance->getStudentsWithAttendance($date, $classKey, null, $term, $pee);
+    
+    if (empty($students_all) || !is_array($students_all)) {
+        $results[] = [
+            'class' => $classKey,
+            'groupId' => $groupId,
+            'status' => 'no_students',
+            'message' => 'ไม่มีนักเรียนในระดับชั้นนี้'
+        ];
+        continue;
+    }
+
+    // Group students by room
+    $students_by_room = [];
+    foreach ($students_all as $s) {
+        $room = $s['Stu_room'];
+        if (!isset($students_by_room[$room])) {
+            $students_by_room[$room] = [];
+        }
+        $students_by_room[$room][] = $s;
+    }
+    ksort($students_by_room);
+
+    $bubbles = [];
+    foreach ($students_by_room as $roomKey => $room_students) {
+        // ตรวจสอบว่าห้องนี้มีข้อมูลการเช็คชื่อหรือไม่
+        $roomHasAttendance = false;
+        foreach ($room_students as $srow) {
+            if (!empty($srow['attendance_id']) || (isset($srow['attendance_status']) && $srow['attendance_status'] !== null && $srow['attendance_status'] !== '')) {
+                $roomHasAttendance = true;
+                break;
             }
         }
 
-        if (!$hasAttendanceData) {
-            // Build a simple flex bubble to indicate no data for this room
-            $noDataFlex = [
+        if ($roomHasAttendance) {
+            $summary = new AttendanceSummary($room_students, $classKey, $roomKey, $date, $term, $pee);
+            $bubbles[] = $summary->getFlexMessage();
+        } else {
+            // Build a grey no-data flex bubble for this room
+            $bubbles[] = [
                 "type" => "bubble",
-                "size" => "giga",
+                "size" => "mega",
+                "header" => [
+                    "type" => "box",
+                    "layout" => "vertical",
+                    "backgroundColor" => "#9ca3af",
+                    "contents" => [[
+                        "type" => "text",
+                        "text" => "📭 ยังไม่มีข้อมูล",
+                        "weight" => "bold",
+                        "size" => "xl",
+                        "color" => "#ffffff",
+                        "align" => "center"
+                    ]]
+                ],
                 "body" => [
                     "type" => "box",
                     "layout" => "vertical",
+                    "spacing" => "md",
                     "contents" => [
-                        ["type"=>"text","text"=>"📭 ไม่มีข้อมูลการเช็คชื่อ","weight"=>"bold","size"=>"lg","align"=>"center"],
-                        ["type"=>"text","text"=>"ชั้น ม.$classKey/$room","size"=>"sm","align"=>"center","margin"=>"md"],
-                        ["type"=>"text","text"=>thaiDateShort($date),'size'=>"sm","align"=>"center","color"=>"#6b7280"]
+                        [
+                            "type" => "text",
+                            "text" => "ชั้น ม." . $classKey . "/" . $roomKey,
+                            "weight" => "bold",
+                            "size" => "lg",
+                            "color" => "#374151",
+                            "align" => "center"
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => thaiDateShort($date),
+                            "size" => "sm",
+                            "color" => "#6b7280",
+                            "align" => "center"
+                        ],
+                        [
+                            "type" => "separator",
+                            "margin" => "md"
+                        ],
+                        [
+                            "type" => "text",
+                            "text" => "ยังไม่มีการบันทึกการมาเรียนสำหรับห้องนี้",
+                            "size" => "sm",
+                            "color" => "#6b7280",
+                            "align" => "center",
+                            "margin" => "lg",
+                            "wrap" => true
+                        ]
                     ]
                 ],
                 "footer" => [
                     "type" => "box",
                     "layout" => "vertical",
-                    "contents" => [["type"=>"text","text"=>"ยังไม่มีการบันทึกการมาเรียนสำหรับห้องนี้","size"=>"xs","align"=>"center","color"=>"#9ca3af"]]
+                    "contents" => [[
+                        "type" => "text",
+                        "text" => "🔄 STD Care by PhichaiSchool",
+                        "size" => "xs",
+                        "color" => "#9ca3af",
+                        "align" => "center"
+                    ]]
                 ]
             ];
-
-            $sendRes = send_line_flex($channel_access_token, $groupId, $noDataFlex);
-            $results[] = [
-                'class' => $classKey,
-                'room' => $room,
-                'groupId' => $groupId,
-                'status' => 'no_data',
-                'line_flex_response' => $sendRes,
-                'flex_example' => $noDataFlex
-            ];
-            continue;
         }
+    }
 
-        // --- ใช้คลาส AttendanceSummary ---
-        $summary = new AttendanceSummary($students_all, $classKey, $room, $date, $term, $pee);
-        $text_message = $summary->getTextSummary();
-        $flex = $summary->getFlexMessage();
+    // LINE Flex Carousel message supports up to 10 bubbles
+    $bubbleChunks = array_chunk($bubbles, 10);
+    $sendResponses = [];
+    foreach ($bubbleChunks as $chunkIndex => $chunkBubbles) {
+        $carouselFlex = [
+            "type" => "carousel",
+            "contents" => $chunkBubbles
+        ];
 
-        // --- ส่ง Flex Message ไปยังกลุ่ม LINE (Messaging API) ---
-        $sendRes = send_line_flex($channel_access_token, $groupId, $flex);
-        $results[] = [
-            'class' => $classKey,
-            'room' => $room,
-            'groupId' => $groupId,
-            'status' => 'ok',
-            'line_flex_response' => $sendRes,
-            'flex_example' => $flex
+        // --- ส่ง Flex Message Carousel ไปยังกลุ่ม LINE (Messaging API) ---
+        $sendRes = send_line_flex($channel_access_token, $groupId, $carouselFlex);
+        $sendResponses[] = [
+            'chunk' => $chunkIndex + 1,
+            'response' => $sendRes,
+            'flex' => $carouselFlex
         ];
     }
+
+    $results[] = [
+        'class' => $classKey,
+        'groupId' => $groupId,
+        'status' => 'ok',
+        'line_flex_responses' => $sendResponses
+    ];
 }
 
 // --- ตอบกลับ ---

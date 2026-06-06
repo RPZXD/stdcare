@@ -133,6 +133,81 @@ $activePage = "settings";
             </form>
         </div>
 
+        <!-- Card: LINE Notification Settings -->
+        <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-white/50 shadow-xl hover:shadow-2xl transition-all">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-4 md:p-6 relative">
+                <div class="absolute top-0 right-0 opacity-10 text-6xl md:text-8xl">💬</div>
+                <div class="flex items-center gap-3 md:gap-4 relative z-10">
+                    <div class="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl flex items-center justify-center text-white">
+                        <i class="fab fa-line text-lg md:text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-xl font-black text-white">ตั้งค่าการแจ้งเตือน LINE</h3>
+                        <p class="text-emerald-100 text-xs md:text-sm">กำหนด Token, วันเวลา และ Group ID รายระดับชั้น</p>
+                    </div>
+                </div>
+            </div>
+            <form id="lineSettingsForm" class="p-4 md:p-6 space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1">
+                        <i class="fas fa-bell text-emerald-500"></i> เวลาแจ้งเตือนสรุปประจำวัน
+                    </label>
+                    <input type="time" name="line_report_time" value="<?= htmlspecialchars($line_report_time) ?>" required
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">LINE Notify Token (สำหรับแจ้งเตือนระบบ/ประวัติ)</label>
+                    <input type="text" name="line_notify_token" value="<?= htmlspecialchars($line_notify_token) ?>" placeholder="ใส่ LINE Notify Token"
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">LINE Messaging API Channel Access Token</label>
+                    <textarea name="line_channel_access_token" rows="3" placeholder="ใส่ Channel Access Token สำหรับส่ง Flex Message"
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all"><?= htmlspecialchars($line_channel_access_token) ?></textarea>
+                </div>
+                
+                <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">LINE Group ID แยกตามระดับชั้น</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.1 Group ID</label>
+                            <input type="text" name="line_group_id_1" value="<?= htmlspecialchars($line_group_id_1) ?>" placeholder="Group ID ม.1"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.2 Group ID</label>
+                            <input type="text" name="line_group_id_2" value="<?= htmlspecialchars($line_group_id_2) ?>" placeholder="Group ID ม.2"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.3 Group ID</label>
+                            <input type="text" name="line_group_id_3" value="<?= htmlspecialchars($line_group_id_3) ?>" placeholder="Group ID ม.3"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.4 Group ID</label>
+                            <input type="text" name="line_group_id_4" value="<?= htmlspecialchars($line_group_id_4) ?>" placeholder="Group ID ม.4"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.5 Group ID</label>
+                            <input type="text" name="line_group_id_5" value="<?= htmlspecialchars($line_group_id_5) ?>" placeholder="Group ID ม.5"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 block mb-1">ม.6 Group ID</label>
+                            <input type="text" name="line_group_id_6" value="<?= htmlspecialchars($line_group_id_6) ?>" placeholder="Group ID ม.6"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> บันทึกการตั้งค่า LINE
+                </button>
+            </form>
+        </div>
+
         <!-- Card 3: Promote Students (Danger Zone) -->
         <div class="glass-effect rounded-2xl lg:rounded-[2rem] overflow-hidden border border-red-200 dark:border-red-900/50 shadow-xl hover:shadow-2xl transition-all lg:col-span-2">
             <div class="bg-gradient-to-r from-red-500 to-orange-600 p-4 md:p-6 relative">
@@ -481,6 +556,12 @@ $(document).ready(function() {
     $('#timeSettingsForm').submit(function(e) {
         e.preventDefault();
         handleFetch('../controllers/SettingController.php?action=update_times', new FormData(this), 'บันทึกการตั้งค่าเวลาสำเร็จ');
+    });
+
+    // 2.7 LINE Settings Form
+    $('#lineSettingsForm').submit(function(e) {
+        e.preventDefault();
+        handleFetch('../controllers/SettingController.php?action=update_times', new FormData(this), 'บันทึกการตั้งค่า LINE สำเร็จ');
     });
 
     // 2.5 Holiday Management Form

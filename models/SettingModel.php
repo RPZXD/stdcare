@@ -538,10 +538,19 @@ class SettingModel
                 'scan_crossover_time',
                 'term_start_date',
                 'term_end_date',
-                'exclude_absent_grades'
+                'exclude_absent_grades',
+                'line_notify_token',
+                'line_channel_access_token',
+                'line_group_id_1',
+                'line_group_id_2',
+                'line_group_id_3',
+                'line_group_id_4',
+                'line_group_id_5',
+                'line_group_id_6',
+                'line_report_time'
             ];
             
-            if (in_array($key, $allowed_keys) && !empty($value)) {
+            if (in_array($key, $allowed_keys) && $value !== null) {
                 $stmt->execute([':key' => $key, ':value' => $value]);
             }
         }

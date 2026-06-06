@@ -35,7 +35,8 @@ class AttendanceSummary
             if ($st && isset($this->status_count[$st])) {
                 $this->status_count[$st]++;
                 if ($st !== '1') {
-                    $this->status_names[$st][] = $s['Stu_pre'].$s['Stu_name'].' '.$s['Stu_sur'].' ('.$s['Stu_no'].')';
+                    $roomSuffix = (empty($room) || $room === 'รวม') ? " (ม.{$class}/{$s['Stu_room']} เลขที่ {$s['Stu_no']})" : " (เลขที่ {$s['Stu_no']})";
+                    $this->status_names[$st][] = $s['Stu_pre'].$s['Stu_name'].' '.$s['Stu_sur'] . $roomSuffix;
                 }
             }
         }
@@ -45,7 +46,11 @@ class AttendanceSummary
     {
         $total = count($this->students_all);
         $lines = [];
-        $lines[] = "สรุปการมาเรียน ม.{$this->class}/{$this->room} วันที่ ".thaiDateShort($this->date);
+        $titleText = "สรุปการมาเรียน ม.{$this->class}";
+        if (!empty($this->room) && $this->room !== 'รวม') {
+            $titleText .= "/{$this->room}";
+        }
+        $lines[] = $titleText . " วันที่ " . thaiDateShort($this->date);
         foreach ($this->status_labels as $key => $info) {
             $percent = $total ? round($this->status_count[$key]*100/$total,1) : 0;
             $lines[] = "{$info['emoji']} {$info['label']}: {$this->status_count[$key]} คน ($percent%)";
@@ -89,7 +94,7 @@ class AttendanceSummary
                 "contents" => [
                     [
                         "type" => "text",
-                        "text" => "ชั้น ม.$class/$room",
+                        "text" => "ชั้น ม." . $class . (!empty($room) && $room !== 'รวม' ? "/$room" : ""),
                         "weight" => "bold",
                         "size" => "lg",
                         "color" => "#14532d",
