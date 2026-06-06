@@ -17,7 +17,7 @@ try {
     $pee = isset($_POST['pee']) ? trim($_POST['pee']) : null;
 
     if ($class === null || $class === '' || $room === null || $room === '' || $term === null || $term === '' || $pee === null || $pee === '') {
-        throw new Exception('กรุณากรอกข้อมูลชั้น ห้อง เทอม และปีการศึกษาให้ครบถ้วน');
+        throw new Exception("กรุณากรอกข้อมูลชั้น ห้อง เทอม และปีการศึกษาให้ครบถ้วน (class='$class', room='$room', term='$term', pee='$pee')");
     }
 
     // Handle file uploads
