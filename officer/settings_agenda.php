@@ -1,51 +1,37 @@
-<?php 
+<?php
 /**
- * Picture Meeting - MVC Controller
- * Handles authentication and page variables
+ * Controller: Meeting Agenda Management (Officer)
+ * MVC Pattern - Handles authentication and prepares data for the meeting agenda view
  */
 session_start();
 
-require_once "../config/Database.php";
-require_once "../class/UserLogin.php";
-require_once "../class/Teacher.php";
-require_once "../class/Student.php";
-require_once "../class/Utils.php";
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../class/UserLogin.php';
+require_once __DIR__ . '/../class/Utils.php';
 
-// Initialize database connection
+// (1) Check Permission
+if (!isset($_SESSION['Officer_login'])) {
+    header("Location: ../login.php");
+    exit;
+}
+
+// (2) Initialize DB & Objects
 $connectDB = new Database("phichaia_student");
 $db = $connectDB->getConnection();
 
-// Initialize classes
 $user = new UserLogin($db);
-$teacher = new Teacher($db);
-$student = new Student($db);
 
-// Fetch core session terms and pee
+// (3) Fetch Core Context
+$userid = $_SESSION['Officer_login'];
+$userData = $user->userData($userid);
+// (3) Fetch Core Context (Allow override via GET parameters for configuration rounds)
 $currentTerm = $user->getTerm();
 $currentPee = $user->getPee();
 
 $term = isset($_GET['term']) ? trim($_GET['term']) : $currentTerm;
 $pee = isset($_GET['pee']) ? trim($_GET['pee']) : $currentPee;
 
-// Check login
-if (isset($_SESSION['Teacher_login'])) {
-    $userid = $_SESSION['Teacher_login'];
-    $userData = $user->userData($userid);
-} else {
-    header("Location: ../login.php");
-    exit;
-}
-
-// Extract teacher information
-$teacher_id = $userData['Teach_id'];
-$teacher_name = $userData['Teach_name'];
-$class = $userData['Teach_class'];
-$room = $userData['Teach_room'];
-
-// Fetch room teachers for the view signatures
-$roomTeachers = $teacher->getTeachersByClassAndRoom($class, $room);
-
-// Fetch Current Agenda Settings from JSON scoped by round
+// (4) Fetch Current Dynamic Agenda Settings for this specific term/year
 $agendaConfig = null;
 try {
     $settingKey = "agenda_settings_{$term}_{$pee}";
@@ -59,7 +45,54 @@ try {
     $agendaConfig = null;
 }
 
-// Fallback default agendas structure if not set
+// Fetch all configured keys like agenda_settings_% to build round selector list
+$configuredRounds = [];
+try {
+    $stmtRounds = $db->query("SELECT setting_key FROM time_settings WHERE setting_key LIKE 'agenda_settings_%'");
+    $roundKeys = $stmtRounds->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($roundKeys as $key) {
+        $parts = explode('_', $key);
+        if (count($parts) >= 4) {
+            $rTerm = $parts[2];
+            $rPee = $parts[3];
+            $configuredRounds[] = [
+                'term' => $rTerm,
+                'pee' => $rPee,
+                'key' => "{$rTerm}_{$rPee}"
+            ];
+        }
+    }
+} catch (Exception $e) {
+    // Silent fail
+}
+
+// Ensure the current active round and the requested round are in the list
+$hasCurrentActive = false;
+$hasRequested = false;
+foreach ($configuredRounds as $r) {
+    if ($r['term'] == $currentTerm && $r['pee'] == $currentPee) {
+        $hasCurrentActive = true;
+    }
+    if ($r['term'] == $term && $r['pee'] == $pee) {
+        $hasRequested = true;
+    }
+}
+if (!$hasCurrentActive) {
+    $configuredRounds[] = ['term' => $currentTerm, 'pee' => $currentPee, 'key' => "{$currentTerm}_{$currentPee}"];
+}
+if (!$hasRequested && ($term != $currentTerm || $pee != $currentPee)) {
+    $configuredRounds[] = ['term' => $term, 'pee' => $pee, 'key' => "{$term}_{$pee}"];
+}
+
+// Sort rounds by year (desc) and term (desc)
+usort($configuredRounds, function($a, $b) {
+    if ($a['pee'] != $b['pee']) {
+        return (int)$b['pee'] - (int)$a['pee'];
+    }
+    return (int)$b['term'] - (int)$a['term'];
+});
+
+// Fallback default agendas structure
 $defaultAgendas = [
     1 => [
         'title' => 'ระเบียบวาระที่ 1 เรื่องที่ประธานแจ้งให้ทราบ',
@@ -104,10 +137,10 @@ if (!$agendaConfig || !isset($agendaConfig['agendas'])) {
     $agendaConfig = [
         'show_committee_election' => $isTerm1,
         'show_committee_page' => $isTerm1,
-        'agendas' => $defaultAgendas,
-        'meeting_date' => ''
+        'agendas' => $defaultAgendas
     ];
 } else {
+    // Ensure settings exist if JSON was saved previously without them
     if (!isset($agendaConfig['show_committee_election'])) {
         $agendaConfig['show_committee_election'] = ($term == '1' || $term == 1);
     }
@@ -116,74 +149,11 @@ if (!$agendaConfig || !isset($agendaConfig['agendas'])) {
     }
 }
 
-// Map dynamic configs to the legacy array format for safety
-$agendaTitles = [];
-$agendaTitles['agenda1_1_title'] = $agendaConfig['agendas'][1]['subs'][0] ?? '';
-$agendaTitles['agenda1_2_title'] = $agendaConfig['agendas'][1]['subs'][1] ?? '';
-$agendaTitles['agenda1_3_title'] = $agendaConfig['agendas'][1]['subs'][2] ?? '';
-$agendaTitles['agenda1_4_title'] = $agendaConfig['agendas'][1]['subs'][3] ?? '';
-$agendaTitles['agenda2_title'] = $agendaConfig['agendas'][2]['subs'][0] ?? $agendaConfig['agendas'][2]['title'] ?? '';
-$agendaTitles['agenda3_title'] = $agendaConfig['agendas'][3]['subs'][0] ?? $agendaConfig['agendas'][3]['title'] ?? '';
-$agendaTitles['agenda4_1_title'] = $agendaConfig['agendas'][4]['subs'][0] ?? '';
-$agendaTitles['agenda4_2_title'] = $agendaConfig['agendas'][4]['subs'][1] ?? '';
-$agendaTitles['agenda5_1_title'] = $agendaConfig['agendas'][5]['subs'][0] ?? '';
-$agendaTitles['agenda5_2_title'] = $agendaConfig['agendas'][5]['subs'][1] ?? '';
-$agendaTitles['agenda5_other_title'] = $agendaConfig['agendas'][5]['subs'][2] ?? '';
 
-// Fetch all configured keys like agenda_settings_% to build round selector list
-$configuredRounds = [];
-try {
-    $stmtRounds = $db->query("SELECT setting_key FROM time_settings WHERE setting_key LIKE 'agenda_settings_%'");
-    $roundKeys = $stmtRounds->fetchAll(PDO::FETCH_COLUMN);
-    foreach ($roundKeys as $key) {
-        $parts = explode('_', $key);
-        if (count($parts) >= 4) {
-            $rTerm = $parts[2];
-            $rPee = $parts[3];
-            $configuredRounds[] = [
-                'term' => $rTerm,
-                'pee' => $rPee,
-                'key' => "{$rTerm}_{$rPee}"
-            ];
-        }
-    }
-} catch (Exception $e) {
-    // Silent fail
-}
+// (5) Prepare Data for View
+$pageTitle = 'ตั้งค่าวาระการประชุม';
+$activePage = 'meeting_agenda';
 
-// Ensure the requested and active rounds are in the list
-$hasCurrentActive = false;
-$hasRequested = false;
-foreach ($configuredRounds as $r) {
-    if ($r['term'] == $currentTerm && $r['pee'] == $currentPee) {
-        $hasCurrentActive = true;
-    }
-    if ($r['term'] == $term && $r['pee'] == $pee) {
-        $hasRequested = true;
-    }
-}
-if (!$hasCurrentActive) {
-    $configuredRounds[] = ['term' => $currentTerm, 'pee' => $currentPee, 'key' => "{$currentTerm}_{$currentPee}"];
-}
-if (!$hasRequested && ($term != $currentTerm || $pee != $currentPee)) {
-    $configuredRounds[] = ['term' => $term, 'pee' => $pee, 'key' => "{$term}_{$pee}"];
-}
-
-// Sort rounds by year (desc) and term (desc)
-usort($configuredRounds, function($a, $b) {
-    if ($a['pee'] != $b['pee']) {
-        return (int)$b['pee'] - (int)$a['pee'];
-    }
-    return (int)$b['term'] - (int)$a['term'];
-});
-
-
-$currentDate = Utils::convertToThaiDatePlusNum(date("Y-m-d"));
-$currentDate2 = Utils::convertToThaiDatePlus(date("Y-m-d"));
-
-$title = 'ภาพกิจกรรมการประชุมผู้ปกครอง';
-$activePage = 'meetingparent';
-
-// Load the view
-include __DIR__ . '/../views/teacher/picture_meeting.php';
+// (6) Render View
+include __DIR__ . '/../views/officer/settings_agenda.php';
 ?>

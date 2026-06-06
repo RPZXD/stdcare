@@ -630,7 +630,7 @@ ob_start();
 
     window.openAddModal = function() {
         $('#addForm')[0].reset();
-        new bootstrap.Modal(document.getElementById('addModal')).show();
+        $('#addModal').modal('show');
     };
 
     window.submitAddForm = function() {
@@ -647,7 +647,7 @@ ob_start();
             success: function(response) {
                 if (response.success) {
                     Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
+                        $('#addModal').modal('hide');
                         loadTable();
                     });
                 } else {
@@ -671,7 +671,7 @@ ob_start();
                     $('#editReason').val(response.data.poor_reason);
                     $('#editDetail').val(response.data.poor_schol);
                     $(`#editReceived${response.data.poor_even}`).prop('checked', true);
-                    new bootstrap.Modal(document.getElementById('editModal')).show();
+                    $('#editModal').modal('show');
                 }
             }
         });
@@ -689,7 +689,7 @@ ob_start();
             success: function(response) {
                 if (response.success) {
                     Swal.fire({ icon: 'success', title: 'แก้ไขสำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                        $('#editModal').modal('hide');
                         loadTable();
                     });
                 } else {
@@ -737,7 +737,7 @@ ob_start();
                     return;
                 }
                 $('#visitContent').html(response);
-                new bootstrap.Modal(document.getElementById('visitModal')).show();
+                $('#visitModal').modal('show');
             }
         });
     };

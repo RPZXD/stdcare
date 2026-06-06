@@ -134,9 +134,9 @@ ob_start();
         <i class="fas fa-plus-circle"></i>
         <span>➕ เพิ่มข้อมูล</span>
     </button>
-    <button onclick="window.print()" class="btn-action flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg">
+    <button onclick="window.open('print_meeting_report.php', '_blank')" class="btn-action flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg">
         <i class="fas fa-print"></i>
-        <span>🖨️ พิมพ์</span>
+        <span>🖨️ พิมพ์เล่มรายงาน</span>
     </button>
 </div>
 
@@ -658,7 +658,7 @@ ob_start();
         $('#addName, #addAddress').prop('readonly', false).removeClass('bg-slate-100');
         $('#manualInputCheck').prop('checked', false);
         currentParentData = [];
-        new bootstrap.Modal(document.getElementById('addModal')).show();
+        $('#addModal').modal('show');
     };
 
     window.submitAddForm = function() {
@@ -674,7 +674,7 @@ ob_start();
             success: function(response) {
                 if (response.success) {
                     Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
+                        $('#addModal').modal('hide');
                         loadTable();
                     });
                 } else {
@@ -705,7 +705,7 @@ ob_start();
                         $('#editImagePreview').addClass('hidden');
                     }
                     
-                    new bootstrap.Modal(document.getElementById('editModal')).show();
+                    $('#editModal').modal('show');
                 }
             }
         });
@@ -724,7 +724,7 @@ ob_start();
             success: function(response) {
                 if (response.success) {
                     Swal.fire({ icon: 'success', title: 'แก้ไขสำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                        $('#editModal').modal('hide');
                         loadTable();
                     });
                 } else {

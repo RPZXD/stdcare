@@ -13,8 +13,8 @@ $term = isset($_GET['term']) ? $_GET['term'] : null;
 $pee = isset($_GET['pee']) ? $_GET['pee'] : null;
 
 try {
-    // Query ดึงข้อมูลรูปภาพตามเงื่อนไข
-    $query = "SELECT picture1, picture2, picture3, picture4 
+    // Query ดึงข้อมูลรูปภาพและรายละเอียดบันทึกการประชุม
+    $query = "SELECT * 
               FROM tb_picmeeting 
               WHERE Stu_major = :class AND Stu_room = :room AND term = :term AND pee = :pee 
               LIMIT 1";
@@ -26,6 +26,23 @@ try {
     $stmt->execute();
 
     $pictures = [];
+    $metadata = [
+        'meeting_date' => '',
+        'closing_time' => '',
+        'agenda_data' => '',
+        'agenda1_1' => '',
+        'agenda1_2' => '',
+        'agenda1_3' => '',
+        'agenda1_4' => '',
+        'agenda2' => '',
+        'agenda3' => '',
+        'agenda4_1' => '',
+        'agenda4_2' => '',
+        'agenda5_1' => '',
+        'agenda5_2' => '',
+        'agenda5_other' => ''
+    ];
+
     if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // เพิ่มรูปภาพที่ไม่ใช่ NULL ลงในอาร์เรย์
         $idx = 0;
@@ -39,12 +56,18 @@ try {
             }
             $idx++;
         }
+
+        // ดึงข้อมูลบันทึกและเวลา/วันที่ประชุม
+        foreach ($metadata as $key => $val) {
+            $metadata[$key] = $row[$key] ?? '';
+        }
     }
 
     // ส่งข้อมูลกลับในรูปแบบ JSON
     echo json_encode([
         'success' => true,
-        'data' => $pictures
+        'data' => $pictures,
+        'metadata' => $metadata
     ]);
 } catch (Exception $e) {
     // ส่งข้อความ error หากเกิดข้อผิดพลาด

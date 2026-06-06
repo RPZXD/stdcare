@@ -86,6 +86,13 @@ $menuItems = [
         'icon' => 'fa-chart-pie',
         'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
     ],
+    [
+        'key' => 'meeting_agenda',
+        'name' => 'ตั้งค่าวาระการประชุม',
+        'url' => 'settings_agenda.php',
+        'icon' => 'fa-list-check',
+        'gradient' => ['from' => 'violet-500', 'to' => 'fuchsia-600'],
+    ],
 ];
 ?>
 
