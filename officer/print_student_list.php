@@ -34,8 +34,6 @@ $year = $_GET['year'] ?? 2569;
 
 // Fetch data depending on scope
 $students = [];
-$titleText = "";
-$advisors_text = "";
 
 if ($scope === 'room') {
     if (empty($class) || empty($room)) {
@@ -43,93 +41,32 @@ if ($scope === 'room') {
         exit;
     }
     $students = $studentModel->getAll(['class' => $class, 'room' => $room]);
-    $titleText = "รายชื่อนักเรียนชั้นมัธยมศึกษาปีที่ {$class}/{$room}";
-    
-    // Get advisers
-    $advisors_data = $teacherModel->getByClassAndRoom($class, $room);
-    if (count($advisors_data) > 0) {
-        $advisor_names = array_map(function($a) { return $a['Teach_name']; }, $advisors_data);
-        $advisorList = [];
-        foreach($advisor_names as $index => $name) {
-             $advisorList[] = ($index + 1) . ". " . htmlspecialchars($name);
-        }
-        $advisors_text = "ครูที่ปรึกษา: " . implode("  ", $advisorList);
-    } else {
-        $advisors_text = "ครูที่ปรึกษา: (ไม่พบข้อมูลครูที่ปรึกษา)";
-    }
-    
-    // Plan name
-    function getPlanName($level, $room) {
-        if ($level == 1) {
-            if ($room == 1) return 'Enrichment Science Classroom (ESC)';
-            if ($room == 2) return 'Enrichment Math Classroom (EMC)';
-            if ($room == 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
-            if ($room == 4) return 'วิทยาศาสตร์พลังสิบ';
-            if ($room == 5) return 'ภาษาอังกฤษ';
-            if ($room == 6) return 'ภาษาจีน';
-            if ($room == 7) return 'ภาษาไทย';
-            if ($room == 8) return 'สังคมศึกษา';
-            if ($room == 9) return 'อุตสาหกรรม - พาณิชยกรรม';
-            if ($room == 10) return 'เกษตรกรรม - คหกรรม';
-            if ($room == 11) return 'ศิลปะ - ดนตรี';
-            if ($room == 12) return 'กีฬา';
-            return '';
-        }
-        if ($level >= 2 && $level <= 3) {
-            if ($room == 1) return 'Enrichment Science Classroom (ESC)';
-            if ($room == 2) return 'Enrichment Math Classroom (EMC)';
-            if ($room == 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
-            if ($room == 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
-            if ($room == 5) return 'ภาษาอังกฤษ';
-            if ($room == 6) return 'ภาษาจีน';
-            if ($room == 7) return 'ภาษาไทย';
-            if ($room == 8) return 'สังคมศึกษา';
-            if ($room == 9) return 'อุตสาหกรรม - พาณิชยกรรม';
-            if ($room == 10) return 'เกษตรกรรม - คหกรรม';
-            if ($room == 11) return 'ศิลปะ - ดนตรี';
-            if ($room == 12) return 'กีฬา';
-            return '';
-        }
-        if ($level == 4) {
-            if ($room == 1) return 'Enrichment Science Classroom (ESC)';
-            if ($room == 2) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
-            if ($room == 3) return 'วิทยาศาสตร์พลังสิบ';
-            if ($room == 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
-            if ($room == 5) return 'สังคมศาสตร์และภาษาไทย';
-            if ($room == 6) return 'ภาษาศาสตร์';
-            if ($room == 7) return 'บริหารอุตสาหกรรม';
-            return '';
-        }
-        if ($level >= 5 && $level <= 6) {
-            if ($room == 1) return 'Enrichment Science Classroom (ESC)';
-            if ($room == 2) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
-            if ($room == 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
-            if ($room == 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
-            if ($room == 5) return 'แผนการเรียนศิลปศาสตร์ - สังคมศาสตร์';
-            if ($room == 6) return 'ภาษาศาสตร์';
-            if ($room == 7) return 'บริหารอุตสาหกรรม';
-            return '';
-        }
-        return '';
-    }
-    $plan = getPlanName($class, $room);
-    if (!empty($plan)) {
-        $advisors_text .= "  |  แผนการเรียน: " . $plan;
-    }
 } elseif ($scope === 'level') {
     if (empty($class)) {
         echo "กรุณาระบุชั้นสำหรับขอบเขตระดับชั้น";
         exit;
     }
     $students = $studentModel->getAll(['class' => $class]);
-    $titleText = "รายชื่อนักเรียนระดับชั้นมัธยมศึกษาปีที่ {$class} ทั้งหมด";
-    $advisors_text = "ระดับชั้น ม.{$class}  |  โรงเรียนพิชัย ปีการศึกษา {$year}";
 } else {
     // School scope
     $students = $studentModel->getAll([]);
-    $titleText = "รายชื่อนักเรียนทั้งหมด โรงเรียนพิชัย";
-    $advisors_text = "โรงเรียนพิชัย ปีการศึกษา {$year}";
 }
+
+// Fetch all active advisors to map them by room
+$advisors = $teacherModel->getAll(false);
+$advisorMap = [];
+foreach ($advisors as $t) {
+    $cKey = $t['Teach_class'];
+    $rKey = $t['Teach_room'];
+    if ($cKey !== null && $rKey !== null) {
+        $key = $cKey . "_" . $rKey;
+        if (!isset($advisorMap[$key])) {
+            $advisorMap[$key] = [];
+        }
+        $advisorMap[$key][] = $t['Teach_name'];
+    }
+}
+$advisorMapJson = json_encode($advisorMap);
 
 // Prepare data for JS
 $studentsJson = json_encode(array_map(function($s, $idx) {
@@ -159,7 +96,7 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $titleText; ?></title>
+    <title>พิมพ์รายชื่อนักเรียน</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../dist/css/style.css">
@@ -173,10 +110,6 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
         }
 
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 5mm 5mm;
-            }
             body { background-color: white; }
             .no-print { display: none !important; }
             .print-area { 
@@ -184,6 +117,17 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
                 margin: 0 !important;
                 padding: 0 !important;
                 box-shadow: none !important;
+            }
+            .paper {
+                page-break-after: always;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 auto !important;
+                padding: 10mm 5mm !important;
+                min-height: auto !important;
+            }
+            .paper:last-child {
+                page-break-after: avoid !important;
             }
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid black !important; }
@@ -194,7 +138,7 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             width: 210mm;
             min-height: 297mm;
             padding: 15mm 10mm;
-            margin: 10px auto;
+            margin: 15px auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative;
         }
@@ -342,49 +286,17 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
         </div>
     </div>
 
-    <!-- Paper Content -->
-    <div class="paper print-area dynamic-font shadow-2xl rounded-sm" id="renderArea">
-        <div class="text-center mb-3">
-            <h1 class="text-base font-bold mb-1" id="printTitle"><?php echo $titleText; ?></h1>
-            <p class="text-sm text-slate-600 mb-2"><?php echo htmlspecialchars($advisors_text); ?></p>
-        </div>
-
-        <table id="targetTable">
-            <thead>
-                <tr id="tableHeader">
-                    <!-- Injected by JS -->
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Students will be injected here -->
-            </tbody>
-        </table>
-
-        <!-- Summary & Stats -->
-        <div class="mt-4 flex justify-between text-sm italic">
-            <p id="statsSummary">รวมทั้งสิ้น 0 คน</p>
-        </div>
-
-        <!-- Dynamic Signature Area -->
-        <div id="signature-section" class="mt-12 hidden" style="page-break-inside: avoid;">
-            <div class="grid grid-cols-2 gap-y-12 gap-x-8 text-center text-sm">
-                <div>
-                    <p>ลงชื่อ..........................................................ผู้จัดทำ/ตรวจ</p>
-                    <p class="mt-1">(..........................................................)</p>
-                </div>
-                
-                <div id="head-signature-block" class="hidden">
-                    <p>ลงชื่อ..........................................................หัวหน้างานทะเบียน</p>
-                    <p class="mt-1">(..........................................................)</p>
-                </div>
-            </div>
-        </div>
+    <!-- Papers Container -->
+    <div id="papersContainer" class="print-area dynamic-font">
+        <!-- Injected by JS -->
     </div>
 
     <script>
         const students = <?php echo $studentsJson; ?>;
         const scope = "<?php echo $scope; ?>";
-        
+        const year = "<?php echo $year; ?>";
+        const advisorMap = <?php echo $advisorMapJson; ?>;
+
         // Control Elements
         const controls = {
             fontSizeRange: document.getElementById('fontSizeRange'),
@@ -402,80 +314,201 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             colAddr: document.getElementById('col-addr'),
             showSignature: document.getElementById('show-signature'),
             showHeadSignature: document.getElementById('show-head-signature'),
-            renderArea: document.getElementById('renderArea'),
-            tableHeader: document.getElementById('tableHeader'),
-            tableBody: document.getElementById('tableBody'),
-            signatureSection: document.getElementById('signature-section'),
-            headSignatureBlock: document.getElementById('head-signature-block')
+            papersContainer: document.getElementById('papersContainer')
         };
+
+        // JS getPlanName function equivalent
+        function getPlanName(level, room) {
+            level = parseInt(level);
+            room = parseInt(room);
+            if (level === 1) {
+                if (room === 1) return 'Enrichment Science Classroom (ESC)';
+                if (room === 2) return 'Enrichment Math Classroom (EMC)';
+                if (room === 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
+                if (room === 4) return 'วิทยาศาสตร์พลังสิบ';
+                if (room === 5) return 'ภาษาอังกฤษ';
+                if (room === 6) return 'ภาษาจีน';
+                if (room === 7) return 'ภาษาไทย';
+                if (room === 8) return 'สังคมศึกษา';
+                if (room === 9) return 'อุตสาหกรรม - พาณิชยกรรม';
+                if (room === 10) return 'เกษตรกรรม - คหกรรม';
+                if (room === 11) return 'ศิลปะ - ดนตรี';
+                if (room === 12) return 'กีฬา';
+                return '';
+            }
+            if (level >= 2 && level <= 3) {
+                if (room === 1) return 'Enrichment Science Classroom (ESC)';
+                if (room === 2) return 'Enrichment Math Classroom (EMC)';
+                if (room === 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
+                if (room === 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
+                if (room === 5) return 'ภาษาอังกฤษ';
+                if (room === 6) return 'ภาษาจีน';
+                if (room === 7) return 'ภาษาไทย';
+                if (room === 8) return 'สังคมศึกษา';
+                if (room === 9) return 'อุตสาหกรรม - พาณิชยกรรม';
+                if (room === 10) return 'เกษตรกรรม - คหกรรม';
+                if (room === 11) return 'ศิลปะ - ดนตรี';
+                if (room === 12) return 'กีฬา';
+                return '';
+            }
+            if (level === 4) {
+                if (room === 1) return 'Enrichment Science Classroom (ESC)';
+                if (room === 2) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
+                if (room === 3) return 'วิทยาศาสตร์พลังสิบ';
+                if (room === 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
+                if (room === 5) return 'สังคมศาสตร์และภาษาไทย';
+                if (room === 6) return 'ภาษาศาสตร์';
+                if (room === 7) return 'บริหารอุตสาหกรรม';
+                return '';
+            }
+            if (level >= 5 && level <= 6) {
+                if (room === 1) return 'Enrichment Science Classroom (ESC)';
+                if (room === 2) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
+                if (room === 3) return 'วิทยาศาสตร์ คณิตศาสตร์ และเทคโนโลยี (Coding)';
+                if (room === 4) return 'วิทยาศาสตร์ คณิตศาสตร์';
+                if (room === 5) return 'แผนการเรียนศิลปศาสตร์ - สังคมศาสตร์';
+                if (room === 6) return 'ภาษาศาสตร์';
+                if (room === 7) return 'บริหารอุตสาหกรรม';
+                return '';
+            }
+            return '';
+        }
 
         function updateTable() {
             const fSize = controls.fontSizeRange.value;
             controls.fontSizeDisplay.innerText = fSize + 'px';
-            controls.renderArea.style.fontSize = fSize + 'px';
+            controls.papersContainer.style.fontSize = fSize + 'px';
             
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
 
-            // Signature Visibility
-            controls.signatureSection.classList.toggle('hidden', !controls.showSignature.checked);
-            controls.headSignatureBlock.classList.toggle('hidden', !controls.showHeadSignature.checked);
-
-            // Header Logic
-            let headerHtml = ``;
-            if (scope === 'room') {
-                headerHtml += `<th class="w-10 text-center">เลขที่</th>`;
-            } else {
-                headerHtml += `<th class="w-12 text-center">ลำดับ</th>`;
-            }
-            if (controls.colId.checked) headerHtml += `<th class="w-20 text-center">เลขประจำตัว</th>`;
-            headerHtml += `<th class="text-center font-bold">ชื่อ-สกุล</th>`;
-            if (controls.colMajorRoom && controls.colMajorRoom.checked) headerHtml += `<th class="w-20 text-center">ชั้น/ห้อง</th>`;
-            if (controls.colNick.checked) headerHtml += `<th class="w-16 text-center">ชื่อเล่น</th>`;
-            if (controls.colSex.checked) headerHtml += `<th class="w-12 text-center">เพศ</th>`;
-            if (controls.colPhone.checked) headerHtml += `<th class="w-28 text-center">เบอร์โทร</th>`;
-            if (controls.colCitizen.checked) headerHtml += `<th class="w-32 text-center">เลขบัตรฯ</th>`;
-            if (controls.colBirth.checked) headerHtml += `<th class="w-24 text-center">วันเกิด</th>`;
-            if (controls.colBlood.checked) headerHtml += `<th class="w-10 text-center">เลือด</th>`;
-            if (controls.colParentPhone.checked) headerHtml += `<th class="w-28 text-center">เบอร์ผู้ปกครอง</th>`;
-            if (controls.colAddr.checked) headerHtml += `<th class="text-left">ที่อยู่</th>`;
-            
-            extraHeaders.forEach(h => {
-                headerHtml += `<th class="text-center border font-bold min-w-[40px]">${h}</th>`;
-            });
-            headerHtml += `<th class="w-20 text-center border font-bold">หมายเหตุ</th>`;
-            controls.tableHeader.innerHTML = headerHtml;
-
-            // Body Logic
-            let bodyHtml = '';
+            // Group students by major and room
+            const groupedStudents = {};
             students.forEach(s => {
-                const nameColorClass = s.sex === 'ชาย' ? 'text-blue-700' : 'text-pink-700';
-                bodyHtml += `<tr>`;
-                if (scope === 'room') {
-                    bodyHtml += `<td class="text-center font-bold">${s.no}</td>`;
-                } else {
-                    bodyHtml += `<td class="text-center font-bold">${s.index}</td>`;
+                const key = `${s.major}_${s.room}`;
+                if (!groupedStudents[key]) {
+                    groupedStudents[key] = [];
                 }
-                if (controls.colId.checked) bodyHtml += `<td class="text-center font-mono">${s.id}</td>`;
-                bodyHtml += `<td class="text-left"><span class="${nameColorClass}">${s.prefix}${s.name} ${s.sur}</span></td>`;
-                if (controls.colMajorRoom && controls.colMajorRoom.checked) bodyHtml += `<td class="text-center">ม.${s.major}/${s.room}</td>`;
-                if (controls.colNick.checked) bodyHtml += `<td class="text-center">${s.nick}</td>`;
-                if (controls.colSex.checked) bodyHtml += `<td class="text-center">${s.sex}</td>`;
-                if (controls.colPhone.checked) bodyHtml += `<td class="text-center">${s.phone}</td>`;
-                if (controls.colCitizen.checked) bodyHtml += `<td class="text-center font-mono text-[10px]">${s.citizen_id}</td>`;
-                if (controls.colBirth.checked) bodyHtml += `<td class="text-center">${s.birth}</td>`;
-                if (controls.colBlood.checked) bodyHtml += `<td class="text-center">${s.blood}</td>`;
-                if (controls.colParentPhone.checked) bodyHtml += `<td class="text-center">${s.parent_phone}</td>`;
-                if (controls.colAddr.checked) bodyHtml += `<td class="text-left text-[10px]">${s.addr}</td>`;
-                
-                extraHeaders.forEach(() => bodyHtml += `<td class="border"></td>`);
-                bodyHtml += `<td class="border"></td>`;
-                bodyHtml += `</tr>`;
+                groupedStudents[key].push(s);
             });
-            controls.tableBody.innerHTML = bodyHtml;
 
-            const male = students.filter(s => s.sex === 'ชาย').length;
-            const female = students.length - male;
-            document.getElementById('statsSummary').innerHTML = `รวมทั้งสิ้น ${students.length} คน (ชาย ${male} คน, หญิง ${female} คน)`;
+            // Sort rooms logically
+            const sortedKeys = Object.keys(groupedStudents).sort((a, b) => {
+                const [aMajor, aRoom] = a.split('_').map(Number);
+                const [bMajor, bRoom] = b.split('_').map(Number);
+                if (aMajor !== bMajor) return aMajor - bMajor;
+                return aRoom - bRoom;
+            });
+
+            let containerHtml = '';
+
+            sortedKeys.forEach(key => {
+                const [major, room] = key.split('_');
+                const roomStudents = groupedStudents[key];
+                
+                // Get advisers
+                const advisorsList = advisorMap[key] || [];
+                let advText = '';
+                if (advisorsList.length > 0) {
+                    advText = "ครูที่ปรึกษา: " + advisorsList.map((name, i) => `${i + 1}. ${name}`).join("  ");
+                } else {
+                    advText = "ครูที่ปรึกษา: (ไม่พบข้อมูลครูที่ปรึกษา)";
+                }
+                
+                // Plan
+                const planName = getPlanName(major, room);
+                if (planName) {
+                    advText += "  |  แผนการเรียน: " + planName;
+                }
+
+                // Table Headers
+                let headerHtml = `<th class="w-10 text-center">เลขที่</th>`;
+                if (controls.colId.checked) headerHtml += `<th class="w-20 text-center">เลขประจำตัว</th>`;
+                headerHtml += `<th class="text-center font-bold">ชื่อ-สกุล</th>`;
+                if (controls.colMajorRoom && controls.colMajorRoom.checked) headerHtml += `<th class="w-20 text-center">ชั้น/ห้อง</th>`;
+                if (controls.colNick.checked) headerHtml += `<th class="w-16 text-center">ชื่อเล่น</th>`;
+                if (controls.colSex.checked) headerHtml += `<th class="w-12 text-center">เพศ</th>`;
+                if (controls.colPhone.checked) headerHtml += `<th class="w-28 text-center">เบอร์โทร</th>`;
+                if (controls.colCitizen.checked) headerHtml += `<th class="w-32 text-center">เลขบัตรฯ</th>`;
+                if (controls.colBirth.checked) headerHtml += `<th class="w-24 text-center">วันเกิด</th>`;
+                if (controls.colBlood.checked) headerHtml += `<th class="w-10 text-center">เลือด</th>`;
+                if (controls.colParentPhone.checked) headerHtml += `<th class="w-28 text-center">เบอร์ผู้ปกครอง</th>`;
+                if (controls.colAddr.checked) headerHtml += `<th class="text-left">ที่อยู่</th>`;
+                
+                extraHeaders.forEach(h => {
+                    headerHtml += `<th class="text-center border font-bold min-w-[40px]">${h}</th>`;
+                });
+                headerHtml += `<th class="w-20 text-center border font-bold">หมายเหตุ</th>`;
+
+                // Table Rows
+                let bodyHtml = '';
+                roomStudents.forEach(s => {
+                    const nameColorClass = s.sex === 'ชาย' ? 'text-blue-700' : 'text-pink-700';
+                    bodyHtml += `<tr>`;
+                    bodyHtml += `<td class="text-center font-bold">${s.no}</td>`; // Always show room number (เลขที่) within each room
+                    if (controls.colId.checked) bodyHtml += `<td class="text-center font-mono">${s.id}</td>`;
+                    bodyHtml += `<td class="text-left"><span class="${nameColorClass}">${s.prefix}${s.name} ${s.sur}</span></td>`;
+                    if (controls.colMajorRoom && controls.colMajorRoom.checked) bodyHtml += `<td class="text-center">ม.${s.major}/${s.room}</td>`;
+                    if (controls.colNick.checked) bodyHtml += `<td class="text-center">${s.nick}</td>`;
+                    if (controls.colSex.checked) bodyHtml += `<td class="text-center">${s.sex}</td>`;
+                    if (controls.colPhone.checked) bodyHtml += `<td class="text-center">${s.phone}</td>`;
+                    if (controls.colCitizen.checked) bodyHtml += `<td class="text-center font-mono text-[10px]">${s.citizen_id}</td>`;
+                    if (controls.colBirth.checked) bodyHtml += `<td class="text-center">${s.birth}</td>`;
+                    if (controls.colBlood.checked) bodyHtml += `<td class="text-center">${s.blood}</td>`;
+                    if (controls.colParentPhone.checked) bodyHtml += `<td class="text-center">${s.parent_phone}</td>`;
+                    if (controls.colAddr.checked) bodyHtml += `<td class="text-left text-[10px]">${s.addr}</td>`;
+                    
+                    extraHeaders.forEach(() => bodyHtml += `<td class="border"></td>`);
+                    bodyHtml += `<td class="border"></td>`;
+                    bodyHtml += `</tr>`;
+                });
+
+                const male = roomStudents.filter(s => s.sex === 'ชาย').length;
+                const female = roomStudents.length - male;
+                const statsHtml = `รวมทั้งสิ้น ${roomStudents.length} คน (ชาย ${male} คน, หญิง ${female} คน)`;
+
+                const showSig = controls.showSignature.checked ? '' : 'hidden';
+                const showHeadSig = controls.showHeadSignature.checked ? '' : 'hidden';
+
+                containerHtml += `
+                    <div class="paper shadow-2xl rounded-sm">
+                        <div class="text-center mb-3">
+                            <h1 class="text-base font-bold mb-1">รายชื่อนักเรียนชั้นมัธยมศึกษาปีที่ ${major}/${room} โรงเรียนพิชัย ปีการศึกษา ${year}</h1>
+                            <p class="text-xs text-slate-600 mb-2">${advText}</p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>${headerHtml}</tr>
+                            </thead>
+                            <tbody>
+                                ${bodyHtml}
+                            </tbody>
+                        </table>
+
+                        <!-- Summary & Stats -->
+                        <div class="mt-4 flex justify-between text-sm italic">
+                            <p>${statsHtml}</p>
+                        </div>
+
+                        <!-- Dynamic Signature Area -->
+                        <div class="mt-12 ${showSig}" style="page-break-inside: avoid;">
+                            <div class="grid grid-cols-2 gap-y-12 gap-x-8 text-center text-sm">
+                                <div>
+                                    <p>ลงชื่อ..........................................................ผู้จัดทำ/ตรวจ</p>
+                                    <p class="mt-1">(..........................................................)</p>
+                                </div>
+                                
+                                <div class="${showHeadSig}">
+                                    <p>ลงชื่อ..........................................................หัวหน้างานทะเบียน</p>
+                                    <p class="mt-1">(..........................................................)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            controls.papersContainer.innerHTML = containerHtml;
         }
 
         // Add listeners to all checkboxes and inputs
@@ -489,7 +522,7 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             const data = [];
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
 
-            const headers = [scope === 'room' ? 'เลขที่' : 'ลำดับ'];
+            const headers = ['ลำดับ', 'เลขที่'];
             if (controls.colId.checked) headers.push('เลขประจำตัว');
             headers.push('ชื่อ-สกุล');
             if (controls.colMajorRoom && controls.colMajorRoom.checked) headers.push('ชั้น/ห้อง');
@@ -508,7 +541,7 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             data.push(headers);
 
             students.forEach(s => {
-                const row = [scope === 'room' ? s.no : s.index];
+                const row = [s.index, s.no];
                 if (controls.colId.checked) row.push({ v: s.id || '', t: 's' });
                 row.push(`${s.prefix}${s.name} ${s.sur}`);
                 if (controls.colMajorRoom && controls.colMajorRoom.checked) row.push(`ม.${s.major}/${s.room}`);
@@ -530,7 +563,7 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             XLSX.utils.book_append_sheet(wb, ws, "รายชื่อนักเรียน");
             
             let filename = `รายชื่อนักเรียน_ทั้งหมด`;
-            if (scope === 'room') filename = `รายชื่อนักเรียน_ม${s.major}_${s.room}`;
+            if (scope === 'room') filename = `รายชื่อนักเรียน_ม${students[0].major}_${students[0].room}`;
             else if (scope === 'level') filename = `รายชื่อนักเรียน_ระดับชั้น_ม${students[0].major}`;
             
             XLSX.writeFile(wb, `${filename}.xlsx`);
