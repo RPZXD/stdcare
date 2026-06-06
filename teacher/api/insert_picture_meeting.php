@@ -11,12 +11,12 @@ try {
     $db = $connectDB->getConnection();
 
     // Validate input
-    $class = $_POST['class'] ?? null;
-    $room = $_POST['room'] ?? null;
-    $term = $_POST['term'] ?? null;
-    $pee = $_POST['pee'] ?? null;
+    $class = isset($_POST['class']) ? trim($_POST['class']) : null;
+    $room = isset($_POST['room']) ? trim($_POST['room']) : null;
+    $term = isset($_POST['term']) ? trim($_POST['term']) : null;
+    $pee = isset($_POST['pee']) ? trim($_POST['pee']) : null;
 
-    if (!$class || !$room || !$term || !$pee) {
+    if ($class === null || $class === '' || $room === null || $room === '' || $term === null || $term === '' || $pee === null || $pee === '') {
         throw new Exception('กรุณากรอกข้อมูลชั้น ห้อง เทอม และปีการศึกษาให้ครบถ้วน');
     }
 

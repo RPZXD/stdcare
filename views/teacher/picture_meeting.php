@@ -448,10 +448,10 @@ ob_start();
 <!-- Scripts -->
 <script>
 (function() {
-    const classId = <?= $class ?>;
-    const roomId = <?= $room ?>;
-    const termValue = <?= $term ?>;
-    const peeValue = <?= $pee ?>;
+    const classId = <?= json_encode($class) ?>;
+    const roomId = <?= json_encode($room) ?>;
+    const termValue = <?= json_encode($term) ?>;
+    const peeValue = <?= json_encode($pee) ?>;
     let currentParentData = [];
 
     // Switch Wizard Tabs
