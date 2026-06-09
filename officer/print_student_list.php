@@ -356,12 +356,8 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
                         </label>
                         <input type="range" id="w-addr" min="80" max="400" value="180" class="w-full h-1 bg-violet-100 rounded-lg appearance-none cursor-pointer accent-violet-600">
                     </div>
-                    <div id="width-custom-ctrl">
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1 flex justify-between">
-                            <span>คอลัมน์กำหนดเอง</span>
-                            <span id="w-custom-val">80px</span>
-                        </label>
-                        <input type="range" id="w-custom" min="40" max="250" value="80" class="w-full h-1 bg-violet-100 rounded-lg appearance-none cursor-pointer accent-violet-600">
+                    <div id="custom-width-controls-container" class="space-y-3">
+                        <!-- Dynamic sliders for custom columns will be injected here -->
                     </div>
                     <div id="width-remarks-ctrl">
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1 flex justify-between">
@@ -470,11 +466,70 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             wParentPhoneVal: document.getElementById('w-parentPhone-val'),
             wAddr: document.getElementById('w-addr'),
             wAddrVal: document.getElementById('w-addr-val'),
-            wCustom: document.getElementById('w-custom'),
-            wCustomVal: document.getElementById('w-custom-val'),
             wRemarks: document.getElementById('w-remarks'),
             wRemarksVal: document.getElementById('w-remarks-val'),
         };
+
+        // Dynamic custom headers width state
+        let currentCustomHeaders = [];
+        const customWidths = {};
+
+        function renderCustomWidthControls() {
+            const container = document.getElementById('custom-width-controls-container');
+            if (!container) return;
+
+            const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
+            
+            // Check if the headers list has actually changed
+            const headersChanged = JSON.stringify(extraHeaders) !== JSON.stringify(currentCustomHeaders);
+            
+            if (headersChanged) {
+                currentCustomHeaders = extraHeaders;
+                
+                // Keep only widths for active headers, initialize new ones
+                const newWidths = {};
+                extraHeaders.forEach(h => {
+                    newWidths[h] = customWidths[h] !== undefined ? customWidths[h] : 80;
+                });
+                
+                // Clear old widths and copy new ones
+                for (let key in customWidths) delete customWidths[key];
+                Object.assign(customWidths, newWidths);
+
+                // Render controls
+                container.innerHTML = extraHeaders.map((header, idx) => {
+                    const widthVal = customWidths[header];
+                    return `
+                        <div id="width-custom-${idx}-ctrl">
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1 flex justify-between">
+                                <span>คอลัมน์: ${header}</span>
+                                <span id="w-custom-${idx}-val">${widthVal}px</span>
+                            </label>
+                            <input type="range" data-header-index="${idx}" min="30" max="400" value="${widthVal}" class="w-full h-1 bg-violet-100 rounded-lg appearance-none cursor-pointer accent-violet-600 custom-width-slider">
+                        </div>
+                    `;
+                }).join('');
+
+                // Add listeners to new sliders
+                container.querySelectorAll('.custom-width-slider').forEach(slider => {
+                    const idx = slider.getAttribute('data-header-index');
+                    const header = currentCustomHeaders[idx];
+                    
+                    const handleSliderInput = (e) => {
+                        const val = e.target.value;
+                        customWidths[header] = parseInt(val);
+                        const displayVal = document.getElementById(`w-custom-${idx}-val`);
+                        if (displayVal) {
+                            displayVal.innerText = val + 'px';
+                        }
+                        updateTable();
+                    };
+                    
+                    slider.addEventListener('input', handleSliderInput);
+                    slider.addEventListener('change', handleSliderInput);
+                });
+            }
+        }
 
         // JS getPlanName function equivalent
         function getPlanName(level, room) {
@@ -534,6 +589,8 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
         }
 
         function updateTable() {
+            renderCustomWidthControls();
+
             const fSize = controls.fontSizeRange.value;
             controls.fontSizeDisplay.innerText = fSize + 'px';
             controls.papersContainer.style.fontSize = fSize + 'px';
@@ -559,7 +616,10 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             document.getElementById('width-remarks-ctrl').style.display = controls.colRemarks.checked ? 'block' : 'none';
 
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
-            document.getElementById('width-custom-ctrl').style.display = extraHeaders.length > 0 ? 'block' : 'none';
+            const customContainer = document.getElementById('custom-width-controls-container');
+            if (customContainer) {
+                customContainer.style.display = extraHeaders.length > 0 ? 'block' : 'none';
+            }
 
             // Get widths
             const widths = {
@@ -575,7 +635,6 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
                 blood: controls.wBlood.value,
                 parentPhone: controls.wParentPhone.value,
                 addr: controls.wAddr.value,
-                custom: controls.wCustom.value,
                 remarks: controls.wRemarks.value
             };
 
@@ -592,7 +651,6 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             controls.wBloodVal.innerText = widths.blood + 'px';
             controls.wParentPhoneVal.innerText = widths.parentPhone + 'px';
             controls.wAddrVal.innerText = widths.addr + 'px';
-            controls.wCustomVal.innerText = widths.custom + 'px';
             controls.wRemarksVal.innerText = widths.remarks + 'px';
 
             // Group students by major and room
@@ -669,7 +727,8 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
                 }
                 
                 extraHeaders.forEach(h => {
-                    headerHtml += `<th style="width: ${widths.custom}px; min-width: ${widths.custom}px; max-width: ${widths.custom}px;" class="text-center border font-bold">${h}</th>`;
+                    const colWidth = customWidths[h] || 80;
+                    headerHtml += `<th style="width: ${colWidth}px; min-width: ${colWidth}px; max-width: ${colWidth}px;" class="text-center border font-bold">${h}</th>`;
                 });
                 if (controls.colRemarks.checked) {
                     headerHtml += `<th style="width: ${widths.remarks}px; min-width: ${widths.remarks}px; max-width: ${widths.remarks}px;" class="text-center border font-bold">หมายเหตุ</th>`;
@@ -713,8 +772,9 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
                         bodyHtml += `<td style="width: ${widths.addr}px; min-width: ${widths.addr}px; max-width: ${widths.addr}px;" class="text-left text-[10px]">${s.addr}</td>`;
                     }
                     
-                    extraHeaders.forEach(() => {
-                        bodyHtml += `<td style="width: ${widths.custom}px; min-width: ${widths.custom}px; max-width: ${widths.custom}px;" class="border"></td>`;
+                    extraHeaders.forEach(h => {
+                        const colWidth = customWidths[h] || 80;
+                        bodyHtml += `<td style="width: ${colWidth}px; min-width: ${colWidth}px; max-width: ${colWidth}px;" class="border"></td>`;
                     });
                     if (controls.colRemarks.checked) {
                         bodyHtml += `<td style="width: ${widths.remarks}px; min-width: ${widths.remarks}px; max-width: ${widths.remarks}px;" class="border"></td>`;
@@ -837,7 +897,11 @@ $studentsJson = json_encode(array_map(function($s, $idx) {
             if (controls.colBlood.checked) colWidths.push({ wch: 8 });
             if (controls.colParentPhone.checked) colWidths.push({ wch: 15 });
             if (controls.colAddr.checked) colWidths.push({ wch: 35 });
-            extraHeaders.forEach(() => colWidths.push({ wch: 12 }));
+            extraHeaders.forEach(h => {
+                const pxWidth = customWidths[h] || 80;
+                const excelWidth = Math.max(5, Math.round(pxWidth / 7.5));
+                colWidths.push({ wch: excelWidth });
+            });
             if (controls.colRemarks.checked) colWidths.push({ wch: 15 });
             ws['!cols'] = colWidths;
 
