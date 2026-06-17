@@ -64,6 +64,7 @@ $exclude_absent_grades = $timeSettings['exclude_absent_grades'] ?? '';
 // LINE Settings
 $line_notify_token = $timeSettings['line_notify_token'] ?? '';
 $line_channel_access_token = $timeSettings['line_channel_access_token'] ?? '';
+$line_channel_secret = $timeSettings['line_channel_secret'] ?? '';
 $line_group_id_1 = $timeSettings['line_group_id_1'] ?? '';
 $line_group_id_2 = $timeSettings['line_group_id_2'] ?? '';
 $line_group_id_3 = $timeSettings['line_group_id_3'] ?? '';

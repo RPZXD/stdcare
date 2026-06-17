@@ -541,6 +541,7 @@ class SettingModel
                 'exclude_absent_grades',
                 'line_notify_token',
                 'line_channel_access_token',
+                'line_channel_secret',
                 'line_group_id_1',
                 'line_group_id_2',
                 'line_group_id_3',

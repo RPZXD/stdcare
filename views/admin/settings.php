@@ -165,6 +165,11 @@ $activePage = "settings";
                     <textarea name="line_channel_access_token" rows="3" placeholder="ใส่ Channel Access Token สำหรับส่ง Flex Message"
                         class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all"><?= htmlspecialchars($line_channel_access_token) ?></textarea>
                 </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">LINE Messaging API Channel Secret</label>
+                    <input type="text" name="line_channel_secret" value="<?= htmlspecialchars($line_channel_secret) ?>" placeholder="ใส่ Channel Secret สำหรับยืนยัน Webhook Signature"
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                </div>
                 
                 <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
                     <label class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">LINE Group ID แยกตามระดับชั้น</label>

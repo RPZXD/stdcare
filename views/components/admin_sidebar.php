@@ -35,6 +35,7 @@ $menuItems = [
     ['key' => 'workspace_history', 'name' => 'ประวัติรหัส Workspace', 'url' => 'workspace_history.php', 'icon' => 'fa-history', 'gradient' => ['from' => 'orange-500', 'to' => 'amber-600']],
     ['is_header' => true, 'name' => 'ระบบ'],
     ['key' => 'settings', 'name' => 'การตั้งค่า', 'url' => 'settings.php', 'icon' => 'fa-cog', 'gradient' => ['from' => 'slate-500', 'to' => 'gray-600']],
+    ['key' => 'line_monitor', 'name' => 'LINE Monitor', 'url' => 'line_monitor.php', 'icon' => 'fa-desktop', 'gradient' => ['from' => 'emerald-500', 'to' => 'green-600']],
     ['key' => 'log', 'name' => 'Log กิจกรรม', 'url' => 'log.php', 'icon' => 'fa-clipboard-list', 'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600']],
 ];
 ?>
