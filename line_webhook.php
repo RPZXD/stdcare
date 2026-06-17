@@ -93,13 +93,19 @@ foreach ($data['events'] as $event) {
         $response_msg = 'Sent greeting message on follow event.';
     } else if ($event_type === 'message' && isset($event['message']['text'])) {
         $text = trim((string)$event['message']['text']);
+        $source_type = (string)($event['source']['type'] ?? 'user');
         
         if (strtolower($text) === '/start' || $text === 'สวัสดี' || $text === 'เริ่ม') {
-            $reply_text = "สวัสดีค่ะ 🙏 ยินดีต้อนรับสู่ระบบดูแลช่วยเหลือผู้ปกครอง โรงเรียนพิชัย\n\nกรุณาส่ง *รหัสประจำตัวนักเรียน* (เช่น 27505) เพื่อลิงก์บัญชีไลน์ของคุณและรับการแจ้งเตือนเวลาเข้า-ออกเรียนของบุตรหลานค่ะ";
+            if ($source_type === 'user') {
+                $reply_text = "สวัสดีค่ะ 🙏 ยินดีต้อนรับสู่ระบบดูแลช่วยเหลือผู้ปกครอง โรงเรียนพิชัย\n\nกรุณาส่ง *รหัสประจำตัวนักเรียน* (เช่น 27505) เพื่อลิงก์บัญชีไลน์ของคุณและรับการแจ้งเตือนเวลาเข้า-ออกเรียนของบุตรหลานค่ะ";
+            } else {
+                $group_id = (string)($event['source']['groupId'] ?? $event['source']['roomId'] ?? '');
+                $reply_text = "สวัสดีค่ะ 🙏 บอทระบบดูแลช่วยเหลือนักเรียน (StdCare) พร้อมทำงานในกลุ่มนี้แล้วค่ะ\n\n🔑 LINE Group ID สำหรับกลุ่มนี้คือ:\n`{$group_id}`";
+            }
             sendLineReply($reply_token, $reply_text, $channel_access_token);
             $response_msg = 'Sent greeting message.';
-        } else {
-            // Treat the message as Student ID
+        } else if ($source_type === 'user') {
+            // Treat the message as Student ID (Only in private 1-on-1 chats)
             $student = $db_connection->getStudentByUsername($text);
             if ($student && is_array($student)) {
                 $stu_id = (string)($student['Stu_id'] ?? $student['student_id'] ?? $text);
@@ -126,6 +132,9 @@ foreach ($data['events'] as $event) {
                 sendLineReply($reply_token, $reply_text, $channel_access_token);
                 $response_msg = "Student ID '{$text}' not found in DB.";
             }
+        } else {
+            // Silence in group/room chat for arbitrary messages (like mentions/@all)
+            $response_msg = "Ignored non-command message in group/room.";
         }
     } else if ($event_type === 'join') {
         // Invited to group/room
