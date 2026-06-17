@@ -248,7 +248,7 @@ $tokensJson = json_encode($tokens ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX
                 <i class="fas fa-lightbulb text-emerald-500 text-lg mt-0.5"></i>
                 <div>
                     <p class="font-bold mb-1">💡 คู่มือ:</p>
-                    <p>1. เข้า <a href="https://notify-bot.line.me/" target="_blank" class="underline font-bold">LINE Notify Portal</a> → 2. ออก Access Token → 3. เพิ่มในระบบนี้ → 4. เชิญ <strong>@linenotify</strong> เข้ากลุ่ม</p>
+                    <p>1. เข้า <a href="https://notify-bot.line.me/" target="_blank" class="underline font-bold">LINE Notify Portal</a> → 2. ออก Access Token → 3. เพิ่มในระบบนี้ → 4. เชิญ <strong>@phichai_school</strong> เข้ากลุ่ม</p>
                 </div>
             </div>
 
