@@ -353,29 +353,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $activePage = 'line_monitor';
 $pageTitle = 'LINE Webhook & Notify Monitor';
 
-// Stats
+// Stats & data initialization
 $stats = [
-    'total_logs' => (int)$db->query("SELECT COUNT(*) FROM line_webhook_logs")->fetchColumn(),
-    'err_logs' => (int)$db->query("SELECT COUNT(*) FROM line_webhook_logs WHERE status != 'success'")->fetchColumn(),
-    'linked_parents' => (int)$db->query("SELECT COUNT(DISTINCT line_userid) FROM parents WHERE line_userid IS NOT NULL")->fetchColumn(),
-    'notify_tokens' => (int)$db->query("SELECT COUNT(*) FROM linetoken")->fetchColumn()
+    'total_logs' => 0,
+    'err_logs' => 0,
+    'linked_parents' => 0,
+    'notify_tokens' => 0
 ];
+$logs = [];
+$tokens = [];
+$linked_parents = [];
+$db_error = null;
 
-// Webhook Logs
-$logs = $db->query("SELECT * FROM line_webhook_logs ORDER BY id DESC LIMIT 50")->fetchAll();
+try {
+    $stats['total_logs'] = (int)$db->query("SELECT COUNT(*) FROM line_webhook_logs")->fetchColumn();
+    $stats['err_logs'] = (int)$db->query("SELECT COUNT(*) FROM line_webhook_logs WHERE status != 'success'")->fetchColumn();
+    $logs = $db->query("SELECT * FROM line_webhook_logs ORDER BY id DESC LIMIT 50")->fetchAll();
+} catch (PDOException $e) {
+    $db_error = "ตาราง line_webhook_logs: " . $e->getMessage();
+}
 
-// LINE Notify Tokens
-$tokens = $db->query("SELECT * FROM linetoken ORDER BY line_class ASC, line_room ASC")->fetchAll();
+try {
+    $stats['linked_parents'] = (int)$db->query("SELECT COUNT(DISTINCT line_userid) FROM parents WHERE line_userid IS NOT NULL")->fetchColumn();
+    $linked_parents = $db->query("
+        SELECT p.id, p.line_userid, p.student_id, p.created_at, 
+               s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room
+        FROM parents p
+        LEFT JOIN student s ON p.student_id = s.Stu_id
+        WHERE p.line_userid IS NOT NULL
+        ORDER BY p.id DESC
+    ")->fetchAll();
+} catch (PDOException $e) {
+    if (!$db_error) {
+        $db_error = "ตาราง parents / student: " . $e->getMessage();
+    }
+}
 
-// Linked Parents
-$linked_parents = $db->query("
-    SELECT p.id, p.line_userid, p.student_id, p.created_at, 
-           s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room
-    FROM parents p
-    LEFT JOIN student s ON p.student_id = s.Stu_id
-    WHERE p.line_userid IS NOT NULL
-    ORDER BY p.id DESC
-")->fetchAll();
+try {
+    $stats['notify_tokens'] = (int)$db->query("SELECT COUNT(*) FROM linetoken")->fetchColumn();
+    $tokens = $db->query("SELECT * FROM linetoken ORDER BY line_class ASC, line_room ASC")->fetchAll();
+} catch (PDOException $e) {
+    if (!$db_error) {
+        $db_error = "ตาราง linetoken: " . $e->getMessage();
+    }
+}
 
 // 4. Render View
 include __DIR__ . '/../views/admin/line_monitor.php';

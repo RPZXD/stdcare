@@ -79,6 +79,20 @@ $webhook_url_display = $protocol . '://' . $host . $parent_dir . '/line_webhook.
     include __DIR__ . '/../components/ui_header.php'; 
     ?>
 
+    <!-- Database Error Alert -->
+    <?php if (!empty($db_error)): ?>
+        <div class="mb-8 p-5 bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 rounded-[2rem] flex items-start gap-4 animate-pulse">
+            <div class="w-10 h-10 bg-rose-500 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                <i class="fas fa-exclamation-triangle text-lg"></i>
+            </div>
+            <div>
+                <h5 class="font-black text-sm mb-1 text-rose-800 dark:text-rose-300">พบข้อผิดพลาดของระบบฐานข้อมูล (Database Sync Required)</h5>
+                <p class="text-xs opacity-90 leading-relaxed"><?= htmlspecialchars($db_error) ?></p>
+                <p class="text-[10px] opacity-75 mt-1.5 font-bold">กรุณาแจ้งผู้ดูแลระบบให้รันการสร้างตารางและคอลัมน์ใหม่ หรือตรวจสอบสิทธิ์การเขียน/อ่านฐานข้อมูลบนโปรดักชัน</p>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Stats and Webhook Info Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Webhook URL Display (Sleek Dark Theme Code look) -->
