@@ -30,6 +30,10 @@ require_once __DIR__ . '/models/SettingModel.php';
 try {
     $db_connection = new App\DatabaseUsers();
     $db = $db_connection->getPDO();
+    
+    // Auto-run migrations if tables/columns are missing
+    checkAndRunMigrations($db);
+
     $settingsModel = new App\Models\SettingModel($db);
     $settings = $settingsModel->getAllTimeSettings();
 } catch (Exception $e) {
@@ -198,4 +202,73 @@ function sendLineReply(?string $replyToken, string $text, string $accessToken): 
     $context = stream_context_create($options);
     $result = file_get_contents($url, false, $context);
     return $result !== false;
+}
+
+/**
+ * Automatically ensures database tables and columns are created.
+ */
+function checkAndRunMigrations(PDO $db): void {
+    // 1. Add line_userid column to parents table if missing
+    try {
+        $db->query("SELECT line_userid FROM parents LIMIT 1");
+    } catch (PDOException $e) {
+        try {
+            $columns = $db->query("DESCRIBE `parents`")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('line_userid', $columns)) {
+                $after = in_array('telegram_id', $columns) ? " AFTER `telegram_id`" : "";
+                $db->query("ALTER TABLE `parents` ADD COLUMN `line_userid` VARCHAR(100) NULL{$after}");
+                $db->query("ALTER TABLE `parents` ADD UNIQUE KEY `line_stu` (`line_userid`, `student_id`)");
+            }
+        } catch (Exception $ex) {
+            error_log("LINE Auto-Migration line_userid Failed: " . $ex->getMessage());
+        }
+    }
+
+    // 2. Create line_webhook_logs table if missing
+    try {
+        $db->query("SELECT 1 FROM line_webhook_logs LIMIT 1");
+    } catch (PDOException $e) {
+        try {
+            $db->query("CREATE TABLE IF NOT EXISTS `line_webhook_logs` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `event_type` VARCHAR(50) NULL,
+                `user_id` VARCHAR(100) NULL,
+                `payload` LONGTEXT NOT NULL,
+                `headers` TEXT NULL,
+                `status` VARCHAR(50) DEFAULT 'pending',
+                `response_message` TEXT NULL,
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        } catch (Exception $ex) {
+            error_log("LINE Auto-Migration line_webhook_logs Failed: " . $ex->getMessage());
+        }
+    }
+
+    // 3. Create linetoken table if missing
+    try {
+        $db->query("SELECT 1 FROM linetoken LIMIT 1");
+    } catch (PDOException $e) {
+        try {
+            $db->query("CREATE TABLE IF NOT EXISTS `linetoken` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `line_name` VARCHAR(200) NOT NULL,
+                `line_class` INT NOT NULL,
+                `line_room` INT NOT NULL DEFAULT 0,
+                `token` VARCHAR(250) NOT NULL,
+                `create_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        } catch (Exception $ex) {
+            error_log("LINE Auto-Migration linetoken Failed: " . $ex->getMessage());
+        }
+    }
+
+    // 4. Ensure line_channel_secret key in settings table
+    try {
+        $stmt = $db->query("SELECT COUNT(*) FROM time_settings WHERE setting_key = 'line_channel_secret'");
+        if ($stmt->fetchColumn() === 0) {
+            $db->query("INSERT INTO time_settings (setting_key, setting_value) VALUES ('line_channel_secret', '')");
+        }
+    } catch (PDOException $e) {
+        error_log("LINE Auto-Migration setting key Failed: " . $e->getMessage());
+    }
 }

@@ -382,13 +382,13 @@ $webhook_url_display = $protocol . '://' . $host . $parent_dir . '/line_webhook.
 
                     <!-- Footer actions buttons -->
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 gap-2">
-                        <button @click="testTokenData.id = '<?= $t['id'] ?>'; testTokenData.name = '<?= htmlspecialchars($t['line_name']) ?>'; showTestModal = true"
+                        <button @click="testTokenData.id = <?= json_encode($t['id']) ?>; testTokenData.name = <?= json_encode($t['line_name'] . ' (ม.' . $t['line_class'] . ($t['line_room'] > 0 ? '/' . $t['line_room'] : ' ทุกห้อง') . ')') ?>; showTestModal = true"
                                 class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-[10px] shadow-md transition flex items-center justify-center gap-1.5 active:scale-95">
                             <i class="fas fa-paper-plane"></i> ทดสอบส่ง
                         </button>
                         
                         <div class="flex items-center gap-1">
-                            <button @click="editTokenData = { id: '<?= $t['id'] ?>', line_name: '<?= htmlspecialchars($t['line_name']) ?>', line_class: '<?= $t['line_class'] ?>', line_room: '<?= $t['line_room'] ?>', token: '<?= htmlspecialchars($t['token']) ?>' }; showEditModal = true"
+                            <button @click="editTokenData = { id: <?= json_encode($t['id']) ?>, line_name: <?= json_encode($t['line_name']) ?>, line_class: <?= json_encode($t['line_class']) ?>, line_room: <?= json_encode($t['line_room']) ?>, token: <?= json_encode($t['token']) ?> }; showEditModal = true"
                                     class="w-8 h-8 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center active:scale-95 shadow-sm">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -592,8 +592,13 @@ $webhook_url_display = $protocol . '://' . $host . $parent_dir . '/line_webhook.
                 <form id="testNotifyForm" class="p-6 space-y-4">
                     <input type="hidden" name="id" x-model="testTokenData.id">
                     <div>
-                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">กลุ่มเป้าหมาย</span>
-                        <p class="text-slate-800 dark:text-white font-black text-sm" x-text="testTokenData.name"></p>
+                        <label class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1.5">กลุ่มเป้าหมาย (Target Group)</label>
+                        <div class="flex items-center gap-2.5 bg-emerald-50 dark:bg-emerald-950/20 px-4 py-3 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+                            <div class="w-7 h-7 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                                <i class="fab fa-line"></i>
+                            </div>
+                            <span class="text-slate-800 dark:text-slate-200 font-black text-xs" x-text="testTokenData.name || 'ไม่ได้ระบุกลุ่ม'"></span>
+                        </div>
                     </div>
                     <div>
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">พิมพ์ข้อความทดสอบ</label>
