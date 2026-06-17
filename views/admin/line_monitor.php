@@ -382,13 +382,13 @@ $webhook_url_display = $protocol . '://' . $host . $parent_dir . '/line_webhook.
 
                     <!-- Footer actions buttons -->
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50 gap-2">
-                        <button @click="testTokenData.id = <?= json_encode($t['id']) ?>; testTokenData.name = <?= json_encode($t['line_name'] . ' (ม.' . $t['line_class'] . ($t['line_room'] > 0 ? '/' . $t['line_room'] : ' ทุกห้อง') . ')') ?>; showTestModal = true"
+                        <button @click="testTokenData.id = <?= htmlspecialchars(json_encode($t['id']), ENT_QUOTES, 'UTF-8') ?>; testTokenData.name = <?= htmlspecialchars(json_encode($t['line_name'] . ' (ม.' . $t['line_class'] . ($t['line_room'] > 0 ? '/' . $t['line_room'] : ' ทุกห้อง') . ')'), ENT_QUOTES, 'UTF-8') ?>; showTestModal = true"
                                 class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-[10px] shadow-md transition flex items-center justify-center gap-1.5 active:scale-95">
                             <i class="fas fa-paper-plane"></i> ทดสอบส่ง
                         </button>
                         
                         <div class="flex items-center gap-1">
-                            <button @click="editTokenData = { id: <?= json_encode($t['id']) ?>, line_name: <?= json_encode($t['line_name']) ?>, line_class: <?= json_encode($t['line_class']) ?>, line_room: <?= json_encode($t['line_room']) ?>, token: <?= json_encode($t['token']) ?> }; showEditModal = true"
+                            <button @click="editTokenData = { id: <?= htmlspecialchars(json_encode($t['id']), ENT_QUOTES, 'UTF-8') ?>, line_name: <?= htmlspecialchars(json_encode($t['line_name']), ENT_QUOTES, 'UTF-8') ?>, line_class: <?= htmlspecialchars(json_encode($t['line_class']), ENT_QUOTES, 'UTF-8') ?>, line_room: <?= htmlspecialchars(json_encode($t['line_room']), ENT_QUOTES, 'UTF-8') ?>, token: <?= htmlspecialchars(json_encode($t['token']), ENT_QUOTES, 'UTF-8') ?> }; showEditModal = true"
                                     class="w-8 h-8 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center active:scale-95 shadow-sm">
                                 <i class="fas fa-edit"></i>
                             </button>
