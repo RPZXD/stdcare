@@ -126,7 +126,7 @@ foreach ($data['events'] as $event) {
     } else if ($event_type === 'join') {
         // Invited to group/room
         $group_id = (string)($event['source']['groupId'] ?? $event['source']['roomId'] ?? '');
-        $reply_text = "สวัสดีค่ะ 🙏 บอทระบบดูแลช่วยเหลือนักเรียน (StdCare) ได้เข้าร่วมกลุ่มเรียบร้อยแล้วค่ะ\n\n🔑 LINE Group ID สำหรับกลุ่มนี้คือ:\n`{$group_id}`\n\nคุณสามารถนำรหัส Group ID นี้ไปกรอกในระบบตั้งค่าห้องเรียนเพื่อส่งข้อความสรุปรายวันได้ค่ะ";
+        $reply_text = "สวัสดีค่ะ 🙏 บอทระบบดูแลช่วยเหลือนักเรียน (StdCare) ได้เข้าร่วมกลุ่มเรียบร้อยแล้วค่ะ\n\n🔑 LINE Group ID สำหรับกลุ่มนี้คือ:\n`{$group_id}`\n\nคุณสามารถนำรหัส Group ID นี้ไปกรอกในระบบตั้งค่าห้องเรียนเพื่อส่งข้อความสรุปรายวัน หรือใช้สำหรับเชื่อมต่อกับระบบอื่นที่ต้องการได้ค่ะ";
         sendLineReply($reply_token, $reply_text, $channel_access_token);
         $response_msg = "Joined group/room. Provided group ID: {$group_id}";
     } else {
