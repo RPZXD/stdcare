@@ -87,7 +87,11 @@ foreach ($data['events'] as $event) {
     $status = 'success';
     $response_msg = '';
 
-    if ($event_type === 'message' && isset($event['message']['text'])) {
+    if ($event_type === 'follow') {
+        $reply_text = "สวัสดีค่ะ 🙏 ยินดีต้อนรับสู่ระบบดูแลช่วยเหลือผู้ปกครอง โรงเรียนพิชัย\n\nกรุณาส่ง *รหัสประจำตัวนักเรียน* (เช่น 27505) เพื่อลิงก์บัญชีไลน์ของคุณและรับการแจ้งเตือนเวลาเข้า-ออกเรียนของบุตรหลานค่ะ";
+        sendLineReply($reply_token, $reply_text, $channel_access_token);
+        $response_msg = 'Sent greeting message on follow event.';
+    } else if ($event_type === 'message' && isset($event['message']['text'])) {
         $text = trim((string)$event['message']['text']);
         
         if (strtolower($text) === '/start' || $text === 'สวัสดี' || $text === 'เริ่ม') {
