@@ -419,7 +419,7 @@ $webhook_url_display = $protocol . '://' . $host . $parent_dir . '/line_webhook.
                             <div class="min-w-0">
                                 <span class="text-[9px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider block w-fit mb-1"><i class="fab fa-line"></i> LINE Verified</span>
                                 <h4 class="font-black text-slate-800 dark:text-white text-sm truncate" title="LINE ID: <?= htmlspecialchars($p['line_userid']) ?>">
-                                    LINE User: <?= htmlspecialchars(Utils::substring($p['line_userid'], 0, 15)) ?>...
+                                    LINE User: <?= htmlspecialchars(mb_substr((string)$p['line_userid'], 0, 15)) ?>...
                                 </h4>
                             </div>
                         </div>
