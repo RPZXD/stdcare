@@ -6,6 +6,9 @@ ob_start();
 
 <!-- Custom Styles -->
 <style>
+    .swal2-container {
+        z-index: 99999 !important;
+    }
     .glass-card {
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(20px);
@@ -646,8 +649,8 @@ ob_start();
             contentType: false,
             success: function(response) {
                 if (response.success) {
+                    $('#addModal').modal('hide');
                     Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        $('#addModal').modal('hide');
                         loadTable();
                     });
                 } else {
@@ -688,8 +691,8 @@ ob_start();
             contentType: false,
             success: function(response) {
                 if (response.success) {
+                    $('#editModal').modal('hide');
                     Swal.fire({ icon: 'success', title: 'แก้ไขสำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
-                        $('#editModal').modal('hide');
                         loadTable();
                     });
                 } else {
