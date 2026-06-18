@@ -1,5 +1,6 @@
 <?php
 $pageTitle = $title ?? 'ข้อมูลนักเรียนยากจน';
+$activePage = 'poor';
 
 ob_start();
 ?>
@@ -8,27 +9,6 @@ ob_start();
 <style>
     .swal2-container {
         z-index: 99999 !important;
-    }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-    .dark .glass-card {
-        background: rgba(30, 41, 59, 0.85);
-    }
-    .stat-card {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .stat-card:hover {
-        transform: translateY(-4px) scale(1.02);
-    }
-    .floating-icon {
-        animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-8px); }
     }
     .student-card {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -73,7 +53,7 @@ ob_start();
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        .no-print, #sidebar, #navbar, #preloader, footer, .glass-card {
+        .no-print, #sidebar, #navbar, #preloader, footer, .glass-effect {
             display: none !important;
         }
         #printHeader, #printTable, #printSignature {
@@ -94,122 +74,108 @@ ob_start();
 </style>
 
 <!-- Page Header (Screen) -->
-<div class="relative mb-6 overflow-hidden no-print">
-    <div class="glass-card rounded-2xl p-4 md:p-6 border border-white/30 dark:border-slate-700/50 shadow-2xl">
-        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-full blur-3xl -z-10"></div>
-        <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-500/20 to-orange-500/20 rounded-full blur-3xl -z-10"></div>
-        
-        <div class="flex flex-col md:flex-row items-center gap-4">
-            <div class="relative">
-                <div class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-xl floating-icon">
-                    <span class="text-2xl md:text-3xl">💰</span>
-                </div>
-            </div>
-            <div class="text-center md:text-left flex-1">
-                <h1 class="text-lg md:text-2xl font-black text-slate-800 dark:text-white">
-                    ข้อมูลนักเรียนยากจน
-                </h1>
-                <p class="text-slate-500 dark:text-slate-400 font-semibold text-sm mt-1">
-                    <i class="fas fa-users text-pink-500 mr-1"></i>
-                    ม.<?php echo htmlspecialchars($class); ?>/<?php echo htmlspecialchars($room); ?>
-                    <span class="mx-1">•</span>
-                    <i class="far fa-calendar-alt text-pink-500 mr-1"></i>
-                    ปีการศึกษา <?php echo htmlspecialchars($pee); ?>
-                </p>
-            </div>
-            <div class="hidden md:block">
-                <img src="../dist/img/logo-phicha.png" alt="Logo" class="w-12 h-12 opacity-80">
-            </div>
-        </div>
-    </div>
+<div class="no-print">
+    <?php 
+    $headerData = [
+        'title' => 'ข้อมูลนักเรียนยากจน',
+        'subtitle' => 'ม.' . htmlspecialchars($class) . '/' . htmlspecialchars($room) . ' • ปีการศึกษา ' . htmlspecialchars($pee),
+        'icon' => 'fa-hand-holding-heart',
+        'color' => 'pink',
+        'actions' => [
+            ['id' => 'btnAdd', 'icon' => 'fa-plus-circle', 'text' => 'เพิ่มข้อมูล', 'color' => 'pink', 'onclick' => 'openAddModal()'],
+            ['id' => 'btnPrint', 'icon' => 'fa-print', 'text' => 'พิมพ์รายงาน', 'color' => 'emerald', 'onclick' => 'window.print()']
+        ]
+    ];
+    include __DIR__ . '/../components/ui_header.php'; 
+    ?>
 </div>
 
 <!-- Summary Stats (Screen) -->
-<div class="grid grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6 no-print">
-    <div class="stat-card glass-card rounded-xl p-2 md:p-4 border border-white/30 dark:border-slate-700/50 shadow-lg text-center">
-        <div class="w-8 h-8 md:w-10 md:h-10 mx-auto bg-gradient-to-br from-pink-400 to-rose-500 rounded-lg flex items-center justify-center mb-1 md:mb-2 shadow">
-            <span class="text-sm md:text-lg">👨‍🎓</span>
-        </div>
-        <p class="text-lg md:text-2xl font-black text-slate-800 dark:text-white" id="totalPoor">-</p>
-        <p class="text-[8px] md:text-xs font-bold text-slate-500 uppercase">ยากจน</p>
-    </div>
-    <div class="stat-card glass-card rounded-xl p-2 md:p-4 border border-white/30 dark:border-slate-700/50 shadow-lg text-center">
-        <div class="w-8 h-8 md:w-10 md:h-10 mx-auto bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg flex items-center justify-center mb-1 md:mb-2 shadow">
-            <span class="text-sm md:text-lg">🎓</span>
-        </div>
-        <p class="text-lg md:text-2xl font-black text-emerald-600" id="receivedScholarship">-</p>
-        <p class="text-[8px] md:text-xs font-bold text-slate-500 uppercase">ได้รับทุน</p>
-    </div>
-    <div class="stat-card glass-card rounded-xl p-2 md:p-4 border border-white/30 dark:border-slate-700/50 shadow-lg text-center">
-        <div class="w-8 h-8 md:w-10 md:h-10 mx-auto bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mb-1 md:mb-2 shadow">
-            <span class="text-sm md:text-lg">📋</span>
-        </div>
-        <p class="text-lg md:text-2xl font-black text-amber-600" id="notReceived">-</p>
-        <p class="text-[8px] md:text-xs font-bold text-slate-500 uppercase">รอรับทุน</p>
-    </div>
-    <div class="stat-card glass-card rounded-xl p-2 md:p-4 border border-white/30 dark:border-slate-700/50 shadow-lg text-center">
-        <div class="w-8 h-8 md:w-10 md:h-10 mx-auto bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center mb-1 md:mb-2 shadow">
-            <span class="text-sm md:text-lg">🏠</span>
-        </div>
-        <p class="text-lg md:text-2xl font-black text-violet-600" id="visitedHome">-</p>
-        <p class="text-[8px] md:text-xs font-bold text-slate-500 uppercase">เยี่ยมบ้าน</p>
-    </div>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
+    <?php
+    $statData = [
+        'label' => 'นักเรียนยากจน',
+        'value' => '<span id="totalPoor">-</span>',
+        'icon' => 'fa-user-graduate',
+        'color' => 'pink',
+        'unit' => 'คน'
+    ];
+    include __DIR__ . '/../components/ui_stat_card.php';
+
+    $statData = [
+        'label' => 'เคยได้รับทุน',
+        'value' => '<span id="receivedScholarship">-</span>',
+        'icon' => 'fa-award',
+        'color' => 'emerald',
+        'unit' => 'คน'
+    ];
+    include __DIR__ . '/../components/ui_stat_card.php';
+
+    $statData = [
+        'label' => 'ยังไม่ได้รับทุน',
+        'value' => '<span id="notReceived">-</span>',
+        'icon' => 'fa-clock',
+        'color' => 'amber',
+        'unit' => 'คน'
+    ];
+    include __DIR__ . '/../components/ui_stat_card.php';
+
+    $statData = [
+        'label' => 'เยี่ยมบ้านแล้ว',
+        'value' => '<span id="visitedHome">-</span>',
+        'icon' => 'fa-house-user',
+        'color' => 'violet',
+        'unit' => 'คน'
+    ];
+    include __DIR__ . '/../components/ui_stat_card.php';
+    ?>
 </div>
 
-<!-- Action Buttons -->
-<div class="flex flex-wrap gap-2 mb-4 md:mb-6 no-print">
-    <button type="button" onclick="openAddModal()" class="btn-action flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold text-sm rounded-xl shadow-lg">
-        <i class="fas fa-plus-circle"></i>
-        <span>➕ เพิ่มข้อมูล</span>
-    </button>
-    <button onclick="window.print()" class="btn-action flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm rounded-xl shadow-lg">
-        <i class="fas fa-print"></i>
-        <span>🖨️ พิมพ์รายงาน</span>
-    </button>
-</div>
-
-<!-- Search Box (Mobile) -->
-<div class="md:hidden mb-4 no-print">
-    <div class="relative">
-        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input type="text" id="mobileSearch" placeholder="🔍 ค้นหานักเรียน..." 
-               class="search-input w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-pink-500">
-    </div>
-</div>
-
-<!-- Mobile Cards Container -->
-<div id="mobileCards" class="space-y-3 no-print">
-    <!-- Loading State -->
-    <div id="mobileLoading" class="glass-card rounded-2xl p-8 text-center">
-        <div class="animate-spin w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p class="text-slate-500 font-semibold">กำลังโหลดข้อมูล...</p>
-    </div>
-</div>
-
-<!-- Desktop Table Card -->
-<div class="glass-card rounded-2xl p-4 md:p-6 border border-white/30 dark:border-slate-700/50 shadow-2xl hidden md:block no-print">
-    <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl flex items-center justify-center shadow">
-            <i class="fas fa-table text-white"></i>
+<!-- Main Content Area Container -->
+<div class="glass-effect rounded-[2rem] lg:rounded-[2.5rem] p-4 md:p-8 shadow-xl border border-white/50 dark:border-slate-700/50 no-print mb-6">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-white shadow">
+            <i class="fas fa-table"></i>
         </div>
-        <h3 class="text-lg font-black text-slate-800 dark:text-white">📋 รายชื่อนักเรียนยากจน</h3>
+        <h3 class="text-lg font-black text-slate-800 dark:text-white">รายชื่อนักเรียนยากจน</h3>
     </div>
     
-    <div class="overflow-x-auto">
-        <table id="record_table" class="w-full display responsive nowrap" style="width:100%">
-            <thead>
-                <tr class="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
-                    <th class="px-3 py-3 text-center rounded-tl-xl">ลำดับ</th>
-                    <th class="px-3 py-3 text-left">ชื่อ-นามสกุล</th>
-                    <th class="px-3 py-3 text-left">เหตุผล</th>
-                    <th class="px-3 py-3 text-center">ทุน</th>
-                    <th class="px-3 py-3 text-center">เยี่ยมบ้าน</th>
-                    <th class="px-3 py-3 text-center rounded-tr-xl">จัดการ</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-            </tbody>
-        </table>
+    <!-- Search Box (Mobile) -->
+    <div class="md:hidden mb-4">
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="mobileSearch" placeholder="🔍 ค้นหานักเรียน..." 
+                   class="search-input w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-pink-500">
+        </div>
+    </div>
+
+    <!-- Mobile Cards Container -->
+    <div id="mobileCards" class="space-y-3">
+        <!-- Loading State -->
+        <div id="mobileLoading" class="glass-effect rounded-2xl p-8 text-center border border-white/20 dark:border-slate-700/30">
+            <div class="animate-spin w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-slate-500 dark:text-slate-400 font-semibold">กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="hidden md:block">
+        <div class="overflow-x-auto">
+            <table id="record_table" class="w-full display responsive nowrap" style="width:100%">
+                <thead>
+                    <tr class="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+                        <th class="px-3 py-3 text-center rounded-tl-xl">ลำดับ</th>
+                        <th class="px-3 py-3 text-left">ชื่อ-นามสกุล</th>
+                        <th class="px-3 py-3 text-left">เหตุผล</th>
+                        <th class="px-3 py-3 text-center">ทุน</th>
+                        <th class="px-3 py-3 text-center">เยี่ยมบ้าน</th>
+                        <th class="px-3 py-3 text-center rounded-tr-xl">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -280,7 +246,7 @@ ob_start();
                 <h5 class="modal-title font-bold flex items-center gap-2">
                     <i class="fas fa-plus-circle"></i> เพิ่มข้อมูลนักเรียนยากจน
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 md:p-6 bg-slate-50 dark:bg-slate-800">
                 <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-lg mb-4">
@@ -329,7 +295,7 @@ ob_start();
                 </form>
             </div>
             <div class="modal-footer bg-white dark:bg-slate-900 border-0 py-4 gap-2">
-                <button type="button" class="btn-action px-5 py-2 bg-slate-400 hover:bg-slate-500 text-white font-bold rounded-xl" data-bs-dismiss="modal">
+                <button type="button" class="btn-action px-5 py-2 bg-slate-400 hover:bg-slate-500 text-white font-bold rounded-xl" data-dismiss="modal">
                     <i class="fas fa-times mr-2"></i>ปิด
                 </button>
                 <button type="button" onclick="submitAddForm()" class="btn-action px-5 py-2 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold rounded-xl">
@@ -348,7 +314,7 @@ ob_start();
                 <h5 class="modal-title font-bold flex items-center gap-2">
                     <i class="fas fa-edit"></i> แก้ไขข้อมูลนักเรียนยากจน
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 md:p-6 bg-slate-50 dark:bg-slate-800">
                 <form id="editForm" method="post" class="space-y-4">
@@ -394,7 +360,7 @@ ob_start();
                 </form>
             </div>
             <div class="modal-footer bg-white dark:bg-slate-900 border-0 py-4 gap-2">
-                <button type="button" class="btn-action px-5 py-2 bg-slate-400 text-white font-bold rounded-xl" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn-action px-5 py-2 bg-slate-400 text-white font-bold rounded-xl" data-dismiss="modal">ปิด</button>
                 <button type="button" onclick="submitEditForm()" class="btn-action px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl">
                     <i class="fas fa-save mr-2"></i>บันทึกการแก้ไข
                 </button>
@@ -411,13 +377,13 @@ ob_start();
                 <h5 class="modal-title font-bold flex items-center gap-2">
                     <i class="fas fa-home"></i> ข้อมูลการเยี่ยมบ้าน
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 md:p-6 bg-slate-50 dark:bg-slate-800">
                 <div id="visitContent"></div>
             </div>
             <div class="modal-footer bg-white border-0 py-4">
-                <button type="button" class="btn-action px-5 py-2 bg-slate-400 text-white font-bold rounded-xl" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn-action px-5 py-2 bg-slate-400 text-white font-bold rounded-xl" data-dismiss="modal">ปิด</button>
             </div>
         </div>
     </div>
@@ -456,7 +422,7 @@ ob_start();
         const fullName = `${item.Stu_pre}${item.Stu_name} ${item.Stu_sur}`;
         
         return `
-            <div class="student-card glass-card rounded-2xl p-4 border border-white/30 dark:border-slate-700/50 shadow-lg slide-in" 
+            <div class="student-card glass-effect rounded-2xl p-4 border border-white/30 dark:border-slate-700/50 shadow-lg slide-in" 
                  style="animation-delay: ${index * 0.05}s" 
                  data-name="${fullName.toLowerCase()}" 
                  data-id="${item.Stu_id}">
@@ -564,7 +530,7 @@ ob_start();
                 let mobileHtml = '';
                 if (allPoorData.length === 0) {
                     mobileHtml = `
-                        <div class="glass-card rounded-2xl p-8 text-center">
+                        <div class="glass-effect rounded-2xl p-8 text-center border border-white/20 dark:border-slate-700/30">
                             <span class="text-4xl mb-4 block">📭</span>
                             <p class="text-slate-500 font-semibold">ยังไม่มีข้อมูลนักเรียนยากจน</p>
                             <button onclick="openAddModal()" class="btn-action mt-4 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold text-sm rounded-xl">
