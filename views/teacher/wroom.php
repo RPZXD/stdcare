@@ -283,7 +283,7 @@ ob_start();
             `<option value="${pos.key}" ${currentValue == pos.key ? 'selected' : ''}>${pos.emoji} ${pos.value}</option>`
         ).join('');
         return `
-            <select name="position[]" class="position-select w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 bg-white dark:bg-slate-800">
+            <select name="position[]" data-student-id="${studentId}" class="position-select w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 bg-white dark:bg-slate-800">
                 ${options}
             </select>
             <input type="hidden" name="stdid[]" value="${studentId}">
@@ -328,12 +328,34 @@ ob_start();
         container.innerHTML = html || '<div class="text-center py-8 text-slate-500">ไม่พบข้อมูล</div>';
     }
 
+    // Sync dropdown changes between desktop and mobile views
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('position-select')) {
+            const studentId = e.target.getAttribute('data-student-id');
+            const newValue = e.target.value;
+            const otherSelects = document.querySelectorAll(`select.position-select[data-student-id="${studentId}"]`);
+            otherSelects.forEach(sel => {
+                if (sel !== e.target) {
+                    sel.value = newValue;
+                }
+            });
+        }
+    });
+
     // Form submit
     document.getElementById('wroomForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        const isMobile = window.innerWidth < 768;
+        const activeContainer = isMobile ? document.getElementById('mobileCards') : document.getElementById('desktopTable');
+        const inactiveContainer = isMobile ? document.getElementById('desktopTable') : document.getElementById('mobileCards');
+        
+        // Temporarily disable inactive inputs so they are not submitted/validated
+        const inactiveInputs = inactiveContainer.querySelectorAll('select, input');
+        inactiveInputs.forEach(input => input.disabled = true);
+        
         // Validate position limits
-        const selects = document.querySelectorAll('select[name="position[]"]');
+        const selects = activeContainer.querySelectorAll('select[name="position[]"]');
         const count = {};
         selects.forEach(sel => {
             const val = sel.value;
@@ -351,6 +373,9 @@ ob_start();
         }
         
         if (over.length > 0) {
+            // Re-enable inactive inputs before returning
+            inactiveInputs.forEach(input => input.disabled = false);
+            
             Swal.fire({
                 icon: 'error',
                 title: 'เลือกตำแหน่งเกินกำหนด',
@@ -363,6 +388,10 @@ ob_start();
         Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
         const formData = new FormData(this);
+        
+        // Re-enable inactive inputs immediately after constructing FormData
+        inactiveInputs.forEach(input => input.disabled = false);
+
         const res = await fetch('../teacher/api/api_wroom_save.php', { method: 'POST', body: formData });
         const result = await res.json();
 
