@@ -1,7 +1,7 @@
 <?php
 /**
- * Teacher GPS Visit Home Page - MVC Entry Point
- * Displays a map with all student locations for the teacher's class
+ * Route Planner Page - MVC Entry Point
+ * Allows teachers to cluster and optimize home visit routes
  */
 session_start();
 
@@ -47,25 +47,19 @@ $stmt = $db->prepare($sql);
 $stmt->execute([$class, $room]);
 $studentGpsList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get all teachers for this room
-$teachers = $teacher->getTeachersByClassAndRoomDuo($class, $room);
-
 // Helper function to extract village name from address
 function getVillageGroup($addr) {
     if (empty($addr)) {
         return "ไม่ระบุหมู่บ้าน/ที่อยู่";
     }
-    // Add space before common prefixes if missing (e.g. ต.ในเมืองอ.พิชัย -> ต.ในเมือง อ.พิชัย)
     $addrClean = preg_replace('/([ก-๙]+)(อ\.|จ\.|อำเภอ|จังหวัด)/u', '$1 $2', $addr);
     $addrClean = preg_replace('/\s+/', ' ', $addrClean);
     
-    // Find moo (หมู่ที่ / หมู่ / ม. / ม)
     $moo = '';
     if (preg_match('/(?:หมู่ที่|หมู่|ม\s*\.\s*|ม\s+)\s*(\d+)/u', $addrClean, $matches)) {
         $moo = $matches[1];
     }
     
-    // Find district (ตำบล / ต. / ต)
     $subdistrict = '';
     if (preg_match('/(?:ตำบล|ต\s*\.\s*|ต\s+)\s*([\x{0e00}-\x{0e7f}]+)/u', $addrClean, $matches)) {
         $subdistrict = trim($matches[1]);
@@ -90,11 +84,9 @@ function getSubdistrictGroup($addr) {
     if (empty($addr)) {
         return "ไม่ระบุตำบล";
     }
-    // Add space before common prefixes if missing (e.g. ต.ในเมืองอ.พิชัย -> ต.ในเมือง อ.พิชัย)
     $addrClean = preg_replace('/([ก-๙]+)(อ\.|จ\.|อำเภอ|จังหวัด)/u', '$1 $2', $addr);
     $addrClean = preg_replace('/\s+/', ' ', $addrClean);
     
-    // Find district (ตำบล / ต. / ต)
     if (preg_match('/(?:ตำบล|ต\s*\.\s*|ต\s+)\s*([\x{0e00}-\x{0e7f}]+)/u', $addrClean, $matches)) {
         return "ต." . trim($matches[1]);
     }
@@ -108,10 +100,12 @@ foreach ($studentGpsList as &$std) {
 }
 unset($std);
 
+// Get all teachers for this room
+$teachers = $teacher->getTeachersByClassAndRoomDuo($class, $room);
 
 // Main page configuration
-$pageTitle = "แผนที่บ้านนักเรียน";
+$pageTitle = "จัดเส้นทางเยี่ยมบ้านอัจฉริยะ";
 $activePage = "visithome";
 
 // Include view
-include __DIR__ . '/../views/teacher/gps_visithome.php';
+include __DIR__ . '/../views/teacher/route_planner.php';

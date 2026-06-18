@@ -242,6 +242,15 @@ $studentsJson = json_encode($students);
             </select>
         </div>
 
+        <!-- Filter by Teacher -->
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-slate-600 mb-1">กรองตามครูผู้เยี่ยมบ้าน:</label>
+            <select id="filterTeacher" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-400">
+                <option value="all">ทั้งหมด (ทุกคนในห้อง)</option>
+                <option value="unassigned">ยังไม่ได้ระบุครู</option>
+            </select>
+        </div>
+
         <!-- Color Coding Options -->
         <div class="mb-4 flex items-center gap-2">
             <input type="checkbox" id="colorCodeSubdistricts" checked class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer">
@@ -283,6 +292,14 @@ $studentsJson = json_encode($students);
                 <label class="flex items-center gap-1.5 cursor-pointer">
                     <input type="checkbox" id="col-visit" checked class="rounded text-indigo-600 border-slate-300">
                     <span>ผู้เยี่ยมบ้าน (ครู)</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="col-lat" class="rounded text-indigo-600 border-slate-300">
+                    <span>ละติจูด (Lat)</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="col-lng" class="rounded text-indigo-600 border-slate-300">
+                    <span>ลองจิจูด (Lng)</span>
                 </label>
             </div>
         </div>
@@ -418,10 +435,24 @@ $studentsJson = json_encode($students);
             colVillage: document.getElementById('col-village'),
             colAddr: document.getElementById('col-addr'),
             colVisit: document.getElementById('col-visit'),
+            colLat: document.getElementById('col-lat'),
+            colLng: document.getElementById('col-lng'),
             customHeaders: document.getElementById('customHeaders'),
             showSignature: document.getElementById('show-signature'),
-            showHeadSignature: document.getElementById('show-head-signature')
+            showHeadSignature: document.getElementById('show-head-signature'),
+            filterTeacher: document.getElementById('filterTeacher')
         };
+
+        // Populate filterTeacher select dropdown dynamically
+        const filterTeacherSelect = document.getElementById('filterTeacher');
+        if (filterTeacherSelect && typeof teachersList !== 'undefined') {
+            teachersList.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t;
+                option.textContent = t;
+                filterTeacherSelect.appendChild(option);
+            });
+        }
 
         // Assign colors to unique subdistricts
         function getSubdistrictColorMap() {
@@ -438,12 +469,35 @@ $studentsJson = json_encode($students);
         }
 
         function updateTable() {
-            const fontSize = controls.fontSizeRange.value;
-            const rowHeight = controls.rowHeightRange.value;
+            const fontSize = parseInt(controls.fontSizeRange.value);
+            const rowHeight = parseInt(controls.rowHeightRange.value);
             
             controls.fontSizeDisplay.innerText = fontSize + 'px';
             controls.rowHeightDisplay.innerText = rowHeight + 'px';
             document.getElementById('renderArea').style.fontSize = fontSize + 'px';
+
+            // Inject dynamic style rule to force real font sizes and correct vertical padding for row height
+            let styleEl = document.getElementById('dynamicTableStyles');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'dynamicTableStyles';
+                document.head.appendChild(styleEl);
+            }
+            // Calculate padding: (rowHeight - approximate_text_height) / 2
+            const paddingV = Math.max(1, (rowHeight - (fontSize * 1.3)) / 2);
+            styleEl.innerHTML = `
+                #targetTable td, #targetTable th {
+                    padding-top: ${paddingV}px !important;
+                    padding-bottom: ${paddingV}px !important;
+                    font-size: ${fontSize}px !important;
+                }
+                #targetTable select.print-select {
+                    font-size: ${fontSize}px !important;
+                    padding-top: 0px !important;
+                    padding-bottom: 0px !important;
+                    height: auto !important;
+                }
+            `;
             
             // Signature state
             document.getElementById('signature-section').classList.toggle('hidden', !controls.showSignature.checked && !controls.showHeadSignature.checked);
@@ -461,6 +515,8 @@ $studentsJson = json_encode($students);
             if (controls.colVillage.checked) headerHtml += `<th class="text-left font-bold min-w-[120px]">หมู่บ้าน (ที่อยู่)</th>`;
             if (controls.colAddr.checked) headerHtml += `<th class="text-left font-bold min-w-[160px]">ที่อยู่</th>`;
             if (controls.colVisit.checked) headerHtml += `<th class="text-left font-bold min-w-[120px]">ครูผู้เยี่ยม</th>`;
+            if (controls.colLat.checked) headerHtml += `<th class="w-24 text-center font-bold">ละติจูด</th>`;
+            if (controls.colLng.checked) headerHtml += `<th class="w-24 text-center font-bold">ลองจิจูด</th>`;
             
             const extraHeaders = controls.customHeaders.value.split('\n').map(h => h.trim()).filter(h => h !== '');
             extraHeaders.forEach(h => {
@@ -474,6 +530,16 @@ $studentsJson = json_encode($students);
             let bodyHtml = '';
 
             let displayStudents = [...students];
+
+            // Apply teacher filter
+            const filterTeacher = controls.filterTeacher.value;
+            if (filterTeacher !== 'all') {
+                if (filterTeacher === 'unassigned') {
+                    displayStudents = displayStudents.filter(s => !s.assigned_teacher);
+                } else {
+                    displayStudents = displayStudents.filter(s => s.assigned_teacher === filterTeacher);
+                }
+            }
 
             if (groupType === 'normal') {
                 // Flat render
@@ -499,6 +565,8 @@ $studentsJson = json_encode($students);
                         (controls.colVillage.checked ? 1 : 0) + 
                         (controls.colAddr.checked ? 1 : 0) + 
                         (controls.colVisit.checked ? 1 : 0) + 
+                        (controls.colLat.checked ? 1 : 0) + 
+                        (controls.colLng.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -530,6 +598,8 @@ $studentsJson = json_encode($students);
                         (controls.colVillage.checked ? 1 : 0) + 
                         (controls.colAddr.checked ? 1 : 0) + 
                         (controls.colVisit.checked ? 1 : 0) + 
+                        (controls.colLat.checked ? 1 : 0) + 
+                        (controls.colLng.checked ? 1 : 0) + 
                         extraHeaders.length;
 
                     bodyHtml += `<tr class="bg-slate-100/80 font-bold border-t border-b border-slate-300">
@@ -547,9 +617,9 @@ $studentsJson = json_encode($students);
             document.getElementById('tableBody').innerHTML = bodyHtml;
 
             // Stats summary update
-            const male = students.filter(s => s.sex === 'ชาย').length;
-            const female = students.length - male;
-            document.getElementById('statsSummary').innerHTML = `พบพิกัดทั้งหมด ${students.length} คน (ชาย ${male} คน, หญิง ${female} คน)`;
+            const male = displayStudents.filter(s => s.sex === 'ชาย').length;
+            const female = displayStudents.length - male;
+            document.getElementById('statsSummary').innerHTML = `พบพิกัดทั้งหมด ${displayStudents.length} คน (ชาย ${male} คน, หญิง ${female} คน)`;
         }
 
         function renderStudentRow(s, rowHeight, subColorMap, extraHeaders) {
@@ -565,11 +635,11 @@ $studentsJson = json_encode($students);
             if (controls.colPhone.checked) rowHtml += `<td class="text-center font-mono">${s.Stu_phone || '-'}</td>`;
             if (controls.colParent.checked) rowHtml += `<td class="text-center font-mono">${s.Par_phone || '-'}</td>`;
             if (controls.colSubdistrict.checked) rowHtml += `<td class="text-left font-bold text-slate-700">${s.subdistrict || '-'}</td>`;
-            if (controls.colVillage.checked) rowHtml += `<td class="text-left text-slate-500 truncate text-[10px]" title="${s.Stu_addr}">${s.village || '-'}</td>`;
-            if (controls.colAddr.checked) rowHtml += `<td class="text-left text-slate-600 text-[10px]">${s.Stu_addr || '-'}</td>`;
+            if (controls.colVillage.checked) rowHtml += `<td class="text-left text-slate-500 truncate" style="font-size: 0.9em;" title="${s.Stu_addr}">${s.village || '-'}</td>`;
+            if (controls.colAddr.checked) rowHtml += `<td class="text-left text-slate-600" style="font-size: 0.9em;">${s.Stu_addr || '-'}</td>`;
             
             if (controls.colVisit.checked) {
-                let selectHtml = `<td class="text-left"><select onchange="saveAssignedTeacher('${s.Stu_id}', this)" class="print-select border border-slate-300 rounded px-1 py-0.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all">`;
+                let selectHtml = `<td class="text-left"><select onchange="saveAssignedTeacher('${s.Stu_id}', this)" class="print-select border border-slate-300 rounded px-1 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all" style="font-size: inherit;">`;
                 selectHtml += `<option value="">- เลือกครู -</option>`;
                 teachersList.forEach(t => {
                     const selected = s.assigned_teacher === t ? 'selected' : '';
@@ -578,6 +648,9 @@ $studentsJson = json_encode($students);
                 selectHtml += `</select></td>`;
                 rowHtml += selectHtml;
             }
+
+            if (controls.colLat.checked) rowHtml += `<td class="text-center font-mono">${s.latitude || '-'}</td>`;
+            if (controls.colLng.checked) rowHtml += `<td class="text-center font-mono">${s.longitude || '-'}</td>`;
 
             extraHeaders.forEach(() => {
                 rowHtml += `<td></td>`;
@@ -653,15 +726,28 @@ $studentsJson = json_encode($students);
             if (controls.colVillage.checked) headers.push('หมู่บ้าน');
             if (controls.colAddr.checked) headers.push('ที่อยู่');
             if (controls.colVisit.checked) headers.push('ครูผู้เยี่ยม');
+            if (controls.colLat.checked) headers.push('ละติจูด');
+            if (controls.colLng.checked) headers.push('ลองจิจูด');
             extraHeaders.forEach(h => headers.push(h));
             data.push(headers);
 
+            // Filter students before export based on active filter
+            const filterTeacher = controls.filterTeacher.value;
+            let exportStudents = [...students];
+            if (filterTeacher !== 'all') {
+                if (filterTeacher === 'unassigned') {
+                    exportStudents = exportStudents.filter(s => !s.assigned_teacher);
+                } else {
+                    exportStudents = exportStudents.filter(s => s.assigned_teacher === filterTeacher);
+                }
+            }
+
             // Populate rows
             if (groupType === 'normal') {
-                students.forEach(s => data.push(buildExcelRow(s, extraHeaders)));
+                exportStudents.forEach(s => data.push(buildExcelRow(s, extraHeaders)));
             } else if (groupType === 'subdistrict') {
                 const grouped = {};
-                students.forEach(s => {
+                exportStudents.forEach(s => {
                     const key = s.subdistrict || 'ไม่ระบุตำบล';
                     if (!grouped[key]) grouped[key] = [];
                     grouped[key].push(s);
@@ -672,7 +758,7 @@ $studentsJson = json_encode($students);
                 });
             } else if (groupType === 'village') {
                 const grouped = {};
-                students.forEach(s => {
+                exportStudents.forEach(s => {
                     const key = s.village || 'ไม่ระบุหมู่บ้าน';
                     if (!grouped[key]) grouped[key] = [];
                     grouped[key].push(s);
@@ -700,6 +786,8 @@ $studentsJson = json_encode($students);
             if (controls.colVillage.checked) row.push(s.village);
             if (controls.colAddr.checked) row.push(s.Stu_addr);
             if (controls.colVisit.checked) row.push(s.assigned_teacher || '');
+            if (controls.colLat.checked) row.push({ v: s.latitude || '', t: 's' });
+            if (controls.colLng.checked) row.push({ v: s.longitude || '', t: 's' });
             extraHeaders.forEach(() => row.push(''));
             return row;
         }

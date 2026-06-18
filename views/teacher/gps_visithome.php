@@ -61,11 +61,14 @@ uksort($groupedSubdistricts, function($a, $b) {
                 <h1 class="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
                     <i class="fas fa-map-location-dot text-blue-600"></i> แผนที่บ้านนักเรียน
                 </h1>
-                <p class="text-slate-500 dark:text-slate-400 font-medium">ชั้นมัธยมศึกษาปีที่ <?= htmlspecialchars($class . "/" . $room); ?> • พบพิกัด <?= count($studentGpsList) ?> คน</p>
+                <p class="text-slate-500 dark:text-slate-400 font-medium">ชั้นมัธยมศึกษาปีที่ <?= htmlspecialchars($class . "/" . $room); ?> • พบพิกัด <span id="totalGpsCount"><?= count($studentGpsList) ?></span> คน</p>
             </div>
         </div>
         <!-- Header Actions -->
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <a href="route_planner.php" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-route"></i> จัดเส้นทางอัจฉริยะ (Route Planner)
+            </a>
             <a href="print_student_gps.php?class=<?= urlencode($class) ?>&room=<?= urlencode($room) ?>" target="_blank" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
                 <i class="fas fa-print"></i> พิมพ์รายชื่อและพิกัด (พร้อมพิมพ์)
             </a>
@@ -82,6 +85,49 @@ uksort($groupedSubdistricts, function($a, $b) {
                     <button id="toggleRouteMode" class="text-xs font-bold px-3 py-1.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1.5 border border-blue-200 dark:border-blue-800">
                         <i class="fas fa-route"></i> จัดเส้นทาง
                     </button>
+                </div>
+                
+                <!-- Filters Section -->
+                <div class="flex flex-col gap-2.5 mb-3 border-b border-slate-200 dark:border-slate-700 pb-3">
+                    <!-- Teacher Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">ครูผู้เยี่ยมบ้าน</label>
+                        <select id="filterTeacher" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 font-medium">
+                            <option value="all">ทั้งหมด (ทุกคนในห้อง)</option>
+                            <?php if ($teachers): ?>
+                                <?php foreach ($teachers as $t): ?>
+                                    <?php 
+                                        $selected = ($t['Teach_name'] === $teacher_name) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?= htmlspecialchars($t['Teach_name']) ?>" <?= $selected ?>><?= htmlspecialchars($t['Teach_name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option value="<?= htmlspecialchars($teacher_name) ?>" selected><?= htmlspecialchars($teacher_name) ?></option>
+                            <?php endif; ?>
+                            <option value="unassigned">ยังไม่ได้ระบุครู</option>
+                        </select>
+                    </div>
+                    <!-- Subdistrict Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">กลุ่มตำบล</label>
+                        <select id="filterSubdistrict" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 font-medium">
+                            <option value="all">ทั้งหมด (ทุกตำบล)</option>
+                            <?php
+                            $subdistricts = [];
+                            foreach ($studentGpsList as $std) {
+                                if (!empty($std['subdistrict']) && $std['subdistrict'] !== 'ไม่ระบุตำบล') {
+                                    $subdistricts[] = $std['subdistrict'];
+                                }
+                            }
+                            $subdistricts = array_unique($subdistricts);
+                            sort($subdistricts);
+                            foreach ($subdistricts as $sub):
+                            ?>
+                                <option value="<?= htmlspecialchars($sub) ?>"><?= htmlspecialchars($sub) ?></option>
+                            <?php endforeach; ?>
+                            <option value="ไม่ระบุตำบล">ไม่ระบุตำบล</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div id="routeToolbar" class="hidden flex-col gap-3 pt-2 border-t border-slate-200 dark:border-slate-700 mt-2">
@@ -124,7 +170,7 @@ uksort($groupedSubdistricts, function($a, $b) {
                         </div>
                     <?php else: ?>
                         <?php foreach ($studentGpsList as $std): ?>
-                            <div class="student-item-container relative group">
+                            <div class="student-item-container relative group" data-student-id="<?= $std['Stu_id'] ?>" data-teacher="<?= htmlspecialchars($std['assigned_teacher'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                 <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
                                     <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($std['village'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                 </div>
@@ -203,7 +249,7 @@ uksort($groupedSubdistricts, function($a, $b) {
                                 <!-- Subdistrict Students Container -->
                                 <div class="subdistrict-content p-2 space-y-2 bg-slate-50/10 dark:bg-slate-900/10">
                                     <?php foreach ($students as $std): ?>
-                                        <div class="student-item-container relative group">
+                                        <div class="student-item-container relative group" data-student-id="<?= $std['Stu_id'] ?>" data-teacher="<?= htmlspecialchars($std['assigned_teacher'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($subdistrict) ?>">
                                             <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
                                                 <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($std['village'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($subdistrict) ?>">
                                             </div>
@@ -285,7 +331,7 @@ uksort($groupedSubdistricts, function($a, $b) {
                                 <!-- Village Students Container -->
                                 <div class="village-content p-2 space-y-2 bg-slate-50/10 dark:bg-slate-900/10">
                                     <?php foreach ($students as $std): ?>
-                                        <div class="student-item-container relative group">
+                                        <div class="student-item-container relative group" data-student-id="<?= $std['Stu_id'] ?>" data-teacher="<?= htmlspecialchars($std['assigned_teacher'] ?? '') ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                             <div class="absolute left-3 top-1/2 -translate-y-1/2 z-10 hidden checkbox-wrapper">
                                                 <input type="checkbox" class="student-checkbox rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 w-5 h-5 cursor-pointer shadow-sm transition-all" value="<?= $std['Stu_id'] ?>" data-lat="<?= $std['latitude'] ?>" data-lng="<?= $std['longitude'] ?>" data-village="<?= htmlspecialchars($village) ?>" data-subdistrict="<?= htmlspecialchars($std['subdistrict'] ?? '') ?>">
                                             </div>
@@ -407,9 +453,120 @@ uksort($groupedSubdistricts, function($a, $b) {
             }
         });
 
-        // Fit map to show all markers
-        if (bounds.length > 0) {
+        // Apply initial filters
+        applyFilters(true);
+    }
+
+    function applyFilters(fitBounds = false) {
+        const selectedTeacher = $('#filterTeacher').val();
+        const selectedSubdistrict = $('#filterSubdistrict').val();
+        const studentData = <?= json_encode($studentGpsList) ?>;
+        const bounds = [];
+
+        // 1. Filter Map Markers
+        studentData.forEach(std => {
+            const marker = markers[std.Stu_id];
+            if (!marker) return;
+
+            let matchTeacher = false;
+            if (selectedTeacher === 'all') {
+                matchTeacher = true;
+            } else if (selectedTeacher === 'unassigned') {
+                matchTeacher = !std.assigned_teacher;
+            } else {
+                matchTeacher = (std.assigned_teacher === selectedTeacher);
+            }
+
+            let matchSubdistrict = false;
+            if (selectedSubdistrict === 'all') {
+                matchSubdistrict = true;
+            } else {
+                matchSubdistrict = (std.subdistrict === selectedSubdistrict);
+            }
+
+            if (matchTeacher && matchSubdistrict) {
+                if (!map.hasLayer(marker)) {
+                    marker.addTo(map);
+                }
+                const lat = parseFloat(std.latitude);
+                const lng = parseFloat(std.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    bounds.push([lat, lng]);
+                }
+            } else {
+                if (map.hasLayer(marker)) {
+                    map.removeLayer(marker);
+                }
+            }
+        });
+
+        // Fit map bounds if requested and there are visible markers
+        if (fitBounds && bounds.length > 0 && map) {
             map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        // 2. Filter Sidebar Student Items
+        $('.student-item-container').each(function() {
+            const teacher = $(this).attr('data-teacher');
+            const subdistrict = $(this).attr('data-subdistrict');
+
+            let matchTeacher = false;
+            if (selectedTeacher === 'all') {
+                matchTeacher = true;
+            } else if (selectedTeacher === 'unassigned') {
+                matchTeacher = !teacher;
+            } else {
+                matchTeacher = (teacher === selectedTeacher);
+            }
+
+            let matchSubdistrict = false;
+            if (selectedSubdistrict === 'all') {
+                matchSubdistrict = true;
+            } else {
+                matchSubdistrict = (subdistrict === selectedSubdistrict);
+            }
+
+            if (matchTeacher && matchSubdistrict) {
+                $(this).removeClass('hidden');
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+
+        // 3. Filter/Collapse Groups
+        $('.subdistrict-group').each(function() {
+            const visibleCount = $(this).find('.student-item-container:not(.hidden)').length;
+            if (visibleCount > 0) {
+                $(this).removeClass('hidden');
+                $(this).find('.subdistrict-header span.rounded-full').text(visibleCount);
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+
+        $('.village-group').each(function() {
+            const visibleCount = $(this).find('.student-item-container:not(.hidden)').length;
+            if (visibleCount > 0) {
+                $(this).removeClass('hidden');
+                $(this).find('.village-header span.rounded-full').text(visibleCount);
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+
+        // 4. Update the unique visible student count at the top
+        const uniqueVisible = new Set();
+        $('.student-item-container:not(.hidden)').each(function() {
+            uniqueVisible.add($(this).attr('data-student-id'));
+        });
+        $('#totalGpsCount').text(uniqueVisible.size);
+
+        // Update Route UI checkbox / counts if active
+        if (typeof updateRouteUI === 'function') {
+            updateRouteUI();
+        }
+        if (typeof updateAllGroupCheckboxes === 'function') {
+            updateAllGroupCheckboxes();
         }
     }
 
@@ -661,9 +818,9 @@ uksort($groupedSubdistricts, function($a, $b) {
             
             updateRouteUI();
             
-            // Check if all are checked
-            const total = $('#flatStudentList .student-checkbox').length;
-            const checked = $('#flatStudentList .student-checkbox:checked').length;
+            // Check if all are checked (only count visible student checkboxes)
+            const total = $('#flatStudentList .student-item-container:not(.hidden) .student-checkbox').length;
+            const checked = $('#flatStudentList .student-item-container:not(.hidden) .student-checkbox:checked').length;
             $('#selectAllStudents').prop('checked', total > 0 && checked === total);
 
             // Update group checkbox states
@@ -673,25 +830,37 @@ uksort($groupedSubdistricts, function($a, $b) {
         // Select All event
         $('#selectAllStudents').on('change', function() {
             const isChecked = $(this).prop('checked');
-            $('.student-checkbox').prop('checked', isChecked);
+            $('.student-checkbox').each(function() {
+                const container = $(this).closest('.student-item-container');
+                if (container.length === 0 || !container.hasClass('hidden')) {
+                    $(this).prop('checked', isChecked);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
             updateRouteUI();
             updateAllGroupCheckboxes();
         });
 
-        // Village Checkbox event
+        // Village Checkbox event (only toggle visible student checkboxes)
         $(document).on('change', '.village-checkbox', function() {
             const village = $(this).data('village');
             const isChecked = $(this).prop('checked');
             
-            $(`.student-checkbox[data-village="${village}"]`).prop('checked', isChecked).trigger('change');
+            $(`.student-item-container:not(.hidden) .student-checkbox[data-village="${village}"]`).prop('checked', isChecked).trigger('change');
         });
 
-        // Subdistrict Checkbox event
+        // Subdistrict Checkbox event (only toggle visible student checkboxes)
         $(document).on('change', '.subdistrict-checkbox', function() {
             const subdistrict = $(this).data('subdistrict');
             const isChecked = $(this).prop('checked');
             
-            $(`.student-checkbox[data-subdistrict="${subdistrict}"]`).prop('checked', isChecked).trigger('change');
+            $(`.student-item-container:not(.hidden) .student-checkbox[data-subdistrict="${subdistrict}"]`).prop('checked', isChecked).trigger('change');
+        });
+
+        // Add filter change event listeners
+        $('#filterTeacher, #filterSubdistrict').on('change', function() {
+            applyFilters(true);
         });
         
         // Ensure map resizes correctly
@@ -699,6 +868,25 @@ uksort($groupedSubdistricts, function($a, $b) {
             if (map) map.invalidateSize();
         }, 300);
     });
+
+    // Redefine original group checkbox checks to respect visible elements only
+    function updateVillageCheckboxes() {
+        $('.village-checkbox').each(function() {
+            const village = $(this).data('village');
+            const total = $(`.student-item-container:not(.hidden) .student-checkbox[data-village="${village}"]`).length;
+            const checked = $(`.student-item-container:not(.hidden) .student-checkbox[data-village="${village}"]:checked`).length;
+            $(this).prop('checked', total > 0 && checked === total);
+        });
+    }
+
+    function updateSubdistrictCheckboxes() {
+        $('.subdistrict-checkbox').each(function() {
+            const subdistrict = $(this).data('subdistrict');
+            const total = $(`.student-item-container:not(.hidden) .student-checkbox[data-subdistrict="${subdistrict}"]`).length;
+            const checked = $(`.student-item-container:not(.hidden) .student-checkbox[data-subdistrict="${subdistrict}"]:checked`).length;
+            $(this).prop('checked', total > 0 && checked === total);
+        });
+    }
 </script>
 
 <style>
