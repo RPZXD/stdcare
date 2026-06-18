@@ -19,6 +19,8 @@ sort($subdistricts);
 <!-- Leaflet Assets (External) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <!-- Header Section -->
@@ -120,7 +122,7 @@ sort($subdistricts);
             </div>
 
             <!-- Action Button -->
-            <button onclick="calculateAndRenderRoutes()" class="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-extrabold rounded-2xl shadow-lg shadow-blue-500/20 hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <button onclick="calculateAndRenderRoutes(true)" class="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-extrabold rounded-2xl shadow-lg shadow-blue-500/20 hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
                 <i class="fas fa-wand-magic-sparkles"></i> คำนวณและจัดเส้นทาง
             </button>
         </div>
@@ -151,13 +153,20 @@ sort($subdistricts);
             <div id="timelineCard" class="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl p-6 hidden">
                 <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-700 pb-3 flex-wrap gap-2">
                     <div>
-                        <h3 class="font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                        <h3 class="font-extrabold text-slate-800 dark:text-white flex items-center gap-2 flex-wrap">
                             <i class="fas fa-calendar-alt text-indigo-500"></i> แผนที่สรุปการเดินทางรายวัน
+                            <span id="planStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full transition-all"></span>
                         </h3>
                         <p class="text-[11px] text-slate-400 font-medium">ผลการคำนวณแบ่งกลุ่มเส้นทางและจัดลำดับเวลา</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="printTimeline()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="saveActivePlan()" id="btnSavePlan" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95">
+                            <i class="fas fa-save"></i> บันทึกแผนจัดเส้นทาง
+                        </button>
+                        <button onclick="clearSavedPlan()" id="btnClearPlan" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95">
+                            <i class="fas fa-trash-alt"></i> ล้างแผนในฐานข้อมูล
+                        </button>
+                        <button onclick="printTimeline()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
                             <i class="fas fa-print"></i> พิมพ์แผนการจัดส่ง
                         </button>
                     </div>
@@ -184,6 +193,8 @@ sort($subdistricts);
     const studentsData = <?= json_encode($studentGpsList) ?>;
     const schoolCoords = [17.28437, 100.08746];
     let routePolylines = [];
+    let currentAssignments = {};
+    let isUsingSavedPlan = false;
 
     // Path colors for distinct days
     const pathColors = [
@@ -287,22 +298,23 @@ sort($subdistricts);
         return R * c;
     }
 
-    // K-Means Clustering for Coordinates
+    // K-Means Clustering for Coordinates (Deterministic Initialization)
     function kMeansClustering(points, k) {
         if (points.length === 0) return [];
         if (points.length <= k) {
             return points.map(p => [p]);
         }
 
-        // Initialize centroids
+        // Initialize centroids deterministically by sorting geographically
+        let sortedPoints = [...points].sort((a, b) => {
+            if (a.lat !== b.lat) return a.lat - b.lat;
+            return a.lng - b.lng;
+        });
+        
         let centroids = [];
-        let usedIndices = new Set();
-        while (centroids.length < k) {
-            let idx = Math.floor(Math.random() * points.length);
-            if (!usedIndices.has(idx)) {
-                centroids.push({ lat: points[idx].lat, lng: points[idx].lng });
-                usedIndices.add(idx);
-            }
+        for (let i = 0; i < k; i++) {
+            let idx = Math.floor(i * sortedPoints.length / k);
+            centroids.push({ lat: sortedPoints[idx].lat, lng: sortedPoints[idx].lng });
         }
 
         let assignments = new Array(points.length).fill(-1);
@@ -386,17 +398,213 @@ sort($subdistricts);
         return { route, returnDist };
     }
 
-    function calculateAndRenderRoutes() {
+    // Update Plan Status Banner/Badge
+    function updatePlanStatusBanner(isSaved) {
+        const badge = $('#planStatusBadge');
+        if (isSaved) {
+            badge.removeClass('bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400')
+                 .addClass('bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400')
+                 .html('<i class="fas fa-check-circle"></i> แผนที่บันทึกในฐานข้อมูล');
+            $('#btnClearPlan').show();
+        } else {
+            badge.removeClass('bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400')
+                 .addClass('bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400')
+                 .html('<i class="fas fa-exclamation-triangle animate-pulse"></i> แผนคำนวณใหม่ (ยังไม่ได้บันทึก)');
+            $('#btnClearPlan').show();
+        }
+    }
+
+    // Save Active Plan to Database
+    function saveActivePlan() {
+        if (Object.keys(currentAssignments).length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'ไม่มีข้อมูล',
+                text: 'ไม่มีข้อมูลเส้นทางที่จะบันทึก',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'ยืนยันการบันทึก',
+            text: 'คุณต้องการบันทึกแผนการจัดเส้นทางนี้ลงในฐานข้อมูลใช่หรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ใช่, บันทึกเลย',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const btn = $('#btnSavePlan');
+                const originalHtml = btn.html();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...').prop('disabled', true);
+
+                $.ajax({
+                    url: 'api/save_route_plan.php',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ assignments: currentAssignments }),
+                    dataType: 'json',
+                    success: function(response) {
+                        btn.html(originalHtml).prop('disabled', false);
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึกสำเร็จ',
+                                text: 'บันทึกแผนจัดเส้นทางลงฐานข้อมูลสำเร็จแล้ว',
+                                confirmButtonColor: '#3085d6'
+                            });
+                            
+                            // Update studentsData cache
+                            Object.keys(currentAssignments).forEach(stuId => {
+                                const std = studentsData.find(s => s.Stu_id === stuId);
+                                if (std) {
+                                    std.visit_day = currentAssignments[stuId];
+                                }
+                            });
+                            
+                            updatePlanStatusBanner(true);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response.message || 'ไม่สามารถบันทึกได้',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.html(originalHtml).prop('disabled', false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ข้อผิดพลาดการเชื่อมต่อ',
+                            text: 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์',
+                            confirmButtonColor: '#3085d6'
+                        });
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    }
+
+    // Clear Plan from Database for Active Students
+    function clearSavedPlan() {
+        const teacherFilter = $('#paramTeacher').val();
+        let activeStudentIds = [];
+        
+        studentsData.forEach(std => {
+            let match = false;
+            if (teacherFilter === 'all') {
+                match = true;
+            } else if (teacherFilter === 'unassigned') {
+                match = !std.assigned_teacher;
+            } else {
+                match = (std.assigned_teacher === teacherFilter);
+            }
+            
+            if (match) {
+                activeStudentIds.push(std.Stu_id);
+            }
+        });
+
+        if (activeStudentIds.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'ไม่พบนักเรียน',
+                text: 'ไม่พบนักเรียนที่จะล้างแผน',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'ยืนยันการล้างแผน',
+            text: 'คุณแน่ใจหรือไม่ที่จะล้างแผนการเดินทางของนักเรียนกลุ่มนี้ในฐานข้อมูล?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'ใช่, ล้างแผนเลย',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const btn = $('#btnClearPlan');
+                const originalHtml = btn.html();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> กำลังล้างแผน...').prop('disabled', true);
+
+                const clearAssignments = {};
+                activeStudentIds.forEach(id => {
+                    clearAssignments[id] = null;
+                });
+
+                $.ajax({
+                    url: 'api/save_route_plan.php',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ assignments: clearAssignments }),
+                    dataType: 'json',
+                    success: function(response) {
+                        btn.html(originalHtml).prop('disabled', false);
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'ล้างแผนสำเร็จ',
+                                text: 'ล้างแผนการจัดเส้นทางสำเร็จแล้ว',
+                                confirmButtonColor: '#3085d6'
+                            });
+                            
+                            // Update in-memory cache
+                            activeStudentIds.forEach(stuId => {
+                                const std = studentsData.find(s => s.Stu_id === stuId);
+                                if (std) {
+                                    std.visit_day = null;
+                                }
+                            });
+                            
+                            calculateAndRenderRoutes(true);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response.message || 'ไม่สามารถล้างแผนได้',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.html(originalHtml).prop('disabled', false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ข้อผิดพลาดการเชื่อมต่อ',
+                            text: 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์',
+                            confirmButtonColor: '#3085d6'
+                        });
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    }
+
+    function calculateAndRenderRoutes(forceRecalculate = false) {
         const startLat = parseFloat($('#startLat').val());
         const startLng = parseFloat($('#startLng').val());
         const teacherFilter = $('#paramTeacher').val();
-        const numDays = parseInt($('#paramDays').val());
+        let numDays = parseInt($('#paramDays').val());
         const visitTime = parseInt($('#paramVisitTime').val());
         const speed = parseFloat($('#paramSpeed').val());
         const startTimeStr = $('#paramStartTime').val();
 
         if (isNaN(startLat) || isNaN(startLng)) {
-            alert('กรุณากรอกพิกัดจุดเริ่มต้นให้ถูกต้อง');
+            Swal.fire({
+                icon: 'warning',
+                title: 'พิกัดไม่ถูกต้อง',
+                text: 'กรุณากรอกพิกัดจุดเริ่มต้นให้ถูกต้อง',
+                confirmButtonColor: '#3085d6'
+            });
             return;
         }
 
@@ -426,7 +634,8 @@ sort($subdistricts);
                     subdistrict: std.subdistrict,
                     village: std.village,
                     lat: lat,
-                    lng: lng
+                    lng: lng,
+                    visit_day: (std.visit_day !== null && std.visit_day !== undefined && std.visit_day !== '') ? parseInt(std.visit_day) : null
                 });
             }
         });
@@ -440,7 +649,12 @@ sort($subdistricts);
 
         if (activeStudents.length === 0) {
             $('#timelineCard').addClass('hidden');
-            alert('ไม่พบนัดเยี่ยมบ้านนักเรียนตามตัวกรองครูที่เลือก');
+            Swal.fire({
+                icon: 'info',
+                title: 'ไม่พบข้อมูล',
+                text: 'ไม่พบนัดเยี่ยมบ้านนักเรียนตามตัวกรองครูที่เลือก',
+                confirmButtonColor: '#3085d6'
+            });
             return;
         }
 
@@ -454,13 +668,53 @@ sort($subdistricts);
         });
         map.fitBounds(bounds, { padding: [50, 50] });
 
-        // 2. Cluster using K-Means
-        const clusters = kMeansClustering(activeStudents, numDays);
+        // 2. Decide Clustering: saved plan vs recalculate
+        let clusters = [];
+        const hasSavedPlan = activeStudents.some(s => s.visit_day !== null && s.visit_day > 0);
+
+        if (!forceRecalculate && hasSavedPlan) {
+            isUsingSavedPlan = true;
+            
+            // Find max day in active students' saved plans
+            let maxSavedDay = 1;
+            activeStudents.forEach(s => {
+                if (s.visit_day && s.visit_day > maxSavedDay) {
+                    maxSavedDay = s.visit_day;
+                }
+            });
+            
+            numDays = maxSavedDay;
+            // Update UI dropdown value
+            $('#paramDays').val(numDays);
+            
+            clusters = Array.from({ length: numDays }, () => []);
+            activeStudents.forEach(s => {
+                if (s.visit_day && s.visit_day <= numDays) {
+                    clusters[s.visit_day - 1].push(s);
+                }
+            });
+            
+            updatePlanStatusBanner(true);
+        } else {
+            isUsingSavedPlan = false;
+            // Cluster using deterministic K-Means
+            clusters = kMeansClustering(activeStudents, numDays);
+            updatePlanStatusBanner(false);
+        }
 
         // 3. Solve TSP and generate schedules
         const plannedDaysData = [];
+        currentAssignments = {}; // Clear previous assignments
+        
         clusters.forEach((cluster, index) => {
             if (cluster.length === 0) return;
+            const dayNum = index + 1;
+            
+            // Map assignments
+            cluster.forEach(student => {
+                currentAssignments[student.id] = dayNum;
+            });
+            
             const tspResult = solveGreedyTSP(startLat, startLng, cluster);
             
             // Build polyline path coordinates
@@ -488,7 +742,7 @@ sort($subdistricts);
             // Start
             timeline.push({
                 time: formatTime(currentTime),
-                icon: 'fa-map-marker-alt text-rose-500',
+                icon: 'fa-star text-rose-500',
                 title: 'เริ่มต้นการเดินทาง',
                 desc: `ออกจากจุดเริ่มต้น (${startLat.toFixed(5)}, ${startLng.toFixed(5)})`
             });
@@ -544,6 +798,12 @@ sort($subdistricts);
             const subs = cluster.map(p => p.subdistrict || 'ไม่ระบุตำบล');
             const modeSub = mostFrequent(subs);
 
+            // Generate Google Maps URL
+            const origin = `${startLat},${startLng}`;
+            const destination = `${startLat},${startLng}`;
+            const waypointCoords = tspResult.route.map(step => `${step.point.lat},${step.point.lng}`).join('|');
+            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${encodeURIComponent(waypointCoords)}&travelmode=driving`;
+
             plannedDaysData.push({
                 dayIndex: index + 1,
                 color: color,
@@ -551,7 +811,8 @@ sort($subdistricts);
                 totalDistance: totalDist,
                 studentCount: cluster.length,
                 timeline: timeline,
-                notes: notes
+                notes: notes,
+                navUrl: navUrl
             });
         });
 
@@ -593,7 +854,7 @@ sort($subdistricts);
             tabButtonsHtml += `
                 <button onclick="switchTab(${day.dayIndex})" id="tab-btn-${day.dayIndex}" class="tab-btn px-4 py-2 text-xs font-black rounded-xl border border-slate-200 dark:border-slate-600 transition-all ${btnClass}">
                     <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background-color: ${day.color};"></span>
-                    วันทีี่ ${day.dayIndex} (ตำบล ${day.zone.replace('ต.', '')} • ${day.studentCount} คน)
+                    วันที่ ${day.dayIndex} (ตำบล ${day.zone.replace('ต.', '')} • ${day.studentCount} คน)
                 </button>
             `;
 
@@ -607,10 +868,10 @@ sort($subdistricts);
                             <i class="fas ${step.icon}"></i>
                         </div>
                         <div class="flex items-center justify-between gap-4 flex-wrap">
-                            <h4 class="font-bold text-xs text-slate-800 dark:text-white">${step.title}</h4>
+                            <h4 class="font-bold text-xs text-slate-800 dark:text-white ml-2">&nbsp;&nbsp;&nbsp;&nbsp;${step.title}</h4>
                             <span class="text-[11px] font-black text-slate-500 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-800 font-mono">${step.time} น.</span>
                         </div>
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-normal">${step.desc}</p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-normal ml-2">${step.desc}</p>
                     </div>
                 `;
             });
@@ -629,9 +890,14 @@ sort($subdistricts);
 
             tabContentsHtml += `
                 <div id="tab-content-${day.dayIndex}" class="tab-content ${activeContentClass} animate-fadeIn">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 mb-6">
-                        <span>ระยะทางเดินทางรวมวันนี้: <strong class="text-blue-600 dark:text-blue-400">${day.totalDistance.toFixed(2)} กม.</strong></span>
-                        <span>จำนวนนักเรียนที่เยี่ยม: <strong class="text-indigo-600">${day.studentCount} คน</strong></span>
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 mb-6 flex-wrap gap-3">
+                        <div class="flex flex-col gap-1">
+                            <span>ระยะทางเดินทางรวมวันนี้: <strong class="text-blue-600 dark:text-blue-400">${day.totalDistance.toFixed(2)} กม.</strong></span>
+                            <span>จำนวนนักเรียนที่เยี่ยม: <strong class="text-indigo-600">${day.studentCount} คน</strong></span>
+                        </div>
+                        <a href="${day.navUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold rounded-xl shadow-md hover:shadow-emerald-500/20 transition-all flex items-center gap-1.5 active:scale-95">
+                            <i class="fas fa-location-arrow"></i> นำทางวันนี้ (Google Maps)
+                        </a>
                     </div>
 
                     <!-- Steps Timeline -->
@@ -705,8 +971,12 @@ sort($subdistricts);
     $(document).ready(function() {
         initMap();
 
-        $('#paramTeacher, #paramDays').on('change', function() {
-            calculateAndRenderRoutes();
+        $('#paramTeacher').on('change', function() {
+            calculateAndRenderRoutes(false);
+        });
+
+        $('#paramDays').on('change', function() {
+            calculateAndRenderRoutes(true);
         });
     });
 </script>
