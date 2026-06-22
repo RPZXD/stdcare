@@ -173,7 +173,7 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
                         <div class="space-y-3">
                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest px-2"><?= $img['label'] ?> <?= $img['required'] ? '<span class="text-rose-500">*</span>' : '' ?></p>
                             <label for="<?= $id ?>" class="group block relative aspect-[4/3] rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all overflow-hidden cursor-pointer">
-                                <input type="file" name="<?= $id ?>" id="<?= $id ?>" class="hidden" accept="image/*" onchange="handleImagePreview(this, 'preview-<?= $id ?>')">
+                                <input type="file" name="<?= $id ?>" id="<?= $id ?>" class="hidden" accept="image/*,.heic,.heif" onchange="handleImagePreview(this, 'preview-<?= $id ?>')">
                                 <input type="hidden" name="remove_<?= $id ?>" id="remove_<?= $id ?>" value="0">
                                 
                                 <div id="preview-<?= $id ?>" class="absolute inset-0">
@@ -214,24 +214,7 @@ function generateVisitForm($data, $isEdit = false, $currentTerm = null, $current
         </form>
 
         <script>
-        function handleImagePreview(input, previewId) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const container = document.getElementById(previewId);
-                    container.innerHTML = `
-                        <img src="${e.target.result}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <span class="px-4 py-2 bg-white text-slate-800 rounded-xl font-bold text-sm">เลือกแล้ว</span>
-                        </div>
-                    `;
-                }
-                reader.readAsDataURL(input.files[0]);
-                // Reset remove flag
-                const removeId = 'remove_' + input.id;
-                document.getElementById(removeId).value = "0";
-            }
-        }
+        // handleImagePreview is defined globally in views/teacher/visithome.php
         
         // Copy data from Term 1 to Term 2 form
         function copyFromTerm1(stuId, pee) {

@@ -136,22 +136,24 @@ $images = [
                         </div>
                     </div>
                     
-                    <?php if ($imagePath): ?>
-                    <div class="mb-2 rounded-lg overflow-hidden">
-                        <img src="uploads/visithome<?= $yearImg ?>/<?= $imagePath ?>?t=<?= time() ?>" 
-                             alt="<?= $image['label'] ?>" 
-                             class="w-full h-24 object-cover rounded-lg">
+                    <div id="preview-<?= $image['id'] ?>" class="mb-2 rounded-lg overflow-hidden relative">
+                        <?php if ($imagePath): ?>
+                            <img src="uploads/visithome<?= $yearImg ?>/<?= $imagePath ?>?t=<?= time() ?>" 
+                                 alt="<?= $image['label'] ?>" 
+                                 class="w-full h-24 object-cover rounded-lg">
+                        <?php else: ?>
+                            <div class="h-24 bg-slate-200 dark:bg-slate-600 rounded-lg flex items-center justify-center">
+                                <span class="text-slate-400 text-xs">ยังไม่มีรูปภาพ</span>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    <?php else: ?>
-                    <div class="mb-2 h-24 bg-slate-200 dark:bg-slate-600 rounded-lg flex items-center justify-center">
-                        <span class="text-slate-400 text-xs">ยังไม่มีรูปภาพ</span>
-                    </div>
-                    <?php endif; ?>
                     
+                    <input type="hidden" name="remove_<?= $image['id'] ?>" id="remove_<?= $image['id'] ?>" value="0">
                     <input type="file" 
                            name="<?= $image['id'] ?>" 
                            id="<?= $image['id'] ?>" 
-                           accept="image/jpeg, image/png, image/gif"
+                           accept="image/*,.heic,.heif"
+                           onchange="handleImagePreview(this, 'preview-<?= $image['id'] ?>')"
                            class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-100 file:text-violet-700 hover:file:bg-violet-200 transition">
                 </div>
                 <?php endforeach; ?>
@@ -184,3 +186,215 @@ $images = [
         </div>
     </form>
 </div>
+
+<script>
+if (typeof window.handleImagePreview === 'undefined') {
+    // Dynamically load heic2any if not present
+    if (typeof heic2any === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+        document.head.appendChild(script);
+    }
+    
+    window.uploadedWebpBlobs = window.uploadedWebpBlobs || {};
+    
+    window.processImageToWebp = async function(file) {
+        let imageFile = file;
+        const fileName = file.name.toLowerCase();
+        const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+
+        if (isHeic) {
+            if (typeof heic2any === 'undefined') {
+                throw new Error('กำลังโหลดไลบรารี HEIC กรุณาลองใหม่อีกครั้ง');
+            }
+            try {
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.8
+                });
+                imageFile = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+            } catch (error) {
+                console.error('HEIC conversion failed:', error);
+                throw new Error('ไม่สามารถแปลงไฟล์ HEIC ได้: ' + error.message);
+            }
+        }
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    let width = img.width;
+                    let height = img.height;
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(function(blob) {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('การแปลงภาพเป็น WebP ล้มเหลว'));
+                        }
+                    }, 'image/webp', 0.85);
+                };
+                img.onerror = function() {
+                    reject(new Error('ไม่สามารถโหลดภาพเพื่อปรับขนาดได้'));
+                };
+                img.src = event.target.result;
+            };
+            reader.onerror = function() {
+                reject(new Error('ไม่สามารถอ่านไฟล์ภาพได้'));
+            };
+            reader.readAsDataURL(imageFile);
+        });
+    };
+
+    window.handleImagePreview = async function(input, previewId) {
+        if (!input.files || !input.files[0]) return;
+
+        const file = input.files[0];
+        const container = document.getElementById(previewId);
+        if (!container) return;
+
+        const originalContent = container.innerHTML;
+        container.innerHTML = `
+            <div class="h-full w-full flex flex-col items-center justify-center p-4 text-center bg-slate-100 dark:bg-slate-700 animate-pulse relative z-20">
+                <div class="w-8 h-8 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-2"></div>
+                <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold leading-tight">กำลังแปลงไฟล์และลดขนาด...</p>
+            </div>
+        `;
+
+        try {
+            const webpBlob = await window.processImageToWebp(file);
+            
+            const form = input.closest('form');
+            const formId = form ? form.id : 'unknownForm';
+            
+            window.uploadedWebpBlobs[formId] = window.uploadedWebpBlobs[formId] || {};
+            window.uploadedWebpBlobs[formId][input.name] = webpBlob;
+
+            const objectUrl = URL.createObjectURL(webpBlob);
+            container.innerHTML = `
+                <img src="${objectUrl}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <span class="px-4 py-2 bg-white text-slate-800 rounded-xl font-bold text-sm">เปลี่ยนรูปภาพ</span>
+                </div>
+            `;
+
+            const removeId = 'remove_' + input.id;
+            const removeInput = document.getElementById(removeId);
+            if (removeInput) {
+                removeInput.value = "0";
+            }
+        } catch (error) {
+            console.error('Image preprocessing error:', error);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message || 'ไม่สามารถประมวลผลรูปภาพได้'
+                });
+            } else {
+                alert(error.message || 'ไม่สามารถประมวลผลรูปภาพได้');
+            }
+            container.innerHTML = originalContent;
+            input.value = '';
+        }
+    };
+}
+
+// Intercept form submit for direct submissions (e.g. from poor.php)
+$(document).ready(function() {
+    $('#editVisitForm').on('submit', function(e) {
+        // If we are in visithome.php, it has its own ajax submit handler and will override/bypass standard submit.
+        // But in poor.php, it will submit normally. We intercept here to do client-side WebP uploads.
+        const formId = this.id;
+        if (window.uploadedWebpBlobs && window.uploadedWebpBlobs[formId]) {
+            e.preventDefault();
+            const formElement = this;
+            const formData = new FormData(formElement);
+            
+            for (let i = 1; i <= 5; i++) {
+                const fileKey = 'image' + i;
+                const blob = window.uploadedWebpBlobs[formId][fileKey];
+                if (blob) {
+                    formData.delete(fileKey);
+                    formData.append(fileKey, blob, fileKey + '.webp');
+                }
+            }
+            
+            const targetUrl = '../teacher/api/update_visit_data.php';
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+            }
+            
+            $.ajax({
+                url: targetUrl,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    try {
+                        const res = JSON.parse(response);
+                        if (res.success) {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('สำเร็จ', 'อัปเดตข้อมูลเรียบร้อยแล้ว', 'success').then(() => {
+                                    // Bootstrap dismiss modal
+                                    const modalElement = $('#visitModal');
+                                    if (modalElement.length) modalElement.modal('hide');
+                                    if (typeof loadTable === 'function') loadTable();
+                                });
+                            } else {
+                                alert('อัปเดตข้อมูลเรียบร้อยแล้ว');
+                                const modalElement = $('#visitModal');
+                                if (modalElement.length) modalElement.modal('hide');
+                            }
+                        } else {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('ล้มเหลว', res.message, 'error');
+                            } else {
+                                alert('ล้มเหลว: ' + res.message);
+                            }
+                        }
+                    } catch(err) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('สำเร็จ', 'อัปเดตข้อมูลเรียบร้อยแล้ว', 'success').then(() => {
+                                const modalElement = $('#visitModal');
+                                if (modalElement.length) modalElement.modal('hide');
+                                if (typeof loadTable === 'function') loadTable();
+                            });
+                        } else {
+                            alert('อัปเดตข้อมูลเรียบร้อยแล้ว');
+                            const modalElement = $('#visitModal');
+                            if (modalElement.length) modalElement.modal('hide');
+                        }
+                    }
+                },
+                error: function() {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('ล้มเหลว', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                    } else {
+                        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+                    }
+                }
+            });
+        }
+    });
+});
+</script>

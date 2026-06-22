@@ -288,7 +288,133 @@ ob_start();
 }
 </style>
 
+<!-- Load heic2any for HEIC to WebP conversion in the browser -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
 <script>
+window.uploadedWebpBlobs = {};
+
+// Helper to convert any image file (including HEIC) to WebP Blob (resizing to max 800 width/height)
+window.processImageToWebp = async function(file) {
+    let imageFile = file;
+
+    // Check if the file is HEIC/HEIF
+    const fileName = file.name.toLowerCase();
+    const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+
+    if (isHeic) {
+        if (typeof heic2any === 'undefined') {
+            throw new Error('ไม่พบไลบรารี heic2any สำหรับแปลงรูปภาพ HEIC');
+        }
+        try {
+            const convertedBlob = await heic2any({
+                blob: file,
+                toType: 'image/jpeg',
+                quality: 0.8
+            });
+            imageFile = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+        } catch (error) {
+            console.error('HEIC conversion failed:', error);
+            throw new Error('ไม่สามารถแปลงไฟล์ HEIC ได้: ' + error.message);
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 800;
+                const maxHeight = 600;
+
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error('การแปลงภาพเป็น WebP ล้มเหลว'));
+                    }
+                }, 'image/webp', 0.85);
+            };
+            img.onerror = function() {
+                reject(new Error('ไม่สามารถโหลดภาพเพื่อปรับขนาดได้'));
+            };
+            img.src = event.target.result;
+        };
+        reader.onerror = function() {
+            reject(new Error('ไม่สามารถอ่านไฟล์ภาพได้'));
+        };
+        reader.readAsDataURL(imageFile);
+    });
+};
+
+window.handleImagePreview = async function(input, previewId) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const container = document.getElementById(previewId);
+    if (!container) return;
+
+    // Show loading spinner overlay
+    const originalContent = container.innerHTML;
+    container.innerHTML = `
+        <div class="h-full w-full flex flex-col items-center justify-center p-4 text-center bg-slate-100 dark:bg-slate-700 animate-pulse relative z-20">
+            <div class="w-8 h-8 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-2"></div>
+            <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold leading-tight">กำลังแปลงไฟล์และลดขนาด...</p>
+        </div>
+    `;
+
+    try {
+        const webpBlob = await window.processImageToWebp(file);
+        
+        // Find form and store blob
+        const form = input.closest('form');
+        const formId = form ? form.id : 'unknownForm';
+        
+        window.uploadedWebpBlobs[formId] = window.uploadedWebpBlobs[formId] || {};
+        window.uploadedWebpBlobs[formId][input.name] = webpBlob;
+
+        // Display preview
+        const objectUrl = URL.createObjectURL(webpBlob);
+        container.innerHTML = `
+            <img src="${objectUrl}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <span class="px-4 py-2 bg-white text-slate-800 rounded-xl font-bold text-sm">เปลี่ยนรูปภาพ</span>
+            </div>
+        `;
+
+        // Reset remove flag if exists
+        const removeId = 'remove_' + input.id;
+        const removeInput = document.getElementById(removeId);
+        if (removeInput) {
+            removeInput.value = "0";
+        }
+    } catch (error) {
+        console.error('Image preprocessing error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error.message || 'ไม่สามารถประมวลผลรูปภาพได้'
+        });
+        container.innerHTML = originalContent;
+        input.value = '';
+    }
+};
+
 $(document).ready(function() {
     // Page load table
     loadTable();
@@ -555,6 +681,19 @@ $(document).ready(function() {
         if (!validateForm(formId)) return;
 
         const formData = new FormData(formElement);
+        
+        // Replace original files with processed WebP Blobs
+        if (window.uploadedWebpBlobs && window.uploadedWebpBlobs[formId]) {
+            for (let i = 1; i <= 5; i++) {
+                const fileKey = 'image' + i;
+                const blob = window.uploadedWebpBlobs[formId][fileKey];
+                if (blob) {
+                    formData.delete(fileKey);
+                    formData.append(fileKey, blob, fileKey + '.webp');
+                }
+            }
+        }
+        
         const url = formId === 'addVisitForm' ? 'api/save_visit_data.php' : 'api/update_visit_data.php';
 
         Swal.fire({
