@@ -5,6 +5,13 @@ require_once(dirname(__DIR__) . '/class/UserLogin.php');
 
 date_default_timezone_set('Asia/Bangkok');
 
+// Prevent concurrent script execution using a file lock
+$lock_file = fopen(__DIR__ . '/mark_absent_students.lock', 'c');
+if (!$lock_file || !flock($lock_file, LOCK_EX | LOCK_NB)) {
+    echo "Script is already running or locked.\n";
+    exit;
+}
+
 echo "Starting Absent Marker Script at " . date('Y-m-d H:i:s') . "\n";
 
 try {
@@ -201,6 +208,14 @@ try {
     if (empty($lateStudents)) {
         echo "ไม่มีนักเรียนมาสายที่ต้องหักคะแนนวันนี้\n";
     } else {
+        $checkBehavior = $conn->prepare("
+            SELECT 1 FROM behavior 
+            WHERE stu_id = :stu_id 
+              AND behavior_date = :behavior_date 
+              AND behavior_type = :behavior_type 
+            LIMIT 1
+        ");
+
         $insertBehavior = $conn->prepare("
             INSERT INTO behavior 
                 (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
@@ -211,6 +226,17 @@ try {
         $behaviorCount = 0;
         foreach ($lateStudents as $stuId) {
             try {
+                // Check if behavior record already exists to prevent duplicate insertion
+                $checkBehavior->execute([
+                    ':stu_id'         => $stuId,
+                    ':behavior_date'  => $today,
+                    ':behavior_type'  => 'มาโรงเรียนสาย'
+                ]);
+                if ($checkBehavior->fetch()) {
+                    echo "Student $stuId already has a 'มาโรงเรียนสาย' behavior record for $today. Skipping.\n";
+                    continue;
+                }
+
                 $insertBehavior->execute([
                     ':stu_id'         => $stuId,
                     ':behavior_date'  => $today,

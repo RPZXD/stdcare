@@ -294,11 +294,11 @@ $studentsJson = json_encode($students);
                     <span>ผู้เยี่ยมบ้าน (ครู)</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="col-lat" class="rounded text-indigo-600 border-slate-300">
+                    <input type="checkbox" id="col-lat" checked class="rounded text-indigo-600 border-slate-300">
                     <span>ละติจูด (Lat)</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="col-lng" class="rounded text-indigo-600 border-slate-300">
+                    <input type="checkbox" id="col-lng" checked class="rounded text-indigo-600 border-slate-300">
                     <span>ลองจิจูด (Lng)</span>
                 </label>
             </div>
