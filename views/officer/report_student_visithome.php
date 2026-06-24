@@ -131,6 +131,47 @@ ob_start();
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Helper function to load home visit details via AJAX
+    function loadReport(studentId) {
+        if (!studentId) return;
+
+        // Show loading spinner
+        Swal.showLoading();
+        const reportContainer = document.getElementById('reportContainer');
+        const emptyState = document.getElementById('emptyState');
+        const reportContent = document.getElementById('reportContent');
+
+        emptyState.classList.add('hidden');
+        reportContainer.classList.remove('hidden');
+        reportContent.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                <i class="fas fa-circle-notch fa-spin text-4xl mb-4 text-orange-500"></i>
+                <p class="font-black italic uppercase tracking-widest text-sm text-slate-500">กำลังดึงรายงานข้อมูลการเยี่ยมบ้าน...</p>
+            </div>
+        `;
+
+        fetch(`../teacher/api/get_visit_details_full.php?student_id=${studentId}`)
+            .then(res => {
+                Swal.close();
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.text();
+            })
+            .then(html => {
+                reportContent.innerHTML = `<div class="animate-fadeIn">${html}</div>`;
+            })
+            .catch(err => {
+                Swal.close();
+                reportContent.innerHTML = `
+                    <div class="p-8 text-center text-rose-500 font-black italic">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
+                        <p>เกิดข้อผิดพลาดในการโหลดข้อมูล หรือไม่พบข้อมูลการเยี่ยมบ้านของนักเรียนคนนี้</p>
+                    </div>
+                `;
+            });
+    }
+
     // 1. Initialize Autocomplete
     if (typeof $.fn.autocomplete === 'function') {
         $('#studentSearch').autocomplete({
@@ -146,8 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             select: (e, ui) => {
                 $('#studentSearch').val(ui.item.value);
                 $('#selectedStudentId').val(ui.item.id);
-                // Trigger form submission
-                $('#searchForm').submit();
+                loadReport(ui.item.id);
                 return false;
             }
         });
@@ -171,41 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Show loading spinner
-            Swal.showLoading();
-            const reportContainer = document.getElementById('reportContainer');
-            const emptyState = document.getElementById('emptyState');
-            const reportContent = document.getElementById('reportContent');
-
-            emptyState.classList.add('hidden');
-            reportContainer.classList.remove('hidden');
-            reportContent.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
-                    <i class="fas fa-circle-notch fa-spin text-4xl mb-4 text-orange-500"></i>
-                    <p class="font-black italic uppercase tracking-widest text-sm text-slate-500">กำลังดึงรายงานข้อมูลการเยี่ยมบ้าน...</p>
-                </div>
-            `;
-
-            fetch(`../teacher/api/get_visit_details_full.php?student_id=${studentId}`)
-                .then(res => {
-                    Swal.close();
-                    if (!res.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return res.text();
-                })
-                .then(html => {
-                    reportContent.innerHTML = `<div class="animate-fadeIn">${html}</div>`;
-                })
-                .catch(err => {
-                    Swal.close();
-                    reportContent.innerHTML = `
-                        <div class="p-8 text-center text-rose-500 font-black italic">
-                            <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
-                            <p>เกิดข้อผิดพลาดในการโหลดข้อมูล หรือไม่พบข้อมูลการเยี่ยมบ้านของนักเรียนคนนี้</p>
-                        </div>
-                    `;
-                });
+            loadReport(studentId);
         });
     }
 
@@ -217,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Auto-submit if student_id is preloaded
     const preloadedId = '<?php echo htmlspecialchars($student_id ?? ""); ?>';
     if (preloadedId) {
-        $('#searchForm').submit();
+        loadReport(preloadedId);
     }
 });
 </script>
