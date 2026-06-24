@@ -256,18 +256,27 @@ try {
 <!-- Print-Only Container (Formal Thai Government Document Style) -->
 <div class="print-only" style="display: none; font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif; color: #000; background-color: #fff;">
     
-    <!-- Garuda Emblem & Header -->
+    <!-- Header -->
     <div style="text-align: center; margin-bottom: 25px;">
-        <img src="../dist/img/ตราครุฑ.jpg" class="garuda-logo" style="height: 1.25in; width: auto; display: block; margin: 0 auto 12px auto;">
         <h2 style="font-size: 20px; font-weight: bold; margin: 0 0 4px 0; line-height: 1.4;">แบบรายงานการเยี่ยมบ้านนักเรียนรายบุคคล</h2>
         <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 4px 0; line-height: 1.4;">โรงเรียน<?= htmlspecialchars($global['nameschool']) ?></h3>
         <p style="font-size: 15px; margin: 0; line-height: 1.4;">ภาคเรียนที่ 1 และภาคเรียนที่ 2 ปีการศึกษา <?= ($pee) ?></p>
     </div>
 
     <!-- Student Profile Information Table -->
+    <?php
+    $phones = [];
+    if (!empty($studentData['Par_phone'])) {
+        $phones[] = $studentData['Par_phone'] . ' (ผู้ปกครอง)';
+    }
+    if (!empty($studentData['Stu_phone'])) {
+        $phones[] = $studentData['Stu_phone'] . ' (นักเรียน)';
+    }
+    $phoneStr = !empty($phones) ? implode(' / ', $phones) : '-';
+    ?>
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 15px; line-height: 1.6;">
         <tr>
-            <td style="width: 105px; padding: 4px 0; vertical-align: top;" rowspan="4">
+            <td style="width: 105px; padding: 4px 0; vertical-align: top;" rowspan="3">
                 <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" class="print-avatar" style="width: 90px; height: 112px; object-fit: cover; border: 1px solid #000; display: block;">
             </td>
             <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;">
@@ -281,20 +290,17 @@ try {
             </td>
         </tr>
         <tr>
-            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;" colspan="2">
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;">
                 ชั้นมัธยมศึกษาปีที่: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_major']) ?> / <?= htmlspecialchars($studentData['Stu_room']) ?></span>
             </td>
-            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;">
-                เบอร์โทรศัพท์: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Par_phone'] ?: ($studentData['Stu_phone'] ?: '-')) ?></span>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;" colspan="2">
+                เบอร์โทรศัพท์: <span style="font-weight: normal;"><?= htmlspecialchars($phoneStr) ?></span>
             </td>
         </tr>
         <tr>
             <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;" colspan="3">
                 ที่อยู่: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_addr'] ?: 'ไม่ระบุที่อยู่') ?></span>
             </td>
-        </tr>
-        <tr>
-            <td style="padding: 4px 8px;" colspan="3"></td> <!-- spacer alignment -->
         </tr>
     </table>
 
@@ -341,35 +347,6 @@ try {
         </div>
     <?php endif; ?>
 
-    <!-- Signature Block (Print-Only) -->
-    <?php
-        $advisorStr1 = isset($advisors[0]) ? $advisors[0] : '......................................................';
-        $advisorStr2 = isset($advisors[1]) ? $advisors[1] : '';
-    ?>
-    <div style="margin-top: 30px; page-break-inside: avoid;">
-        <table style="width: 100%; border: none; font-size: 14px; line-height: 1.6;">
-            <tr>
-                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px;">
-                    <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ผู้ปกครองนักเรียน</p>
-                    <p style="margin: 0 0 5px 0;">(..............................................................)</p>
-                    <p style="margin: 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
-                </td>
-                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px;">
-                    <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ครูประจำชั้น/ผู้เยี่ยมบ้าน</p>
-                    <p style="margin: 0 0 5px 0;">( <?= htmlspecialchars($advisorStr1) ?> )</p>
-                    <p style="margin: 0 0 25px 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
-                    
-                    <?php if (!empty($advisorStr2)): ?>
-                        <div style="margin-top: 20px;">
-                            <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ครูประจำชั้นร่วม</p>
-                            <p style="margin: 0 0 5px 0;">( <?= htmlspecialchars($advisorStr2) ?> )</p>
-                            <p style="margin: 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
-                        </div>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        </table>
-    </div>
 </div>
 
 <?php
