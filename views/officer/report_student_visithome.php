@@ -126,7 +126,7 @@ ob_start();
 
     <!-- Search Section -->
     <div class="glass-effect rounded-[2rem] p-8 mb-8 shadow-xl border border-white/50 dark:border-slate-700/50 animate-fadeIn no-print" style="animation-delay: 0.1s">
-        <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div class="md:col-span-3 space-y-2">
                 <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 italic">ค้นหาชื่อ นามสกุล หรือเลขประจำตัวนักเรียน</label>
                 <div class="relative">
@@ -149,6 +149,27 @@ ob_start();
                 </button>
             </div>
         </form>
+
+        <?php if (!empty($recentStudents)): ?>
+        <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+            <span class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5 italic">
+                <i class="fas fa-history text-orange-500"></i> ประวัติเยี่ยมบ้านล่าสุด:
+            </span>
+            <?php foreach ($recentStudents as $rs): 
+                $rsName = $rs['Stu_pre'] . $rs['Stu_name'] . ' ' . $rs['Stu_sur'];
+                $rsLabel = $rsName . ' (ม.' . $rs['Stu_major'] . '/' . $rs['Stu_room'] . ')';
+            ?>
+                <button type="button" class="recent-student-chip px-4 py-2 bg-slate-50 hover:bg-orange-500/10 text-slate-600 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400 rounded-full font-bold text-xs border border-slate-100 dark:border-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-sm"
+                        data-id="<?php echo $rs['Stu_id']; ?>"
+                        data-label="<?php echo htmlspecialchars($rsLabel); ?>"
+                        data-value="<?php echo htmlspecialchars($rsName); ?>">
+                    <i class="fas fa-user-circle text-slate-400"></i>
+                    <?php echo htmlspecialchars($rsName); ?>
+                    <span class="opacity-60 font-medium">(ม.<?php echo $rs['Stu_major']; ?>/<?php echo $rs['Stu_room']; ?>)</span>
+                </button>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Results Section (Initially Hidden) -->
@@ -308,6 +329,17 @@ document.addEventListener('DOMContentLoaded', () => {
             window.print();
         });
     }
+
+    // 2.5 Recent Student Chips Interaction
+    $('.recent-student-chip').on('click', function() {
+        const id = $(this).data('id');
+        const value = $(this).data('value');
+
+        if (searchInput) searchInput.value = value;
+        document.getElementById('selectedStudentId').value = id;
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        loadReport(id);
+    });
 
     // 3. Auto-submit if student_id is preloaded
     const preloadedId = '<?php echo htmlspecialchars($student_id ?? ""); ?>';
