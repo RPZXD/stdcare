@@ -47,8 +47,8 @@ ob_start();
                     <a href="gps_visithome.php" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-map-location-dot"></i> แผนที่บ้าน
                     </a>
-                    <button onclick="printPage()" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-print"></i> พิมพ์รายงาน
+                    <button onclick="printMemo()" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-print"></i> พิมพ์บันทึกข้อความเยี่ยมบ้าน
                     </button>
                 </div>
             </div>
@@ -431,8 +431,8 @@ $(document).ready(function() {
     };
 
     // Print logic
-    window.printPage = function() {
-        window.print();
+    window.printMemo = function() {
+        window.open('visithome_memo_print.php', '_blank');
     };
 
     // Load Data into Table

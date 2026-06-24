@@ -38,7 +38,7 @@ $pageTitle = 'รายงานสรุประบบ';
 $activeMenu = 'report';
 
 // รับค่า tab จาก query string
-$tab = $_GET['tab'] ?? 'late';
+$tab = $_GET['tab'] ?? '';
 
 // Mapping tab => File
 $tabFiles = [

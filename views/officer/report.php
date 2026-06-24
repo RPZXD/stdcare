@@ -24,6 +24,28 @@ ob_start();
         border-color: rgba(255, 255, 255, 0.05);
     }
 
+    /* Custom Styles for Report Menu Cards */
+    .report-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .report-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+    }
+    .icon-box {
+        transition: transform 0.5s ease;
+    }
+    .report-card:hover .icon-box {
+        transform: rotate(12deg) scale(1.1);
+    }
+    .menu-item {
+        transition: all 0.3s ease;
+    }
+    .menu-item:hover {
+        padding-left: 1.5rem;
+        background: rgba(99, 102, 241, 0.05);
+    }
+
     /* Mobile Table to Card Transformation */
     @media (max-width: 768px) {
         .report-content table, 
@@ -224,9 +246,214 @@ ob_start();
         </div>
     </div>
 
+    <?php if (empty($tab)): ?>
+    <!-- Visual Report Menu Dashboard (similar to views/teacher/report.php but for officer) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Card 1: พฤติกรรมและการมาเรียน -->
+        <div class="report-card glass-effect rounded-[2.5rem] overflow-hidden border border-white/50 dark:border-slate-700/50 shadow-xl animate-fadeIn" style="animation-delay: 0.1s">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="icon-box w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner">
+                            <i class="fas fa-user-clock text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-white">พฤติกรรมและการมาเรียน</h2>
+                            <p class="text-sm text-slate-500">ข้อมูลสรุปเวลาเรียนและคะแนนพฤติกรรม</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <a href="report.php?tab=late" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-indigo-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-indigo-500 group-hover:text-white transition-all text-indigo-500">
+                            <i class="fas fa-clock"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">เวลาเรียนและการมาสาย</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
+                    </a>
+
+                    <a href="report.php?tab=deduct-room" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-indigo-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-indigo-500 group-hover:text-white transition-all text-indigo-500">
+                            <i class="fas fa-school"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">คะแนนพฤติกรรม (รายห้อง)</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
+                    </a>
+
+                    <a href="report.php?tab=deduct-group" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-indigo-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-indigo-500 group-hover:text-white transition-all text-indigo-500">
+                            <i class="fas fa-chart-bar"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">คะแนนพฤติกรรม (กลุ่ม)</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: การเยี่ยมบ้านและผู้ปกครอง -->
+        <div class="report-card glass-effect rounded-[2.5rem] overflow-hidden border border-white/50 dark:border-slate-700/50 shadow-xl animate-fadeIn" style="animation-delay: 0.2s">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="icon-box w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner">
+                            <i class="fas fa-users text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-white">เยี่ยมบ้านและผู้ปกครอง</h2>
+                            <p class="text-sm text-slate-500">ข้อมูลสรุปการเยี่ยมบ้านและเครือข่ายผู้ปกครอง</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <a href="report.php?tab=homevisit" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-emerald-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all text-emerald-500">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">รายงานสรุปการเยี่ยมบ้าน</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
+                    </a>
+
+                    <a href="report.php?tab=parent-leader" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-emerald-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all text-emerald-500">
+                            <i class="fas fa-id-card"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">ประธานเครือข่ายผู้ปกครอง</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: การประเมินและคัดกรอง (SDQ, EQ, 11 ด้าน) -->
+        <div class="report-card glass-effect rounded-[2.5rem] overflow-hidden border border-white/50 dark:border-slate-700/50 shadow-xl animate-fadeIn" style="animation-delay: 0.3s">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="icon-box w-14 h-14 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-2xl flex items-center justify-center shadow-inner">
+                            <i class="fas fa-brain text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-white">การประเมินและคัดกรอง</h2>
+                            <p class="text-sm text-slate-500">ข้อมูลสรุป SDQ, EQ และการคัดกรอง 11 ด้าน</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- SDQ Section -->
+                    <div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ประเมินจุดแข็งและจุดอ่อน (SDQ)</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="report.php?tab=sdq_room" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายห้อง</a>
+                            <a href="report.php?tab=sdq_class" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายชั้น</a>
+                            <a href="report.php?tab=sdq_school" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">ภาพรวมโรงเรียน</a>
+                        </div>
+                    </div>
+
+                    <!-- EQ Section -->
+                    <div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ความฉลาดทางอารมณ์ (EQ)</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="report.php?tab=eq_room" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายห้อง</a>
+                            <a href="report.php?tab=eq_class" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายชั้น</a>
+                            <a href="report.php?tab=eq_school" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">ภาพรวมโรงเรียน</a>
+                        </div>
+                    </div>
+
+                    <!-- 11 Areas Screening Section -->
+                    <div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">การคัดกรอง 11 ด้าน</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="report.php?tab=screen11_room" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายห้อง</a>
+                            <a href="report.php?tab=screen11_class" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">รายชั้น</a>
+                            <a href="report.php?tab=screen11_school" class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-amber-400 hover:bg-amber-500/5 text-center text-xs font-black text-slate-700 dark:text-slate-300 transition-all">ภาพรวมโรงเรียน</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: โครงการห้องเรียนสีขาว -->
+        <div class="report-card glass-effect rounded-[2.5rem] overflow-hidden border border-white/50 dark:border-slate-700/50 shadow-xl animate-fadeIn" style="animation-delay: 0.4s">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="icon-box w-14 h-14 bg-slate-100 dark:bg-slate-900 text-slate-600 rounded-2xl flex items-center justify-center shadow-inner">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-white">โครงการห้องเรียนสีขาว</h2>
+                            <p class="text-sm text-slate-500">ข้อมูลโครงสร้างและผลการประเมินห้องเรียนสีขาว</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <a href="report.php?tab=whiteclass" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-slate-400 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-slate-700 group-hover:text-white transition-all text-slate-600">
+                            <i class="fas fa-clipboard-list"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">สรุปผลการคัดกรองห้องเรียนสีขาว</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-slate-600 transition-colors"></i>
+                    </a>
+
+                    <a href="report.php?tab=whiteclass-list" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-slate-400 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-slate-700 group-hover:text-white transition-all text-slate-600">
+                            <i class="fas fa-address-book"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">รายชื่อคณะกรรมการห้องเรียนสีขาว</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-slate-600 transition-colors"></i>
+                    </a>
+
+                    <a href="report.php?tab=whiteclass-structure" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-slate-400 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-slate-700 group-hover:text-white transition-all text-slate-600">
+                            <i class="fas fa-sitemap"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">โครงสร้างคณะกรรมการห้องเรียนสีขาว</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-slate-600 transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Tips Footer -->
+    <div class="mt-12 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100 dark:border-indigo-800 animate-fadeIn" style="animation-delay: 0.5s">
+        <div class="flex items-center gap-3 text-indigo-700 dark:text-indigo-400">
+            <i class="fas fa-lightbulb text-xl"></i>
+            <span class="font-bold">คำแนะนำ:</span>
+            <p class="text-sm font-medium">คุณสามารถคลิกเลือกประเภทรายงานต่างๆ เพื่อดูรายละเอียดและดาวน์โหลด/สั่งพิมพ์ได้ทันที</p>
+        </div>
+    </div>
+
+    <?php else: ?>
     <!-- Navigation Tabs -->
     <div class="mb-10 animate-fadeIn relative z-40" style="animation-delay: 0.1s">
         <div class="flex flex-wrap items-center gap-3 no-print">
+            <a href="report.php" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border border-slate-200 dark:border-slate-700 transition-all">
+                <i class="fas fa-arrow-left"></i> กลับหน้าเมนู
+            </a>
             <?php foreach ($mainTabs as [$key, $label, $color]): 
                 $isActive = $tab === $key;
                 $colors = [
@@ -298,6 +525,7 @@ ob_start();
             ?>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <script>
