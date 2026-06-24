@@ -7,7 +7,7 @@ require_once "../../class/UserLogin.php";
 require_once "../../class/Utils.php";
 
 // Check authentication
-if (!isset($_SESSION['Teacher_login'])) {
+if (!isset($_SESSION['Teacher_login']) && !isset($_SESSION['Officer_login'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

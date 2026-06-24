@@ -15,7 +15,7 @@ if (file_exists("../../vendor/autoload.php")) {
 }
 
 // Check authentication
-if (!isset($_SESSION['Teacher_login'])) {
+if (!isset($_SESSION['Teacher_login']) && !isset($_SESSION['Officer_login'])) {
     header('HTTP/1.1 401 Unauthorized');
     echo 'Unauthorized';
     exit;

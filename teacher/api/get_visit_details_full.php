@@ -11,7 +11,7 @@ require_once "../../class/UserLogin.php";
 require_once "../../class/Utils.php";
 
 // 1. Check Authentication
-if (!isset($_SESSION['Teacher_login'])) {
+if (!isset($_SESSION['Teacher_login']) && !isset($_SESSION['Officer_login'])) {
     echo '<div class="p-8 text-center text-rose-500 font-black italic">! ไม่ได้รับอนุญาตให้เข้าถึงข้อมูล</div>';
     exit;
 }

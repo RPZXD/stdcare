@@ -110,8 +110,8 @@ class Attendance {
         // then run a CASE-based UPDATE for existing rows and a multi-row INSERT for new rows.
         if (empty($stu_ids) || !is_array($stu_ids)) return 0;
 
-        // Normalize arrays
-        $stu_ids = array_values($stu_ids);
+        // Normalize and deduplicate student IDs
+        $stu_ids = array_unique(array_values($stu_ids));
         $statuses = is_array($statuses) ? $statuses : [];
         $reasons = is_array($reasons) ? $reasons : [];
 

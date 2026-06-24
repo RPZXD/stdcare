@@ -235,11 +235,6 @@ $currentYear = date('Y') + 543; // Buddhist year
 
     <!-- Page 2: รายชื่อนักเรียนยากจน -->
     <div class="print-container page-break">
-        <!-- Date Header Right-aligned -->
-        <div style="text-align: right; margin-bottom: 30px;">
-            วันที่ &nbsp;<?= toThaiNumber($currentDay) ?>&nbsp; เดือน &nbsp;<?= htmlspecialchars($currentMonthName) ?>&nbsp; พ.ศ. &nbsp;<?= toThaiNumber($currentYear) ?>
-        </div>
-        
         <!-- Document Title -->
         <div style="text-align: center; font-weight: bold; line-height: 1.6; margin-bottom: 25px;">
             <p style="margin: 0 0 5px 0; padding: 0;">รายชื่อนักเรียนที่มีความจำเป็นทางด้านเศรษฐกิจ (ยากจน )</p>

@@ -129,7 +129,7 @@ try {
     /*
     // ดึงนักเรียนที่สถานะ "ขาดเรียน" (2) ของวันนี้ ที่ยังไม่มีบันทึกหักคะแนนในวันนี้
     $sqlAbsent = "
-        SELECT sa.student_id
+        SELECT DISTINCT sa.student_id
         FROM student_attendance sa
         LEFT JOIN behavior b 
             ON sa.student_id = b.stu_id 
@@ -187,7 +187,7 @@ try {
 
     // ดึงนักเรียนที่สถานะ "สาย" (3) ของวันนี้ ที่ยังไม่มีบันทึกหักคะแนนในวันนี้
     $sqlLate = "
-        SELECT sa.student_id
+        SELECT DISTINCT sa.student_id
         FROM student_attendance sa
         LEFT JOIN behavior b 
             ON sa.student_id = b.stu_id 

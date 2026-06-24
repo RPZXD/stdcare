@@ -325,6 +325,16 @@ ob_start();
                         <i class="fas fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
                     </a>
 
+                    <a href="report_class_visithome.php" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-emerald-200 group">
+                        <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all text-emerald-500">
+                            <i class="fas fa-house-chimney-user"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-slate-800 dark:text-white">รายงานการเยี่ยมบ้านรายห้อง</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
+                    </a>
+
                     <a href="report.php?tab=parent-leader" class="menu-item flex items-center gap-4 p-4 rounded-2xl border border-slate-50 dark:border-slate-700/50 hover:border-emerald-200 group">
                         <span class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all text-emerald-500">
                             <i class="fas fa-id-card"></i>
