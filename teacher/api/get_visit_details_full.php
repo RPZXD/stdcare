@@ -45,6 +45,15 @@ try {
         exit;
     }
     
+    // Fetch room advisors
+    $advisors = [];
+    if (!empty($studentData['Stu_major']) && !empty($studentData['Stu_room'])) {
+        $advisorSql = "SELECT Teach_name FROM teacher WHERE Teach_class = :class AND Teach_room = :room AND Teach_status = 1";
+        $advisorStmt = $db->prepare($advisorSql);
+        $advisorStmt->execute(['class' => $studentData['Stu_major'], 'room' => $studentData['Stu_room']]);
+        $advisors = $advisorStmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    
     // 4. Fetch Visit Data
     $round1Data = null;
     $round2Data = null;
@@ -87,7 +96,18 @@ try {
     }
 ?>
 
+<?php
+    $configPath = __DIR__ . '/../../config.json';
+    $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+    $global = $config['global'] ?? ['nameschool' => 'โรงเรียนพิชัย'];
+?>
 <div class="space-y-10">
+    <!-- Print-Only Header (Formal Government Document Style) -->
+    <div class="print-only mb-6 text-center font-bold" style="display: none; font-family: 'Sarabun', sans-serif;">
+        <img src="../dist/img/ตราครุฑ.jpg" class="mx-auto mb-4" style="height: 1.2in; width: auto;">
+        <h2 class="text-xl font-bold mb-1">แบบรายงานการเยี่ยมบ้านนักเรียนรายบุคคล</h2>
+        <h3 class="text-lg font-bold mb-6">โรงเรียน<?php echo htmlspecialchars($global['nameschool']); ?></h3>
+    </div>
     <!-- Student Quick Profile -->
     <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-[2.5rem] p-8 border border-white dark:border-slate-800 shadow-xl overflow-hidden relative">
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl"></div>
@@ -213,6 +233,27 @@ try {
                 <?php endif; ?>
             </div>
         <?php endfor; ?>
+    <?php
+    // Prepare advisors string for the signature block
+    $advisorStr1 = isset($advisors[0]) ? $advisors[0] : '......................................................';
+    $advisorStr2 = isset($advisors[1]) ? $advisors[1] : '';
+    ?>
+    <!-- Print-Only Signatures (Formal Government Document Style) -->
+    <div class="print-only mt-10 pt-10" style="display: none; font-family: 'Sarabun', sans-serif;">
+        <div class="grid grid-cols-2 gap-12 text-center text-sm">
+            <div>
+                <p class="mb-12">ลงชื่อ.............................................................. ผู้ปกครองนักเรียน</p>
+                <p>(..............................................................)</p>
+            </div>
+            <div>
+                <p class="mb-12">ลงชื่อ.............................................................. ครูประจำชั้น/ผู้เยี่ยมบ้าน</p>
+                <p>( <?php echo htmlspecialchars($advisorStr1); ?> )</p>
+                <?php if (!empty($advisorStr2)): ?>
+                    <p class="mt-8 mb-12">ลงชื่อ.............................................................. ครูประจำชั้นร่วม</p>
+                    <p>( <?php echo htmlspecialchars($advisorStr2); ?> )</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
 

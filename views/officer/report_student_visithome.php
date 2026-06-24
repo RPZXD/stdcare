@@ -57,7 +57,168 @@ ob_start();
     @media print {
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-        .glass-effect { box-shadow: none !important; border: 1px solid #eee !important; }
+        
+        /* Reset margins and background for direct print */
+        body, html {
+            background: white !important;
+            color: black !important;
+            font-size: 11pt !important;
+            font-family: 'Sarabun', 'TH Sarabun New', sans-serif !important;
+        }
+        
+        /* Remove sidebar/navbar wrapper offset */
+        aside, nav, footer, #preloader {
+            display: none !important;
+        }
+        .lg\:ml-64 {
+            margin-left: 0 !important;
+        }
+        main {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .max-w-7xl, .max-w-\[1600px\] {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Style report containers */
+        .glass-effect {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        #reportContainer {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Format student profile for print */
+        #reportContent .bg-gradient-to-br {
+            background: transparent !important;
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            padding: 20px !important;
+            margin-bottom: 25px !important;
+        }
+        #reportContent img {
+            border-radius: 12px !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        /* Layout Grid and Spacing */
+        #reportContent .space-y-10 > .grid {
+            display: block !important;
+        }
+        
+        /* Force page-break before Term 2 so Term 1 is Page 1 and Term 2 is Page 2 */
+        #reportContent .space-y-10 > .grid > div:nth-child(2) {
+            page-break-before: always !important;
+            margin-top: 40px !important;
+        }
+        
+        /* Hide Term round indicators (circles with numbers 1 and 2) */
+        #reportContent div.flex > div.w-10 {
+            display: none !important;
+        }
+        
+        /* Format h3 headers as clean formal titles */
+        #reportContent h3 {
+            font-size: 13pt !important;
+            color: black !important;
+            font-weight: bold !important;
+            margin-bottom: 15px !important;
+            border-bottom: 2px solid black !important;
+            padding-bottom: 6px !important;
+            margin-left: 0 !important;
+        }
+        
+        /* Clean standard list block for questions */
+        #reportContent .grid-cols-1 {
+            display: block !important;
+        }
+        #reportContent .bg-white.dark\:bg-slate-900 {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        
+        /* Print question items as dotted list rows */
+        #reportContent .group {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            border: none !important;
+            border-bottom: 1px dotted #aaa !important;
+            border-radius: 0 !important;
+            padding: 6px 0 !important;
+            margin-bottom: 2px !important;
+            background: transparent !important;
+            page-break-inside: avoid !important;
+            box-shadow: none !important;
+        }
+        #reportContent .group div.flex-1 {
+            display: flex !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+        }
+        #reportContent .group p.text-\[9px\] {
+            font-size: 10pt !important;
+            color: #444 !important;
+            font-weight: bold !important;
+            margin: 0 !important;
+            display: inline-block !important;
+        }
+        #reportContent .group p.text-sm {
+            font-size: 10pt !important;
+            color: black !important;
+            font-weight: normal !important;
+            margin: 0 !important;
+            display: inline-block !important;
+            text-align: right !important;
+        }
+        #reportContent .group .w-6 {
+            display: none !important;
+        }
+        
+        /* Format problems box for print */
+        #reportContent .bg-orange-50 {
+            background: transparent !important;
+            border: 1px solid #ccc !important;
+            border-radius: 8px !important;
+            padding: 15px !important;
+            margin-top: 20px !important;
+            page-break-inside: avoid !important;
+        }
+        #reportContent .bg-orange-50 h4 {
+            color: black !important;
+            font-weight: bold !important;
+            font-size: 10pt !important;
+            border-bottom: 1px solid #eee !important;
+            padding-bottom: 5px !important;
+            margin-bottom: 8px !important;
+        }
+        #reportContent .bg-orange-50 p {
+            color: black !important;
+            font-size: 10pt !important;
+        }
+        
+        /* Format photos gallery */
+        #reportContent .grid-cols-3 {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 15px !important;
+            page-break-inside: avoid !important;
+        }
+        #reportContent .grid-cols-3 img {
+            border-radius: 8px !important;
+            border: 1px solid #ddd !important;
+        }
     }
     
     /* Focus & Typing Interactions */
