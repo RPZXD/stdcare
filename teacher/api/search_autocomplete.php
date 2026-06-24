@@ -69,7 +69,8 @@ if ($type === 'teacher') {
         
         $data[] = [
             'label' => $fullName . $classRoom . $statusText, // ชื่อ (ม.ชั้น/ห้อง) [สถานะ]
-            'value' => $row['Stu_name'] . ' ' . $row['Stu_sur'] // ใช้ชื่อเป็น value สำหรับค้นหา
+            'value' => $row['Stu_name'] . ' ' . $row['Stu_sur'], // ใช้ชื่อเป็น value สำหรับค้นหา
+            'id' => $row['Stu_id'] // รหัสนักเรียนสำหรับเอาไปใช้งานต่อ
         ];
     }
 }
