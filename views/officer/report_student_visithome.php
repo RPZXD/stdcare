@@ -33,14 +33,21 @@ ob_start();
         max-height: 300px;
         overflow-y: auto;
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
         border: 1px solid #e2e8f0 !important;
         z-index: 9999 !important;
         padding: 8px;
+        transition: background-color 0.3s;
     }
-    .ui-menu-item { border-radius: 8px; margin-bottom: 2px; }
-    .ui-menu-item-wrapper { padding: 10px 15px !important; transition: all 0.2s; font-size: 0.9rem; font-weight: 600; }
+    .dark .ui-autocomplete {
+        background: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .ui-menu-item { border-radius: 12px; margin-bottom: 2px; }
+    .ui-menu-item-wrapper { padding: 12px 18px !important; transition: all 0.2s; font-size: 0.9rem; font-weight: 600; color: #334155; }
+    .dark .ui-menu-item-wrapper { color: #cbd5e1; }
     .ui-state-active, .ui-state-active:hover {
         background: linear-gradient(90deg, #f97316, #ea580c) !important;
         color: white !important;
@@ -51,6 +58,33 @@ ob_start();
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         .glass-effect { box-shadow: none !important; border: 1px solid #eee !important; }
+    }
+    
+    /* Focus & Typing Interactions */
+    #studentSearch {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #studentSearch:focus {
+        border-color: #f97316 !important;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+        background-color: white;
+    }
+    .dark #studentSearch:focus {
+        background-color: rgba(15, 23, 42, 0.6);
+    }
+    
+    /* Custom Animations for Empty State */
+    @keyframes bounceSlow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .animate-bounce-slow {
+        animation: bounceSlow 3s ease-in-out infinite;
+    }
+    .text-gradient {
+        background: linear-gradient(135deg, #f97316, #dc2626);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 </style>
 
@@ -78,7 +112,11 @@ ob_start();
                 </div>
                 
                 <div class="flex items-center gap-4 no-print">
-                    <a href="report.php" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border border-slate-200 dark:border-slate-700 transition-all shadow-sm">
+                    <!-- Print Button (Hidden by default, shown when reportContainer is visible) -->
+                    <button type="button" id="printReportBtn" class="hidden px-5 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all shadow-md hover:scale-105 hover:shadow-lg active:scale-95">
+                        <i class="fas fa-print animate-bounce"></i> พิมพ์รายงาน
+                    </button>
+                    <a href="report.php" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border border-slate-200 dark:border-slate-700 transition-all shadow-sm active:scale-95">
                         <i class="fas fa-arrow-left"></i> กลับหน้าเมนู
                     </a>
                 </div>
@@ -97,7 +135,10 @@ ob_start();
                     </div>
                     <input type="text" id="studentSearch" placeholder="พิมพ์ชื่อ นามสกุล หรือรหัสประจำตัวนักเรียนเพื่อค้นหา..." 
                            value="<?php echo htmlspecialchars($preloadStudentName ?? ''); ?>"
-                           class="w-full pl-12 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900/20 outline-none transition-all font-bold text-slate-700 dark:text-white">
+                           class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900/20 outline-none transition-all font-bold text-slate-700 dark:text-white">
+                    <button type="button" id="clearSearchBtn" class="<?php echo empty($student_id) ? 'hidden' : ''; ?> absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center">
+                        <i class="fas fa-times-circle text-lg"></i>
+                    </button>
                     <input type="hidden" id="selectedStudentId" name="student_id" value="<?php echo htmlspecialchars($student_id ?? ''); ?>">
                 </div>
             </div>
@@ -120,17 +161,28 @@ ob_start();
     </div>
 
     <!-- Empty State -->
-    <div id="emptyState" class="animate-fadeIn py-20 text-center">
-        <div class="w-32 h-32 bg-slate-50 dark:bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner border border-slate-100 dark:border-slate-800 transform transition-transform hover:scale-110">
-            <i class="fas fa-search-plus text-5xl text-slate-200"></i>
+    <div id="emptyState" class="animate-fadeIn py-20 text-center relative overflow-hidden">
+        <!-- Interactive Glowing/Floating background effects -->
+        <div class="relative w-48 h-48 mx-auto mb-8 flex items-center justify-center">
+            <div class="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-red-500/10 rounded-full animate-ping duration-1000 opacity-75"></div>
+            <div class="absolute w-36 h-36 bg-orange-500/5 rounded-full border border-orange-500/20 animate-pulse"></div>
+            <div class="absolute w-28 h-28 bg-white dark:bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-xl border border-slate-100 dark:border-slate-800 transform hover:scale-110 transition-transform duration-500">
+                <i class="fas fa-search-location text-5xl text-gradient animate-bounce-slow"></i>
+            </div>
         </div>
-        <h3 class="text-2xl font-black text-slate-400 uppercase tracking-widest">กรุณาเลือกนักเรียนเพื่อแสดงข้อมูล</h3>
-        <p class="text-slate-400 mt-2 font-medium italic">พิมพ์ชื่อหรือรหัสประจำตัวในกล่องค้นหาเพื่อดึงรายละเอียดการเยี่ยมบ้านรายบุคคล</p>
+        <h3 class="text-2xl font-black text-slate-800 dark:text-white tracking-wide uppercase">พร้อมค้นหารายงานการเยี่ยมบ้าน</h3>
+        <p class="text-slate-400 mt-3 max-w-md mx-auto font-medium text-sm leading-relaxed">
+            พิมพ์ชื่อ นามสกุล หรือรหัสประจำตัวนักเรียน ในช่องค้นหาด้านบน เพื่อตรวจสอบและจัดพิมพ์รายงานผลการเยี่ยมบ้านรายบุคคลทันที
+        </p>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const searchInput = document.getElementById('studentSearch');
+    const printBtn = document.getElementById('printReportBtn');
+
     // Helper function to load home visit details via AJAX
     function loadReport(studentId) {
         if (!studentId) return;
@@ -160,6 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(html => {
                 reportContent.innerHTML = `<div class="animate-fadeIn">${html}</div>`;
+                // Show print button when report is successfully loaded
+                if (printBtn) {
+                    printBtn.classList.remove('hidden');
+                }
             })
             .catch(err => {
                 Swal.close();
@@ -169,6 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>เกิดข้อผิดพลาดในการโหลดข้อมูล หรือไม่พบข้อมูลการเยี่ยมบ้านของนักเรียนคนนี้</p>
                     </div>
                 `;
+                if (printBtn) {
+                    printBtn.classList.add('hidden');
+                }
             });
     }
 
@@ -187,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             select: (e, ui) => {
                 $('#studentSearch').val(ui.item.value);
                 $('#selectedStudentId').val(ui.item.id);
+                if (clearBtn) clearBtn.classList.remove('hidden');
                 loadReport(ui.item.id);
                 return false;
             }
@@ -215,14 +275,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Clear selectedStudentId on manual typing changes
-    document.getElementById('studentSearch').addEventListener('input', function() {
-        document.getElementById('selectedStudentId').value = '';
-    });
+    // Toggle clear button and reset selection on input changes
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            document.getElementById('selectedStudentId').value = '';
+            if (this.value.trim() !== '') {
+                if (clearBtn) clearBtn.classList.remove('hidden');
+            } else {
+                if (clearBtn) clearBtn.classList.add('hidden');
+            }
+        });
+    }
+
+    // Clear Button Action
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            document.getElementById('selectedStudentId').value = '';
+            clearBtn.classList.add('hidden');
+
+            const reportContainer = document.getElementById('reportContainer');
+            const emptyState = document.getElementById('emptyState');
+            if (reportContainer) reportContainer.classList.add('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (printBtn) printBtn.classList.add('hidden');
+        });
+    }
+
+    // Print Button Action
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            window.print();
+        });
+    }
 
     // 3. Auto-submit if student_id is preloaded
     const preloadedId = '<?php echo htmlspecialchars($student_id ?? ""); ?>';
     if (preloadedId) {
+        if (clearBtn) clearBtn.classList.remove('hidden');
         loadReport(preloadedId);
     }
 });
