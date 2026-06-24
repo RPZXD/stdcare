@@ -31,6 +31,20 @@ $pee = $user->getPee();
 $pageTitle = 'รายงานการเยี่ยมบ้านรายบุคคล';
 $activePage = 'report'; // Highlights sidebar item
 
+// Preload Student details if student_id is passed via GET
+$student_id = $_GET['student_id'] ?? '';
+$preloadStudentName = '';
+if (!empty($student_id)) {
+    $preloadSql = "SELECT Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room FROM student WHERE Stu_id = :student_id";
+    $preloadStmt = $db->prepare($preloadSql);
+    $preloadStmt->bindParam(':student_id', $student_id);
+    $preloadStmt->execute();
+    $preloadStudent = $preloadStmt->fetch(PDO::FETCH_ASSOC);
+    if ($preloadStudent) {
+        $preloadStudentName = $preloadStudent['Stu_pre'] . $preloadStudent['Stu_name'] . ' ' . $preloadStudent['Stu_sur'] . ' (ม.' . $preloadStudent['Stu_major'] . '/' . $preloadStudent['Stu_room'] . ')';
+    }
+}
+
 // (5) Render View
 include __DIR__ . '/../views/officer/report_student_visithome.php';
 ?>

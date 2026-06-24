@@ -96,8 +96,9 @@ ob_start();
                         <i class="fas fa-search text-lg"></i>
                     </div>
                     <input type="text" id="studentSearch" placeholder="พิมพ์ชื่อ นามสกุล หรือรหัสประจำตัวนักเรียนเพื่อค้นหา..." 
+                           value="<?php echo htmlspecialchars($preloadStudentName ?? ''); ?>"
                            class="w-full pl-12 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900/20 outline-none transition-all font-bold text-slate-700 dark:text-white">
-                    <input type="hidden" id="selectedStudentId" name="student_id">
+                    <input type="hidden" id="selectedStudentId" name="student_id" value="<?php echo htmlspecialchars($student_id ?? ''); ?>">
                 </div>
             </div>
 
@@ -212,6 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('studentSearch').addEventListener('input', function() {
         document.getElementById('selectedStudentId').value = '';
     });
+
+    // 3. Auto-submit if student_id is preloaded
+    const preloadedId = '<?php echo htmlspecialchars($student_id ?? ""); ?>';
+    if (preloadedId) {
+        $('#searchForm').submit();
+    }
 });
 </script>
 
