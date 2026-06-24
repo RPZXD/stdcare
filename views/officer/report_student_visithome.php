@@ -257,13 +257,13 @@ ob_start();
             <div class="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
             <div class="absolute bottom-0 left-0 w-64 h-64 bg-red-500/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
             
-            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="no-print relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-6">
                     <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl flex items-center justify-center text-white shadow-xl transform hover:rotate-6 transition-transform">
-                        <i class="fas fa-home-user text-3xl"></i>
+                        <i class="no-print fas fa-home-user text-3xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight">
+                        <h1 class="no-print text-3xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight">
                             รายงานการเยี่ยมบ้านรายบุคคล
                         </h1>
                         <p class="text-slate-500 dark:text-slate-400 font-medium mt-1">

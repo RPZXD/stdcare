@@ -1,7 +1,8 @@
 <?php
 /**
  * API: Get Visit Details Full (HTML Response)
- * Refactored with Tailwind CSS for Modern Premium UI
+ * Clean Minimal Report UI & Optimized A4 Perfect Print
+ * (No Borders, Large Profile Image, No Signatures)
  */
 session_start();
 header('Content-Type: text/html; charset=utf-8');
@@ -68,10 +69,14 @@ try {
     $stmt2->execute(['student_id' => $student_id, 'term' => '2', 'pee' => $pee]);
     $round2Data = $stmt2->fetch(PDO::FETCH_ASSOC);
 
+    $hasRound1 = !empty($round1Data);
+    $hasRound2 = !empty($round2Data);
+    $activeRoundsCount = ($hasRound1 ? 1 : 0) + ($hasRound2 ? 1 : 0);
+
     // 5. Questions Definition
     $questions = [
         1 => ["label" => "บ้านที่อยู่อาศัย", "options" => ["บ้านของตนเอง", "บ้านเช่า", "อาศัยอยู่กับผู้อื่น"]],
-        2 => ["label" => "ระยะทาง", "options" => ["1-5 กิโลเมตร", "6-10 กิโลเมตร", "11-15 กิโลเมตร", "16-20 กิโลเมตร", "20 กม. ขึ้นไป"]],
+        2 => ["label" => "ระยะทางไป รร.", "options" => ["1-5 กิโลเมตร", "6-10 กิโลเมตร", "11-15 กิโลเมตร", "16-20 กิโลเมตร", "20 กม. ขึ้นไป"]],
         3 => ["label" => "การเดินทาง", "options" => ["เดิน", "รถจักรยาน", "รถจักรยานยนต์", "รถยนต์ส่วนตัว", "รถรับส่ง/สาย", "อื่นๆ"]],
         4 => ["label" => "สภาพแวดล้อม", "options" => ["ดี", "พอใช้", "ไม่ดี", "ควรปรับปรุง"]],
         5 => ["label" => "อาชีพผู้ปกครอง", "options" => ["เกษตรกร", "ค้าขาย", "รับราชการ", "รับจ้าง", "อื่นๆ"]],
@@ -79,14 +84,14 @@ try {
         7 => ["label" => "สถานภาพบิดามารดา", "options" => ["อยู่ด้วยกัน", "หย่าร้าง", "บิดาถึงแก่กรรม", "มารดาถึงแก่กรรม", "ถึงแก่กรรมทั้งคู่"]],
         8 => ["label" => "การอบรมเลี้ยงดู", "options" => ["เข้มงวด", "ตามใจ", "ใช้เหตุผล", "ปล่อยปละละเลย", "อื่นๆ"]],
         9 => ["label" => "โรคประจำตัว", "options" => ["ไม่มี", "มี"]],
-        10 => ["label" => "ความสัมพันธ์", "options" => ["อบอุ่น", "เฉยๆ", "ห่างเหิน"]],
+        10 => ["label" => "ความสัมพันธ์ในบ้าน", "options" => ["อบอุ่น", "เฉยๆ", "ห่างเหิน"]],
         11 => ["label" => "หน้าที่ในบ้าน", "options" => ["มีหน้าที่ประจำ", "ทำเป็นครั้งคราว", "ไม่มี"]],
         12 => ["label" => "สนิทกับใครที่สุด", "options" => ["พ่อ", "แม่", "พี่สาว", "น้องสาว", "พี่ชาย", "น้องชาย", "อื่นๆ"]],
         13 => ["label" => "รายได้/ใช้จ่าย", "options" => ["เพียงพอ", "ไม่พอในบางครั้ง", "ขัดสน"]],
         14 => ["label" => "ลักษณะเพื่อนเล่น", "options" => ["รุ่นเดียวกัน", "รุ่นน้อง", "รุ่นพี่", "ทุกรุ่น"]],
         15 => ["label" => "การศึกษาต่อ", "options" => ["ศึกษาต่อ", "ประกอบอาชีพ", "อื่นๆ"]],
         16 => ["label" => "ที่ปรึกษาปัญหา", "options" => ["พ่อ", "แม่", "พี่สาว", "น้องสาว", "พี่ชาย", "น้องชาย", "อื่นๆ"]],
-        17 => ["label" => "ความรู้สึกครูมาเยี่ยม", "options" => ["พอใจ", "เฉยๆ", "ไม่พอใจ"]],
+        17 => ["label" => "รู้สึกเมื่อครูมาเยี่ยม", "options" => ["พอใจ", "เฉยๆ", "ไม่พอใจ"]],
         18 => ["label" => "ทัศนคติต่อโรงเรียน", "options" => ["พอใจ", "เฉยๆ", "ไม่พอใจ"]],
     ];
 
@@ -101,167 +106,276 @@ try {
     $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
     $global = $config['global'] ?? ['nameschool' => 'โรงเรียนพิชัย'];
 ?>
-<div class="space-y-10">
-    <!-- Print-Only Header (Formal Government Document Style) -->
-    <div class="print-only mb-6 text-center font-bold" style="display: none; font-family: 'Sarabun', sans-serif;">
-        <img src="../dist/img/ตราครุฑ.jpg" class="mx-auto mb-4" style="height: 1.2in; width: auto;">
-        <h2 class="text-xl font-bold mb-1">แบบรายงานการเยี่ยมบ้านนักเรียนรายบุคคล</h2>
-        <h3 class="text-lg font-bold mb-6">โรงเรียน<?php echo htmlspecialchars($global['nameschool']); ?></h3>
+
+<style>
+    /* Screen Styles */
+    @media screen {
+        .print-only {
+            display: none !important;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+        }
+        body, html {
+            background-color: #fff !important;
+            color: #000 !important;
+            font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important;
+            font-size: 15px !important;
+            line-height: 1.35 !important;
+        }
+        /* Override parent print view styles for print-only elements */
+        #reportContent img.garuda-logo {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            margin: 0 auto 12px auto !important;
+            display: block !important;
+        }
+        #reportContent img.print-avatar {
+            border: 1px solid #000 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            display: block !important;
+        }
+    }
+</style>
+
+<!-- Screen-Only Container (Retains user's beautiful modern UI/UX) -->
+<div class="no-print space-y-8 font-sans text-slate-800 dark:text-slate-100">
+    <!-- Header หัวรายงานเอกสาร (แสดงบนหน้าจอและหน้าพิมพ์แบบเรียบง่าย) -->
+    <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            รายงานข้อมูลการเยี่ยมบ้านนักเรียน ปีการศึกษา <?= ($pee) ?>
+        </h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1"><?= htmlspecialchars($global['nameschool']) ?></p>
     </div>
-    <!-- Student Quick Profile -->
-    <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-[2.5rem] p-8 border border-white dark:border-slate-800 shadow-xl overflow-hidden relative">
-        <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl"></div>
-        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
-            <div class="relative group">
-                <?php 
-                    $stuImg = !empty($studentData['Stu_picture']) ? "../img/student/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.svg";
-                ?>
-                <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" 
-                     class="w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl group-hover:scale-105 transition-transform duration-500">
-                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-orange-600 text-white rounded-2xl flex items-center justify-center font-black shadow-lg italic">
-                    <?= $studentData['Stu_no'] ?>
-                </div>
-            </div>
-            <div class="flex-1 text-center md:text-left space-y-2">
-                <div class="flex flex-col md:flex-row md:items-center gap-3">
-                    <h2 class="text-3xl font-black text-slate-800 dark:text-white italic">
-                        <?= $studentData['Stu_pre'].$studentData['Stu_name'].' '.$studentData['Stu_sur'] ?>
-                    </h2>
-                    <span class="px-3 py-1 bg-white/50 dark:bg-slate-800/50 rounded-xl text-xs font-black text-slate-400 border border-slate-200 dark:border-slate-700 italic">
-                        ID: <?= $studentData['Stu_id'] ?>
-                    </span>
-                </div>
-                <p class="text-slate-500 dark:text-slate-400 font-bold italic">
-                    ชั้นมัธยมศึกษาปีที่ <?= $studentData['Stu_major'] ?>/<?= $studentData['Stu_room'] ?>
+
+    <!-- Student Quick Profile (รูปซ้ายใหญ่ / ข้อมูลขวา / ไม่มีกรอบ) -->
+    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-8 py-2">
+        <div class="flex-shrink-0">
+            <?php 
+                $stuImg = !empty($studentData['Stu_picture']) ? "../img/student/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.svg";
+            ?>
+            <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" 
+                 class="w-36 h-44 rounded-2xl object-cover shadow-md border border-slate-100 dark:border-slate-800 print:w-32 print:h-40 print:shadow-none">
+        </div>
+        <div class="flex-1 space-y-3 text-center sm:text-left pt-2">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
+                    <?= $studentData['Stu_pre'].$studentData['Stu_name'].' '.$studentData['Stu_sur'] ?>
+                </h2>
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
+                    เลขประจำตัวนักเรียน: <?= $studentData['Stu_id'] ?> &bull; เลขที่: <?= $studentData['Stu_no'] ?>
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center">
-                            <i class="fas fa-map-marker-alt text-xs"></i>
-                        </div>
-                        <span class="text-sm font-bold text-slate-600 dark:text-slate-300 truncate max-w-[250px]" title="<?= $studentData['Stu_addr'] ?>">
-                            <?= $studentData['Stu_addr'] ?: 'ไม่ระบุที่อยู่' ?>
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 flex items-center justify-center">
-                            <i class="fas fa-phone-alt text-xs"></i>
-                        </div>
-                        <span class="text-sm font-black text-slate-600 dark:text-slate-300">
-                            <?= $studentData['Par_phone'] ?: ($studentData['Stu_phone'] ?: '-') ?>
-                        </span>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="text-base font-semibold text-slate-700 dark:text-slate-300">
+                ชั้นมัธยมศึกษาปีที่ <?= $studentData['Stu_major'] ?>/<?= $studentData['Stu_room'] ?>
+            </div>
+
+            <div class="pt-2 space-y-1.5 text-sm text-slate-600 dark:text-slate-400 border-t border-dashed border-slate-200 dark:border-slate-700">
+                <div><strong>ที่อยู่:</strong> <?= $studentData['Stu_addr'] ?: 'ไม่ระบุที่อยู่' ?></div>
+                <div><strong>เบอร์โทรศัพท์ติดต่อ:</strong> <?= $studentData['Par_phone'] ?: ($studentData['Stu_phone'] ?: '-') ?></div>
             </div>
         </div>
     </div>
 
-    <!-- Visit Details Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Visit Details Grid (แบบข้อความล้วน / ไม่มีกรอบกล่อง) -->
+    <div class="grid grid-cols-1 <?= $activeRoundsCount > 1 ? 'lg:grid-cols-2' : '' ?> gap-10 pt-4 print-layout-grid">
         <?php for($round = 1; $round <= 2; $round++): 
             $data = ($round == 1) ? $round1Data : $round2Data;
+            if(!$data) continue; 
         ?>
-            <div class="space-y-6">
-                <div class="flex items-center gap-4 mb-2">
-                    <div class="w-10 h-10 <?= $round == 1 ? 'bg-indigo-600' : 'bg-emerald-600' ?> text-white rounded-2xl flex items-center justify-center shadow-lg font-black italic">
-                        <?= $round ?>
-                    </div>
-                    <h3 class="text-xl font-black text-slate-800 dark:text-white italic">การเยี่ยมบ้านภาคเรียนที่ <?= $round ?></h3>
+            <div class="space-y-4">
+                <div class="border-b-2 border-slate-800 dark:border-slate-200 pb-1.5">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                        ข้อมูลการเยี่ยมบ้าน ภาคเรียนที่ <?= $round ?>
+                    </h3>
                 </div>
 
-                <?php if(!$data): ?>
-                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-slate-300">
-                        <i class="fas fa-clock-rotate-left text-4xl mb-4 opacity-50"></i>
-                        <p class="font-black italic uppercase tracking-widest text-xs">อยู่ระหว่างรอดำเนินการ</p>
-                    </div>
-                <?php else: ?>
-                    <div class="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-xl space-y-6">
-                        <!-- Questions & Answers -->
-                        <div class="grid grid-cols-1 gap-4">
-                            <?php for($i = 1; $i <= 18; $i++): 
-                                $ans = getAnswer($i, $data['vh'.$i] ?? null, $questions);
-                                $label = $questions[$i]['label'];
-                            ?>
-                                <div class="flex items-start justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-orange-200 transition-colors">
-                                    <div class="flex-1">
-                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic"><?= $label ?></p>
-                                        <p class="text-sm font-black text-slate-700 dark:text-slate-200"><?= $ans ?></p>
-                                    </div>
-                                    <div class="w-6 h-6 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center text-[8px] font-black text-slate-300">
-                                        <?= $i ?>
-                                    </div>
-                                </div>
-                            <?php endfor; ?>
+                <!-- รายการคำถามคำตอบในรูปแบบ Text รายงาน -->
+                <div class="grid grid-cols-1 <?= $activeRoundsCount == 1 ? 'sm:grid-cols-2' : '' ?> gap-x-8 gap-y-2.5 text-sm print-sub-grid">
+                    <?php for($i = 1; $i <= 18; $i++): 
+                        $ans = getAnswer($i, $data['vh'.$i] ?? null, $questions);
+                        $label = $questions[$i]['label'];
+                    ?>
+                        <div class="flex items-baseline justify-between border-b border-dotted border-slate-200 dark:border-slate-700 pb-1">
+                            <span class="text-slate-500 dark:text-slate-400 pr-4"><?= $i ?>. <?= $label ?></span>
+                            <span class="font-bold text-slate-900 dark:text-white text-right"><?= $ans ?></span>
                         </div>
+                    <?php endfor; ?>
+                </div>
 
-                        <!-- Problems Section -->
-                        <?php if(!empty($data['vh20'])): ?>
-                            <div class="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-2xl border border-orange-100 dark:border-orange-900/30">
-                                <h4 class="text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest italic mb-3 flex items-center gap-2">
-                                    <i class="fas fa-exclamation-triangle"></i> ปัญหาและความต้องการ
-                                </h4>
-                                <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed italic">
-                                    <?= nl2br(htmlspecialchars($data['vh20'])) ?>
-                                </p>
-                            </div>
-                        <?php endif; ?>
+                <!-- ปัญหาและความต้องการ -->
+                <?php if(!empty($data['vh20'])): ?>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                            [ปัญหาและความต้องการที่พบ]
+                        </h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed pl-4 border-l-2 border-slate-300 dark:border-slate-600">
+                            <?= nl2br(htmlspecialchars($data['vh20'])) ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
 
-                        <!-- Images Gallery -->
-                        <?php 
-                            $images = [];
-                            for($k=1;$k<=5;$k++) if(!empty($data['picture'.$k])) $images[] = $data['picture'.$k];
-                            
-                            if(!empty($images)):
-                        ?>
-                            <div class="space-y-3">
-                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic px-1">ภาพประกอบการเยี่ยมบ้าน</h4>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <?php foreach($images as $img): 
-                                        $imgPath = "../teacher/uploads/visithome" . ($pee - 543) . "/" . $img;
-                                    ?>
-                                        <a href="<?= $imgPath ?>" target="_blank" class="relative group aspect-square overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <img src="<?= $imgPath ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <i class="fas fa-expand text-white"></i>
-                                            </div>
-                                        </a>
-                                    <?php endforeach; ?>
+                <!-- ภาพประกอบ (ซ่อนตอนพิมพ์อัตโนมัติเพื่อคุมระยะหน้ากระดาษ) -->
+                <?php 
+                    $images = [];
+                    for($k=1;$k<=5;$k++) if(!empty($data['picture'.$k])) $images[] = $data['picture'.$k];
+                    if(!empty($images)):
+                ?>
+                    <div class="space-y-2 pt-4 no-print">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ภาพประกอบการเยี่ยมบ้าน</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <?php foreach($images as $img): 
+                                $imgPath = "../teacher/uploads/visithome" . ($pee - 543) . "/" . $img;
+                            ?>
+                                <div class="aspect-square overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                                    <img src="<?= $imgPath ?>" class="w-full h-full object-cover">
                                 </div>
-                            </div>
-                        <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endfor; ?>
-    <?php
-    // Prepare advisors string for the signature block
-    $advisorStr1 = isset($advisors[0]) ? $advisors[0] : '......................................................';
-    $advisorStr2 = isset($advisors[1]) ? $advisors[1] : '';
-    ?>
-    <!-- Print-Only Signatures (Formal Government Document Style) -->
-    <div class="print-only mt-10 pt-10" style="display: none; font-family: 'Sarabun', sans-serif;">
-        <div class="grid grid-cols-2 gap-12 text-center text-sm">
-            <div>
-                <p class="mb-12">ลงชื่อ.............................................................. ผู้ปกครองนักเรียน</p>
-                <p>(..............................................................)</p>
-            </div>
-            <div>
-                <p class="mb-12">ลงชื่อ.............................................................. ครูประจำชั้น/ผู้เยี่ยมบ้าน</p>
-                <p>( <?php echo htmlspecialchars($advisorStr1); ?> )</p>
-                <?php if (!empty($advisorStr2)): ?>
-                    <p class="mt-8 mb-12">ลงชื่อ.............................................................. ครูประจำชั้นร่วม</p>
-                    <p>( <?php echo htmlspecialchars($advisorStr2); ?> )</p>
-                <?php endif; ?>
-            </div>
+    </div>
+</div>
+
+<!-- Print-Only Container (Formal Thai Government Document Style) -->
+<div class="print-only" style="display: none; font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif; color: #000; background-color: #fff;">
+    
+    <!-- Garuda Emblem & Header -->
+    <div style="text-align: center; margin-bottom: 25px;">
+        <img src="../dist/img/ตราครุฑ.jpg" class="garuda-logo" style="height: 1.25in; width: auto; display: block; margin: 0 auto 12px auto;">
+        <h2 style="font-size: 20px; font-weight: bold; margin: 0 0 4px 0; line-height: 1.4;">แบบรายงานการเยี่ยมบ้านนักเรียนรายบุคคล</h2>
+        <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 4px 0; line-height: 1.4;">โรงเรียน<?= htmlspecialchars($global['nameschool']) ?></h3>
+        <p style="font-size: 15px; margin: 0; line-height: 1.4;">ภาคเรียนที่ 1 และภาคเรียนที่ 2 ปีการศึกษา <?= ($pee) ?></p>
+    </div>
+
+    <!-- Student Profile Information Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 15px; line-height: 1.6;">
+        <tr>
+            <td style="width: 105px; padding: 4px 0; vertical-align: top;" rowspan="4">
+                <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" class="print-avatar" style="width: 90px; height: 112px; object-fit: cover; border: 1px solid #000; display: block;">
+            </td>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;">
+                ชื่อ-นามสกุล: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_pre'].$studentData['Stu_name'].' '.$studentData['Stu_sur']) ?></span>
+            </td>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000; width: 170px;">
+                เลขประจำตัว: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_id']) ?></span>
+            </td>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000; width: 100px;">
+                เลขที่: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_no']) ?></span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;" colspan="2">
+                ชั้นมัธยมศึกษาปีที่: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_major']) ?> / <?= htmlspecialchars($studentData['Stu_room']) ?></span>
+            </td>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;">
+                เบอร์โทรศัพท์: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Par_phone'] ?: ($studentData['Stu_phone'] ?: '-')) ?></span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px; font-weight: bold; border-bottom: 1px dotted #000;" colspan="3">
+                ที่อยู่: <span style="font-weight: normal;"><?= htmlspecialchars($studentData['Stu_addr'] ?: 'ไม่ระบุที่อยู่') ?></span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px;" colspan="3"></td> <!-- spacer alignment -->
+        </tr>
+    </table>
+
+    <!-- Comparison Table (Semester 1 vs Semester 2) -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; line-height: 1.3;">
+        <thead>
+            <tr style="background-color: #f3f4f6;">
+                <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; width: 35px; font-weight: bold;">ที่</th>
+                <th style="border: 1px solid #000; padding: 6px 8px; text-align: left; font-weight: bold;">รายการข้อมูลการเยี่ยมบ้าน</th>
+                <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; width: 190px; font-weight: bold;">ผลการเยี่ยมบ้าน ภาคเรียนที่ 1</th>
+                <th style="border: 1px solid #000; padding: 6px 4px; text-align: center; width: 190px; font-weight: bold;">ผลการเยี่ยมบ้าน ภาคเรียนที่ 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php for($i = 1; $i <= 18; $i++): 
+                $ans1 = getAnswer($i, $round1Data['vh'.$i] ?? null, $questions);
+                $ans2 = getAnswer($i, $round2Data['vh'.$i] ?? null, $questions);
+                $label = $questions[$i]['label'];
+            ?>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 5px 4px; text-align: center;"><?= $i ?></td>
+                    <td style="border: 1px solid #000; padding: 5px 8px;"><?= htmlspecialchars($label) ?></td>
+                    <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; font-weight: <?= ($ans1 != '-') ? 'bold' : 'normal' ?>;"><?= htmlspecialchars($ans1) ?></td>
+                    <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; font-weight: <?= ($ans2 != '-') ? 'bold' : 'normal' ?>;"><?= htmlspecialchars($ans2) ?></td>
+                </tr>
+            <?php endfor; ?>
+        </tbody>
+    </table>
+
+    <!-- Problems and Needs Section (Print-Only) -->
+    <?php if(!empty($round1Data['vh20']) || !empty($round2Data['vh20'])): ?>
+        <div style="margin-bottom: 25px; border: 1px solid #000; padding: 12px; border-radius: 4px; page-break-inside: avoid; font-size: 14px;">
+            <h4 style="font-size: 15px; font-weight: bold; margin: 0 0 8px 0; border-bottom: 1px solid #000; padding-bottom: 4px;">ปัญหาและความต้องการที่พบ / ข้อเสนอแนะเพิ่มเติม</h4>
+            <?php if(!empty($round1Data['vh20'])): ?>
+                <div style="margin-bottom: 6px;">
+                    <strong>ภาคเรียนที่ 1:</strong> <?= nl2br(htmlspecialchars($round1Data['vh20'])) ?>
+                </div>
+            <?php endif; ?>
+            <?php if(!empty($round2Data['vh20'])): ?>
+                <div style="margin-bottom: 6px;">
+                    <strong>ภาคเรียนที่ 2:</strong> <?= nl2br(htmlspecialchars($round2Data['vh20'])) ?>
+                </div>
+            <?php endif; ?>
         </div>
+    <?php endif; ?>
+
+    <!-- Signature Block (Print-Only) -->
+    <?php
+        $advisorStr1 = isset($advisors[0]) ? $advisors[0] : '......................................................';
+        $advisorStr2 = isset($advisors[1]) ? $advisors[1] : '';
+    ?>
+    <div style="margin-top: 30px; page-break-inside: avoid;">
+        <table style="width: 100%; border: none; font-size: 14px; line-height: 1.6;">
+            <tr>
+                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px;">
+                    <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ผู้ปกครองนักเรียน</p>
+                    <p style="margin: 0 0 5px 0;">(..............................................................)</p>
+                    <p style="margin: 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
+                </td>
+                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px;">
+                    <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ครูประจำชั้น/ผู้เยี่ยมบ้าน</p>
+                    <p style="margin: 0 0 5px 0;">( <?= htmlspecialchars($advisorStr1) ?> )</p>
+                    <p style="margin: 0 0 25px 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
+                    
+                    <?php if (!empty($advisorStr2)): ?>
+                        <div style="margin-top: 20px;">
+                            <p style="margin: 0 0 35px 0;">ลงชื่อ.............................................................. ครูประจำชั้นร่วม</p>
+                            <p style="margin: 0 0 5px 0;">( <?= htmlspecialchars($advisorStr2) ?> )</p>
+                            <p style="margin: 0;">วันที่ ........ เดือน ........................ พ.ศ. ............</p>
+                        </div>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 
 <?php
 } catch (Exception $e) {
-    echo '<div class="p-8 bg-rose-50 dark:bg-rose-900/20 rounded-3xl border border-rose-100 dark:border-rose-900/30 text-center">';
-    echo '  <i class="fas fa-bug text-3xl text-rose-500 mb-4 block"></i>';
-    echo '  <p class="font-black italic text-rose-600">เกิดข้อผิดพลาดในการโหลดข้อมูล: ' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '<div class="p-4 text-center text-rose-600 font-bold border border-rose-200 rounded-xl">';
+    echo 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' . htmlspecialchars($e->getMessage());
     echo '</div>';
 }
 ?>
