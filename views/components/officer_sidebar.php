@@ -31,25 +31,56 @@ $menuItems = [
         'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
     ],
     [
-        'key' => 'student_data',
-        'name' => 'ข้อมูลนักเรียน',
-        'url' => 'data_student.php',
-        'icon' => 'fa-user-graduate',
+        'key' => 'master_data',
+        'name' => 'จัดการข้อมูลพื้นฐาน',
+        'icon' => 'fa-database',
         'gradient' => ['from' => 'emerald-500', 'to' => 'teal-600'],
+        'children' => [
+            [
+                'key' => 'student_data',
+                'name' => 'ข้อมูลนักเรียน',
+                'url' => 'data_student.php',
+                'icon' => 'fa-user-graduate',
+            ],
+            [
+                'key' => 'teacher_data',
+                'name' => 'ครูและบุคลากร',
+                'url' => 'data_teacher.php',
+                'icon' => 'fa-chalkboard-teacher',
+            ],
+            [
+                'key' => 'parent_data',
+                'name' => 'ข้อมูลผู้ปกครอง',
+                'url' => 'data_parent.php',
+                'icon' => 'fa-users-rectangle',
+            ],
+        ]
     ],
     [
-        'key' => 'teacher_data',
-        'name' => 'ครูและบุคลากร',
-        'url' => 'data_teacher.php',
-        'icon' => 'fa-chalkboard-teacher',
-        'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
-    ],
-    [
-        'key' => 'parent_data',
-        'name' => 'ข้อมูลผู้ปกครอง',
-        'url' => 'data_parent.php',
-        'icon' => 'fa-users-rectangle',
+        'key' => 'rfid_attendance',
+        'name' => 'ระบบบัตร & เช็คชื่อ',
+        'icon' => 'fa-id-card',
         'gradient' => ['from' => 'sky-500', 'to' => 'cyan-600'],
+        'children' => [
+            [
+                'key' => 'rfid_manage',
+                'name' => 'จัดการ RFID',
+                'url' => 'rfid.php',
+                'icon' => 'fa-credit-card',
+            ],
+            [
+                'key' => 'forgot_rfid',
+                'name' => 'บันทึกลืมบัตร',
+                'url' => 'data_forgotrfid.php',
+                'icon' => 'fa-id-card-clip',
+            ],
+            [
+                'key' => 'attendance',
+                'name' => 'ข้อมูลเช็คชื่อ',
+                'url' => 'data_attendance.php',
+                'icon' => 'fa-clipboard-check',
+            ],
+        ]
     ],
     [
         'key' => 'behavior',
@@ -57,27 +88,6 @@ $menuItems = [
         'url' => 'data_behavior.php',
         'icon' => 'fa-shield-heart',
         'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
-    ],
-    [
-        'key' => 'forgot_rfid',
-        'name' => 'บันทึกลืมบัตร',
-        'url' => 'data_forgotrfid.php',
-        'icon' => 'fa-id-card-clip',
-        'gradient' => ['from' => 'amber-500', 'to' => 'orange-600'],
-    ],
-    [
-        'key' => 'attendance',
-        'name' => 'ข้อมูลเช็คชื่อ',
-        'url' => 'data_attendance.php',
-        'icon' => 'fa-clipboard-check',
-        'gradient' => ['from' => 'teal-500', 'to' => 'emerald-600'],
-    ],
-    [
-        'key' => 'rfid_manage',
-        'name' => 'จัดการ RFID',
-        'url' => 'rfid.php',
-        'icon' => 'fa-credit-card',
-        'gradient' => ['from' => 'slate-600', 'to' => 'slate-800'],
     ],
     [
         'key' => 'report',
@@ -159,25 +169,61 @@ $menuItems = [
                 <?php foreach ($menuItems as $menu):
                     $fromColor = $menu['gradient']['from'];
                     $toColor = $menu['gradient']['to'];
-                    $isActive = ($currentActive === $menu['key']);
                     $colorName = explode('-', $fromColor)[0];
-                    ?>
-                    <li>
-                        <a href="<?php echo htmlspecialchars($menu['url']); ?>" onclick="closeSidebarOnMobile()"
-                            class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
-                            <span
-                                class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
-                                <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
-                            </span>
-                            <span
-                                class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
-                            <?php if ($isActive): ?>
-                                <div
-                                    class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse">
-                                </div>
-                            <?php endif; ?>
-                        </a>
-                    </li>
+                    
+                    if (isset($menu['children'])):
+                        $childKeys = array_column($menu['children'], 'key');
+                        $isParentActive = in_array($currentActive, $childKeys);
+                        ?>
+                        <li x-data="{ open: <?= $isParentActive ? 'true' : 'false' ?> }">
+                            <button type="button" @click="open = !open"
+                                class="sidebar-item w-full flex items-center px-4 py-3 rounded-2xl transition-all group active:scale-[0.98] <?= $isParentActive ? 'bg-white/5 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                <span
+                                    class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?= $fromColor ?> to-<?= $toColor ?> rounded-xl shadow-lg shadow-<?= $colorName ?>-500/20 group-hover:shadow-<?= $colorName ?>-500/40 transition-shadow">
+                                    <i class="fas <?= $menu['icon'] ?> text-white text-base"></i>
+                                </span>
+                                <span class="ml-4 font-bold text-sm tracking-tight text-left"><?= htmlspecialchars($menu['name']) ?></span>
+                                <i class="fas fa-chevron-down text-xs ml-auto text-gray-500 transition-transform duration-200"
+                                    :class="open ? 'rotate-180 text-white' : ''"></i>
+                            </button>
+                            
+                            <ul x-show="open" x-collapse class="pl-4 mt-1.5 space-y-1.5 border-l border-white/5 ml-9" style="display: none;">
+                                <?php foreach ($menu['children'] as $child):
+                                    $isChildActive = ($currentActive === $child['key']);
+                                    ?>
+                                    <li>
+                                        <a href="<?= htmlspecialchars($child['url']) ?>" onclick="closeSidebarOnMobile()"
+                                            class="flex items-center pl-6 pr-4 py-2.5 rounded-xl transition-all group active:scale-[0.98] <?= $isChildActive ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                            <i class="fas <?= $child['icon'] ?> text-xs mr-3 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                                            <span class="text-sm tracking-tight"><?= htmlspecialchars($child['name']) ?></span>
+                                            <?php if ($isChildActive): ?>
+                                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"></div>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
+                    <?php else:
+                        $isActive = ($currentActive === $menu['key']);
+                        ?>
+                        <li>
+                            <a href="<?php echo htmlspecialchars($menu['url']); ?>" onclick="closeSidebarOnMobile()"
+                                class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
+                                <span
+                                    class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
+                                    <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
+                                </span>
+                                <span
+                                    class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
+                                <?php if ($isActive): ?>
+                                    <div
+                                        class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse">
+                                    </div>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 <?php endforeach; ?>
 
                 <li class="my-6 px-4">
