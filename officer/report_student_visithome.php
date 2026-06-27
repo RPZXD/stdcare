@@ -45,20 +45,8 @@ if (!empty($student_id)) {
     }
 }
 
-// Fetch 3 recently visited students for quick suggestions
-$recentStudents = [];
-try {
-    $recentSql = "SELECT DISTINCT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room 
-                  FROM visithome v 
-                  JOIN student s ON v.Stu_id = s.Stu_id 
-                  WHERE v.Pee = :pee 
-                  LIMIT 3";
-    $recentStmt = $db->prepare($recentSql);
-    $recentStmt->execute(['pee' => $pee]);
-    $recentStudents = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    // Silent fallback
-}
+// Fetch 3 recently searched students from session
+$recentStudents = $_SESSION['visithome_search_history'] ?? [];
 
 // (5) Render View
 include __DIR__ . '/../views/officer/report_student_visithome.php';

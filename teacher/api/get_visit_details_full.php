@@ -46,6 +46,29 @@ try {
         exit;
     }
     
+    // Save search history in session
+    if (!isset($_SESSION['visithome_search_history'])) {
+        $_SESSION['visithome_search_history'] = [];
+    }
+    // Remove duplicate entry if it exists to push it to the front
+    $_SESSION['visithome_search_history'] = array_values(array_filter(
+        $_SESSION['visithome_search_history'],
+        function($item) use ($student_id) {
+            return $item['Stu_id'] != $student_id;
+        }
+    ));
+    // Add student details to the search history session
+    array_unshift($_SESSION['visithome_search_history'], [
+        'Stu_id' => $studentData['Stu_id'],
+        'Stu_pre' => $studentData['Stu_pre'],
+        'Stu_name' => $studentData['Stu_name'],
+        'Stu_sur' => $studentData['Stu_sur'],
+        'Stu_major' => $studentData['Stu_major'],
+        'Stu_room' => $studentData['Stu_room']
+    ]);
+    // Limit suggestions to 3 items
+    $_SESSION['visithome_search_history'] = array_slice($_SESSION['visithome_search_history'], 0, 3);
+    
     // Fetch room advisors
     $advisors = [];
     if (!empty($studentData['Stu_major']) && !empty($studentData['Stu_room'])) {
@@ -155,9 +178,7 @@ try {
 <div class="no-print space-y-8 font-sans text-slate-800 dark:text-slate-100">
     <!-- Header หัวรายงานเอกสาร (แสดงบนหน้าจอและหน้าพิมพ์แบบเรียบง่าย) -->
     <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            รายงานข้อมูลการเยี่ยมบ้านนักเรียน ปีการศึกษา <?= ($pee) ?>
-        </h1>
+
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1"><?= htmlspecialchars($global['nameschool']) ?></p>
     </div>
 
@@ -165,7 +186,7 @@ try {
     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-8 py-2">
         <div class="flex-shrink-0">
             <?php 
-                $stuImg = !empty($studentData['Stu_picture']) ? "../img/student/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.svg";
+                $stuImg = !empty($studentData['Stu_picture']) ? "../photo/" . $studentData['Stu_picture'] : "../dist/img/default-avatar.svg";
             ?>
             <img src="<?= $stuImg ?>" onerror="this.src='../dist/img/default-avatar.svg';" 
                  class="w-36 h-44 rounded-2xl object-cover shadow-md border border-slate-100 dark:border-slate-800 print:w-32 print:h-40 print:shadow-none">
@@ -344,6 +365,69 @@ try {
                     <strong>ภาคเรียนที่ 2:</strong> <?= nl2br(htmlspecialchars($round2Data['vh20'])) ?>
                 </div>
             <?php endif; ?>
+        </div>
+    <?php endif; ?>
+	
+	<!-- เพิ่มโค้ดส่วนนี้ต่อจากข้อมูลปัญหาและความต้องการ (ภายในคลาส print-only) -->
+    <?php 
+        // รวบรวมรูปภาพจากทั้ง 2 ภาคเรียน
+        $printImages = [];
+        
+        // รูปภาคเรียนที่ 1
+        if ($hasRound1) {
+            for($k=1; $k<=5; $k++) {
+                if(!empty($round1Data['picture'.$k])) {
+                    $printImages[] = [
+                        'path' => "../teacher/uploads/visithome" . ($pee - 543) . "/" . $round1Data['picture'.$k],
+                        'label' => 'เทอม 1'
+                    ];
+                }
+            }
+        }
+        
+        // รูปภาคเรียนที่ 2
+        if ($hasRound2) {
+            for($k=1; $k<=5; $k++) {
+                if(!empty($round2Data['picture'.$k])) {
+                    $printImages[] = [
+                        'path' => "../teacher/uploads/visithome" . ($pee - 543) . "/" . $round2Data['picture'.$k],
+                        'label' => 'เทอม 2'
+                    ];
+                }
+            }
+        }
+
+        if(!empty($printImages)): 
+    ?>
+        <div style="margin-top: 15px; page-break-inside: avoid;">
+            <h4 style="font-size: 15px; font-weight: bold; margin: 0 0 10px 0; border-bottom: 1px solid #000; padding-bottom: 4px;">
+                ภาพประกอบการเยี่ยมบ้านนักเรียน
+            </h4>
+            
+            <!-- ใช้ CSS Table Layout เพื่อความเสถียรในการสั่งพิมพ์ (เลียนแบบ Grid 3 คอลัมน์) -->
+            <table style="width: 100%; border-collapse: separate; border-spacing: 8px; margin: -8px;">
+                <tr>
+                    <?php 
+                    $count = 0;
+                    foreach($printImages as $imgItem): 
+                        // ถ้าครบ 3 รูปให้ขึ้นแถวใหม่
+                        if ($count > 0 && $count % 3 == 0) {
+                            echo '</tr><tr>';
+                        }
+                        $count++;
+                    ?>
+                        <td style="width: 33.33%; text-align: center; vertical-align: top; border: 1px solid #ddd; padding: 4px; background: #fafafa;">
+                            <img src="<?= $imgItem['path'] ?>" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.style.display='none';">
+                            <div style="font-size: 12px; margin-top: 4px; color: #555;">(ภาพถ่าย<?= $imgItem['label'] ?>)</div>
+                        </td>
+                    <?php endforeach; ?>
+                    
+                    <!-- เติมคอลัมน์ว่างให้เต็มแถว (ถ้ามีรูปไม่ครบจำนวนทวีคูณของ 3) -->
+                    <?php while ($count % 3 != 0): $count++; ?>
+                        <td style="width: 33.33%;"></td>
+                    <?php endwhile; ?>
+                </tr>
+            </table>
         </div>
     <?php endif; ?>
 

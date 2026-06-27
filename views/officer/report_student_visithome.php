@@ -314,7 +314,7 @@ ob_start();
         <?php if (!empty($recentStudents)): ?>
         <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
             <span class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5 italic">
-                <i class="fas fa-history text-orange-500"></i> ประวัติเยี่ยมบ้านล่าสุด:
+                <i class="fas fa-history text-orange-500"></i> ประวัติค้นหาล่าสุด:
             </span>
             <?php foreach ($recentStudents as $rs): 
                 $rsName = $rs['Stu_pre'] . $rs['Stu_name'] . ' ' . $rs['Stu_sur'];
