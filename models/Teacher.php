@@ -90,7 +90,7 @@ class Teacher
         // $id_old คือ 'editTeach_id_old'
         // $data_from_controller คือ array 6 ตัวจาก Controller
 
-        // (SQL มี 6 placeholders)
+        // (SQL มี placeholders)
         $sql = "UPDATE teacher SET 
                     Teach_id = :Teach_id_new,
                     Teach_name = :Teach_name, 
@@ -101,7 +101,11 @@ class Teacher
                     role_std = :role_std,
                     Teach_phone = :Teach_phone,
                     Teach_birth = :Teach_birth,
-                    Teach_addr = :Teach_addr
+                    Teach_addr = :Teach_addr,
+                    Teach_email = :Teach_email,
+                    Teach_sex = :Teach_sex,
+                    Teach_Position2 = :Teach_Position2,
+                    Teach_HiDegree = :Teach_HiDegree
                 WHERE Teach_id = :Teach_id_old";
 
         // Normalize optional values: use NULL for empty
@@ -119,6 +123,10 @@ class Teacher
             ':Teach_phone' => $data_from_controller['Teach_phone'] ?? null,
             ':Teach_birth' => $data_from_controller['Teach_birth'] ?? null,
             ':Teach_addr' => $data_from_controller['Teach_addr'] ?? null,
+            ':Teach_email' => $data_from_controller['Teach_email'] ?? null,
+            ':Teach_sex' => $data_from_controller['Teach_sex'] ?? null,
+            ':Teach_Position2' => $data_from_controller['Teach_Position2'] ?? null,
+            ':Teach_HiDegree' => $data_from_controller['Teach_HiDegree'] ?? null,
             ':Teach_id_old' => $id_old // (ใช้ $id_old ที่รับเข้ามา)
         ];
 

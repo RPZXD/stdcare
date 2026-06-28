@@ -141,6 +141,10 @@ try {
                     'Teach_phone' => trim($_POST['editTeach_phone'] ?? ''),
                     'Teach_birth' => $_POST['editTeach_birth'] ?? null,
                     'Teach_addr' => trim($_POST['editTeach_addr'] ?? ''),
+                    'Teach_email' => trim($_POST['editTeach_email'] ?? ''),
+                    'Teach_sex' => $_POST['editTeach_sex'] ?? '',
+                    'Teach_Position2' => trim($_POST['editTeach_Position2'] ?? ''),
+                    'Teach_HiDegree' => trim($_POST['editTeach_HiDegree'] ?? ''),
                     // (เพิ่ม 2 field นี้สำหรับ Model)
                     'Teach_id_new' => $teach_id,
                     'Teach_id_old' => $teach_id_old

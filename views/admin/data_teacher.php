@@ -173,6 +173,66 @@ $statuses = [
                                 </select>
                             </div>
                             <div>
+                <thead>
+                    <tr class="bg-sky-50/50 dark:bg-slate-800/50">
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-xl text-center w-16">รูป</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">รหัส</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">ชื่อ-สกุล</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">ชั้น/ห้อง</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">กลุ่มสาระ</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">สถานะ</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">บทบาท</th>
+                        <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-r-xl text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="font-bold text-slate-700 dark:text-slate-300">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Teacher Modal -->
+<div class="modal fade" id="addTeacherModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content !rounded-3xl !border-0 !shadow-2xl overflow-hidden">
+            <div class="modal-header bg-gradient-to-r from-emerald-500 to-teal-600 text-white !border-0 p-4 md:p-6">
+                <h5 class="modal-title text-base md:text-xl font-black flex items-center gap-3">
+                    <i class="fas fa-user-plus"></i> เพิ่มข้อมูลครู
+                </h5>
+                <button type="button" class="close text-white text-2xl" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="addTeacherForm">
+                <div class="modal-body p-4 md:p-8 bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-slate-800">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">รหัสครู *</label>
+                            <input type="text" name="addTeach_id" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ชื่อ-สกุล *</label>
+                            <input type="text" name="addTeach_name" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">กลุ่มสาระ</label>
+                            <select name="addTeach_major" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                                <option value="">-- เลือก --</option>
+                                <?php foreach ($majors as $m): ?>
+                                <option value="<?= htmlspecialchars($m) ?>"><?= htmlspecialchars($m) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ชั้น</label>
+                                <select name="addTeach_class" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
+                                    <option value="">-- เลือก --</option>
+                                    <?php for ($i = 1; $i <= 6; $i++): ?>
+                                    <option value="<?= $i ?>">ม.<?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ห้อง</label>
                                 <input type="text" name="addTeach_room" placeholder="1, 2, A" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all">
                             </div>
@@ -289,6 +349,26 @@ $statuses = [
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วันเกิด</label>
                             <input type="date" name="editTeach_birth" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">อีเมล</label>
+                            <input type="email" name="editTeach_email" placeholder="example@phichai.ac.th" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">เพศ</label>
+                            <select name="editTeach_sex" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                                <option value="">-- เลือก --</option>
+                                <option value="ชาย">ชาย</option>
+                                <option value="หญิง">หญิง</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ตำแหน่ง</label>
+                            <input type="text" name="editTeach_Position2" placeholder="เช่น ครู วิทยฐานะชำนาญการ" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">วุฒิการศึกษาสูงสุด</label>
+                            <input type="text" name="editTeach_HiDegree" placeholder="เช่น ปริญญาโท การศึกษามหาบัณฑิต" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
                         </div>
                         <div class="md:col-span-2">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">ที่อยู่</label>
@@ -770,109 +850,6 @@ $(document).ready(function() {
             }
             renderCharts();
         }
-    });
-
-    // Update stats cards
-    function updateStats(data) {
-        $('#totalTeachers').text(data.length);
-        $('#activeTeachers').text(data.filter(r => String(r.Teach_status) === '1').length);
-        $('#teacherCount').text(data.filter(r => r.role_std === 'T').length);
-        $('#staffCount').text(data.filter(r => r.role_std === 'OF').length);
-    }
-
-    // Render charts
-    function renderCharts() {
-        if (!allTeachersData.length) return;
-        
-        // Status Chart
-        const statusCounts = { '1': 0, '2': 0, '3': 0, '4': 0, '9': 0, '0': 0 };
-        allTeachersData.forEach(r => { statusCounts[String(r.Teach_status || '0')]++; });
-        
-        if (window.statusChartObj) window.statusChartObj.destroy();
-        window.statusChartObj = new Chart(document.getElementById('statusChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['ปกติ', 'ย้าย', 'เกษียณ', 'ลาออก', 'เสียชีวิต', 'ไม่ใช้งาน'],
-                datasets: [{
-                    data: [statusCounts['1'], statusCounts['2'], statusCounts['3'], statusCounts['4'], statusCounts['9'], statusCounts['0']],
-                    backgroundColor: ['#10b981', '#0ea5e9', '#64748b', '#f59e0b', '#1f2937', '#f43f5e']
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
-        });
-
-        // Major Chart (Top 5)
-        const majorCounts = {};
-        allTeachersData.forEach(r => { const m = r.Teach_major || 'ไม่ระบุ'; majorCounts[m] = (majorCounts[m] || 0) + 1; });
-        const topMajors = Object.entries(majorCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        
-        if (window.majorChartObj) window.majorChartObj.destroy();
-        window.majorChartObj = new Chart(document.getElementById('majorChart'), {
-            type: 'bar',
-            data: {
-                labels: topMajors.map(([k]) => k.length > 10 ? k.substring(0, 10) + '...' : k),
-                datasets: [{ data: topMajors.map(([, v]) => v), backgroundColor: '#6366f1', borderRadius: 8 }]
-            },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-
-        // Role Chart
-        const roleCounts = {};
-        allTeachersData.forEach(r => { const role = r.role_std || 'UNK'; roleCounts[role] = (roleCounts[role] || 0) + 1; });
-        const roleMap = { 'T': 'ครู', 'OF': 'เจ้าหน้าที่', 'VP': 'รองผอ.', 'DIR': 'ผอ.', 'ADM': 'Admin', 'UNK': 'อื่นๆ' };
-        
-        if (window.roleChartObj) window.roleChartObj.destroy();
-        window.roleChartObj = new Chart(document.getElementById('roleChart'), {
-            type: 'pie',
-            data: {
-                labels: Object.keys(roleCounts).map(k => roleMap[k] || k),
-                datasets: [{ data: Object.values(roleCounts), backgroundColor: ['#0ea5e9', '#f59e0b', '#8b5cf6', '#ec4899', '#10b981', '#64748b'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
-        });
-    }
-
-    // Add Teacher
-    $('#btnAddTeacher').click(() => {
-        $('#addTeacherForm')[0].reset();
-        $('#addTeacherModal').modal('show');
-    });
-
-    $('#addTeacherForm').submit(async function(e) {
-        e.preventDefault();
-        const res = await fetch(API_URL + '?action=create', { method: 'POST', body: new FormData(this) });
-        const result = await res.json();
-        if (result.success) {
-            $('#addTeacherModal').modal('hide');
-            teacherTable.ajax.reload();
-            Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'เพิ่มข้อมูลครูเรียบร้อย', timer: 2000, showConfirmButton: false });
-        } else {
-            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: result.message || 'ไม่สามารถเพิ่มข้อมูลได้' });
-        }
-    });
-
-    // Edit Teacher
-    $('#teacherTable').on('click', '.editTeacherBtn', async function() {
-        const id = $(this).data('id');
-        const res = await fetch(API_URL + '?action=get&id=' + id);
-        const data = await res.json();
-        if (data && data.Teach_id) {
-            $('[name="editTeach_id_old"]').val(data.Teach_id);
-            $('[name="editTeach_id"]').val(data.Teach_id);
-            $('[name="editTeach_name"]').val(data.Teach_name);
-            $('[name="editTeach_major"]').val(data.Teach_major);
-            $('[name="editTeach_class"]').val(data.Teach_class);
-            $('[name="editTeach_room"]').val(data.Teach_room);
-            $('[name="editTeach_status"]').val(data.Teach_status);
-            $('[name="editrole_std"]').val(data.role_std);
-            $('[name="editTeach_phone"]').val(data.Teach_phone || '');
-            $('[name="editTeach_birth"]').val(data.Teach_birth || '');
-            $('[name="editTeach_addr"]').val(data.Teach_addr || '');
-            $('#editTeacherModal').modal('show');
-        }
-    });
-
-    $('#editTeacherForm').submit(async function(e) {
         e.preventDefault();
         const res = await fetch(API_URL + '?action=update', { method: 'POST', body: new FormData(this) });
         const result = await res.json();
