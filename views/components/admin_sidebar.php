@@ -22,22 +22,99 @@ $userPhoto = $teacherData['Teach_photo'] ?? '';
 
 // Menu configuration for Admin Panel
 $menuItems = [
-    ['is_header' => true, 'name' => 'แดชบอร์ด'],
-    ['key' => 'dashboard', 'name' => 'แดชบอร์ด', 'url' => 'index.php', 'icon' => 'fa-gauge-high', 'gradient' => ['from' => 'rose-500', 'to' => 'red-600']],
-    ['is_header' => true, 'name' => 'จัดการข้อมูล'],
-    ['key' => 'teacher', 'name' => 'ครูและบุคลากร', 'url' => 'data_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600']],
-    ['key' => 'student', 'name' => 'ข้อมูลนักเรียน', 'url' => 'data_student.php', 'icon' => 'fa-user-graduate', 'gradient' => ['from' => 'violet-500', 'to' => 'purple-600']],
-    ['key' => 'parent', 'name' => 'ข้อมูลผู้ปกครอง', 'url' => 'data_parent.php', 'icon' => 'fa-users', 'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600']],
-    ['key' => 'behavior', 'name' => 'หักคะแนนพฤติกรรม', 'url' => 'data_behavior.php', 'icon' => 'fa-frown', 'gradient' => ['from' => 'amber-500', 'to' => 'yellow-600']],
-    ['is_header' => true, 'name' => 'Google Workspace'],
-    ['key' => 'workspace', 'name' => 'จัดการ Workspace (กลุ่ม)', 'url' => 'workspace_batch.php', 'icon' => 'fa-google', 'gradient' => ['from' => 'emerald-500', 'to' => 'green-600']],
-    ['key' => 'workspace_name_batch', 'name' => 'อัปเดตชื่อเมล', 'url' => 'workspace_name_batch.php', 'icon' => 'fa-user-edit', 'gradient' => ['from' => 'sky-500', 'to' => 'blue-600']],
-    ['key' => 'workspace_teacher', 'name' => 'จัดการ Workspace ครู', 'url' => 'workspace_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600']],
-    ['key' => 'workspace_history', 'name' => 'ประวัติรหัส Workspace', 'url' => 'workspace_history.php', 'icon' => 'fa-history', 'gradient' => ['from' => 'orange-500', 'to' => 'amber-600']],
-    ['is_header' => true, 'name' => 'ระบบ'],
-    ['key' => 'settings', 'name' => 'การตั้งค่า', 'url' => 'settings.php', 'icon' => 'fa-cog', 'gradient' => ['from' => 'slate-500', 'to' => 'gray-600']],
-    ['key' => 'line_monitor', 'name' => 'LINE Monitor', 'url' => 'line_monitor.php', 'icon' => 'fa-desktop', 'gradient' => ['from' => 'emerald-500', 'to' => 'green-600']],
-    ['key' => 'log', 'name' => 'Log กิจกรรม', 'url' => 'log.php', 'icon' => 'fa-clipboard-list', 'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600']],
+    [
+        'key' => 'dashboard',
+        'name' => 'แดชบอร์ด',
+        'url' => 'index.php',
+        'icon' => 'fa-gauge-high',
+    ],
+    [
+        'key' => 'master_data',
+        'name' => 'จัดการข้อมูลหลัก',
+        'icon' => 'fa-database',
+        'children' => [
+            [
+                'key' => 'teacher',
+                'name' => 'ครูและบุคลากร',
+                'url' => 'data_teacher.php',
+                'icon' => 'fa-chalkboard-teacher',
+            ],
+            [
+                'key' => 'student',
+                'name' => 'ข้อมูลนักเรียน',
+                'url' => 'data_student.php',
+                'icon' => 'fa-user-graduate',
+            ],
+            [
+                'key' => 'parent',
+                'name' => 'ข้อมูลผู้ปกครอง',
+                'url' => 'data_parent.php',
+                'icon' => 'fa-users',
+            ],
+            [
+                'key' => 'behavior',
+                'name' => 'หักคะแนนพฤติกรรม',
+                'url' => 'data_behavior.php',
+                'icon' => 'fa-frown',
+            ],
+        ]
+    ],
+    [
+        'key' => 'google_workspace',
+        'name' => 'Google Workspace',
+        'icon' => 'fa-google',
+        'children' => [
+            [
+                'key' => 'workspace',
+                'name' => 'จัดการ Workspace (กลุ่ม)',
+                'url' => 'workspace_batch.php',
+                'icon' => 'fa-users-cog',
+            ],
+            [
+                'key' => 'workspace_name_batch',
+                'name' => 'อัปเดตชื่อเมล',
+                'url' => 'workspace_name_batch.php',
+                'icon' => 'fa-user-edit',
+            ],
+            [
+                'key' => 'workspace_teacher',
+                'name' => 'จัดการ Workspace ครู',
+                'url' => 'workspace_teacher.php',
+                'icon' => 'fa-chalkboard-teacher',
+            ],
+            [
+                'key' => 'workspace_history',
+                'name' => 'ประวัติรหัส Workspace',
+                'url' => 'workspace_history.php',
+                'icon' => 'fa-history',
+            ],
+        ]
+    ],
+    [
+        'key' => 'system_settings',
+        'name' => 'ระบบควบคุม',
+        'icon' => 'fa-cogs',
+        'children' => [
+            [
+                'key' => 'settings',
+                'name' => 'การตั้งค่าระบบ',
+                'url' => 'settings.php',
+                'icon' => 'fa-cog',
+            ],
+            [
+                'key' => 'line_monitor',
+                'name' => 'LINE Monitor',
+                'url' => 'line_monitor.php',
+                'icon' => 'fa-desktop',
+            ],
+            [
+                'key' => 'log',
+                'name' => 'Log กิจกรรม',
+                'url' => 'log.php',
+                'icon' => 'fa-clipboard-list',
+            ],
+        ]
+    ]
 ];
 ?>
 
@@ -88,28 +165,57 @@ $menuItems = [
         <nav class="mt-2 px-3 pb-24">
             <ul class="space-y-1.5 pt-2">
                 <?php foreach ($menuItems as $menu): 
-                    if (isset($menu['is_header'])) {
-                        echo '<li class="mt-6 mb-2 px-4 first:mt-0"><p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">' . htmlspecialchars($menu['name']) . '</p></li>';
-                        continue;
-                    }
-                    // Use global theme color for flat single-color style
                     $fromColor = $toColor = $themeColor . '-500';
-                    $colorName = $themeColor;
-                    $isActive = ($currentActive === $menu['key']);
-                ?>
-                <li>
-                    <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
-                       onclick="closeSidebarOnMobile()"
-                       class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
-                        <span class="w-10 h-10 flex items-center justify-center bg-<?php echo $themeColor; ?>-500 rounded-xl shadow-lg shadow-<?php echo $themeColor; ?>-500/20 group-hover:shadow-<?php echo $themeColor; ?>-500/40 transition-shadow">
-                            <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
-                        </span>
-                        <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
-                        <?php if($isActive): ?>
-                            <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                        <?php endif; ?>
-                    </a>
-                </li>
+                    
+                    if (isset($menu['children'])):
+                        $childKeys = array_column($menu['children'], 'key');
+                        $isParentActive = in_array($currentActive, $childKeys);
+                        ?>
+                        <li x-data="{ open: <?= $isParentActive ? 'true' : 'false' ?> }">
+                            <button type="button" @click="open = !open"
+                                class="sidebar-item w-full flex items-center px-4 py-3 rounded-2xl transition-all group active:scale-[0.98] <?= $isParentActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                <span class="w-10 h-10 flex items-center justify-center bg-<?= $themeColor ?>-500 rounded-xl shadow-lg shadow-<?= $themeColor ?>-500/20 group-hover:shadow-<?= $themeColor ?>-500/40 transition-shadow">
+                                    <i class="fas <?= $menu['icon'] ?> text-white text-base"></i>
+                                </span>
+                                <span class="ml-4 font-bold text-sm tracking-tight text-left"><?= htmlspecialchars($menu['name']) ?></span>
+                                <i class="fas fa-chevron-down text-xs ml-auto text-gray-500 transition-transform duration-200"
+                                    :class="open ? 'rotate-180 text-white' : ''"></i>
+                            </button>
+                            
+                            <ul x-show="open" x-collapse class="pl-4 mt-1.5 space-y-1.5 border-l border-white/5 ml-9" style="display: none;">
+                                <?php foreach ($menu['children'] as $child):
+                                    $isChildActive = ($currentActive === $child['key']);
+                                    ?>
+                                    <li>
+                                        <a href="<?= htmlspecialchars($child['url']) ?>" onclick="closeSidebarOnMobile()"
+                                            class="flex items-center pl-6 pr-4 py-2.5 rounded-xl transition-all group active:scale-[0.98] <?= $isChildActive ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                            <i class="fas <?= $child['icon'] ?> text-xs mr-3 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                                            <span class="text-sm tracking-tight"><?= htmlspecialchars($child['name']) ?></span>
+                                            <?php if ($isChildActive): ?>
+                                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
+                    <?php else:
+                        $isActive = ($currentActive === $menu['key']);
+                        ?>
+                        <li>
+                            <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
+                               onclick="closeSidebarOnMobile()"
+                               class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
+                                <span class="w-10 h-10 flex items-center justify-center bg-<?php echo $themeColor; ?>-500 rounded-xl shadow-lg shadow-<?php echo $themeColor; ?>-500/20 group-hover:shadow-<?php echo $themeColor; ?>-500/40 transition-shadow">
+                                    <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
+                                </span>
+                                <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
+                                <?php if($isActive): ?>
+                                    <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 <?php endforeach; ?>
                 
                 <!-- System Divider -->
