@@ -29,10 +29,6 @@ $avatarUrl = (!empty($userPhoto))
 // Menu configuration for Director
 $menuItems = [
     [
-        'is_header' => true,
-        'name' => 'แดชบอร์ด',
-    ],
-    [
         'key' => 'dashboard',
         'name' => 'หน้าหลัก',
         'url' => 'index.php',
@@ -40,51 +36,57 @@ $menuItems = [
         'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
     ],
     [
-        'is_header' => true,
-        'name' => 'ข้อมูลและรายงาน',
-    ],
-    [
-        'key' => 'student',
-        'name' => 'ข้อมูลนักเรียน',
-        'url' => 'data_student.php',
-        'icon' => 'fa-user-graduate',
+        'key' => 'master_data',
+        'name' => 'จัดการข้อมูลหลัก',
+        'icon' => 'fa-database',
         'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
+        'children' => [
+            [
+                'key' => 'student',
+                'name' => 'ข้อมูลนักเรียน',
+                'url' => 'data_student.php',
+                'icon' => 'fa-user-graduate',
+            ],
+            [
+                'key' => 'teacher',
+                'name' => 'ครูและบุคลากร',
+                'url' => 'data_teacher.php',
+                'icon' => 'fa-chalkboard-teacher',
+            ],
+            [
+                'key' => 'parent',
+                'name' => 'ข้อมูลผู้ปกครอง',
+                'url' => 'data_parent.php',
+                'icon' => 'fa-users',
+            ],
+            [
+                'key' => 'behavior',
+                'name' => 'หักคะแนนพฤติกรรม',
+                'url' => 'data_behavior.php',
+                'icon' => 'fa-frown',
+            ],
+        ]
     ],
     [
-        'key' => 'teacher',
-        'name' => 'ครูและบุคลากร',
-        'url' => 'data_teacher.php',
-        'icon' => 'fa-chalkboard-teacher',
-        'gradient' => ['from' => 'emerald-500', 'to' => 'green-600'],
-    ],
-    [
-        'key' => 'parent',
-        'name' => 'ข้อมูลผู้ปกครอง',
-        'url' => 'data_parent.php',
-        'icon' => 'fa-users',
-        'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600'],
-    ],
-    [
-        'key' => 'behavior',
-        'name' => 'หักคะแนนพฤติกรรม',
-        'url' => 'data_behavior.php',
-        'icon' => 'fa-frown',
-        'gradient' => ['from' => 'amber-500', 'to' => 'yellow-600'],
-    ],
-    [
-        'key' => 'report',
-        'name' => 'รายงานข้อมูล',
-        'url' => 'report.php',
-        'icon' => 'fa-file-alt',
+        'key' => 'reports_stats',
+        'name' => 'รายงาน & สถิติ',
+        'icon' => 'fa-chart-pie',
         'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
-    ],
-    [
-        'key' => 'stats',
-        'name' => 'กราฟสถิติ',
-        'url' => 'statistics.php',
-        'icon' => 'fa-chart-bar',
-        'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
-    ],
+        'children' => [
+            [
+                'key' => 'report',
+                'name' => 'รายงานข้อมูล',
+                'url' => 'report.php',
+                'icon' => 'fa-file-alt',
+            ],
+            [
+                'key' => 'stats',
+                'name' => 'กราฟสถิติ',
+                'url' => 'statistics.php',
+                'icon' => 'fa-chart-bar',
+            ],
+        ]
+    ]
 ];
 ?>
 
@@ -135,28 +137,61 @@ $menuItems = [
         <nav class="mt-2 px-3 pb-24">
             <ul class="space-y-1.5 pt-2">
                 <?php foreach ($menuItems as $menu): 
-                    if (isset($menu['is_header'])) {
-                        echo '<li class="mt-6 mb-2 px-4 first:mt-0"><p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">' . htmlspecialchars($menu['name']) . '</p></li>';
-                        continue;
-                    }
                     $fromColor = $menu['gradient']['from'];
                     $toColor = $menu['gradient']['to'];
                     $colorName = explode('-', $fromColor)[0];
-                    $isActive = ($currentActive === $menu['key']);
-                ?>
-                <li>
-                    <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
-                       onclick="closeSidebarOnMobile()"
-                       class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
-                        <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
-                            <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
-                        </span>
-                        <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
-                        <?php if($isActive): ?>
-                            <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                        <?php endif; ?>
-                    </a>
-                </li>
+                    
+                    if (isset($menu['children'])):
+                        $childKeys = array_column($menu['children'], 'key');
+                        $isParentActive = in_array($currentActive, $childKeys);
+                        ?>
+                        <li x-data="{ open: <?= $isParentActive ? 'true' : 'false' ?> }">
+                            <button type="button" @click="open = !open"
+                                class="w-full sidebar-item flex items-center justify-between px-4 py-3 rounded-2xl transition-all group no-underline <?= $isParentActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                <div class="flex items-center">
+                                    <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?= $fromColor ?> to-<?= $toColor ?> rounded-xl shadow-lg shadow-<?= $colorName ?>-500/20 group-hover:shadow-<?= $colorName ?>-500/40 transition-shadow">
+                                        <i class="fas <?= $menu['icon'] ?> text-white text-base"></i>
+                                    </span>
+                                    <span class="ml-4 font-bold text-sm tracking-tight"><?= htmlspecialchars($menu['name']) ?></span>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"
+                                    :class="open ? 'rotate-180 text-white' : ''"></i>
+                            </button>
+                            
+                            <ul x-show="open" x-collapse class="pl-4 mt-1.5 space-y-1.5 border-l border-white/5 ml-9" style="display: none;">
+                                <?php foreach ($menu['children'] as $child):
+                                    $isChildActive = ($currentActive === $child['key']);
+                                    ?>
+                                    <li>
+                                        <a href="<?= htmlspecialchars($child['url']) ?>" onclick="closeSidebarOnMobile()"
+                                            class="flex items-center pl-6 pr-4 py-2.5 rounded-xl transition-all group active:scale-[0.98] <?= $isChildActive ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:bg-white/5 hover:text-white' ?>">
+                                            <i class="fas <?= $child['icon'] ?> text-xs mr-3 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                                            <span class="text-sm tracking-tight"><?= htmlspecialchars($child['name']) ?></span>
+                                            <?php if ($isChildActive): ?>
+                                                <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
+                    <?php else:
+                        $isActive = ($currentActive === $menu['key']);
+                        ?>
+                        <li>
+                            <a href="<?php echo htmlspecialchars($menu['url']); ?>" 
+                               onclick="closeSidebarOnMobile()"
+                               class="sidebar-item flex items-center px-4 py-3 rounded-2xl transition-all group no-underline active:scale-[0.98] <?php echo $isActive ? 'bg-white/10 text-white border border-white/5 shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'; ?>">
+                                <span class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-<?php echo $fromColor; ?> to-<?php echo $toColor; ?> rounded-xl shadow-lg shadow-<?php echo $colorName; ?>-500/20 group-hover:shadow-<?php echo $colorName; ?>-500/40 transition-shadow">
+                                    <i class="fas <?php echo $menu['icon']; ?> text-white text-base"></i>
+                                </span>
+                                <span class="ml-4 font-bold text-sm tracking-tight"><?php echo htmlspecialchars($menu['name']); ?></span>
+                                <?php if($isActive): ?>
+                                    <div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 <?php endforeach; ?>
                 
                 <!-- System Divider -->

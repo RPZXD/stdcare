@@ -128,36 +128,36 @@ $menuItems = [
         ],
     ],
     [
-        'is_header' => true,
+        'key' => 'reports_and_data',
         'name' => 'ข้อมูลและรายงาน',
-    ],
-    [
-        'key' => 'data_student',
-        'name' => 'ข้อมูลนักเรียน',
-        'url' => 'data_student.php',
-        'icon' => 'fa-user-graduate',
-        'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
-    ],
-    [
-        'key' => 'parent_data',
-        'name' => 'ข้อมูลผู้ปกครอง',
-        'url' => 'parent_data.php',
-        'icon' => 'fa-people-roof',
-        'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600'],
-    ],
-    [
-        'key' => 'search',
-        'name' => 'ค้นหาข้อมูล',
-        'url' => 'search_data.php',
-        'icon' => 'fa-magnifying-glass',
-        'gradient' => ['from' => 'orange-500', 'to' => 'red-600'],
-    ],
-    [
-        'key' => 'report',
-        'name' => 'รายงาน',
-        'url' => 'report.php',
         'icon' => 'fa-chart-pie',
-        'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
+        'gradient' => ['from' => 'violet-500', 'to' => 'purple-600'],
+        'submenu' => [
+            [
+                'key' => 'data_student',
+                'name' => 'ข้อมูลนักเรียน',
+                'url' => 'data_student.php',
+                'icon' => 'fa-user-graduate',
+            ],
+            [
+                'key' => 'parent_data',
+                'name' => 'ข้อมูลผู้ปกครอง',
+                'url' => 'parent_data.php',
+                'icon' => 'fa-people-roof',
+            ],
+            [
+                'key' => 'search',
+                'name' => 'ค้นหาข้อมูล',
+                'url' => 'search_data.php',
+                'icon' => 'fa-magnifying-glass',
+            ],
+            [
+                'key' => 'report',
+                'name' => 'รายงาน',
+                'url' => 'report.php',
+                'icon' => 'fa-chart-pie',
+            ],
+        ]
     ],
     [
         'is_header' => true,
