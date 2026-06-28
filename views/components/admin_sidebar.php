@@ -32,6 +32,7 @@ $menuItems = [
     ['is_header' => true, 'name' => 'Google Workspace'],
     ['key' => 'workspace', 'name' => 'จัดการ Workspace (กลุ่ม)', 'url' => 'workspace_batch.php', 'icon' => 'fa-google', 'gradient' => ['from' => 'emerald-500', 'to' => 'green-600']],
     ['key' => 'workspace_name_batch', 'name' => 'อัปเดตชื่อเมล', 'url' => 'workspace_name_batch.php', 'icon' => 'fa-user-edit', 'gradient' => ['from' => 'sky-500', 'to' => 'blue-600']],
+    ['key' => 'workspace_teacher', 'name' => 'จัดการ Workspace ครู', 'url' => 'workspace_teacher.php', 'icon' => 'fa-chalkboard-teacher', 'gradient' => ['from' => 'teal-500', 'to' => 'cyan-600']],
     ['key' => 'workspace_history', 'name' => 'ประวัติรหัส Workspace', 'url' => 'workspace_history.php', 'icon' => 'fa-history', 'gradient' => ['from' => 'orange-500', 'to' => 'amber-600']],
     ['is_header' => true, 'name' => 'ระบบ'],
     ['key' => 'settings', 'name' => 'การตั้งค่า', 'url' => 'settings.php', 'icon' => 'fa-cog', 'gradient' => ['from' => 'slate-500', 'to' => 'gray-600']],

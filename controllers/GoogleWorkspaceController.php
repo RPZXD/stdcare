@@ -63,6 +63,18 @@ class GoogleWorkspaceController {
     }
 
     /**
+     * ดึงรายชื่อผู้ใช้ทั้งหมดในโดเมนจาก Google Workspace
+     */
+    public function listUsers() {
+        $payload = [
+            "token" => $this->secretToken,
+            "action" => "listUsers"
+        ];
+
+        return $this->sendRequest($payload);
+    }
+
+    /**
      * ส่ง cURL Request ไปยัง GAS
      */
     private function sendRequest($payload) {

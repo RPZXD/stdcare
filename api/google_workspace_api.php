@@ -101,6 +101,94 @@ try {
             echo json_encode($result);
             break;
 
+        case 'list_workspace_users':
+            $result = $controller->listUsers();
+            echo json_encode($result);
+            break;
+
+        case 'sync_teachers_email':
+            // 1. Fetch Google Workspace Users
+            $wsResult = $controller->listUsers();
+            if (!isset($wsResult['status']) || $wsResult['status'] !== 'success') {
+                echo json_encode([
+                    'status' => 'error', 
+                    'message' => 'Failed to fetch users from Google Workspace: ' . ($wsResult['message'] ?? 'Unknown error')
+                ]);
+                exit();
+            }
+            
+            $googleUsers = $wsResult['users'] ?? [];
+            if (empty($googleUsers)) {
+                echo json_encode(['status' => 'success', 'updated_count' => 0, 'total_teachers' => 0, 'matched_count' => 0, 'message' => 'No users found in Google Workspace.']);
+                exit();
+            }
+
+            // 2. Fetch all active teachers from DB
+            require_once '../config/Database.php';
+            $connectDB = new Database("phichaia_student");
+            $db = $connectDB->getConnection();
+
+            $stmt = $db->query("SELECT Teach_id, Teach_name, Teach_email FROM teacher WHERE Teach_status = 1");
+            $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Function to normalize Thai name for matching
+            // Remove prefix: นาย, นาง, นางสาว, ดร., ดร, อ., อาจารย์
+            // Remove all spaces and tabs
+            $normalizeName = function($name) {
+                $prefixes = ['นาย', 'นางสาว', 'นาง', 'ดร.', 'ดร', 'อ.', 'อาจารย์'];
+                $cleanName = trim($name);
+                foreach ($prefixes as $prefix) {
+                    if (strpos($cleanName, $prefix) === 0) {
+                        $cleanName = substr($cleanName, strlen($prefix));
+                        break;
+                    }
+                }
+                return preg_replace('/\s+/u', '', $cleanName);
+            };
+
+            // Index Google Users by normalized name
+            $googleUsersMap = [];
+            foreach ($googleUsers as $gUser) {
+                $normGName = $normalizeName($gUser['fullName']);
+                if (strpos($gUser['email'], '@phichai.ac.th') !== false) {
+                    $googleUsersMap[$normGName] = $gUser['email'];
+                }
+            }
+
+            // 3. Match and Update
+            $updateCount = 0;
+            $matched = [];
+            $updateStmt = $db->prepare("UPDATE teacher SET Teach_email = :email WHERE Teach_id = :id");
+
+            foreach ($teachers as $teach) {
+                $normTName = $normalizeName($teach['Teach_name']);
+                if (isset($googleUsersMap[$normTName])) {
+                    $email = $googleUsersMap[$normTName];
+                    if ($teach['Teach_email'] !== $email) {
+                        $updateStmt->execute([
+                            'email' => $email,
+                            'id' => $teach['Teach_id']
+                        ]);
+                        $updateCount++;
+                    }
+                    $matched[] = [
+                        'id' => $teach['Teach_id'],
+                        'name' => $teach['Teach_name'],
+                        'email' => $email,
+                        'status' => ($teach['Teach_email'] !== $email) ? 'updated' : 'unchanged'
+                    ];
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'updated_count' => $updateCount,
+                'total_teachers' => count($teachers),
+                'matched_count' => count($matched),
+                'matched' => $matched
+            ]);
+            break;
+
         default:
             echo json_encode(['status' => 'error', 'message' => 'Unknown action.']);
             break;
