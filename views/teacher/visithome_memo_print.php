@@ -38,7 +38,7 @@ $currentYear = date('Y') + 543; // Buddhist year
     
     <style>
         :root {
-            --doc-font-size: 10pt; /* Default to 10pt as requested */
+            --doc-font-size: 12pt; /* Default to 10pt as requested */
         }
 
         body {
@@ -111,18 +111,20 @@ $currentYear = date('Y') + 543; // Buddhist year
                 margin-left: 30mm;
                 margin-right: 20mm;
                 margin-top: 25mm;
-                margin-bottom: 25mm;
+                margin-bottom: 20mm;
             }
             body {
                 background-color: white;
             }
             .print-container {
-                width: auto;
-                min-height: auto;
-                padding: 0;
-                margin: 0;
-                box-shadow: none;
-                background: transparent;
+                width: 100% !important;       /* ให้ขยายตามพื้นที่พิมพ์จริงของหน้ากระดาษ */
+                min-height: auto !important;  /* ยกเลิกความสูงขั้นต่ำตอนพิมพ์ */
+                height: auto !important;
+                padding: 0 !important;        /* เคลียร์ padding เป็น 0 เพื่อป้องกันปัญหาระยะขอบซ้ำซ้อน (Double Margins) */
+                margin: 0 !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                page-break-after: avoid;
             }
             .no-print, .no-print-bar {
                 display: none !important;
@@ -139,17 +141,6 @@ $currentYear = date('Y') + 543; // Buddhist year
             <p class="text-xs text-slate-500">ตรวจสอบความถูกต้องก่อนสั่งพิมพ์</p>
         </div>
         
-        <!-- Font Size Adjuster Control -->
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-500 font-bold mr-1">ขนาดฟอนต์:</span>
-            <button onclick="changeFontSize(-1)" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg border border-slate-200 transition-all flex items-center justify-center" title="ลดขนาดฟอนต์">
-                <i class="fas fa-minus text-xs"></i>
-            </button>
-            <span id="fontSizeDisplay" class="text-sm font-bold text-slate-700 min-w-[40px] text-center">10pt</span>
-            <button onclick="changeFontSize(1)" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg border border-slate-200 transition-all flex items-center justify-center" title="เพิ่มขนาดฟอนต์">
-                <i class="fas fa-plus text-xs"></i>
-            </button>
-        </div>
 
         <div class="flex gap-2">
             <button onclick="window.close()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-all border border-slate-200 flex items-center gap-2">
@@ -167,8 +158,8 @@ $currentYear = date('Y') + 543; // Buddhist year
     <!-- Page 1: บันทึกข้อความ (Memo) -->
     <div class="print-container">
         <!-- Garuda Emblem and Header -->
-        <div style="position: relative; margin-bottom: 25px; min-height: 1.5cm;">
-            <img src="../dist/img/ตราครุฑ.jpg" alt="ตราครุฑ" style="position: absolute; left: 0; top: 0; width: 1.5cm; height: 1.5cm;">
+        <div style="position: relative; margin-bottom: 0px; min-height: 1.5cm;">
+            <img src="../dist/img/ตราครุฑ.jpg" alt="ตราครุฑ" style="position: absolute; left: 0; top: -20px; width: 2cm; height: 2cm;">
             <div class="memo-title" style="text-align: center; font-weight: bold; line-height: 1.5cm; margin: 0; padding: 0;">
                 บันทึกข้อความ
             </div>

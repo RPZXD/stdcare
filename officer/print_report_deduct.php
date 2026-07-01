@@ -261,13 +261,13 @@ $reporterName = $userData['Teach_name'] ?? '';
     <table>
         <thead>
             <tr>
-                <th class="w-12">ที่</th>
+                <th class="w-5">ที่</th>
                 <th>ชื่อ - นามสกุล</th>
-                <th class="w-28">รหัสนักเรียน</th>
-                <th class="w-20">ชั้น/ห้อง</th>
-                <th class="w-12">เลขที่</th>
-                <th class="w-20">คะแนนที่หัก</th>
-                <th class="w-24">คะแนนคงเหลือ</th>
+                <th class="w-10">รหัสนักเรียน</th>
+                <th class="w-10">ชั้น/ห้อง</th>
+                <th class="w-5">เลขที่</th>
+                <th class="w-15">คะแนนที่หัก</th>
+                <th class="w-25">คะแนนคงเหลือ</th>
             </tr>
         </thead>
         <tbody>
@@ -335,24 +335,6 @@ $reporterName = $userData['Teach_name'] ?? '';
         </tbody>
     </table>
     <?php endif; ?>
-
-    <div class="signature-container">
-        <div class="signature-box">
-            <p style="margin-bottom: 25px;">ลงชื่อ............................................................ ผู้รายงาน</p>
-            <p><strong>( <?php echo htmlspecialchars($reporterName); ?> )</strong></p>
-            <p style="font-size: 11px; color: #555;">ตำแหน่ง เจ้าหน้าที่ระบบดูแลช่วยเหลือนักเรียน</p>
-        </div>
-        <div class="signature-box">
-            <p style="margin-bottom: 25px;">ลงชื่อ............................................................ ผู้ตรวจสอบ</p>
-            <p><strong>(............................................................)</strong></p>
-            <p style="font-size: 11px; color: #555;">ตำแหน่ง หัวหน้างานระดับชั้น / งานปกครอง</p>
-        </div>
-        <div class="signature-box full-width">
-            <p style="margin-bottom: 25px;">ลงชื่อ............................................................ ผู้อนุมัติ/รับทราบ</p>
-            <p><strong>(............................................................)</strong></p>
-            <p style="font-size: 11px; color: #555;">ตำแหน่ง รองผู้อำนวยการกลุ่มบริหารงานบุคคล / ผู้อำนวยการ<?php echo htmlspecialchars($global['nameschool']); ?></p>
-        </div>
-    </div>
 
     <div class="footer-meta">
         พิมพ์และออกรายงานโดยระบบ StdCare <?php echo htmlspecialchars($global['nameschool']); ?> ณ วันที่ <?php echo date('d/m/Y H:i'); ?> น.
