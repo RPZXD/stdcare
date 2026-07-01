@@ -46,7 +46,7 @@ $pee = $user->getPee();
     </div>
 
     <!-- Enhanced Filters -->
-    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8">
+    <div class="bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-8 no-print">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
             <!-- Group Select - Always Visible except maybe for 'all' tab if we want -->
             <div class="lg:col-span-4 space-y-2 group-selector">
@@ -116,11 +116,13 @@ $pee = $user->getPee();
         <table class="w-full text-left border-separate border-spacing-y-2" id="group-table">
             <thead>
                 <tr class="bg-slate-50/50 dark:bg-slate-900/50">
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">ลำดับ / นักเรียน</th>
+                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl text-center w-16">ที่</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">ชื่อ - นามสกุล</th>
                     <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง / เลขที่</th>
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่ถูกหัก</th>
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">ความสมบูรณ์คะแนน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง</th>
+                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center w-16">เลขที่</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่หัก</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">คะแนนคงเหลือ</th>
                 </tr>
             </thead>
             <tbody id="group-table-body" class="font-bold text-slate-700 dark:text-slate-300">
@@ -220,31 +222,34 @@ $(document).ready(function() {
                         
                         const html = `
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
-                                <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="ลำดับ / นักเรียน">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-[10px] font-black italic">
-                                            ${idx + 1}
-                                        </div>
-                                        <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.FullName}</div>
+                                <td class="px-4 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800 text-center" data-label="ที่">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-[10px] font-black italic mx-auto">
+                                        ${idx + 1}
                                     </div>
                                 </td>
-                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
-                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">ID: ${stu.Stu_id}</span>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800" data-label="ชื่อ - นามสกุล">
+                                    <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.FullName}</div>
                                 </td>
-                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ชั้น / ห้อง / เลขที่">
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic font-mono">ID: ${stu.Stu_id}</span>
+                                </td>
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="ชั้น / ห้อง">
                                     <span class="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-black italic">
-                                        ${stu.ClassRoom} (${stu.Stu_no})
+                                        ${stu.ClassRoom}
                                     </span>
                                 </td>
-                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
-                                    <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span></span>
+                                <td class="px-4 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center font-mono" data-label="เลขที่">
+                                    ${stu.Stu_no}
                                 </td>
-                                <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="ความสมบูรณ์คะแนน">
+                                <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center text-rose-500 italic" data-label="คะแนนที่หัก">
+                                    ${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span>
+                                </td>
+                                <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนคงเหลือ">
                                     <div class="flex flex-col items-center gap-1.5">
-                                        <div class="w-24 bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                                        <div class="w-24 bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden print:hidden">
                                             <div class="bg-${barColor}-500 h-full transition-all duration-1000" style="width: ${score}%"></div>
                                         </div>
-                                        <span class="text-[9px] font-black text-${barColor}-600 dark:text-${barColor}-400 italic">${score} / 100</span>
+                                        <span class="text-[11px] font-black text-${barColor}-600 dark:text-${barColor}-400 italic">${score} / 100</span>
                                     </div>
                                 </td>
                             </tr>

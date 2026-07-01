@@ -4,6 +4,12 @@
  * Modern UI with Tailwind CSS, Glassmorphism & Responsive Design
  */
 ob_start();
+
+if (!isset($global)) {
+    $configPath = __DIR__ . '/../../config.json';
+    $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+    $global = $config['global'] ?? ['logoLink' => 'logo-phicha.png', 'nameTitle' => 'StdCare', 'nameschool' => 'โรงเรียนพิชัย'];
+}
 ?>
 
 <style>

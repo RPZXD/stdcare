@@ -88,11 +88,13 @@ $pee = $user->getPee();
         <table class="w-full text-left border-separate border-spacing-y-2" id="deduct-table">
             <thead>
                 <tr class="bg-slate-50/50 dark:bg-slate-900/50">
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl">เลขที่ / นักเรียน</th>
+                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-l-2xl text-center w-16">เลขที่</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">ชื่อ - นามสกุล</th>
                     <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">รหัสนักเรียน</th>
                     <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">ชั้น / ห้อง</th>
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่ถูกหัก</th>
-                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center">สถานะคะแนน</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนที่หัก</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic text-center">คะแนนคงเหลือ</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest italic rounded-r-2xl text-center w-28">หมายเหตุ</th>
                 </tr>
             </thead>
             <tbody id="deduct-table-body" class="font-bold text-slate-700 dark:text-slate-300">
@@ -197,13 +199,13 @@ $(document).ready(function() {
 
                             const html = `
                                 <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
-                                    <td class="px-6 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800" data-label="เลขที่ / นักเรียน">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-indigo-500 text-[10px] font-black italic">
-                                                ${stu.Stu_no}
-                                            </div>
-                                            <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.Stu_pre}${stu.Stu_name} ${stu.Stu_sur}</div>
+                                    <td class="px-4 py-5 rounded-l-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-l border-slate-100 dark:border-slate-800 text-center" data-label="เลขที่">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-indigo-500 text-[10px] font-black italic mx-auto">
+                                            ${stu.Stu_no}
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800" data-label="ชื่อ - นามสกุล">
+                                        <div class="text-[13px] font-black text-slate-800 dark:text-white">${stu.Stu_pre}${stu.Stu_name} ${stu.Stu_sur}</div>
                                     </td>
                                     <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="รหัสนักเรียน">
                                         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest font-mono italic">ID: ${stu.Stu_id}</span>
@@ -213,11 +215,17 @@ $(document).ready(function() {
                                             ม.${stu.Stu_major}/${stu.Stu_room}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
-                                        <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span></span>
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center text-rose-500 italic" data-label="คะแนนที่หัก">
+                                        ${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span>
                                     </td>
-                                    <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="สถานะคะแนน">
-                                        ${statusBadge}
+                                    <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center font-mono" data-label="คะแนนคงเหลือ">
+                                        <div class="print:hidden">
+                                            ${statusBadge}
+                                        </div>
+                                        <span class="hidden print:inline font-bold text-sm text-slate-800">${score}</span>
+                                    </td>
+                                    <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="หมายเหตุ">
+                                        <span class="text-xs text-slate-400">-</span>
                                     </td>
                                 </tr>
                             `;
