@@ -186,13 +186,13 @@ $(document).ready(function() {
                             
                             let statusBadge = '';
                             if (score < 50) {
-                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full border border-rose-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">🚨 ต่ำกว่า 50 คะแนน</span></div>`;
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full border border-rose-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic"><span class="print:hidden">🚨</span> ต่ำกว่า 50 คะแนน</span></div>`;
                             } else if (score <= 70) {
-                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">⚠️ 50 - 70 คะแนน</span></div>`;
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic"><span class="print:hidden">⚠️</span> 50 - 70 คะแนน</span></div>`;
                             } else if (score < 100) {
-                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">✅ 71 - 99 คะแนน</span></div>`;
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic"><span class="print:hidden">✅</span> 71 - 99 คะแนน</span></div>`;
                             } else {
-                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic">✨ ปกติ</span></div>`;
+                                statusBadge = `<div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-500/20 shadow-sm"><span class="text-[10px] font-black uppercase tracking-widest italic"><span class="print:hidden">✨</span> ปกติ</span></div>`;
                             }
 
                             const html = `
@@ -214,7 +214,7 @@ $(document).ready(function() {
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
-                                        <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70">✂️</span></span>
+                                        <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span></span>
                                     </td>
                                     <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="สถานะคะแนน">
                                         ${statusBadge}

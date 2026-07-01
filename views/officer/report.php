@@ -128,13 +128,15 @@ ob_start();
             display: table !important; 
             width: 100% !important; 
             border-collapse: collapse !important;
+            border: 1px solid #000000 !important;
             margin-top: 0.5cm !important;
             page-break-inside: auto;
         }
         .report-content thead { 
             display: table-header-group !important; 
-            background: #f8fafc !important;
+            background: #f2f2f2 !important;
             -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         .report-content tr { 
             display: table-row !important; 
@@ -146,22 +148,23 @@ ob_start();
         }
         .report-content th {
             display: table-cell !important;
-            background: #f1f5f9 !important;
-            color: #000 !important;
+            background: #e2e8f0 !important;
+            color: #000000 !important;
             font-weight: bold !important;
-            text-transform: uppercase !important;
             font-size: 9pt !important;
-            border: 1px solid #cbd5e1 !important;
-            padding: 10px 5px !important;
+            border: 1px solid #000000 !important;
+            padding: 8px 5px !important;
+            text-align: center !important;
             -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         .report-content td { 
             display: table-cell !important; 
             padding: 8px 5px !important; 
-            text-align: inherit !important;
-            border: 1px solid #e2e8f0 !important;
-            font-size: 10pt !important;
+            border: 1px solid #000000 !important;
+            font-size: 9pt !important;
             background: transparent !important;
+            color: #000000 !important;
         }
         .report-content td:before { display: none !important; }
 
@@ -182,27 +185,49 @@ ob_start();
             font-weight: bold !important;
         }
 
+        /* Flatten rank/number background */
+        .report-content td .w-8.h-8 {
+            background: transparent !important;
+            border: none !important;
+            width: auto !important;
+            height: auto !important;
+            display: inline !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+
         /* Print formatting for Progress Bars in Group Deduct Report */
         .report-content td .w-24 {
             display: none !important;
         }
         .report-content td span.text-\[9px\] {
-            font-size: 10pt !important;
+            font-size: 9pt !important;
             font-weight: bold !important;
-            color: #000 !important;
+            color: #000000 !important;
         }
 
         /* Print formatting for Status Badges in Room Deduct Report */
         .report-content td .rounded-full:not(#lateTable *) {
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 9999px !important;
-            padding: 4px 12px !important;
-            background: #f8fafc !important;
-            color: #000 !important;
-            -webkit-print-color-adjust: exact;
-            display: inline-flex !important;
-            font-size: 8pt !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            color: #000000 !important;
+            display: inline !important;
+            font-size: 9pt !important;
+            font-weight: bold !important;
             box-shadow: none !important;
+        }
+
+        /* Center columns content for printing */
+        .report-content td.text-center,
+        .report-content td[data-label="รหัสนักเรียน"],
+        .report-content td[data-label="ชั้น / ห้อง / เลขที่"],
+        .report-content td[data-label="ชั้น / ห้อง"],
+        .report-content td[data-label="คะแนนที่ถูกหัก"],
+        .report-content td[data-label="สถานะคะแนน"],
+        .report-content td[data-label="ความสมบูรณ์คะแนน"] {
+            text-align: center !important;
         }
 
         /* Print Header - Visible only when printing */

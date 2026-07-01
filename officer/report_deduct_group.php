@@ -237,7 +237,7 @@ $(document).ready(function() {
                                     </span>
                                 </td>
                                 <td class="px-6 py-5 bg-white dark:bg-slate-900 shadow-sm border-y border-slate-100 dark:border-slate-800 text-center" data-label="คะแนนที่ถูกหัก">
-                                    <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70">✂️</span></span>
+                                    <span class="text-sm font-black text-rose-500 italic">${count} <span class="text-[10px] opacity-70 print:hidden">✂️</span></span>
                                 </td>
                                 <td class="px-6 py-5 rounded-r-2xl bg-white dark:bg-slate-900 shadow-sm border-y border-r border-slate-100 dark:border-slate-800 text-center" data-label="ความสมบูรณ์คะแนน">
                                     <div class="flex flex-col items-center gap-1.5">
