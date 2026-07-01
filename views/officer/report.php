@@ -164,22 +164,45 @@ ob_start();
             background: transparent !important;
         }
         .report-content td:before { display: none !important; }
-        
+
         /* Specific Fixes for Report Late */
-        .report-content td div { display: inline-flex !important; }
-        .report-content td .rounded-lg, 
-        .report-content td .rounded-full { 
+        #lateTable td div { display: inline-flex !important; }
+        #lateTable td .rounded-lg, 
+        #lateTable td .rounded-full { 
             border-radius: 0 !important; 
             background: transparent !important;
             border: none !important;
             padding: 0 !important;
             box-shadow: none !important;
         }
-        .report-content td .text-indigo-600,
-        .report-content td .text-rose-600,
-        .report-content td .text-amber-600 {
+        #lateTable td .text-indigo-600,
+        #lateTable td .text-rose-600,
+        #lateTable td .text-amber-600 {
             color: #000 !important;
             font-weight: bold !important;
+        }
+
+        /* Print formatting for Progress Bars in Group Deduct Report */
+        .report-content td .w-24 {
+            display: none !important;
+        }
+        .report-content td span.text-\[9px\] {
+            font-size: 10pt !important;
+            font-weight: bold !important;
+            color: #000 !important;
+        }
+
+        /* Print formatting for Status Badges in Room Deduct Report */
+        .report-content td .rounded-full:not(#lateTable *) {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 9999px !important;
+            padding: 4px 12px !important;
+            background: #f8fafc !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            display: inline-flex !important;
+            font-size: 8pt !important;
+            box-shadow: none !important;
         }
 
         /* Print Header - Visible only when printing */
