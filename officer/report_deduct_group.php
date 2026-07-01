@@ -274,8 +274,18 @@ $(document).ready(function() {
     }
 
     $printBtn.on('click', function() {
-        if (typeof window.printReport === 'function') window.printReport();
-        else window.print();
+        const groupVal = $groupSelect.val() || '';
+        const levelVal = $('#level-select').val() || '';
+        const classVal = $('#class-select').val() || '';
+        const majorVal = $('#major-select').val() || '';
+        const roomVal = $('#room-select').val() || '';
+        
+        let printUrl = `print_report_deduct.php?tab=deduct-group&group=${groupVal}&type=${currentTab}&term=${term}&pee=${pee}`;
+        if (currentTab === 'level') printUrl += `&level=${levelVal}`;
+        if (currentTab === 'class') printUrl += `&class=${classVal}`;
+        if (currentTab === 'room') printUrl += `&major=${majorVal}&room=${roomVal}`;
+        
+        window.open(printUrl, '_blank');
     });
 });
 </script>

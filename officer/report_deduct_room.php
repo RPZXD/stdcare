@@ -257,11 +257,11 @@ $(document).ready(function() {
 
     // Integrated Print
     $printBtn.on('click', function() {
-        if (typeof window.printReport === 'function') {
-            window.printReport();
-        } else {
-            window.print();
-        }
+        const classVal = $selectClass.val() || '';
+        const roomVal = $selectRoom.val() || '';
+        
+        const printUrl = `print_report_deduct.php?tab=deduct-room&class=${encodeURIComponent(classVal)}&room=${encodeURIComponent(roomVal)}&term=${term}&pee=${pee}`;
+        window.open(printUrl, '_blank');
     });
 });
 </script>
