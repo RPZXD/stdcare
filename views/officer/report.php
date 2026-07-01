@@ -233,10 +233,16 @@ ob_start();
 
 <div class="max-w-[1600px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <!-- Print Header (Hidden on screen) -->
-    <div id="print-header">
-        <h1 class="text-2xl font-bold uppercase tracking-widest"><?php echo $global['nameschool']; ?></h1>
-        <h2 class="text-xl font-bold mt-2">รายงานสรุปข้อมูลนักเรียน: <span id="print-report-name"><?php echo $pageTitle; ?></span></h2>
-        <p class="text-sm italic mt-2">พิมพ์โดย: <?php echo $userData['Teach_name']; ?> | วันที่: <?php echo date('d/m/Y H:i'); ?></p>
+    <div id="print-header" class="text-center mb-8 pb-4">
+        <h1 class="text-2xl font-black text-slate-900"><?php echo $global['nameschool']; ?></h1>
+        <h2 class="text-xl font-bold mt-2 text-slate-800">รายงานสรุปข้อมูลระบบดูแลช่วยเหลือนักเรียน (StdCare)</h2>
+        <p class="text-sm font-bold text-slate-600 mt-2">
+            ข้อมูลรายงาน: <span id="print-report-name"><?php echo $pageTitle; ?></span>
+            | ภาคเรียนที่ <?php echo $term; ?> ปีการศึกษา <?php echo $pee; ?>
+        </p>
+        <p class="text-xs text-slate-500 mt-1 italic">
+            ผู้พิมพ์รายงาน: <?php echo $userData['Teach_name']; ?> | ข้อมูล ณ วันที่ <?php echo date('d/m/Y H:i'); ?> น.
+        </p>
     </div>
 
     <!-- Header Section -->
@@ -566,6 +572,28 @@ ob_start();
                 </div>';
             }
             ?>
+
+            <!-- Print Signature Section (Hidden on Screen) -->
+            <div class="hidden print:block mt-16" id="print-signature-section">
+                <div class="grid grid-cols-2 gap-12 px-8 text-slate-800">
+                    <div class="text-center">
+                        <p class="mb-6">ลงชื่อ............................................................ ผู้รายงาน</p>
+                        <p class="font-bold">( <?php echo htmlspecialchars($userData['Teach_name']); ?> )</p>
+                        <p class="text-xs text-slate-500 mt-1">ตำแหน่ง เจ้าหน้าที่ระบบดูแลช่วยเหลือนักเรียน</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="mb-6">ลงชื่อ............................................................ ผู้ตรวจสอบ</p>
+                        <p class="font-bold">(............................................................)</p>
+                        <p class="text-xs text-slate-500 mt-1">ตำแหน่ง หัวหน้างานระดับชั้น / งานปกครอง</p>
+                    </div>
+                    <div class="text-center col-span-2 mt-8">
+                        <p class="mb-6">ลงชื่อ............................................................ ผู้อนุมัติ/รับทราบ</p>
+                        <p class="font-bold">(............................................................)</p>
+                        <p class="text-xs text-slate-500 mt-1">ตำแหน่ง รองผู้อำนวยการกลุ่มบริหารงานบุคคล / ผู้อำนวยการ<?php echo $global['nameschool'] ?? 'โรงเรียนพิชัย'; ?></p>
+                    </div>
+                </div>
+                <p class="text-center text-[9px] text-slate-400 mt-12 italic">พิมพ์และออกรายงานโดยระบบ StdCare โรงเรียนพิชัย ณ วันที่ <?php echo date('d/m/Y H:i'); ?> น.</p>
+            </div>
         </div>
     </div>
     <?php endif; ?>
