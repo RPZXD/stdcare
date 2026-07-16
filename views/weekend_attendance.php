@@ -165,6 +165,26 @@ $(document).ready(function() {
         }
     });
 
+    function checkWeekend(inputEl) {
+        var dateVal = $(inputEl).val();
+        if (dateVal) {
+            var day = new Date(dateVal).getDay(); // 0 = Sunday, 6 = Saturday
+            if (day !== 0 && day !== 6) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'เลือกได้เฉพาะวันเสาร์-อาทิตย์',
+                    text: 'ระบบนี้แสดงข้อมูลเฉพาะประวัติการสแกนในวันหยุดเสาร์และอาทิตย์เท่านั้น',
+                    confirmButtonColor: '#ea580c'
+                });
+                $(inputEl).val('');
+            }
+        }
+    }
+
+    $('#date_from, #date_to').on('change', function() {
+        checkWeekend(this);
+    });
+
     $('#weekendFilterForm').on('submit', function(e) {
         e.preventDefault();
         dataTable.ajax.reload();
