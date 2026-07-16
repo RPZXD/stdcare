@@ -36,15 +36,25 @@ $activePage = "weekend_attendance";
         </div>
     </div>
 
-    <!-- Filter Section -->
-    <div class="glass rounded-2xl p-4 lg:p-6 shadow-xl mb-6 bg-white/80 dark:bg-slate-900/80">
+    <!-- Tabs Navigation -->
+    <div class="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-px">
+        <button id="tab-weekend" class="px-5 py-3 font-black text-sm rounded-t-2xl transition-all border-b-4 border-orange-600 bg-orange-50 dark:bg-orange-950/20 text-orange-600 focus:outline-none flex items-center gap-2">
+            <i class="fas fa-calendar-week"></i> สแกนวันเสาร์-อาทิตย์
+        </button>
+        <button id="tab-advanced" class="px-5 py-3 font-black text-sm rounded-t-2xl transition-all border-b-4 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none flex items-center gap-2">
+            <i class="fas fa-search-plus"></i> ค้นหาละเอียด/กรองข้อมูลตามวัน
+        </button>
+    </div>
+
+    <!-- Filter Section (Hidden by default for Weekend Tab) -->
+    <div id="filter-section-container" class="glass rounded-2xl p-4 lg:p-6 shadow-xl mb-6 bg-white/80 dark:bg-slate-900/80" style="display: none;">
         <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
             <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-filter"></i>
             </div>
             <div>
-                <h3 class="text-base md:text-lg font-black text-slate-800 dark:text-white">ตัวกรองข้อมูล</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Filter Weekend Logs</p>
+                <h3 class="text-base md:text-lg font-black text-slate-800 dark:text-white">ตัวกรองข้อมูลแบบละเอียด</h3>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Advanced Scan Filters (All Days)</p>
             </div>
         </div>
         
@@ -106,6 +116,8 @@ $activePage = "weekend_attendance";
 
 <script>
 $(document).ready(function() {
+    var activeMode = 'weekend'; // 'weekend' or 'all'
+
     var dataTable = $('#weekendTable').DataTable({
         processing: true,
         serverSide: true,
@@ -113,6 +125,7 @@ $(document).ready(function() {
             url: 'api/weekend_data.php',
             type: 'GET',
             data: function(d) {
+                d.mode = activeMode;
                 d.scan_type = $('#scan_type').val();
                 d.date_from = $('#date_from').val();
                 d.date_to = $('#date_to').val();
@@ -165,25 +178,36 @@ $(document).ready(function() {
         }
     });
 
-    function checkWeekend(inputEl) {
-        var dateVal = $(inputEl).val();
-        if (dateVal) {
-            var day = new Date(dateVal).getDay(); // 0 = Sunday, 6 = Saturday
-            if (day !== 0 && day !== 6) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'เลือกได้เฉพาะวันเสาร์-อาทิตย์',
-                    text: 'ระบบนี้แสดงข้อมูลเฉพาะประวัติการสแกนในวันหยุดเสาร์และอาทิตย์เท่านั้น',
-                    confirmButtonColor: '#ea580c'
-                });
-                $(inputEl).val('');
-            }
-        }
-    }
+    // Tab switching logic
+    $('#tab-weekend').on('click', function() {
+        activeMode = 'weekend';
+        // Toggle tab styles
+        $(this).addClass('border-orange-600 bg-orange-50 dark:bg-orange-950/20 text-orange-600')
+               .removeClass('border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300');
+        $('#tab-advanced').removeClass('border-orange-600 bg-orange-50 dark:bg-orange-950/20 text-orange-600')
+                          .addClass('border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300');
+        
+        // Hide filter container and reset fields
+        $('#filter-section-container').slideUp(300);
+        $('#weekendFilterForm')[0].reset();
+        
+        // Reload DataTable
+        dataTable.ajax.reload();
+    });
 
-    $('#date_from, #date_to').on('change', function() {
-        // Temporarily commented out for testing
-        // checkWeekend(this);
+    $('#tab-advanced').on('click', function() {
+        activeMode = 'all';
+        // Toggle tab styles
+        $(this).addClass('border-orange-600 bg-orange-50 dark:bg-orange-950/20 text-orange-600')
+               .removeClass('border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300');
+        $('#tab-weekend').removeClass('border-orange-600 bg-orange-50 dark:bg-orange-950/20 text-orange-600')
+                         .addClass('border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300');
+        
+        // Show filter container
+        $('#filter-section-container').slideDown(300);
+        
+        // Reload DataTable
+        dataTable.ajax.reload();
     });
 
     $('#weekendFilterForm').on('submit', function(e) {

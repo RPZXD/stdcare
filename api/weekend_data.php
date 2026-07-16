@@ -39,10 +39,17 @@ try {
     $dateTo = trim($_GET['date_to'] ?? '');
     $scanTypeFilter = trim($_GET['scan_type'] ?? '');
 
-    // 3. Base Query (Filter by WEEKDAY: 5 = Saturday, 6 = Sunday) - TEMPORARILY DISABLED FOR TESTING
-    $baseQuery = "FROM attendance_log l 
-                  INNER JOIN student s ON l.student_id = s.Stu_id
-                  WHERE 1=1";
+    // 3. Base Query
+    $mode = $_GET['mode'] ?? 'weekend'; // 'weekend' or 'all'
+    if ($mode === 'all') {
+        $baseQuery = "FROM attendance_log l 
+                      INNER JOIN student s ON l.student_id = s.Stu_id
+                      WHERE 1=1";
+    } else {
+        $baseQuery = "FROM attendance_log l 
+                      INNER JOIN student s ON l.student_id = s.Stu_id
+                      WHERE WEEKDAY(l.scan_timestamp) IN (5, 6)";
+    }
     
     $whereClause = "";
     $params = [];
