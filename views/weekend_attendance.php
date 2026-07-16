@@ -182,7 +182,8 @@ $(document).ready(function() {
     }
 
     $('#date_from, #date_to').on('change', function() {
-        checkWeekend(this);
+        // Temporarily commented out for testing
+        // checkWeekend(this);
     });
 
     $('#weekendFilterForm').on('submit', function(e) {

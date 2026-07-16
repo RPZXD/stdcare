@@ -39,10 +39,10 @@ try {
     $dateTo = trim($_GET['date_to'] ?? '');
     $scanTypeFilter = trim($_GET['scan_type'] ?? '');
 
-    // 3. Base Query (Filter by WEEKDAY: 5 = Saturday, 6 = Sunday)
+    // 3. Base Query (Filter by WEEKDAY: 5 = Saturday, 6 = Sunday) - TEMPORARILY DISABLED FOR TESTING
     $baseQuery = "FROM attendance_log l 
                   INNER JOIN student s ON l.student_id = s.Stu_id
-                  WHERE WEEKDAY(l.scan_timestamp) IN (5, 6)";
+                  WHERE 1=1";
     
     $whereClause = "";
     $params = [];
