@@ -108,6 +108,12 @@ $menuItems = [
                 'icon' => 'fa-desktop',
             ],
             [
+                'key' => 'weekend_attendance',
+                'name' => 'สแกนเสาร์-อาทิตย์',
+                'url' => 'weekend_attendance.php',
+                'icon' => 'fa-calendar-week',
+            ],
+            [
                 'key' => 'log',
                 'name' => 'Log กิจกรรม',
                 'url' => 'log.php',
