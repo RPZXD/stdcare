@@ -1,22 +1,11 @@
 <?php
 header('Content-Type: application/json');
-require_once __DIR__ . '/../../classes/DatabaseUsers.php';
-require_once __DIR__ . '/../../models/SettingModel.php';
+require_once __DIR__ . '/../classes/DatabaseUsers.php';
+require_once __DIR__ . '/../models/SettingModel.php';
 use App\DatabaseUsers;
 use App\Models\SettingModel;
 
 date_default_timezone_set('Asia/Bangkok');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Check authorization
-if (!isset($_SESSION['Admin_login'])) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Unauthorized access']);
-    exit;
-}
 
 try {
     $db = new DatabaseUsers();
@@ -76,11 +65,9 @@ try {
     }
 
     // 4. Counts
-    // Total weekend records (unfiltered by search/date params)
     $totalStmt = $pdo->query("SELECT COUNT(l.id) as total " . $baseQuery);
     $totalRecords = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-    // Filtered weekend records
     $filteredStmt = $pdo->prepare("SELECT COUNT(l.id) as total " . $baseQuery . $whereClause);
     $filteredStmt->execute($params);
     $filteredRecords = $filteredStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
@@ -94,7 +81,7 @@ try {
                 l.student_id,
                 l.scan_type,
                 l.scan_timestamp,
-                s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room, s.Stu_picture,
+                s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_major, s.Stu_room,
                 CASE
                     WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) <= :arrival_late THEN 'normal_arrival'
                     WHEN l.scan_type = 'arrival' AND TIME(l.scan_timestamp) > :arrival_late AND TIME(l.scan_timestamp) <= :arrival_absent THEN 'late_arrival'
@@ -133,15 +120,33 @@ try {
 
         $formattedDate = "วัน{$dayName}ที่ {$d} {$m} {$y} ({$timeStr})";
 
+        // PDPA Masking: Student ID (Keep first 5, mask last 3 or similar)
+        $stuId = $row['student_id'];
+        $len = strlen($stuId);
+        if ($len > 3) {
+            $maskedId = substr($stuId, 0, $len - 3) . '***';
+        } else {
+            $maskedId = '***';
+        }
+
+        // PDPA Masking: Surname (Keep first char, rest ***)
+        $surname = $row['Stu_sur'] ?? '';
+        if (!empty($surname)) {
+            $maskedSurname = mb_substr($surname, 0, 1, 'UTF-8') . '***';
+        } else {
+            $maskedSurname = '***';
+        }
+
+        $fullname = ($row['Stu_pre'] ?? '') . $row['Stu_name'] . ' ' . $maskedSurname;
+
         $data[] = [
-            'student_id' => htmlspecialchars($row['student_id']),
-            'fullname' => htmlspecialchars(($row['Stu_pre'] ?? '') . $row['Stu_name'] . ' ' . $row['Stu_sur']),
+            'student_id' => $maskedId,
+            'fullname' => $fullname,
             'class' => htmlspecialchars($row['Stu_major'] . '/' . $row['Stu_room']),
             'scan_timestamp' => $row['scan_timestamp'],
             'formatted_date' => $formattedDate,
             'scan_type' => $row['scan_type'] === 'arrival' ? '🔵 เข้าเรียน' : '🔴 ออกโรงเรียน',
-            'status_type' => $row['status'],
-            'photo' => !empty($row['Stu_picture']) ? 'https://std.phichai.ac.th/photo/' . $row['Stu_picture'] : 'assets/images/profile.png'
+            'status_type' => $row['status']
         ];
     }
 

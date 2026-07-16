@@ -159,6 +159,13 @@ if ($isTeacher) {
             'gradient' => ['from' => 'purple-500', 'to' => 'pink-600'],
         ],
         [
+            'key' => 'weekend_attendance',
+            'name' => 'สแกนเสาร์-อาทิตย์',
+            'url' => 'weekend_attendance.php',
+            'icon' => 'fa-calendar-week',
+            'gradient' => ['from' => 'orange-500', 'to' => 'red-600'],
+        ],
+        [
             'key' => 'announce',
             'name' => 'ข้อมูลทั่วไป/ประกาศ',
             'url' => 'annouce.php',
