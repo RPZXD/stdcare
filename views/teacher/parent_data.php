@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadStudents() {
     try {
-        const response = await fetch(`api/fetch_data_student.php?class=${classId}&room=${roomId}`);
+        const response = await fetch(`teacher/api/fetch_data_student.php?class=${classId}&room=${roomId}`);
         const result = await response.json();
         
         if (result.success) {
@@ -524,7 +524,7 @@ function updateStats() {
 
 async function viewStudent(stuId) {
     try {
-        const response = await fetch(`api/view_student.php?stu_id=${stuId}`);
+        const response = await fetch(`teacher/api/view_student.php?stu_id=${stuId}`);
         const html = await response.text();
         
         document.getElementById('viewModalContent').innerHTML = html;
@@ -560,7 +560,7 @@ async function saveParentData() {
     const formData = new FormData(document.getElementById('editParentForm'));
     
     try {
-        const response = await fetch('api/update_student.php', {
+        const response = await fetch('teacher/api/update_parent.php', {
             method: 'POST',
             body: formData
         });
@@ -574,7 +574,7 @@ async function saveParentData() {
             Swal.fire('ข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกได้', 'error');
         }
     } catch (e) {
-        Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาด', 'error');
+        Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
     }
 }
 
