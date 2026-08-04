@@ -684,13 +684,13 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                                     <i class="fas fa-clipboard-list mr-2"></i>
                                     แบบประเมิน SDQ (${titles[type]})
                                 </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-4 md:p-6">
                                 ${response}
                             </div>
                             <div class="modal-footer border-0 p-4 bg-slate-50 dark:bg-slate-800">
-                                <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal">ยกเลิก</button>
+                                <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal" data-dismiss="modal">ยกเลิก</button>
                                 <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition" id="saveSDQBtn">${actionText}</button>
                             </div>
                         </div>
@@ -698,8 +698,14 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                 </div>
             `;
             $('body').append(modalHtml);
-            const modal = new bootstrap.Modal(document.getElementById('sdqModal'));
-            modal.show();
+            const modalElem = document.getElementById('sdqModal');
+            let modalObj = null;
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                modalObj = new bootstrap.Modal(modalElem);
+                modalObj.show();
+            } else {
+                $(modalElem).modal('show');
+            }
 
             $('#saveSDQBtn').on('click', function() {
                 const formId = mode === 'edit' ? '#sdqEditForm' : '#sdqForm';
@@ -740,7 +746,8 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                         
                         if (res && res.success === true) {
                             // Close modal immediately
-                            $('#sdqModal').modal('hide');
+                            $(modalElem).modal('hide');
+                            if (modalObj && modalObj.hide) modalObj.hide();
                             
                             Swal.fire({ 
                                 icon: 'success',
@@ -778,8 +785,10 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                 });
             });
 
-            document.getElementById('sdqModal').addEventListener('hidden.bs.modal', function() {
-                this.remove();
+            $(modalElem).on('hidden.bs.modal', function() {
+                $(this).remove();
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
             });
         },
         error: () => Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดฟอร์มได้', 'error')
@@ -814,7 +823,7 @@ function openResultModal(type, studentId, studentName, studentNo, studentClass, 
                                     <i class="fas fa-chart-pie mr-2"></i>
                                     แปลผล SDQ (${titles[type]})
                                 </h5>
-                                <button type="button" class="btn-close btn-close-white print-hide" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-close-white print-hide" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-4 md:p-6">
                                 ${response}
@@ -823,15 +832,19 @@ function openResultModal(type, studentId, studentName, studentNo, studentClass, 
                                 <button type="button" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition" id="printResultBtn">
                                     <i class="fas fa-print mr-2"></i>พิมพ์
                                 </button>
-                                <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal">ปิด</button>
+                                <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal" data-dismiss="modal">ปิด</button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             $('body').append(modalHtml);
-            const modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+            const resModalElem = document.getElementById('resultModal');
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                new bootstrap.Modal(resModalElem).show();
+            } else {
+                $(resModalElem).modal('show');
+            }
 
             $('#printResultBtn').on('click', function() {
                 let printContents = document.getElementById('modalContentToPrint').innerHTML;
@@ -846,8 +859,10 @@ function openResultModal(type, studentId, studentName, studentNo, studentClass, 
                 setTimeout(() => { printWindow.focus(); printWindow.print(); printWindow.close(); }, 500);
             });
 
-            document.getElementById('resultModal').addEventListener('hidden.bs.modal', function() {
-                this.remove();
+            $(resModalElem).on('hidden.bs.modal', function() {
+                $(this).remove();
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
             });
         },
         error: () => Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error')

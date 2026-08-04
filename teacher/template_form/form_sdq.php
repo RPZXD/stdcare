@@ -141,30 +141,46 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-4 items-end">
-            <?php if (!empty($validClassmates)): ?>
-                <div class="flex flex-col gap-1">
-                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">คัดลอกข้อมูลเพื่อน:</span>
-                    <select onchange="if(this.value) copyFromClassmate(this.value)" class="w-48 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
-                        <option value="" class="text-slate-800">-- เลือกชื่อเพื่อน --</option>
-                        <?php foreach ($validClassmates as $c): ?>
-                            <option value="<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            <?php endif; ?>
+        <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-end">
+            <!-- Copy Source Dropdown (Self, Parent, or Classmates) -->
+            <div class="flex flex-col gap-1">
+                <span class="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">คัดลอกการประเมินจาก:</span>
+                <select onchange="handleCopySourceChange(this)" class="w-full md:w-56 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition">
+                    <option value="" class="text-slate-800">-- เลือกแหล่งคัดลอก --</option>
+                    
+                    <optgroup label="การประเมินของนักเรียนคนนี้" class="text-slate-800">
+                        <?php if ($type !== 'self'): ?>
+                            <option value="self_same" class="text-slate-800">🙋‍♂️ จากนักเรียนประเมินตนเอง</option>
+                        <?php endif; ?>
+                        <?php if ($type !== 'par'): ?>
+                            <option value="par_same" class="text-slate-800">👨‍👩‍👧 จากผู้ปกครองประเมิน</option>
+                        <?php endif; ?>
+                        <?php if ($type !== 'teach'): ?>
+                            <option value="teach_same" class="text-slate-800">👨‍🏫 จากครูประเมิน</option>
+                        <?php endif; ?>
+                    </optgroup>
+
+                    <?php if (!empty($validClassmates)): ?>
+                        <optgroup label="การประเมินจากเพื่อนในห้อง" class="text-slate-800">
+                            <?php foreach ($validClassmates as $c): ?>
+                                <option value="classmate_<?= $c['Stu_id'] ?>" class="text-slate-800">เลขที่ <?= $c['Stu_no'] ?>. <?= $c['full_name'] ?></option>
+                            <?php endforeach; ?>
+                        </optgroup>
+                    <?php endif; ?>
+                </select>
+            </div>
 
             <?php if ($term == '2'): ?>
                 <div>
                     <?php if ($hasTerm1Data && $term1DataStr !== null): ?>
                         <button type="button" onclick='importTerm1Data(<?= htmlspecialchars($term1DataStr, ENT_QUOTES, "UTF-8") ?>)'
-                            class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg">
-                            <i class="fas fa-file-download"></i> คัดลอกข้อมูลเทอม 1
+                            class="w-full md:w-auto px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/50 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fas fa-file-download"></i> คัดลอกเทอม 1
                         </button>
                     <?php else: ?>
                         <button type="button" onclick="Swal.fire('ไม่มีข้อมูล', 'นักเรียนคนนี้ยังไม่ได้ประเมิน / ตรวจสอบในเทอม 1', 'warning')" 
-                            class="px-4 py-2 bg-white/10 opacity-70 backdrop-blur border border-white/30 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-not-allowed">
-                            <i class="fas fa-info-circle"></i> ไม่มีข้อมูลเทอม 1
+                            class="w-full md:w-auto px-4 py-2 bg-white/10 opacity-70 backdrop-blur border border-white/30 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-not-allowed">
+                            <i class="fas fa-info-circle"></i> ไม่มีเทอม 1
                         </button>
                     <?php endif; ?>
                 </div>
@@ -281,54 +297,102 @@ $formId = $mode === 'edit' ? 'sdqEditForm' : 'sdqForm';
             icon: 'success',
             title: 'ดึงข้อมูลสำเร็จ',
             text: 'คัดลอกข้อมูลการประเมินจากเทอม 1 เรียบร้อยแล้ว (ตรวจสอบและกดบันทึกได้เลย)',
-            timer: 3000,
+            timer: 2000,
             showConfirmButton: false
         });
-    function copyFromClassmate(stuId) {
+    }
+
+    function handleCopySourceChange(selectElem) {
+        const val = selectElem.value;
+        if (!val) return;
+
+        if (val === 'self_same') {
+            copyFromSameStudent('self', 'นักเรียนประเมินตนเอง');
+        } else if (val === 'par_same') {
+            copyFromSameStudent('par', 'ผู้ปกครองประเมิน');
+        } else if (val === 'teach_same') {
+            copyFromSameStudent('teach', 'ครูประเมิน');
+        } else if (val.startsWith('classmate_')) {
+            const stuId = val.replace('classmate_', '');
+            copyFromClassmate(stuId);
+        }
+        
+        // Reset select dropdown after action
+        selectElem.value = '';
+    }
+
+    function copyFromSameStudent(targetType, sourceLabel) {
         Swal.fire({
-            title: 'คัดลอกข้อมูลจากเพื่อน?',
-            text: "ระบบจะดึงข้อมูลการประเมินของเพื่อนมาใส่ในแบบฟอร์มนี้",
+            title: `คัดลอกจากการประเมินของ${sourceLabel}?`,
+            text: `ระบบจะดึงผลการประเมินของนักเรียนคนนี้ (${sourceLabel}) มาใส่ในแบบฟอร์มนี้`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'ตกลง',
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({ title: 'กำลังโหลด...', didOpen: () => Swal.showLoading() });
-                
-                $.ajax({
-                    url: 'api/fetch_student_sdq_answers.php',
-                    method: 'GET',
-                    data: { 
-                        student_id: stuId, 
-                        type: '<?= $type ?>',
-                        pee: '<?= $pee ?>', 
-                        term: '<?= $term ?>' 
-                    },
-                    success: function(res) {
-                        Swal.close();
-                        if (res.status === 'success') {
-                            const data = res.data;
-                            if (data && data.answers) {
-                                for (let i = 1; i <= 25; i++) {
-                                    const val = data.answers['q' + i];
-                                    if (val !== undefined && val !== null && val !== '') {
-                                        const radio = document.querySelector(`input[name="q${i}"][value="${val}"]`);
-                                        if (radio) radio.checked = true;
-                                    }
-                                }
-                                if (data.memo) {
-                                    const memoArea = document.querySelector('textarea[name="memo"]');
-                                    if (memoArea) memoArea.value = data.memo;
-                                }
-                                Swal.fire({ icon: 'success', title: 'คัดลอกข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false });
+                fetchAndApplySDQAnswers('<?= $student_id ?>', targetType);
+            }
+        });
+    }
+
+    function copyFromClassmate(stuId) {
+        Swal.fire({
+            title: 'คัดลอกข้อมูลจากเพื่อน?',
+            text: "ระบบจะดึงข้อมูลการประเมินของเพื่อนคนนี้มาใส่ในแบบฟอร์มนี้",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetchAndApplySDQAnswers(stuId, '<?= $type ?>');
+            }
+        });
+    }
+
+    function fetchAndApplySDQAnswers(stuId, sourceType) {
+        Swal.fire({ title: 'กำลังดึงข้อมูล...', didOpen: () => Swal.showLoading() });
+        
+        $.ajax({
+            url: 'api/fetch_student_sdq_answers.php',
+            method: 'GET',
+            data: { 
+                student_id: stuId, 
+                type: sourceType,
+                pee: '<?= $pee ?>', 
+                term: '<?= $term ?>' 
+            },
+            success: function(res) {
+                Swal.close();
+                if (res.status === 'success') {
+                    const data = res.data;
+                    if (data && data.answers) {
+                        for (let i = 1; i <= 25; i++) {
+                            const val = data.answers['q' + i];
+                            if (val !== undefined && val !== null && val !== '') {
+                                const radio = document.querySelector(`input[name="q${i}"][value="${val}"]`);
+                                if (radio) radio.checked = true;
                             }
-                        } else {
-                            Swal.fire('ข้อผิดพลาด', res.message, 'error');
                         }
-                    },
-                    error: function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); }
-                });
+                        if (data.memo) {
+                            const memoArea = document.querySelector('textarea[name="memo"]');
+                            if (memoArea) memoArea.value = data.memo;
+                        }
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'คัดลอกข้อมูลสำเร็จ', 
+                            text: 'กรุณาตรวจสอบข้อมูลก่อนกดบันทึก',
+                            timer: 2000, 
+                            showConfirmButton: false 
+                        });
+                    }
+                } else {
+                    Swal.fire('ไม่พบข้อมูล', res.message || 'ยังไม่มีข้อมูลการประเมินนี้', 'warning');
+                }
+            },
+            error: function() { 
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); 
             }
         });
     }
