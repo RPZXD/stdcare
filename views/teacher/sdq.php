@@ -544,13 +544,27 @@ function createActionBtn(hasData, type, item) {
     const text = hasData ? 'แก้ไข' : 'บันทึก';
     const status = hasData ? '✅' : '❌';
     
-    return `
-        <div class="flex items-center justify-center gap-2">
-            <span>${status}</span>
-            <button onclick="${actionFn}('${item.Stu_id}', '${item.full_name}', '${item.Stu_no}', ${classId}, ${roomId}, ${termId}, ${peeId})"
-                class="px-3 py-1.5 ${bgColor} text-white text-xs font-bold rounded-lg shadow transition-all">
-                <i class="fas ${icon} mr-1"></i>${text}
+    let buttons = `
+        <button onclick="${actionFn}('${item.Stu_id}', '${item.full_name}', '${item.Stu_no}', ${classId}, ${roomId}, ${termId}, ${peeId})"
+            class="px-2.5 py-1.5 ${bgColor} text-white text-xs font-bold rounded-lg shadow transition-all flex items-center">
+            <i class="fas ${icon} mr-1"></i>${text}
+        </button>
+    `;
+
+    if (hasData) {
+        buttons += `
+            <button onclick="deleteSDQ('${type}', '${item.Stu_id}', '${item.full_name}', ${termId}, ${peeId})"
+                title="ลบข้อมูลเพื่อให้ทำใหม่"
+                class="px-2 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg shadow transition-all flex items-center justify-center">
+                <i class="fas fa-trash-alt"></i>
             </button>
+        `;
+    }
+    
+    return `
+        <div class="flex items-center justify-center gap-1.5">
+            <span>${status}</span>
+            ${buttons}
         </div>
     `;
 }
@@ -573,12 +587,24 @@ function createMobileActionBtn(hasData, type, item) {
     const bgColor = hasData ? 'bg-amber-500' : 'bg-blue-500';
     const icon = hasData ? 'fa-edit' : 'fa-plus';
     
-    return `
+    let buttons = `
         <button onclick="${actionFn}('${item.Stu_id}', '${item.full_name}', '${item.Stu_no}', ${classId}, ${roomId}, ${termId}, ${peeId})"
             class="w-8 h-8 ${bgColor} text-white text-xs font-bold rounded-lg shadow flex items-center justify-center">
             <i class="fas ${icon}"></i>
         </button>
     `;
+
+    if (hasData) {
+        buttons += `
+            <button onclick="deleteSDQ('${type}', '${item.Stu_id}', '${item.full_name}', ${termId}, ${peeId})"
+                title="ลบข้อมูลเพื่อให้ทำใหม่"
+                class="w-8 h-8 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg shadow flex items-center justify-center">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+    }
+
+    return buttons;
 }
 
 function createMobileResultBtn(type, hasData, item) {
@@ -689,9 +715,18 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                             <div class="modal-body p-4 md:p-6">
                                 ${response}
                             </div>
-                            <div class="modal-footer border-0 p-4 bg-slate-50 dark:bg-slate-800">
-                                <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal" data-dismiss="modal">ยกเลิก</button>
-                                <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition" id="saveSDQBtn">${actionText}</button>
+                            <div class="modal-footer border-0 p-4 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                                <div>
+                                    ${mode === 'edit' ? `
+                                        <button type="button" class="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 transition flex items-center gap-2 text-sm" id="deleteInModalBtn">
+                                            <i class="fas fa-trash-alt"></i> ลบข้อมูลเพื่อทำใหม่
+                                        </button>
+                                    ` : ''}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-bold rounded-xl transition" data-bs-dismiss="modal" data-dismiss="modal">ยกเลิก</button>
+                                    <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition" id="saveSDQBtn">${actionText}</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -705,6 +740,14 @@ function openSDQModal(type, mode, studentId, studentName, studentNo, studentClas
                 modalObj.show();
             } else {
                 $(modalElem).modal('show');
+            }
+
+            if (mode === 'edit') {
+                $('#deleteInModalBtn').on('click', function() {
+                    $(modalElem).modal('hide');
+                    if (modalObj && modalObj.hide) modalObj.hide();
+                    deleteSDQ(type, studentId, studentName, Term, Pee);
+                });
             }
 
             $('#saveSDQBtn').on('click', function() {
@@ -868,6 +911,71 @@ function openResultModal(type, studentId, studentName, studentNo, studentClass, 
         error: () => Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error')
     });
 }
+
+// Delete SDQ Function
+window.deleteSDQ = function(type, studentId, studentName, term, pee) {
+    const titles = { std: 'นักเรียนประเมินตนเอง', self: 'นักเรียนประเมินตนเอง', teach: 'ครูประเมิน', par: 'ผู้ปกครองประเมิน' };
+    const typeLabel = titles[type] || type;
+
+    Swal.fire({
+        title: 'ยืนยันการลบข้อมูล?',
+        html: `คุณต้องการลบข้อมูล SDQ (<b>${typeLabel}</b>)<br>ของ <b>${studentName}</b> หรือไม่?<br><p class="text-rose-500 text-xs mt-2 font-bold"><i class="fas fa-exclamation-triangle mr-1"></i>เมื่อลบแล้ว สถานะจะกลับเป็นยังไม่ประเมิน เพื่อให้ทำแบบประเมินใหม่ได้</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> ยืนยันลบข้อมูล',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'กำลังลบข้อมูล...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            $.ajax({
+                url: 'api/delete_sdq.php',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    student_id: studentId,
+                    type: type,
+                    term: term,
+                    pee: pee
+                }),
+                dataType: 'json',
+                success: function(res) {
+                    if (res && res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ลบสำเร็จ!',
+                            text: res.message || 'ลบข้อมูลเรียบร้อยแล้ว นักเรียนสามารถทำแบบประเมินใหม่ได้',
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            loadStudentData(); // Reload table and stats dynamically
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด',
+                            text: res.message || 'ไม่สามารถลบข้อมูลได้',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            });
+        }
+    });
+};
 </script>
 
 

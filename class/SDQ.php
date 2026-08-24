@@ -413,5 +413,33 @@ class SDQ {
         return $results;
     }
 
+    /**
+     * Delete SDQ record for a specific student, term, and pee
+     * @param string $type self|std|teach|par
+     * @param string $student_id
+     * @param int|string $pee
+     * @param int|string $term
+     * @return bool
+     */
+    public function deleteSDQ($type, $student_id, $pee, $term) {
+        $tableMap = [
+            'self' => 'sdq_self',
+            'std' => 'sdq_self',
+            'teach' => 'sdq_teach',
+            'par' => 'sdq_par'
+        ];
+        if (!isset($tableMap[$type])) {
+            return false;
+        }
+        $table = $tableMap[$type];
+        $query = "DELETE FROM $table WHERE Stu_id = :student_id AND Pee = :pee AND Term = :term";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            ':student_id' => $student_id,
+            ':pee' => $pee,
+            ':term' => $term
+        ]);
+    }
+
 }
 ?>
