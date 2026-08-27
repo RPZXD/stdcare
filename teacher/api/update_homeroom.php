@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? null;
     $detail = $_POST['detail'] ?? null;
     $result = $_POST['result'] ?? null;
-    $date = date("Y-m-d");
+    $date = (!empty($_POST['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['date'])) ? $_POST['date'] : date("Y-m-d");
 
     if (!$id || !$type || !$title || !$detail || !$result) {
         echo json_encode(['success' => false, 'message' => 'กรุณากรอกข้อมูลให้ครบถ้วน (ประเภท, หัวข้อ, รายละเอียด, ผลการดำเนินงาน)']);
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image2 = $image2 ?? $existingHomeroom['h_pic2'];
     }
 
-    if ($homeroom->updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2)) {
+    if ($homeroom->updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2, $date)) {
         echo json_encode(['success' => true, 'message' => 'อัปเดตข้อมูลสำเร็จ']);
     } else {
         echo json_encode(['success' => false, 'message' => 'ไม่สามารถอัปเดตข้อมูลได้']);

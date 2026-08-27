@@ -394,17 +394,26 @@ ob_start();
         </div>
         <div class="flex-1 overflow-y-auto p-5 md:p-6">
             <form id="addForm" enctype="multipart/form-data">
-                <!-- Type -->
-                <div class="mb-5">
-                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        <i class="fas fa-tags mr-1 text-sky-500"></i> ประเภทกิจกรรม <span class="text-red-500">*</span>
-                    </label>
-                    <select name="type" id="addType" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white focus:border-sky-400 transition">
-                        <option value="">-- เลือกประเภท --</option>
-                        <?php foreach ($types as $type): ?>
-                        <option value="<?php echo $type['th_id']; ?>"><?php echo htmlspecialchars($type['th_name']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <!-- Type & Date -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fas fa-tags mr-1 text-sky-500"></i> ประเภทกิจกรรม <span class="text-red-500">*</span>
+                        </label>
+                        <select name="type" id="addType" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white focus:border-sky-400 transition">
+                            <option value="">-- เลือกประเภท --</option>
+                            <?php foreach ($types as $type): ?>
+                            <option value="<?php echo $type['th_id']; ?>"><?php echo htmlspecialchars($type['th_name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fas fa-calendar-day mr-1 text-sky-500"></i> วันที่จัดกิจกรรม / บันทึกย้อนหลัง <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="date" id="addDate" required value="<?php echo date('Y-m-d'); ?>"
+                               class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white focus:border-sky-400 transition">
+                    </div>
                 </div>
                 
                 <!-- Title -->
@@ -860,6 +869,15 @@ function convertToThaiDate(dateString) {
 // Modal Functions
 function openAddModal() {
     document.getElementById('addForm').reset();
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedToday = `${year}-${month}-${day}`;
+    const addDateInput = document.getElementById('addDate');
+    if (addDateInput) {
+        addDateInput.value = formattedToday;
+    }
     document.getElementById('addPreview1').classList.add('hidden');
     document.getElementById('addPreview2').classList.add('hidden');
     document.getElementById('addModal').classList.remove('hidden');
@@ -955,6 +973,7 @@ async function editActivity(id) {
         
         if (data.success && data.data.length > 0) {
             const item = data.data[0];
+            const dateValue = item.h_date ? item.h_date.split(' ')[0] : '';
             
             let typeOptions = types.map(t => 
                 `<option value="${t.th_id}" ${t.th_id == item.th_id ? 'selected' : ''}>${t.th_name}</option>`
@@ -963,20 +982,32 @@ async function editActivity(id) {
             document.getElementById('editModalBody').innerHTML = `
                 <form id="editForm" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="${item.h_id}">
-                    <div class="mb-5">
-                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">ประเภท</label>
-                        <select name="type" id="editType" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
-                            ${typeOptions}
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                <i class="fas fa-tags mr-1 text-amber-500"></i> ประเภทกิจกรรม <span class="text-red-500">*</span>
+                            </label>
+                            <select name="type" id="editType" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white">
+                                ${typeOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                <i class="fas fa-calendar-day mr-1 text-amber-500"></i> วันที่จัดกิจกรรม <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" name="date" id="editDate" required value="${dateValue}" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white">
+                        </div>
                     </div>
                     <div class="mb-5">
                         <div class="flex items-center justify-between gap-3 mb-2">
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">หัวข้อ</label>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                                <i class="fas fa-heading mr-1 text-amber-500"></i> หัวข้อเรื่อง <span class="text-red-500">*</span>
+                            </label>
                             <button type="button" onclick="generateHomeroomWithAI('edit')" class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-bold rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1">
                                 <i class="fas fa-magic"></i> ✨ ช่วยเขียนด้วย AI
                             </button>
                         </div>
-                        <input type="text" name="title" id="editTitle" value="${item.h_topic}" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl">
+                        <input type="text" name="title" id="editTitle" required value="${item.h_topic}" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-xl text-sm dark:bg-slate-700 dark:text-white">
                     </div>
                     <div class="mb-5">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">รายละเอียด</label>

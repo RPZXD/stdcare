@@ -121,11 +121,11 @@ try {
                     . "  \"result\": \"ผลที่คาดว่าจะได้รับ (ระบุผลลัพธ์ที่นักเรียนจะได้รับหลังจากทำกิจกรรมเสร็จสิ้น กระชับและวัดผลได้ 1-2 ข้อ)\"\n"
                     . "}";
 
-            $res = callGeminiAPI($apiKey, 'gemini-2.5-flash', $prompt, true);
+            $res = callGeminiAPI($apiKey, 'gemini-3.6-flash', $prompt, true);
             if (!$res['success']) {
                 $errData = json_decode($res['response'], true);
                 $msg = $errData['error']['message'] ?? '';
-                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false);
+                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false || stripos($msg, 'not found') !== false);
                 if ($isTransient) {
                     $res = callGeminiAPI($apiKey, 'gemini-1.5-flash', $prompt, true);
                 }
@@ -222,11 +222,11 @@ try {
                     . "ความยาวประมาณ 3-5 ประโยค พร้อมเสนอแนะแนวทางแก้ไขหรือความช่วยเหลือที่สอดคล้องกับสถานการณ์ของนักเรียน (เช่น เสนอแนะให้ทุนการศึกษา, ดูแลใกล้ชิดร่วมกับผู้ปกครอง หรือประสานครูแนะแนว)\n"
                     . "(ห้ามมีคำนำเกริ่นนำหรือเครื่องหมายคำพูด Markdown คลุม ให้ส่งเฉพาะเนื้อหาข้อความสรุปรายงานเท่านั้น)";
 
-            $res = callGeminiAPI($apiKey, 'gemini-2.5-flash', $prompt, false);
+            $res = callGeminiAPI($apiKey, 'gemini-3.6-flash', $prompt, false);
             if (!$res['success']) {
                 $errData = json_decode($res['response'], true);
                 $msg = $errData['error']['message'] ?? '';
-                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false);
+                $isTransient = ($res['http_code'] === 429 || $res['http_code'] >= 500 || stripos($msg, 'demand') !== false || stripos($msg, 'limit') !== false || stripos($msg, 'overloaded') !== false || stripos($msg, 'quota') !== false || stripos($msg, 'not found') !== false);
                 if ($isTransient) {
                     $res = callGeminiAPI($apiKey, 'gemini-1.5-flash', $prompt, false);
                 }

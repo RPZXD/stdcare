@@ -21,7 +21,7 @@ $class = $_POST['class'] ?? null;
 $room = $_POST['room'] ?? null;
 $term = $_POST['term'] ?? null;
 $pee = $_POST['pee'] ?? null;
-$date = date("Y-m-d");
+$date = (!empty($_POST['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['date'])) ? $_POST['date'] : date("Y-m-d");
 
 // Validate required fields
 if (!$type || !$title || !$detail || !$result) {

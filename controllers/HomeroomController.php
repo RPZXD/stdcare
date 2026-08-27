@@ -24,11 +24,11 @@ class HomeroomController {
         return $this->model->deleteHomeroom($id);
     }
 
-    public function updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2) {
-        return $this->model->updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2);
+    public function updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2, $date = null) {
+        return $this->model->updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2, $date);
     }
 
-    public function insertHomeroom($type, $title, $detail, $result, $date, $major, $room, $term, $pee, $image1 = null, $image2 = null) {
+    public function insertHomeroom($type, $title, $detail, $result, $date = null, $major = null, $room = null, $term = null, $pee = null, $image1 = null, $image2 = null) {
         return $this->model->insertHomeroom($type, $title, $detail, $result, $date, $major, $room, $term, $pee, $image1, $image2);
     }
 }

@@ -53,11 +53,19 @@ class HomeroomModel {
         return $stmt->execute();
     }
 
-    public function updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2) {
-        $query = "UPDATE " . $this->table_homeroom . " 
-                  SET th_id = :type, h_topic = :title, h_detail = :detail, h_result = :result, h_pic1 = :image1, h_pic2 = :image2 
-                  WHERE h_id = :id";
-        $stmt = $this->conn->prepare($query);
+    public function updateHomeroom($id, $type, $title, $detail, $result, $image1, $image2, $date = null) {
+        if (!empty($date)) {
+            $query = "UPDATE " . $this->table_homeroom . " 
+                      SET th_id = :type, h_topic = :title, h_detail = :detail, h_result = :result, h_pic1 = :image1, h_pic2 = :image2, h_date = :date 
+                      WHERE h_id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':date', $date);
+        } else {
+            $query = "UPDATE " . $this->table_homeroom . " 
+                      SET th_id = :type, h_topic = :title, h_detail = :detail, h_result = :result, h_pic1 = :image1, h_pic2 = :image2 
+                      WHERE h_id = :id";
+            $stmt = $this->conn->prepare($query);
+        }
         $stmt->bindParam(':type', $type);
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':detail', $detail);
@@ -69,7 +77,8 @@ class HomeroomModel {
         return $stmt->execute();
     }
 
-    public function insertHomeroom($type, $title, $detail, $result, $date, $major, $room, $term, $pee, $image1 = null, $image2 = null) {
+    public function insertHomeroom($type, $title, $detail, $result, $date = null, $major = null, $room = null, $term = null, $pee = null, $image1 = null, $image2 = null) {
+        $activityDate = !empty($date) ? $date : date('Y-m-d');
         $query = "INSERT INTO " . $this->table_homeroom . " (th_id, h_topic, h_detail, h_result, h_date, h_major, h_room, h_term, h_pee, h_pic1, h_pic2)
                   VALUES (:type, :title, :detail, :result, :date, :major, :room, :term, :pee, :image1, :image2)";
         $stmt = $this->conn->prepare($query);
@@ -77,7 +86,7 @@ class HomeroomModel {
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':detail', $detail);
         $stmt->bindParam(':result', $result);
-        $stmt->bindParam(':date', $date);
+        $stmt->bindParam(':date', $activityDate);
         $stmt->bindParam(':major', $major);
         $stmt->bindParam(':room', $room);
         $stmt->bindParam(':term', $term);
