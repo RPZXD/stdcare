@@ -34,7 +34,7 @@ if (file_exists(__DIR__ . '/theme_helpers.php')) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Compiled Tailwind CSS -->
-    <link rel="stylesheet" href="<?php echo $basePath ?? '..'; ?>/dist/css/style.css">
+    <link rel="stylesheet" href="<?php echo $basePath ?? '..'; ?>/dist/css/style.css?v=20260916">
     
     <link rel="stylesheet" href="<?php echo $basePath ?? '..'; ?>/plugins/sweetalert2/sweetalert2.min.css">
     <script src="<?php echo $basePath ?? '..'; ?>/plugins/sweetalert2/sweetalert2.all.min.js"></script>

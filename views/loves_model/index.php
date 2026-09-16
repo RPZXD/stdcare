@@ -46,11 +46,11 @@ $imgPrefix = $isSubfolder ? '../' : '';
     </div>
 
     <!-- Infographic Banner & Policy Intro -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch w-full">
         <!-- Banner Image Showcase -->
-        <div class="lg:col-span-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-4 shadow-xl border border-white/20 dark:border-slate-700/50 flex flex-col justify-center items-center">
-            <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-inner group w-full h-full flex items-center justify-center bg-gray-50 dark:bg-slate-900/50">
-                <img src="<?php echo $imgPrefix; ?>dist/img/loves-model.jpg" alt="LOVES MODEL" class="w-full h-auto max-h-[480px] object-contain transition-transform duration-500 group-hover:scale-[1.02]">
+        <div class="w-full min-w-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-4 shadow-xl border border-white/20 dark:border-slate-700/50 flex flex-col justify-center items-center">
+            <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-inner group w-full h-full flex items-center justify-center bg-gray-50 dark:bg-slate-900/50 p-2">
+                <img src="<?php echo $imgPrefix; ?>dist/img/loves-model.jpg" alt="LOVES MODEL" class="w-full max-w-full h-auto max-h-[480px] object-contain transition-transform duration-500 group-hover:scale-[1.02]">
             </div>
             <p class="text-xs text-center text-gray-400 dark:text-gray-500 mt-2 font-medium">
                 แผนภาพโมเดลนวัตกรรม LOVES MODEL
@@ -58,7 +58,7 @@ $imgPrefix = $isSubfolder ? '../' : '';
         </div>
 
         <!-- Policy Description -->
-        <div class="lg:col-span-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 flex flex-col justify-between">
+        <div class="w-full min-w-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-xl border border-white/20 dark:border-slate-700/50 flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-3 mb-4">
                     <span class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg">
