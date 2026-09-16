@@ -179,6 +179,13 @@ if ($isTeacher) {
             'icon' => 'fa-calendar',
             'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
         ],
+        [
+            'key' => 'loves_model',
+            'name' => 'LOVES MODEL',
+            'url' => 'loves_model.php',
+            'icon' => 'fa-heart',
+            'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
+        ],
     ]);
 }
 

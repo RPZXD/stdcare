@@ -125,6 +125,12 @@ $menuItems = [
                 'url' => 'wroom.php',
                 'icon' => 'fa-clipboard-check',
             ],
+            [
+                'key' => 'loves_model',
+                'name' => 'LOVES MODEL',
+                'url' => 'loves_model.php',
+                'icon' => 'fa-heart',
+            ],
         ],
     ],
     [

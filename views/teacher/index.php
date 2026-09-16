@@ -220,6 +220,10 @@ ob_start();
             <span class="text-2xl md:text-3xl mb-2 block">📊</span>
             <p class="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300">รายงาน</p>
         </a>
+        <a href="loves_model.php" class="stat-card glass-card rounded-xl md:rounded-2xl p-4 border border-white/30 dark:border-slate-700/50 shadow-lg text-center hover:shadow-xl">
+            <span class="text-2xl md:text-3xl mb-2 block">💖</span>
+            <p class="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300">LOVES MODEL</p>
+        </a>
     </div>
 </div>
 
