@@ -66,6 +66,41 @@ if ($behaviors && is_array($behaviors)) {
     }
 }
 
+// ดึงคะแนนเพิ่มจากกิจกรรมจิตอาสา (จาก DatabaseEventstd: 1 ชั่วโมง = 1 คะแนน)
+try {
+    require_once __DIR__ . '/../classes/DatabaseEventstd.php';
+    $eventDb = new \App\DatabaseEventstd();
+    $eventPdo = $eventDb->getPDO();
+
+    $sqlBonus = "SELECT sal.id, a.title AS activity_name, a.event_date AS activity_date, a.hours
+                 FROM student_activity_logs sal
+                 INNER JOIN activities a ON sal.activity_id = a.id
+                 WHERE sal.student_id = :stu_id 
+                   AND a.category = 'จิตอาสา'
+                   AND a.term = :term 
+                   AND a.pee = :pee
+                 ORDER BY a.event_date DESC";
+    $stmtBonus = $eventPdo->prepare($sqlBonus);
+    $stmtBonus->execute(['stu_id' => $student_id, 'term' => $term, 'pee' => $pee]);
+    $volunteerActivities = $stmtBonus->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($volunteerActivities) {
+        foreach ($volunteerActivities as $va) {
+            $hours = (int)($va['hours'] ?? 0);
+            $bonusPoints += $hours;
+            $bonusRecords[] = [
+                'behavior_date' => $va['activity_date'],
+                'behavior_type' => 'จิตอาสา',
+                'behavior_name' => $va['activity_name'],
+                'behavior_score' => $hours,
+                'teacher_behavior' => 'ระบบกิจกรรมจิตอาสา'
+            ];
+        }
+    }
+} catch (\Throwable $e) {
+    // กรณีไม่ได้เชื่อมต่อหรือเกิดข้อผิดพลาด ให้ใช้ค่าเดิม
+}
+
 // Net score = 100 - deductions + bonus (capped at 0-100)
 $netScore = max(0, min(100, 100 - $deductionPoints + $bonusPoints));
 

@@ -241,31 +241,30 @@ ob_start();
                     <!-- Student Search Section (Only for Create mode) -->
                     <div id="searchSection" class="relative group">
                         <label
-                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic group-focus-within:text-indigo-500 transition-colors mb-2 block">ค้นหานักเรียน</label>
+                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic group-focus-within:text-indigo-500 transition-colors mb-2 block">ค้นหานักเรียน (Autocomplete)</label>
                         <div class="relative flex gap-2">
                             <div class="flex-1 relative">
                                 <i
                                     class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
                                 <input type="text" id="studentSearchInput" autocomplete="off"
-                                    class="smooth-input w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-black text-slate-700 dark:text-white"
-                                    placeholder="พิมพ์ชื่อ นามสกุล หรือเลขประจำตัว...">
+                                    class="smooth-input w-full pl-14 pr-12 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-black text-slate-700 dark:text-white"
+                                    placeholder="พิมพ์เลขประจำตัว, ชื่อ หรือนามสกุล...">
+                                <!-- Search Loading inside input -->
+                                <div id="searchLoading" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
+                                    <div
+                                        class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+                                    </div>
+                                </div>
                             </div>
                             <button type="button" id="btnSearchStudent"
                                 class="px-6 py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-95">
                                 <i class="fas fa-search"></i>
                             </button>
-
-                            <!-- Search Loading -->
-                            <div id="searchLoading" class="absolute right-20 top-1/2 -translate-y-1/2 hidden">
-                                <div
-                                    class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
-                                </div>
-                            </div>
                         </div>
 
-                        <!-- Search Results Dropdown -->
+                        <!-- Search Results Dropdown (Autocomplete) -->
                         <div id="searchResults"
-                            class="absolute z-20 w-full mt-2 bg-white dark:bg-slate-800 rounded-[1.5rem] shadow-2xl border border-slate-100 dark:border-slate-700 max-h-64 overflow-y-auto hidden">
+                            class="absolute z-30 w-full mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 max-h-64 overflow-y-auto hidden">
                             <!-- Results will be populated here -->
                         </div>
                     </div>
@@ -493,42 +492,56 @@ ob_start();
         const $results = $('#searchResults');
         const $loading = $('#searchLoading');
 
-        if (query.length < 2) {
+        const trimmed = (query || '').trim();
+        if (trimmed.length < 1) {
             $results.addClass('hidden').empty();
+            $loading.addClass('hidden');
             return;
         }
 
         $loading.removeClass('hidden');
         try {
-            const data = await $.get(`${API_URL}?action=search_students&q=${encodeURIComponent(query)}&limit=8`);
+            const data = await $.get(`${API_URL}?action=search_students&q=${encodeURIComponent(trimmed)}&limit=10`);
             $loading.addClass('hidden');
 
-            if (data.length === 0) {
-                $results.html('<div class="p-6 text-center text-slate-500 font-bold italic">ไม่พบข้อมูลนักเรียน</div>').removeClass('hidden');
+            if (!data || data.length === 0) {
+                $results.html('<div class="p-5 text-center text-slate-500 dark:text-slate-400 font-bold text-sm italic"><i class="fas fa-search mr-2"></i>ไม่พบข้อมูลนักเรียน</div>').removeClass('hidden');
                 return;
             }
 
             let html = '';
-            data.forEach(s => {
+            data.forEach((s) => {
                 const img = s.Stu_picture ? `https://std.phichai.ac.th/photo/${s.Stu_picture}` : '../dist/img/default-avatar.svg';
+                const fullName = `${s.Stu_pre || ''}${s.Stu_name || ''} ${s.Stu_sur || ''}`.trim();
+                const roomInfo = `ม.${s.Stu_major || '-'}/${s.Stu_room || '-'}`;
+                const safePic = (s.Stu_picture || '').replace(/'/g, "\\'");
+                const safeName = fullName.replace(/'/g, "\\'");
+                const safeInfo = `${roomInfo} • ID: ${s.Stu_id}`.replace(/'/g, "\\'");
+
                 html += `
-                <div onclick="selectStudent('${s.Stu_id}', '${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}', 'ม.${s.Stu_major}/${s.Stu_room}', '${s.Stu_picture}')" 
-                     class="group flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-900 border-b border-slate-50 dark:border-slate-800 last:border-0 cursor-pointer transition-all">
-                    <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-white">
+                <div onclick="selectStudent('${s.Stu_id}', '${safeName}', '${safeInfo}', '${safePic}')" 
+                     class="search-student-item group flex items-center gap-3.5 p-3.5 hover:bg-indigo-50/80 dark:hover:bg-slate-700/60 border-b border-slate-100 dark:border-slate-700/50 last:border-0 cursor-pointer transition-all"
+                     data-id="${s.Stu_id}" data-name="${safeName}" data-info="${safeInfo}" data-pic="${safePic}">
+                    <div class="w-12 h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white border border-slate-100 dark:border-slate-700">
                         <img src="${img}" class="w-full h-full object-cover" onerror="this.src='../dist/img/default-avatar.svg'">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-sm font-black text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">${s.Stu_pre}${s.Stu_name} ${s.Stu_sur}</div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ม.${s.Stu_major}/${s.Stu_room} • ID: ${s.Stu_id}</div>
+                        <div class="text-sm font-black text-slate-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                            ${fullName}
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 font-bold text-[10px]">${roomInfo}</span>
+                            <span>เลขประจำตัว: <strong class="text-indigo-600 dark:text-indigo-400 font-black">${s.Stu_id}</strong></span>
+                        </div>
                     </div>
-                    <i class="fas fa-chevron-right text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                    <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all pr-1 text-xs"></i>
                 </div>
             `;
             });
             $results.html(html).removeClass('hidden');
         } catch (e) {
             $loading.addClass('hidden');
-            $results.html('<div class="p-6 text-center text-rose-500 font-bold italic">เกิดข้อผิดพลาด</div>').removeClass('hidden');
+            $results.html('<div class="p-5 text-center text-rose-500 font-bold text-sm italic">เกิดข้อผิดพลาดในการค้นหา</div>').removeClass('hidden');
         }
     };
 
@@ -549,7 +562,7 @@ ob_start();
     window.clearSelectedStudent = function () {
         $('#modalStu_id').val('');
         $('#selectedStudent').addClass('hidden');
-        $('#studentSearchInput').focus();
+        $('#studentSearchInput').val('').focus();
         $('#btnClearSelection').addClass('hidden');
     };
 
@@ -569,7 +582,7 @@ ob_start();
 
     $(document).ready(function () {
 
-        // (เพิ่ม) debounce สำหรับการพิมพ์
+        // Debounce สำหรับการพิมพ์
         function debounce(func, delay) {
             let timer;
             return function (...args) {
@@ -578,16 +591,33 @@ ob_start();
             };
         }
 
+        // Autocomplete แบบ Real-time ขณะพิมพ์ (เลขประจำตัว, ชื่อ, หรือ นามสกุล)
+        $('#studentSearchInput').on('input', debounce(function () {
+            searchStudentsLive(this.value);
+        }, 250));
+
+        // เมื่อคลิกโฟกัสที่ช่องค้นหา ถ้ามีข้อความอยู่ให้แสดงผลอัตโนมัติ
+        $('#studentSearchInput').on('focus', function () {
+            if (this.value.trim().length >= 1) {
+                searchStudentsLive(this.value);
+            }
+        });
+
         // Search student when button clicked
         $('#btnSearchStudent').on('click', function () {
             searchStudentsLive($('#studentSearchInput').val());
         });
 
-        // Search student when Enter pressed
-        $('#studentSearchInput').on('keypress', function (e) {
+        // กด Enter: ถ้ามีผลลัพธ์แสดงอยู่ให้เลือกรายการแรกทันที ถ้าไม่มีให้ค้นหา
+        $('#studentSearchInput').on('keydown', function (e) {
             if (e.which === 13) {
                 e.preventDefault();
-                searchStudentsLive(this.value);
+                const $firstItem = $('#searchResults .search-student-item').first();
+                if ($firstItem.length && !$('#searchResults').hasClass('hidden')) {
+                    $firstItem.click();
+                } else {
+                    searchStudentsLive(this.value);
+                }
             }
         });
 
@@ -745,22 +775,27 @@ ob_start();
             }
         });
 
+        // Live search on typing with debounce (รองรับค้นหาแบบ real-time)
+        $('#behaviorSearch').on('input', debounce(function () {
+            behaviorTable.search(this.value.trim()).draw();
+        }, 300));
+
         // Button-based Search
         $('#btnSearch').on('click', function () {
-            behaviorTable.search($('#behaviorSearch').val()).draw();
+            behaviorTable.search($('#behaviorSearch').val().trim()).draw();
         });
 
         // Search when Enter pressed
-        $('#behaviorSearch').on('keypress', function (e) {
+        $('#behaviorSearch').on('keydown', function (e) {
             if (e.which === 13) {
                 e.preventDefault();
-                behaviorTable.search(this.value).draw();
+                behaviorTable.search(this.value.trim()).draw();
             }
         });
 
         // Clear search
         $('#btnClearSearch').on('click', function () {
-            $('#behaviorSearch').val('');
+            $('#behaviorSearch').val('').focus();
             behaviorTable.search('').draw();
         });
 

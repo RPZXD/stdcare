@@ -222,11 +222,11 @@ class Behavior {
                     t1.behavior_type, 
                     t1.behavior_name, 
                     t1.behavior_score,
-                    t3.Teach_name AS teacher_behavior
+                    COALESCE(t3.Teach_name, t1.teach_id, '-') AS teacher_behavior
                 FROM {$this->table} AS t1
                 INNER JOIN {$this->table_data} AS t2 
                     ON t1.stu_id = t2.Stu_id
-                INNER JOIN {$this->table_teacher} AS t3
+                LEFT JOIN {$this->table_teacher} AS t3
                     ON t1.teach_id = t3.Teach_id
                 WHERE t2.Stu_status = 1 AND t1.behavior_term = :term AND t1.behavior_pee = :pee
                 ORDER BY t1.behavior_date DESC, 
@@ -390,13 +390,13 @@ class Behavior {
                     t1.behavior_type, 
                     t1.behavior_name, 
                     t1.behavior_score,
-                    t3.Teach_name AS teacher_behavior
+                    COALESCE(t3.Teach_name, t1.teach_id, '-') AS teacher_behavior
                 FROM {$this->table} AS t1
-                INNER JOIN {$this->table_data} AS t2 
+                LEFT JOIN {$this->table_data} AS t2 
                     ON t1.stu_id = t2.Stu_id
-                INNER JOIN {$this->table_teacher} AS t3
+                LEFT JOIN {$this->table_teacher} AS t3
                     ON t1.teach_id = t3.Teach_id
-                WHERE  t2.Stu_id = :stdid AND t2.Stu_status = 1 AND t1.behavior_term = :term AND t1.behavior_pee = :pee
+                WHERE t1.stu_id = :stdid AND t1.behavior_term = :term AND t1.behavior_pee = :pee
                 ORDER BY t1.behavior_date DESC, 
                          t2.Stu_major ASC, 
                          t2.Stu_room ASC

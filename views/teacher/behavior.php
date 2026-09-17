@@ -651,7 +651,9 @@ ob_start();
         let html = '';
         students.forEach((student, index) => {
             const deduct = parseInt(student.total_behavior_score) || 0;
-            const bonus = parseInt(bonusData[student.Stu_id]) || 0;
+            const behaviorBonus = parseInt(student.behavior_bonus) || 0;
+            const volunteerBonus = parseInt(bonusData[student.Stu_id]) || 0;
+            const bonus = behaviorBonus + volunteerBonus;
             const netScore = Math.max(0, Math.min(100, 100 - deduct + bonus)); // คะแนนสุทธิ
             const progress = Math.min(100, deduct); // แท่งแสดงการหัก
 

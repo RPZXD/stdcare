@@ -22,7 +22,8 @@ class BehaviorModel
     public function getBehaviorSummaryByClass($class, $room, $term, $pee)
     {
         $sql = "SELECT s.Stu_id, s.Stu_pre, s.Stu_name, s.Stu_sur, s.Stu_picture, s.Stu_no,
-                       COALESCE(SUM(b.behavior_score),0) AS total_behavior_score,
+                       COALESCE(SUM(CASE WHEN b.behavior_type NOT IN ('ความดี', 'จิตอาสาช่วยเหลือครู', 'ช่วยเหลือเพื่อน', 'เก็บของได้ส่งคืน', 'บำเพ็ญประโยชน์') THEN b.behavior_score ELSE 0 END), 0) AS total_behavior_score,
+                       COALESCE(SUM(CASE WHEN b.behavior_type IN ('ความดี', 'จิตอาสาช่วยเหลือครู', 'ช่วยเหลือเพื่อน', 'เก็บของได้ส่งคืน', 'บำเพ็ญประโยชน์') THEN b.behavior_score ELSE 0 END), 0) AS behavior_bonus,
                        GROUP_CONCAT(DISTINCT CONCAT(t.Teach_name) SEPARATOR ', ') AS teacher_names
                 FROM student s
                 LEFT JOIN behavior b ON s.Stu_id = b.stu_id AND b.behavior_term = :term AND b.behavior_pee = :pee
@@ -78,15 +79,31 @@ class BehaviorModel
 
         // Search
         if (!empty($search)) {
-            $sql .= " AND (
-                s.Stu_name LIKE :search OR 
-                s.Stu_sur LIKE :search OR 
-                b.stu_id LIKE :search OR 
-                b.behavior_name LIKE :search OR 
-                b.behavior_type LIKE :search OR
-                CONCAT(s.Stu_name, ' ', s.Stu_sur) LIKE :search
-            )";
-            $params[':search'] = "%$search%";
+            $search = trim($search);
+            $words = preg_split('/\s+/', $search);
+            $searchConditions = [];
+            foreach ($words as $idx => $word) {
+                if ($word === '') continue;
+                $paramKey = ":s{$idx}";
+                $searchConditions[] = "(
+                    s.Stu_id LIKE {$paramKey} OR 
+                    b.stu_id LIKE {$paramKey} OR 
+                    s.Stu_name LIKE {$paramKey} OR 
+                    s.Stu_sur LIKE {$paramKey} OR 
+                    CONCAT(s.Stu_name, ' ', s.Stu_sur) LIKE {$paramKey} OR 
+                    CONCAT(s.Stu_pre, s.Stu_name, ' ', s.Stu_sur) LIKE {$paramKey} OR 
+                    CONCAT(s.Stu_pre, ' ', s.Stu_name, ' ', s.Stu_sur) LIKE {$paramKey} OR 
+                    CONCAT('ม.', s.Stu_major, '/', s.Stu_room) LIKE {$paramKey} OR 
+                    CONCAT(s.Stu_major, '/', s.Stu_room) LIKE {$paramKey} OR 
+                    b.behavior_name LIKE {$paramKey} OR 
+                    b.behavior_type LIKE {$paramKey} OR 
+                    b.behavior_date LIKE {$paramKey}
+                )";
+                $params[$paramKey] = "%{$word}%";
+            }
+            if (!empty($searchConditions)) {
+                $sql .= " AND " . implode(' AND ', $searchConditions);
+            }
         }
 
         // Final counts for filtered records
@@ -138,20 +155,57 @@ class BehaviorModel
     }
 
     /**
-     * ค้นหานักเรียนแบบ fuzzy search (รหัส, ชื่อ, นามสกุล)
+     * ค้นหานักเรียนแบบ autocomplete / fuzzy search (รหัสประจำตัว, ชื่อ, นามสกุล)
      * คืนค่าเป็น array ของนักเรียน (จำกัดผลลัพธ์)
      */
     public function searchStudents($q, $limit = 10)
     {
-        $pattern = '%' . $q . '%';
+        $q = trim((string) $q);
+        if ($q === '') {
+            return [];
+        }
+
+        // แยกคำค้นหาด้วยช่องว่างเพื่อรองรับการค้นหา ชื่อ นามสกุล พร้อมกัน
+        $words = preg_split('/\s+/', $q);
+        $conditions = [];
+        $params = [];
+
+        foreach ($words as $idx => $word) {
+            if ($word === '') continue;
+            $paramKey = ":w{$idx}";
+            $conditions[] = "(
+                Stu_id LIKE {$paramKey} OR 
+                Stu_name LIKE {$paramKey} OR 
+                Stu_sur LIKE {$paramKey} OR 
+                CONCAT(Stu_name, ' ', Stu_sur) LIKE {$paramKey} OR 
+                CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) LIKE {$paramKey} OR
+                CONCAT(Stu_pre, ' ', Stu_name, ' ', Stu_sur) LIKE {$paramKey}
+            )";
+            $params[$paramKey] = '%' . $word . '%';
+        }
+
+        if (empty($conditions)) {
+            return [];
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        // จัดลำดับ: เลขประจำตัวตรงเป๊ะ หรือขึ้นต้นด้วยคำค้นหามาก่อน
+        $params[':exact_q'] = $q;
+        $params[':prefix_q'] = $q . '%';
+
         $sql = "SELECT Stu_id, Stu_pre, Stu_name, Stu_sur, Stu_major, Stu_room, Stu_picture
                 FROM student
                 WHERE Stu_status = '1'
-                  AND (Stu_id LIKE :q OR Stu_name LIKE :q OR Stu_sur LIKE :q OR CONCAT(Stu_pre, Stu_name, ' ', Stu_sur) LIKE :q)
-                ORDER BY Stu_major, Stu_room, Stu_name
+                  AND ({$whereClause})
+                ORDER BY 
+                    (Stu_id = :exact_q) DESC,
+                    (Stu_id LIKE :prefix_q) DESC,
+                    (Stu_name LIKE :prefix_q) DESC,
+                    Stu_major ASC, Stu_room ASC, Stu_no ASC, Stu_name ASC
                 LIMIT " . intval($limit);
 
-        return $this->db->query($sql, ['q' => $pattern])->fetchAll();
+        return $this->db->query($sql, $params)->fetchAll();
     }
 
     /**
@@ -163,17 +217,19 @@ class BehaviorModel
                     (stu_id, behavior_date, behavior_type, behavior_name, behavior_score, teach_id, behavior_term, behavior_pee)
                 VALUES 
                     (:stu_id, :behavior_date, :behavior_type, :behavior_name, :behavior_score, :teach_id, :term, :pee)";
-        // Determine score automatically from type. If no mapping found, fall back to posted score or 0.
-        $score = $this->getScoreForType($data['addBehavior_type'] ?? '');
-        if ($score === null) {
-            $score = isset($data['addBehavior_score']) ? intval($data['addBehavior_score']) : 0;
+        // Determine score: prioritize user input score if provided, fallback to type mapping or 0
+        $rawScore = $data['addBehavior_score'] ?? $data['behavior_score'] ?? null;
+        if ($rawScore !== null && $rawScore !== '' && is_numeric($rawScore)) {
+            $score = intval($rawScore);
+        } else {
+            $score = $this->getScoreForType($data['addBehavior_type'] ?? $data['behavior_type'] ?? '') ?? 0;
         }
 
         $params = [
-            ':stu_id' => $data['addStu_id'],
-            ':behavior_date' => $data['addBehavior_date'],
-            ':behavior_type' => $data['addBehavior_type'],
-            ':behavior_name' => $data['addBehavior_name'],
+            ':stu_id' => $data['addStu_id'] ?? $data['stu_id'] ?? '',
+            ':behavior_date' => $data['addBehavior_date'] ?? $data['behavior_date'] ?? '',
+            ':behavior_type' => $data['addBehavior_type'] ?? $data['behavior_type'] ?? '',
+            ':behavior_name' => $data['addBehavior_name'] ?? $data['behavior_name'] ?? '',
             ':behavior_score' => $score,
             ':teach_id' => $teach_id,
             ':term' => $term,
@@ -200,10 +256,12 @@ class BehaviorModel
                     behavior_pee = :pee
                 WHERE id = :id";
 
-        // Compute score from selected type. If mapping not found, fall back to provided score or 0.
-        $score = $this->getScoreForType($data['editBehavior_type'] ?? '');
-        if ($score === null) {
-            $score = isset($data['editBehavior_score']) ? intval($data['editBehavior_score']) : 0;
+        // Determine score: prioritize user input score if provided, fallback to type mapping or 0
+        $rawScore = $data['editBehavior_score'] ?? $data['behavior_score'] ?? null;
+        if ($rawScore !== null && $rawScore !== '' && is_numeric($rawScore)) {
+            $score = intval($rawScore);
+        } else {
+            $score = $this->getScoreForType($data['editBehavior_type'] ?? $data['behavior_type'] ?? '') ?? 0;
         }
 
         $params = [

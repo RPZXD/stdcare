@@ -62,6 +62,27 @@ if ($term && $pee) {
             }
         }
     }
+
+    // ดึงคะแนนเพิ่มจากกิจกรรมจิตอาสา (จาก DatabaseEventstd: 1 ชั่วโมง = 1 คะแนน)
+    try {
+        require_once __DIR__ . '/../classes/DatabaseEventstd.php';
+        $eventDb = new \App\DatabaseEventstd();
+        $eventPdo = $eventDb->getPDO();
+
+        $sqlBonus = "SELECT COALESCE(SUM(a.hours), 0) AS bonus_hours
+                     FROM student_activity_logs sal
+                     INNER JOIN activities a ON sal.activity_id = a.id
+                     WHERE sal.student_id = :stu_id 
+                       AND a.category = 'จิตอาสา'
+                       AND a.term = :term 
+                       AND a.pee = :pee";
+        $stmtBonus = $eventPdo->prepare($sqlBonus);
+        $stmtBonus->execute(['stu_id' => $student_id, 'term' => $term, 'pee' => $pee]);
+        $resBonus = $stmtBonus->fetch(PDO::FETCH_ASSOC);
+        $behavior_bonus += (int)($resBonus['bonus_hours'] ?? 0);
+    } catch (\Throwable $e) {
+        // กรณีไม่ได้เชื่อมต่อหรือเกิดข้อผิดพลาด ให้ใช้ค่าเดิม
+    }
 }
 
 // Net score = 100 - deduction + bonus (capped at 0-100)

@@ -79,14 +79,20 @@ try {
 
 // คำนวณคะแนนคงเหลือ
 $total_deduction = 0;
+$behavior_bonus = 0;
+$goodDeedTypes = ['ความดี', 'จิตอาสาช่วยเหลือครู', 'ช่วยเหลือเพื่อน', 'เก็บของได้ส่งคืน', 'บำเพ็ญประโยชน์'];
 if ($behaviorList && is_array($behaviorList)) {
     foreach ($behaviorList as $b) {
-        $total_deduction += (int)$b['behavior_score'];
+        $sc = (int)$b['behavior_score'];
+        if (in_array($b['behavior_type'] ?? '', $goodDeedTypes)) {
+            $behavior_bonus += $sc;
+        } else {
+            $total_deduction += $sc;
+        }
     }
 }
-$net_score = 100 - $total_deduction + $bonus_points;
-if($net_score < 0) $net_score = 0;
-if($net_score > 100) $net_score = 100;
+$total_bonus = $bonus_points + $behavior_bonus;
+$net_score = max(0, min(100, 100 - $total_deduction + $total_bonus));
 
 // เตรียมข้อมูลสำหรับ frontend
 echo json_encode([

@@ -118,12 +118,14 @@ try {
             break;
 
         case 'create':
-            $stu_id = $_POST['addStu_id'] ?? '';
+            $stu_id = $_POST['addStu_id'] ?? $_POST['stu_id'] ?? '';
             try {
-                // compute score for logging (model will also compute and persist)
-                $computedScore = $model->getScoreForType($_POST['addBehavior_type'] ?? '');
-                if ($computedScore === null) {
-                    $computedScore = isset($_POST['addBehavior_score']) ? intval($_POST['addBehavior_score']) : 0;
+                // compute score for logging (prioritize submitted score if set)
+                $rawScore = $_POST['addBehavior_score'] ?? $_POST['behavior_score'] ?? null;
+                if ($rawScore !== null && $rawScore !== '' && is_numeric($rawScore)) {
+                    $computedScore = intval($rawScore);
+                } else {
+                    $computedScore = $model->getScoreForType($_POST['addBehavior_type'] ?? $_POST['behavior_type'] ?? '') ?? 0;
                 }
 
                 $success = $model->createBehavior($_POST, $teach_id, $term, $pee);
@@ -152,13 +154,15 @@ try {
             break;
 
         case 'update':
-            $id = $_POST['editId'] ?? '';
-            $stu_id = $_POST['editStu_id'] ?? '';
+            $id = $_POST['editId'] ?? $_POST['id'] ?? '';
+            $stu_id = $_POST['editStu_id'] ?? $_POST['stu_id'] ?? '';
             try {
-                // compute score for logging (model will compute and persist)
-                $computedScore = $model->getScoreForType($_POST['editBehavior_type'] ?? '');
-                if ($computedScore === null) {
-                    $computedScore = isset($_POST['editBehavior_score']) ? intval($_POST['editBehavior_score']) : 'N/A';
+                // compute score for logging (prioritize submitted score if set)
+                $rawScore = $_POST['editBehavior_score'] ?? $_POST['behavior_score'] ?? null;
+                if ($rawScore !== null && $rawScore !== '' && is_numeric($rawScore)) {
+                    $computedScore = intval($rawScore);
+                } else {
+                    $computedScore = $model->getScoreForType($_POST['editBehavior_type'] ?? $_POST['behavior_type'] ?? '') ?? 0;
                 }
 
                 $model->updateBehavior($id, $_POST, $teach_id, $term, $pee);
