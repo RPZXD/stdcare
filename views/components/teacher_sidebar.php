@@ -131,6 +131,12 @@ $menuItems = [
                 'url' => 'loves_model.php',
                 'icon' => 'fa-heart',
             ],
+            [
+                'key' => 'soft_power',
+                'name' => 'Soft Power',
+                'url' => 'soft_power.php',
+                'icon' => 'fa-book-open',
+            ],
         ],
     ],
     [
