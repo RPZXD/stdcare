@@ -94,6 +94,20 @@ if ($isTeacher) {
             'icon' => 'fa-chart-pie',
             'gradient' => ['from' => 'indigo-500', 'to' => 'violet-600'],
         ],
+        [
+            'key' => 'loves_model',
+            'name' => 'LOVES MODEL',
+            'url' => 'loves_model.php',
+            'icon' => 'fa-heart',
+            'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
+        ],
+        [
+            'key' => 'soft_power',
+            'name' => 'Soft Power',
+            'url' => 'soft_power.php',
+            'icon' => 'fa-book-open',
+            'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
+        ],
     ];
 } else {
     // Default Main Menu (Public Pages)
@@ -185,6 +199,13 @@ if ($isTeacher) {
             'url' => 'loves_model.php',
             'icon' => 'fa-heart',
             'gradient' => ['from' => 'rose-500', 'to' => 'pink-600'],
+        ],
+        [
+            'key' => 'soft_power',
+            'name' => 'Soft Power',
+            'url' => 'soft_power.php',
+            'icon' => 'fa-book-open',
+            'gradient' => ['from' => 'blue-500', 'to' => 'indigo-600'],
         ],
     ]);
 }

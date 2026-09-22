@@ -125,6 +125,55 @@ ob_start();
             </form>
         </div>
     </div>
+<!-- Quick Innovation Links: LOVES MODEL & Soft Power -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 md:mb-8">
+    <!-- LOVES MODEL Card -->
+    <a href="loves_model.php" class="stat-card glass-card rounded-2xl md:rounded-3xl p-5 md:p-6 border border-rose-200/50 dark:border-rose-900/40 shadow-xl relative overflow-hidden group hover:border-rose-400 transition-all flex items-center justify-between">
+        <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-center gap-4 relative z-10">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-rose-500/30 group-hover:scale-110 group-hover:rotate-6 transition-transform">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div>
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200/50 mb-1">
+                    นวัตกรรมดูแลช่วยเหลือ
+                </span>
+                <h3 class="text-base md:text-lg font-black text-gray-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                    LOVES MODEL
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                    พาน้องกลับมาเรียน และสร้างแรงบันดาลใจ
+                </p>
+            </div>
+        </div>
+        <div class="relative z-10 w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+            <i class="fas fa-arrow-right text-sm"></i>
+        </div>
+    </a>
+
+    <!-- Soft Power Card -->
+    <a href="soft_power.php" class="stat-card glass-card rounded-2xl md:rounded-3xl p-5 md:p-6 border border-blue-200/50 dark:border-blue-900/40 shadow-xl relative overflow-hidden group hover:border-blue-400 transition-all flex items-center justify-between">
+        <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-center gap-4 relative z-10">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30 group-hover:scale-110 group-hover:rotate-6 transition-transform">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div>
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border border-blue-200/50 mb-1">
+                    คู่มือการบริหารสถานศึกษา
+                </span>
+                <h3 class="text-base md:text-lg font-black text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    Soft Power โรงเรียนพิชัย
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                    พัฒนาอัตลักษณ์ลูกพิชัย พร้อมดาวน์โหลดคู่มือ PDF
+                </p>
+            </div>
+        </div>
+        <div class="relative z-10 w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+            <i class="fas fa-arrow-right text-sm"></i>
+        </div>
+    </a>
 </div>
 
 <!-- Quick Stats Cards - Overview -->
